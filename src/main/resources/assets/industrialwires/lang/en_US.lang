@@ -1,0 +1,18 @@
+tile.industrialwires.ic2Connector.tin_conn.name=Tin Wire Connector
+tile.industrialwires.ic2Connector.tin_relay.name=Tin Wire Relay
+tile.industrialwires.ic2Connector.copper_conn.name=Copper Wire Connector
+tile.industrialwires.ic2Connector.copper_relay.name=Copper Wire Relay
+tile.industrialwires.ic2Connector.gold_conn.name=Gold Wire Connector
+tile.industrialwires.ic2Connector.gold_relay.name=Gold Wire Relay
+tile.industrialwires.ic2Connector.hv_conn.name=IC2 HV Wire Connector
+tile.industrialwires.ic2Connector.hv_relay.name=IC2 HV Wire Relay
+item.industrialwires.ic2wireCoil.tin.name=Tin Wire Coil
+item.industrialwires.ic2wireCoil.copper.name=Copper Wire Coil
+item.industrialwires.ic2wireCoil.gold.name=Gold Wire Coil
+item.industrialwires.ic2wireCoil.hv.name=IC2 HV Wire Coil
+
+ie.manual.category.industrialWires.name=Industrial Wires
+ie.manual.entry.industrialWires.all.name=Industrial Wires
+ie.manual.entry.industrialWires.all.subtext=Everything you need to know
+ie.manual.entry.industrialWires.all0=Wires from the IndustrialWires company allow you to transfer energy like you can with cables from the IndustrialCraft2 company.<br>You use them exactly as you would use wires from Immersive Engineering. Each wire transfers as much EU as the corresponding cable would,
+ie.manual.entry.industrialWires.all1=so attaching a connector to a power source that would destroy the cable will destroy the connector.

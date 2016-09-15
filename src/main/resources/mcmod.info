@@ -1,0 +1,16 @@
+[
+{
+  "modid": "industrialwires",
+  "name": "Industrial wires",
+  "description": "Addon for IndustrialCraft2 and Immersive Engineering that adds IE wires to transfer IC2 power",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["malte0811"],
+  "credits": "BluSunrize and Mr. Damien Hazard for Immersive Engineering, the IC2 team for IC2",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
