@@ -10,7 +10,9 @@ public enum BlockTypes_IC2_Connector implements IBlockEnum {
 	GOLD_CONN,
 	GOLD_RELAY,
 	HV_CONN,
-	HV_RELAY;
+	HV_RELAY,
+	GLASS_CONN,
+	GLASS_RELAY;
 	@Override
 	public String getName() {
 		return toString().toLowerCase();

@@ -87,6 +87,10 @@ public class BlockIC2Connector extends BlockIETileProvider<BlockTypes_IC2_Connec
 			return new TileEntityIC2ConnectorHV(false);
 		else if (meta==7)
 			return new TileEntityIC2ConnectorHV(true);
+		else if (meta==8)
+			return new TileEntityIC2ConnectorGlass(false);
+		else if (meta==9)
+			return new TileEntityIC2ConnectorGlass(true);
 		
 		return null;
 	}

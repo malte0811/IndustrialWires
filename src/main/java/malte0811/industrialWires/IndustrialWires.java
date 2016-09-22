@@ -1,13 +1,20 @@
 package malte0811.industrialWires;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import blusunrize.immersiveengineering.api.tool.AssemblerHandler;
+import blusunrize.immersiveengineering.api.tool.AssemblerHandler.RecipeQuery;
 import blusunrize.immersiveengineering.common.IEContent;
 import blusunrize.immersiveengineering.common.blocks.stone.BlockTypes_StoneDecoration;
 import ic2.api.item.IC2Items;
 import malte0811.industrialWires.blocks.BlockIC2Connector;
 import malte0811.industrialWires.blocks.TileEntityIC2ConnectorCopper;
+import malte0811.industrialWires.blocks.TileEntityIC2ConnectorGlass;
 import malte0811.industrialWires.blocks.TileEntityIC2ConnectorGold;
 import malte0811.industrialWires.blocks.TileEntityIC2ConnectorHV;
 import malte0811.industrialWires.blocks.TileEntityIC2ConnectorTin;
+import malte0811.industrialWires.crafting.RecipeCoilLength;
 import malte0811.industrialWires.items.ItemIC2Coil;
 import malte0811.industrialWires.wires.IC2Wiretype;
 import net.minecraft.creativetab.CreativeTabs;
@@ -20,6 +27,8 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.oredict.RecipeSorter;
+import net.minecraftforge.oredict.RecipeSorter.Category;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 
 @Mod(modid = IndustrialWires.MODID, version = IndustrialWires.VERSION, dependencies="required-after:immersiveengineering;required-after:IC2")
@@ -49,6 +58,7 @@ public class IndustrialWires {
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorCopper.class, "ic2ConnectorCopper");
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorGold.class, "ic2ConnectorGold");
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorHV.class, "ic2ConnectorHV");
+		GameRegistry.registerTileEntity(TileEntityIC2ConnectorGlass.class, "ic2ConnectorGlass");
 		if (IC2Wiretype.IC2_TYPES==null) {
 			throw new IllegalStateException("No IC2 wires registered");
 		}
@@ -57,25 +67,50 @@ public class IndustrialWires {
 
 	@EventHandler
 	public void init(FMLInitializationEvent e) {
-		//WIRES
-		ItemStack tinCable = IC2Items.getItem("cable", "type:tin,insulation:0");
-		ItemStack copperCable = IC2Items.getItem("cable", "type:copper,insulation:0");
-		ItemStack goldCable = IC2Items.getItem("cable", "type:gold,insulation:0");
-		ItemStack hvCable = IC2Items.getItem("cable", "type:iron,insulation:0");
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(coil, 2, 0), "ttt", "tst", "ttt", 't', tinCable, 's', "stickWood"));
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(coil, 2, 1), "ccc", "csc", "ccc", 'c', copperCable, 's', "stickWood"));
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(coil, 2, 2), "ggg", "gsg", "ggg", 'g', goldCable, 's', "stickWood"));
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(coil, 2, 3), "hhh", "hsh", "hhh", 'h', hvCable, 's', "stickWood"));
+		ItemStack glassCable = IC2Items.getItem("cable", "type:glass,insulation:0");
 		//CONNECTORS
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(ic2conn, 1, 0), " t ", "rtr", "rtr", 't', "ingotTin", 'r', "itemRubber"));
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(ic2conn, 1, 2), " c ", "rcr", "rcr", 'c', "ingotCopper", 'r', "itemRubber"));
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(ic2conn, 1, 4), " g ", "rgr", "rgr", 'g', "ingotGold", 'r', "itemRubber"));
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(ic2conn, 1, 6), " i ", "rir", "rir", 'i', "ingotIron", 'r', "itemRubber"));
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(ic2conn, 4, 0), " t ", "rtr", "rtr", 't', "ingotTin", 'r', "itemRubber"));
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(ic2conn, 4, 2), " c ", "rcr", "rcr", 'c', "ingotCopper", 'r', "itemRubber"));
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(ic2conn, 4, 4), " g ", "rgr", "rgr", 'g', "ingotGold", 'r', "itemRubber"));
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(ic2conn, 4, 6), " i ", "rir", "rir", 'i', "ingotIron", 'r', "itemRubber"));
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(ic2conn, 4, 8), " c ", "rcr", "rcr",'c', glassCable, 'r', "itemRubber"));
 		//RELAYS
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(ic2conn, 1, 1), " t ", "rtr", 't', "ingotTin", 'r', "itemRubber"));
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(ic2conn, 1, 3), " c ", "rcr", 'c', "ingotCopper", 'r', "itemRubber"));
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(ic2conn, 1, 5), " g ", "rgr", 'g', "ingotGold", 'r', "itemRubber"));
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(ic2conn, 1, 7), " i ", "gig", "gig", 'i', "ingotIron", 'g', new ItemStack(IEContent.blockStoneDecoration, 1, BlockTypes_StoneDecoration.INSULATING_GLASS.getMeta())));
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(ic2conn, 4, 1), " t ", "rtr", 't', "ingotTin", 'r', "itemRubber"));
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(ic2conn, 4, 3), " c ", "rcr", 'c', "ingotCopper", 'r', "itemRubber"));
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(ic2conn, 4, 5), " g ", "rgr", 'g', "ingotGold", 'r', "itemRubber"));
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(ic2conn, 4, 7), " i ", "gig", "gig", 'i', "ingotIron", 'g', new ItemStack(IEContent.blockStoneDecoration, 1, BlockTypes_StoneDecoration.INSULATING_GLASS.getMeta())));
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(ic2conn, 2, 9), " c ", "grg", "grg", 'r', "itemRubber", 'c', glassCable, 'g', new ItemStack(IEContent.blockStoneDecoration, 1, BlockTypes_StoneDecoration.INSULATING_GLASS.getMeta())));
+		//WIRES
+		RecipeSorter.register("industrialwires:coilLength", RecipeCoilLength.class, Category.SHAPELESS, "after:forge:shapelessore");
+		for (int i = 0;i<IC2Wiretype.IC2_TYPES.length;i++) {
+			GameRegistry.addRecipe(new RecipeCoilLength(i));
+		}
+		AssemblerHandler.registerRecipeAdapter(RecipeCoilLength.class, new AssemblerHandler.IRecipeAdapter<RecipeCoilLength>() {
+
+			@Override
+			public RecipeQuery[] getQueriedInputs(RecipeCoilLength recipe, ItemStack[] in) {
+				List<RecipeQuery> ret = new ArrayList<>();
+				for (int i = 0;i<in.length-1;i++) {
+					boolean added = false;
+					for (int j = 0;j<ret.size();j++) {
+						if (ItemStack.areItemStacksEqual((ItemStack)ret.get(j).query, in[i])) {
+							ret.get(j).querySize++;
+							added = true;
+							break;
+						}
+					}
+					if (!added) {
+						ret.add(new RecipeQuery(in[i], 1));
+					}
+				}
+				return ret.toArray(new RecipeQuery[ret.size()]);
+			}
+			@Override
+			public RecipeQuery[] getQueriedInputs(RecipeCoilLength arg0) {
+				return new RecipeQuery[0];
+			}
+			
+		});
 	}
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent	 e) {

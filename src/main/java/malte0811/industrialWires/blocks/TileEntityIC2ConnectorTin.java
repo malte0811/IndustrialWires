@@ -18,6 +18,7 @@ import blusunrize.immersiveengineering.api.energy.wires.TileEntityImmersiveConne
 import blusunrize.immersiveengineering.api.energy.wires.WireType;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IBlockBounds;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDirectionalTile;
+import blusunrize.immersiveengineering.common.util.Utils;
 import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergyAcceptor;
@@ -26,6 +27,7 @@ import ic2.api.energy.tile.IEnergySink;
 import ic2.api.energy.tile.IEnergySource;
 import malte0811.industrialWires.IIC2Connector;
 import malte0811.industrialWires.wires.IC2Wiretype;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -208,6 +210,21 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	@Override
 	public int getSourceTier() {
 		return tier;
+	}
+	
+	@Override
+	public void removeCable(Connection connection) {
+		WireType type = connection != null ? connection.cableType : null;
+		Set<Connection> outputs = ImmersiveNetHandler.INSTANCE.getConnections(worldObj, Utils.toCC(this));
+		if(outputs == null || outputs.size() == 0) {
+			if(type == limitType || type == null)
+				this.limitType = null;
+		}
+		this.markDirty();
+		if(worldObj != null) {
+			IBlockState state = worldObj.getBlockState(pos);
+			worldObj.notifyBlockUpdate(pos, state,state, 3);
+		}
 	}
 
 	@Override

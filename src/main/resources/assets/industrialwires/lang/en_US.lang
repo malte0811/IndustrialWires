@@ -6,13 +6,25 @@ tile.industrialwires.ic2Connector.gold_conn.name=Gold Wire Connector
 tile.industrialwires.ic2Connector.gold_relay.name=Gold Wire Relay
 tile.industrialwires.ic2Connector.hv_conn.name=IC2 HV Wire Connector
 tile.industrialwires.ic2Connector.hv_relay.name=IC2 HV Wire Relay
+tile.industrialwires.ic2Connector.glass_conn.name=Glass Fiber Wire Connector
+tile.industrialwires.ic2Connector.glass_relay.name=Glass Fiber Wire Relay
+
 item.industrialwires.ic2wireCoil.tin.name=Tin Wire Coil
 item.industrialwires.ic2wireCoil.copper.name=Copper Wire Coil
 item.industrialwires.ic2wireCoil.gold.name=Gold Wire Coil
 item.industrialwires.ic2wireCoil.hv.name=IC2 HV Wire Coil
+item.industrialwires.ic2wireCoil.glass.name=Glass Fiber Wire Coil
+
+industrialwires.desc.wireLength=Wire length: %1s block(s)
+industrialwires.desc.recipe=Please check the Engineer's manual for recipe details
+
+industrialwires.chat.tooLong=This coil does not contain enough wire for this connection
+industrialwires.chat.stackSize=Linking is only possible with a stack of size 1
+ 
 
 ie.manual.category.industrialWires.name=Industrial Wires
 ie.manual.entry.industrialWires.all.name=Industrial Wires
 ie.manual.entry.industrialWires.all.subtext=Everything you need to know
-ie.manual.entry.industrialWires.all0=Wires from the IndustrialWires company allow you to transfer energy like you can with cables from the IndustrialCraft2 company.<br>You use them exactly as you would use wires from Immersive Engineering. Each wire transfers as much EU as the corresponding cable would,
-ie.manual.entry.industrialWires.all1=so attaching a connector to a power source that would destroy the cable will destroy the connector.
+ie.manual.entry.industrialWires.all0=Wires from the IndustrialWires company allow you to transfer energy like you can with cables from the IndustrialCraft2 company.<br>You use them exactly as you would use wires from Immersive Engineering. Each wire transfers as much EU as the corresponding cable would, so
+ie.manual.entry.industrialWires.all1=attaching a connector to a power source that would destroy the cable will destroy the connector.<br>The wire coils for the IC2 cable are different from the Immersive Engineering wire coils in that longer connections use up more wire: The coils are crafted by placing any combination of uninsulated IC2 cables and the corresponding wire coils in a crafting grid. The next page shows some examples of valid recipes and their outputs. The uninsulated
+ie.manual.entry.industrialWires.all2=tin cables can be replaced by uninsulated copper, gold or HV cables or by glass fiber cable to craft the other coils.

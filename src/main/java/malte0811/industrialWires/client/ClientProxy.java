@@ -1,6 +1,7 @@
 package malte0811.industrialWires.client;
 
 import java.util.Locale;
+import java.util.Random;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -8,6 +9,8 @@ import blusunrize.immersiveengineering.api.ManualHelper;
 import blusunrize.immersiveengineering.client.models.smart.ConnLoader;
 import blusunrize.lib.manual.ManualInstance;
 import blusunrize.lib.manual.ManualPages;
+import blusunrize.lib.manual.ManualPages.PositionedItemStack;
+import ic2.api.item.IC2Items;
 import malte0811.industrialWires.CommonProxy;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.items.ItemIC2Coil;
@@ -50,8 +53,13 @@ public class ClientProxy extends CommonProxy {
 		ConnLoader.textureReplacements.put("ic2_conn_hv", ImmutableMap.of("#immersiveengineering:blocks/connector_connectorHV",
 				IndustrialWires.MODID+":blocks/ic2_connHV"));
 		ConnLoader.baseModels.put("ic2_relay_hv", new ResourceLocation("immersiveengineering:block/connector/relayHV.obj"));
-		ConnLoader.textureReplacements.put("ic2_relay_hv", ImmutableMap.of("#immersiveengineering:blocks/connector_connectorHV",
-				IndustrialWires.MODID+":blocks/ic2_relayHV"));
+
+		ConnLoader.baseModels.put("ic2_conn_glass", new ResourceLocation("immersiveengineering:block/connector/connectorHV.obj"));
+		ConnLoader.textureReplacements.put("ic2_conn_glass", ImmutableMap.of("#immersiveengineering:blocks/connector_connectorHV",
+				IndustrialWires.MODID+":blocks/ic2_connGlass"));
+		ConnLoader.baseModels.put("ic2_relay_glass", new ResourceLocation("immersiveengineering:block/connector/relayHV.obj"));
+		ConnLoader.textureReplacements.put("ic2_relay_glass", ImmutableMap.of("#immersiveengineering:blocks/connector_relayHV",
+				IndustrialWires.MODID+":blocks/ic2_relayGlass"));
 
 		for(int meta = 0; meta < ItemIC2Coil.subNames.length; meta++) {
 			ResourceLocation loc = new ResourceLocation(IndustrialWires.MODID, "ic2wireCoil/" + ItemIC2Coil.subNames[meta]);
@@ -82,10 +90,45 @@ public class ClientProxy extends CommonProxy {
 	public void postInit() {
 		super.postInit();
 		ManualInstance m = ManualHelper.getManual();
+		PositionedItemStack[][] wireRecipes = new PositionedItemStack[3][10];
+		int xBase = 15;
+		ItemStack tinCable = IC2Items.getItem("cable", "type:tin,insulation:0");
+		for (int i = 0;i<3;i++) {
+			for (int j = 0;j<3;j++) {
+				wireRecipes[0][3*i+j] = new PositionedItemStack(tinCable.copy(), 18*i+xBase, 18*j);
+			}
+		}
+		ItemStack tmp = new ItemStack(IndustrialWires.coil);
+		ItemIC2Coil.setLength(tmp, 9);
+		wireRecipes[0][9] = new PositionedItemStack(tmp, 18*4+xBase, 18);
+		Random r = new Random();
+		for (int i = 1;i<3;i++) {
+			int lengthSum = 0;
+			for (int j1 = 0;j1<3;j1++) {
+				for (int j2 = 0;j2<3;j2++) {
+					if (r.nextBoolean()) {
+						// cable
+						lengthSum++;
+						wireRecipes[i][3*j1+j2] = new PositionedItemStack(tinCable.copy(), 18*j1+xBase, 18*j2);
+					} else {
+						// wire coil
+						int length = r.nextInt(99)+1;
+						tmp = new ItemStack(IndustrialWires.coil);
+						ItemIC2Coil.setLength(tmp, length);
+						wireRecipes[i][3*j1+j2] = new PositionedItemStack(tmp, 18*j1+xBase, 18*j2);
+						lengthSum+=length;
+					}
+				}
+			}
+			tmp = new ItemStack(IndustrialWires.coil);
+			ItemIC2Coil.setLength(tmp, lengthSum);
+			wireRecipes[i][9] = new PositionedItemStack(tmp, 18*4+xBase, 18);
+		}
 		m.addEntry("industrialWires.all", "industrialWires",
-				new ManualPages.CraftingMulti(m, "industrialWires.all0", new ItemStack(IndustrialWires.coil, 1, 0), new ItemStack(IndustrialWires.coil, 1, 1), new ItemStack(IndustrialWires.coil, 1, 2), new ItemStack(IndustrialWires.coil, 1, 3)),
-				new ManualPages.CraftingMulti(m, "industrialWires.all1", new ItemStack(IndustrialWires.ic2conn, 1, 0), new ItemStack(IndustrialWires.ic2conn, 1, 1), new ItemStack(IndustrialWires.ic2conn, 1, 2), new ItemStack(IndustrialWires.ic2conn, 1, 3),
-						new ItemStack(IndustrialWires.ic2conn, 1, 4), new ItemStack(IndustrialWires.ic2conn, 1, 5), new ItemStack(IndustrialWires.ic2conn, 1, 6), new ItemStack(IndustrialWires.ic2conn, 1, 7))
+				new ManualPages.CraftingMulti(m, "industrialWires.all0", new ItemStack(IndustrialWires.ic2conn, 1, 0), new ItemStack(IndustrialWires.ic2conn, 1, 1), new ItemStack(IndustrialWires.ic2conn, 1, 2), new ItemStack(IndustrialWires.ic2conn, 1, 3),
+						new ItemStack(IndustrialWires.ic2conn, 1, 4), new ItemStack(IndustrialWires.ic2conn, 1, 5), new ItemStack(IndustrialWires.ic2conn, 1, 6), new ItemStack(IndustrialWires.ic2conn, 1, 7)),
+				new ManualPages.Text(m, "industrialWires.all1"),
+				new ManualPages.CraftingMulti(m, "industrialWires.all2", (Object[])wireRecipes)
 				);
 	}
 }

@@ -132,8 +132,39 @@
 		"inventory,type=hv_relay": [
 			{
 				"model": "immersiveengineering:connector/relayHV.obj",
+				"transform": {
+					"scale": [ 0.5, 0.5, 0.5 ],
+					"firstperson_righthand": { "translation": [ 0, 0.25, 0.125 ]},
+					"firstperson_lefthand": { "translation": [ 0, 0.25, 0.125 ]},
+					"thirdperson_righthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
+					"thirdperson_lefthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
+					"fixed": {"scale": [ 2,2,2 ], "translation": [ 0, 0, 0 ], "rotation": [{ "y": -90 }]},
+					"gui": { "translation": [ 0, 0.125, 0 ], "rotation": [{ "x": 30 },{ "y": 135 },{ "z": 0 }], "scale": [ 1.5, 1.5, 1.5 ] }
+				}
+			}
+		],
+		"inventory,type=glass_conn": [
+			{
+				"model": "immersiveengineering:connector/connectorHV.obj",
 				"textures": {
-					"#immersiveengineering:blocks/connector_relayHV": "industrialwires:blocks/ic2_relayHV"
+					"#immersiveengineering:blocks/connector_connectorHV": "industrialwires:blocks/ic2_connGlass"
+				},
+				"transform": {
+					"scale": [ 0.5, 0.5, 0.5 ],
+					"firstperson_righthand": { "translation": [ 0, 0.25, 0.125 ]},
+					"firstperson_lefthand": { "translation": [ 0, 0.25, 0.125 ]},
+					"thirdperson_righthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
+					"thirdperson_lefthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
+					"fixed": {"scale": [ 2,2,2 ], "translation": [ 0, 0, 0 ], "rotation": [{ "y": -90 }]},
+					"gui": { "translation": [ 0, 0.125, 0 ], "rotation": [{ "x": 30 },{ "y": 135 },{ "z": 0 }], "scale": [ 1.5, 1.5, 1.5 ] }
+				}
+			}
+		],
+		"inventory,type=glass_relay": [
+			{
+				"model": "immersiveengineering:connector/relayHV.obj",
+				"textures": {
+					"#immersiveengineering:blocks/connector_relayHV": "industrialwires:blocks/ic2_relayGlass"
 				},
 				"transform": {
 					"scale": [ 0.5, 0.5, 0.5 ],
@@ -170,6 +201,12 @@
 			},
 			"hv_relay": {
 				"model": "immersiveengineering:smartmodel/conn_ic2_relay_hv"
+			},
+			"glass_conn": {
+				"model": "immersiveengineering:smartmodel/conn_ic2_conn_glass"
+			},
+			"glass_relay": {
+				"model": "immersiveengineering:smartmodel/conn_ic2_relay_glass"
 			}
 		},
 		"facing": {

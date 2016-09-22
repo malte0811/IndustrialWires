@@ -16,6 +16,7 @@ import blusunrize.immersiveengineering.common.IESaveData;
 import blusunrize.immersiveengineering.common.util.IEAchievements;
 import blusunrize.immersiveengineering.common.util.ItemNBTHelper;
 import blusunrize.immersiveengineering.common.util.Utils;
+import ic2.api.item.IC2Items;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.wires.IC2Wiretype;
 import net.minecraft.block.state.IBlockState;
@@ -24,6 +25,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
@@ -34,7 +36,8 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
 public class ItemIC2Coil extends Item implements IWireCoil{
-	public final static String[] subNames = {"tin", "copper", "gold", "hv"};
+	public final static String[] subNames = {"tin", "copper", "gold", "hv", "glass"};
+	public final static String lengthKey = "wireLength";
 
 	public ItemIC2Coil() {
 		setUnlocalizedName(IndustrialWires.MODID+".ic2wireCoil");
@@ -46,7 +49,9 @@ public class ItemIC2Coil extends Item implements IWireCoil{
 	@Override
 	public void getSubItems(Item itemIn, CreativeTabs tab, List<ItemStack> subItems) {
 		for (int i = 0;i<subNames.length;i++) {
-			subItems.add(new ItemStack(this, 1, i));
+			ItemStack tmp = new ItemStack(this, 1, i);
+			setLength(tmp, getMaxWireLength(tmp));
+			subItems.add(tmp);
 		}
 	}
 	@Override
@@ -59,6 +64,8 @@ public class ItemIC2Coil extends Item implements IWireCoil{
 	}
 	@Override
 	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean adv) {
+		list.add(I18n.format(IndustrialWires.MODID+".desc.wireLength", getLength(stack)));
+		list.add(I18n.format(IndustrialWires.MODID+".desc.recipe"));
 		if(stack.getTagCompound()!=null && stack.getTagCompound().hasKey("linkingPos")) {
 			int[] link = stack.getTagCompound().getIntArray("linkingPos");
 			if(link!=null&&link.length>3) {
@@ -67,10 +74,13 @@ public class ItemIC2Coil extends Item implements IWireCoil{
 		}
 	}
 
-	//copied from "vanilla" IE
 	@Override
 	public EnumActionResult onItemUseFirst(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, EnumHand hand) {
 		if(!world.isRemote) {
+			if (stack.stackSize>1) {
+				player.addChatMessage(new TextComponentTranslation(IndustrialWires.MODID+".chat.stackSize"));
+				return EnumActionResult.FAIL;
+			}
 			TileEntity tileEntity = world.getTileEntity(pos);
 			if(tileEntity instanceof IImmersiveConnectable && ((IImmersiveConnectable)tileEntity).canConnect()) {
 				TargetingInfo target = new TargetingInfo(side, hitX,hitY,hitZ);
@@ -125,25 +135,35 @@ public class ItemIC2Coil extends Item implements IWireCoil{
 							ignore.addAll(nodeLink.getIgnored(nodeHere));
 							boolean canSee = Utils.rayTraceForFirst(rtOff0, rtOff1, world, ignore)==null;
 							if(canSee) {
-								TargetingInfo targetLink = TargetingInfo.readFromNBT(stack.getTagCompound());
-								ImmersiveNetHandler.INSTANCE.addConnection(world, Utils.toCC(nodeHere), Utils.toCC(nodeLink), (int)Math.sqrt(distanceSq), type);
+								int lengthOnStack = getLength(stack);
+								int length = (int)Math.sqrt(distanceSq);
+								if (length<=lengthOnStack) {
+									TargetingInfo targetLink = TargetingInfo.readFromNBT(stack.getTagCompound());
+									ImmersiveNetHandler.INSTANCE.addConnection(world, Utils.toCC(nodeHere), Utils.toCC(nodeLink), length, type);
 
-								nodeHere.connectCable(type, target, nodeLink);
-								nodeLink.connectCable(type, targetLink, nodeHere);
-								IESaveData.setDirty(world.provider.getDimension());
-								player.addStat(IEAchievements.connectWire);
+									nodeHere.connectCable(type, target, nodeLink);
+									nodeLink.connectCable(type, targetLink, nodeHere);
+									IESaveData.setDirty(world.provider.getDimension());
+									player.addStat(IEAchievements.connectWire);
 
-								if(!player.capabilities.isCreativeMode) {
-									stack.stackSize--;
+									if(!player.capabilities.isCreativeMode) {
+										if (length<lengthOnStack) {
+											setLength(stack, lengthOnStack-length);
+										} else {
+											player.setHeldItem(hand, null);
+										}
+									}
+									((TileEntity)nodeHere).markDirty();
+									world.addBlockEvent(masterPos, ((TileEntity) nodeHere).getBlockType(), -1, 0);
+									IBlockState state = world.getBlockState(masterPos);
+									world.notifyBlockUpdate(masterPos, state,state, 3);
+									((TileEntity)nodeLink).markDirty();
+									world.addBlockEvent(linkPos, ((TileEntity) nodeLink).getBlockType(), -1, 0);
+									state = world.getBlockState(linkPos);
+									world.notifyBlockUpdate(linkPos, state,state, 3);
+								} else {
+									player.addChatMessage(new TextComponentTranslation(IndustrialWires.MODID+".chat.tooLong"));
 								}
-								((TileEntity)nodeHere).markDirty();
-								world.addBlockEvent(masterPos, ((TileEntity) nodeHere).getBlockType(), -1, 0);
-								IBlockState state = world.getBlockState(masterPos);
-								world.notifyBlockUpdate(masterPos, state,state, 3);
-								((TileEntity)nodeLink).markDirty();
-								world.addBlockEvent(linkPos, ((TileEntity) nodeLink).getBlockType(), -1, 0);
-								state = world.getBlockState(linkPos);
-								world.notifyBlockUpdate(linkPos, state,state, 3);
 							} else {
 								player.addChatMessage(new TextComponentTranslation(Lib.CHAT_WARN+"cantSee"));
 							}
@@ -159,5 +179,36 @@ public class ItemIC2Coil extends Item implements IWireCoil{
 			}
 		}
 		return EnumActionResult.PASS;
+	}
+	@Override
+	public int getItemStackLimit(ItemStack stack) {
+		return 64;
+	}
+	public static void setLength(ItemStack i, int blocks) {
+		i.setTagInfo(lengthKey, new NBTTagInt(blocks));
+	}
+	public static int getLength(ItemStack i) {
+		if (i.getTagCompound()==null) {
+			setLength(i, 4);
+		}
+		return i.getTagCompound().getInteger(lengthKey);
+	}
+	public static int getMaxWireLength(ItemStack i) {
+		return 64*IC2Wiretype.IC2_TYPES[i.getItemDamage()].getMaxLength();
+	}
+	public static ItemStack getUninsulatedCable(ItemStack i) {
+		switch (i.getMetadata()) {
+		case 0:
+			return IC2Items.getItem("cable", "type:tin,insulation:0");
+		case 1:
+			return IC2Items.getItem("cable", "type:copper,insulation:0");
+		case 2:
+			return IC2Items.getItem("cable", "type:gold,insulation:0");
+		case 3:
+			return IC2Items.getItem("cable", "type:iron,insulation:0");
+		case 4:
+			return IC2Items.getItem("cable", "type:glass,insulation:0");
+		}
+		return null;
 	}
 }
