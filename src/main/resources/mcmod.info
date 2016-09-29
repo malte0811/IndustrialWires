@@ -1,7 +1,7 @@
 [
 {
   "modid": "industrialwires",
-  "name": "Industrial wires",
+  "name": "Industrial Wires",
   "description": "Addon for IndustrialCraft2 and Immersive Engineering that adds IE wires to transfer IC2 power",
   "version": "${version}",
   "mcversion": "${mcversion}",

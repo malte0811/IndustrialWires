@@ -1,5 +1,5 @@
-def mainVersion = "1.0"
-def buildNumber = "1"
+def mainVersion = "1.1"
+def buildNumber = "2"
 
 // For those who want the bleeding edge
 buildscript {
@@ -46,14 +46,18 @@ minecraft {
 }
 
 repositories {
-    
+    maven {
+        name 'ic2'
+        url 'http://maven.ic2.player.to/'
+    }
 }
 
 dependencies {
-
+    deobfCompile "net.industrial-craft:industrialcraft-2:2.6.9-ex110:dev"
 }
 
 jar {
+	from 'LICENSE'
     manifest {
         
     }
