@@ -1,5 +1,5 @@
 def mainVersion = "1.1"
-def buildNumber = "2"
+def buildNumber = "3"
 
 // For those who want the bleeding edge
 buildscript {
@@ -53,7 +53,7 @@ repositories {
 }
 
 dependencies {
-    deobfCompile "net.industrial-craft:industrialcraft-2:2.6.9-ex110:dev"
+    deobfCompile "net.industrial-craft:industrialcraft-2:2.6.+:dev"
 }
 
 jar {

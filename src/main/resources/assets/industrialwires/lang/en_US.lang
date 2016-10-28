@@ -21,6 +21,7 @@ industrialwires.desc.recipe=Please check the Engineer's manual for recipe detail
 industrialwires.chat.tooLong=This coil does not contain enough wire for this connection
 industrialwires.chat.stackSize=Linking is only possible with a stack of size 1
  
+itemGroup.industrialwires=Industrial Wires
 
 ie.manual.category.industrialWires.name=Industrial Wires
 ie.manual.entry.industrialWires.all.name=Industrial Wires

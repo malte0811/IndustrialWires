@@ -47,8 +47,6 @@ public class BlockIC2Connector extends BlockIETileProvider<BlockTypes_IC2_Connec
 		setHardness(3.0F);
 		setResistance(15.0F);
 		lightOpacity = 0;
-		setAllNotNormalBlock();
-		setBlockLayer(BlockRenderLayer.SOLID, BlockRenderLayer.TRANSLUCENT);
 		this.setCreativeTab(IndustrialWires.creativeTab);
 	}
 	@Override
@@ -114,5 +112,29 @@ public class BlockIC2Connector extends BlockIETileProvider<BlockTypes_IC2_Connec
 	@Override
 	public String createRegistryName() {
 		return IndustrialWires.MODID+":"+name;
+	}
+	@Override
+	public boolean canRenderInLayer(BlockRenderLayer layer) {
+		return layer==BlockRenderLayer.TRANSLUCENT||layer==BlockRenderLayer.SOLID;
+	}
+	@Override
+	public boolean isFullBlock(IBlockState state) {
+		return false;
+	}
+	@Override
+	public boolean isFullCube(IBlockState state) {
+		return false;
+	}
+	@Override
+	public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos) {
+		return false;
+	}
+	@Override
+	public boolean isOpaqueCube(IBlockState state) {
+		return false;
+	}
+	@Override
+	public boolean isVisuallyOpaque() {
+		return false;
 	}
 }
