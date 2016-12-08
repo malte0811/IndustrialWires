@@ -20,6 +20,7 @@ package malte0811.industrialWires.wires;
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler;
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler.Connection;
 import blusunrize.immersiveengineering.api.energy.wires.WireType;
+import malte0811.industrialWires.IWConfig;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.items.ItemIC2Coil;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -65,7 +66,7 @@ public class IC2Wiretype extends WireType{
 	}
 	@Override
 	public int getMaxLength() {
-		return type>=3?32:16;
+		return IWConfig.maxLengthPerConn[type];
 	}
 	@Override
 	public ItemStack getWireCoil(ImmersiveNetHandler.Connection con) {

@@ -1,3 +1,7 @@
+#####Version 1.1-4
+ - fixed an insane amount of log-spam in an edgecase (probably a Vanilla or Forge bug)
+ - added config values for wire length per connection and per coil item
+ 
 #####Version 1.1-3
  - fixed incompatibility with IE build 48
    - reduced the amount of calls to core IE classes to make such incompatibilities less likely

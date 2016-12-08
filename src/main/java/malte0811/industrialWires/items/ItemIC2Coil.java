@@ -34,6 +34,7 @@ import blusunrize.immersiveengineering.common.util.IEAchievements;
 import blusunrize.immersiveengineering.common.util.ItemNBTHelper;
 import blusunrize.immersiveengineering.common.util.Utils;
 import ic2.api.item.IC2Items;
+import malte0811.industrialWires.IWConfig;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.wires.IC2Wiretype;
 import net.minecraft.block.state.IBlockState;
@@ -207,7 +208,7 @@ public class ItemIC2Coil extends Item implements IWireCoil{
 		return i.getTagCompound().getInteger(lengthKey);
 	}
 	public static int getMaxWireLength(ItemStack i) {
-		return 64*IC2Wiretype.IC2_TYPES[i.getItemDamage()].getMaxLength();
+		return IWConfig.maxLengthOnCoil[i.getItemDamage()];
 	}
 	public static ItemStack getUninsulatedCable(ItemStack i) {
 		switch (i.getMetadata()) {
