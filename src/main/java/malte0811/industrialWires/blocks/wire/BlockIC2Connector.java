@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package malte0811.industrialWires.blocks;
+package malte0811.industrialWires.blocks.wire;
 
 import java.util.Arrays;
 
@@ -24,6 +24,7 @@ import blusunrize.immersiveengineering.api.energy.wires.TileEntityImmersiveConne
 import blusunrize.immersiveengineering.common.blocks.BlockIETileProvider;
 import blusunrize.immersiveengineering.common.blocks.ItemBlockIEBase;
 import malte0811.industrialWires.IndustrialWires;
+import malte0811.industrialWires.blocks.IMetaEnum;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -40,7 +41,7 @@ import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 
-public class BlockIC2Connector extends BlockIETileProvider<BlockTypes_IC2_Connector> {
+public class BlockIC2Connector extends BlockIETileProvider<BlockTypes_IC2_Connector> implements IMetaEnum {
 
 	public BlockIC2Connector() {
 		super("ic2Connector", Material.IRON, PropertyEnum.create("type", BlockTypes_IC2_Connector.class), ItemBlockIEBase.class, IEProperties.FACING_ALL);
@@ -136,5 +137,9 @@ public class BlockIC2Connector extends BlockIETileProvider<BlockTypes_IC2_Connec
 	@Override
 	public boolean isVisuallyOpaque() {
 		return false;
+	}
+	@Override
+	public Object[] getValues() {
+		return enumValues;
 	}
 }

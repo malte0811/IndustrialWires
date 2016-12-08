@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package malte0811.industrialWires.blocks;
+package malte0811.industrialWires.blocks.wire;
 
 import blusunrize.immersiveengineering.api.energy.wires.WireType;
 import malte0811.industrialWires.wires.IC2Wiretype;

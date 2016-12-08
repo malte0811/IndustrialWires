@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package malte0811.industrialWires.blocks;
+package malte0811.industrialWires.blocks.wire;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,7 +35,6 @@ import blusunrize.immersiveengineering.api.energy.wires.TileEntityImmersiveConne
 import blusunrize.immersiveengineering.api.energy.wires.WireType;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IBlockBounds;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDirectionalTile;
-import blusunrize.immersiveengineering.common.util.Utils;
 import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergyAcceptor;
@@ -44,7 +43,6 @@ import ic2.api.energy.tile.IEnergySink;
 import ic2.api.energy.tile.IEnergySource;
 import malte0811.industrialWires.IIC2Connector;
 import malte0811.industrialWires.wires.IC2Wiretype;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -135,15 +133,15 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	}
 	@Override
 	public void invalidate() {
-		super.invalidate();
-		if (!worldObj.isRemote)
+		if (!worldObj.isRemote&&!first)
 			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
 		first = true;
+		super.invalidate();
 	}
 	@Override
 	public void onChunkUnload() {
 		super.onChunkUnload();
-		if (!worldObj.isRemote)
+		if (!worldObj.isRemote&&!first)
 			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
 		first = true;
 	}
@@ -293,8 +291,36 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 		}
 		return new float[]{0,0,0,1,1,1};
 	}
+	/*
+	 * regarding equals+hashCode
+	 * TE's are considered equal if they have the same pos+dimension id
+	 * This is necessary to work around a weird bug causing a lot of log spam (100GB and above are well possible).
+	 * For further information see #1 (https://github.com/malte0811/IndustrialWires/issues/1)
+	 */
 	@Override
 	public int hashCode() {
-		return pos.hashCode();
+		int ret = worldObj.provider.getDimension();
+		ret = 31*ret+pos.hashCode();
+		return ret;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (obj==this) {
+			return true;
+		}
+		if (!(obj instanceof TileEntityIC2ConnectorTin)) {
+			return false;
+		}
+		if (obj.getClass()!=getClass()) {
+			return false;
+		}
+		TileEntityIC2ConnectorTin te = (TileEntityIC2ConnectorTin) obj;
+		if (!te.pos.equals(pos)) {
+			return false;
+		}
+		if (te.worldObj.provider.getDimension()!=worldObj.provider.getDimension()) {
+			return false;
+		}
+		return true;
 	}
 }

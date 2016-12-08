@@ -15,24 +15,34 @@
  * You should have received a copy of the GNU General Public License
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package malte0811.industrialWires.blocks;
+package malte0811.industrialWires.blocks.wire;
 
-import blusunrize.immersiveengineering.api.energy.wires.WireType;
-import malte0811.industrialWires.wires.IC2Wiretype;
+import blusunrize.immersiveengineering.common.blocks.BlockIEBase.IBlockEnum;
 
-public class TileEntityIC2ConnectorGlass extends TileEntityIC2ConnectorHV {
-	public TileEntityIC2ConnectorGlass(boolean rel) {
-		super(rel);
-	}
-
-	public TileEntityIC2ConnectorGlass() {} 
-
-	{
-		tier = 5;
-		maxStored = IC2Wiretype.IC2_TYPES[4].getTransferRate()/8;
-	}
+public enum BlockTypes_IC2_Connector implements IBlockEnum {
+	TIN_CONN,
+	TIN_RELAY,
+	COPPER_CONN,
+	COPPER_RELAY,
+	GOLD_CONN,
+	GOLD_RELAY,
+	HV_CONN,
+	HV_RELAY,
+	GLASS_CONN,
+	GLASS_RELAY;
 	@Override
-	public boolean canConnect(WireType t) {
-		return t==IC2Wiretype.IC2_TYPES[4];
+	public String getName() {
+		return toString().toLowerCase();
 	}
+
+	@Override
+	public int getMeta() {
+		return ordinal();
+	}
+
+	@Override
+	public boolean listForCreative() {
+		return true;
+	}
+
 }

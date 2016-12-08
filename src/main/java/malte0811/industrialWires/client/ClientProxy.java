@@ -30,7 +30,9 @@ import blusunrize.lib.manual.ManualPages.PositionedItemStack;
 import ic2.api.item.IC2Items;
 import malte0811.industrialWires.CommonProxy;
 import malte0811.industrialWires.IndustrialWires;
+import malte0811.industrialWires.blocks.IMetaEnum;
 import malte0811.industrialWires.items.ItemIC2Coil;
+import net.minecraft.block.Block;
 import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -39,7 +41,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.registry.GameData;
 
 public class ClientProxy extends CommonProxy {
 	@Override
@@ -84,20 +85,24 @@ public class ClientProxy extends CommonProxy {
 			ModelLoader.setCustomModelResourceLocation(IndustrialWires.coil, meta, new ModelResourceLocation(loc, "inventory"));
 		}
 		Item blockItem = Item.getItemFromBlock(IndustrialWires.ic2conn);
-		final ResourceLocation loc = GameData.getBlockRegistry().getNameForObject(IndustrialWires.ic2conn);
+		final ResourceLocation loc = IndustrialWires.ic2conn.getRegistryName();
 		ModelLoader.setCustomMeshDefinition(blockItem, new ItemMeshDefinition() {
 			@Override
 			public ModelResourceLocation getModelLocation(ItemStack stack) {
 				return new ModelResourceLocation(loc, "inventory");
 			}
 		});
-		for(int meta = 0; meta < IndustrialWires.ic2conn.getMetaEnums().length; meta++) {
-			String location = loc.toString();
-			String prop = "inventory,type=" + IndustrialWires.ic2conn.getMetaEnums()[meta].toString().toLowerCase(Locale.US);
-			try {
-				ModelLoader.setCustomModelResourceLocation(blockItem, meta, new ModelResourceLocation(location, prop));
-			} catch(NullPointerException npe) {
-				throw new RuntimeException(IndustrialWires.ic2conn + " lacks an item!", npe);
+		Block[] blocks = {IndustrialWires.ic2conn};
+		for (Block b:blocks) {
+			Object[] v = ((IMetaEnum)b).getValues();
+			for(int meta = 0; meta < v.length; meta++) {
+				String location = loc.toString();
+				String prop = "inventory,type=" + v[meta].toString().toLowerCase(Locale.US);
+				try {
+					ModelLoader.setCustomModelResourceLocation(blockItem, meta, new ModelResourceLocation(location, prop));
+				} catch(NullPointerException npe) {
+					throw new RuntimeException(b + " lacks an item!", npe);
+				}
 			}
 		}
 		//		OBJLoader.INSTANCE.addDomain(IndustrialWires.MODID);
