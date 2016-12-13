@@ -25,6 +25,10 @@ import blusunrize.immersiveengineering.api.tool.AssemblerHandler.RecipeQuery;
 import blusunrize.immersiveengineering.common.IEContent;
 import blusunrize.immersiveengineering.common.blocks.stone.BlockTypes_StoneDecoration;
 import ic2.api.item.IC2Items;
+import malte0811.industrialWires.blocks.converter.BlockMechanicalConverter;
+import malte0811.industrialWires.blocks.converter.TileEntityIEMotor;
+import malte0811.industrialWires.blocks.converter.TileEntityMechICtoIE;
+import malte0811.industrialWires.blocks.converter.TileEntityMechIEtoIC;
 import malte0811.industrialWires.blocks.wire.BlockIC2Connector;
 import malte0811.industrialWires.blocks.wire.TileEntityIC2ConnectorCopper;
 import malte0811.industrialWires.blocks.wire.TileEntityIC2ConnectorGlass;
@@ -53,6 +57,7 @@ public class IndustrialWires {
 	public static final String MODID = "industrialwires";
 	public static final String VERSION = "${version}";
 	public static BlockIC2Connector ic2conn;
+	public static BlockMechanicalConverter mechConv;
 	public static ItemIC2Coil coil;
 	public static CreativeTabs creativeTab = new CreativeTabs(MODID) {
 		
@@ -69,13 +74,18 @@ public class IndustrialWires {
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent e) {
+		new IWConfig();
 		ic2conn = new BlockIC2Connector();
+		mechConv = new BlockMechanicalConverter();
 		coil = new ItemIC2Coil();
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorTin.class, "ic2ConnectorTin");
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorCopper.class, "ic2ConnectorCopper");
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorGold.class, "ic2ConnectorGold");
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorHV.class, "ic2ConnectorHV");
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorGlass.class, "ic2ConnectorGlass");
+		GameRegistry.registerTileEntity(TileEntityIEMotor.class, MODID+":ieMotor");
+		GameRegistry.registerTileEntity(TileEntityMechICtoIE.class, MODID+":mechIcToIe");
+		GameRegistry.registerTileEntity(TileEntityMechIEtoIC.class, MODID+":mechIeToIc");
 		if (IC2Wiretype.IC2_TYPES==null) {
 			throw new IllegalStateException("No IC2 wires registered");
 		}

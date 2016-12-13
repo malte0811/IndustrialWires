@@ -17,6 +17,25 @@
  *******************************************************************************/
 package malte0811.industrialWires.blocks;
 
-public interface IMetaEnum {
-	Object[] getValues();
+import net.minecraft.block.Block;
+import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
+
+public class ItemBlockIW extends ItemBlock {
+	Object[] values;
+	public ItemBlockIW(Block b) {
+		super(b);
+		assert b instanceof IMetaEnum;
+		values = ((IMetaEnum)b).getValues();
+		hasSubtypes = true;
+	}
+	@Override
+	public String getUnlocalizedName(ItemStack stack) {
+		int meta = stack.getMetadata();
+		return block.getUnlocalizedName()+"."+values[meta].toString().toLowerCase();
+	}
+	@Override
+	public int getMetadata(int damage) {
+		return damage;
+	}
 }
