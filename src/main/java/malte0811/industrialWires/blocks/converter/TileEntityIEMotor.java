@@ -32,7 +32,7 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 
 public class TileEntityIEMotor extends TileEntityIWBase implements ITickable, IFluxReceiver, IDirectionalTile {
-	public static final double bufferMax = 2*MechConversion.maxIfToMech*ConversionUtil.rotPerIf();
+	public final double bufferMax = 2*MechConversion.maxIfToMech*ConversionUtil.rotPerIf();
 
 	private double rotBuffer = 0;
 	private FluxStorage energy = new FluxStorage(20*MechConversion.maxIfToMech, 2*MechConversion.maxIfToMech);
@@ -53,7 +53,6 @@ public class TileEntityIEMotor extends TileEntityIWBase implements ITickable, IF
 			}
 			TileEntity te = worldObj.getTileEntity(receiver);
 			if (te instanceof IRotationAcceptor) {
-				//TODO maybe get inputRotation changed to return a double? Would make this more user-friendly
 				((IRotationAcceptor)te).inputRotation(rotBuffer, dir);
 				rotBuffer = 0;
 				dirty = true;
@@ -116,7 +115,7 @@ public class TileEntityIEMotor extends TileEntityIWBase implements ITickable, IF
 	}
 	@Override
 	public int getFacingLimitation() {
-		return 0;
+		return 1;
 	}
 	@Override
 	public boolean mirrorFacingOnPlacement(EntityLivingBase placer) {

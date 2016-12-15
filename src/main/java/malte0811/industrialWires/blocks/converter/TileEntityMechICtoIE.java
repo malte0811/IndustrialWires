@@ -33,8 +33,8 @@ import net.minecraft.util.math.BlockPos;
 public class TileEntityMechICtoIE extends TileEntityIWBase implements IDirectionalTile, ITickable {
 	EnumFacing dir = EnumFacing.DOWN;
 	int kinBuffer = 0;
-	private static final int kinBufMax = 2*MechConversion.maxKinToRot;
-	private static final double maxInsert = ConversionUtil.rotPerKin()*MechConversion.maxKinToRot;
+	private final int kinBufMax = 2*MechConversion.maxKinToRot;
+	private final double maxInsert = ConversionUtil.rotPerKin()*MechConversion.maxKinToRot;
 	BlockPos to;
 	BlockPos from;
 	@Override
@@ -90,7 +90,7 @@ public class TileEntityMechICtoIE extends TileEntityIWBase implements IDirection
 	}
 	@Override
 	public int getFacingLimitation() {
-		return 0;
+		return 1;
 	}
 	@Override
 	public boolean mirrorFacingOnPlacement(EntityLivingBase placer) {

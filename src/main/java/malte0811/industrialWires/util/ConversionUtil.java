@@ -35,10 +35,10 @@ public class ConversionUtil {
 		return 1/MechConversion.euPerIf;
 	}
 	public static double euPerKin() {
-		return MechConversion.kinPerEu;
+		return 1/euPerKin();
 	}
 	public static double kinPerEu() {
-		return 1/euPerKin();
+		return MechConversion.kinPerEu;
 	}
 	public static double kinPerRot() {
 		return kinPerEu()*euPerIfIdeal()*ifPerRot();

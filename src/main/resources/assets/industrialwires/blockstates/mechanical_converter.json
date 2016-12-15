@@ -1,0 +1,111 @@
+{
+	"forge_marker": 1,
+	"defaults": {
+		"transform": "forge:default-block",
+		"model": "immersiveengineering:ieSixSides",
+		"textures": {
+			
+		},
+		"custom": {
+			"flip-v": true
+		}
+	},
+	"variants": {
+		"inventory,type=ie_motor": [{
+			"textures": {
+				"bottom": "industrialwires:blocks/converter/con_ie",
+				"top": "industrialwires:blocks/converter/power_ie",
+				"north": "industrialwires:blocks/converter/motor",
+				"south": "industrialwires:blocks/converter/motor",
+				"west": "industrialwires:blocks/converter/motor",
+				"east": "industrialwires:blocks/converter/motor"
+			}
+		}],
+		"inventory,type=ie_to_ic2": [{
+			"textures": {
+				"bottom": "industrialwires:blocks/converter/con_ic",
+				"top": "industrialwires:blocks/converter/con_ie",
+				"north": "industrialwires:blocks/converter/ie_to_ic_side",
+				"south": "industrialwires:blocks/converter/ie_to_ic_side",
+				"west": "industrialwires:blocks/converter/ie_to_ic_side",
+				"east": "industrialwires:blocks/converter/ie_to_ic_side"
+			}
+		}],
+		"inventory,type=ic2_to_ie": [{
+			"textures": {
+				"bottom": "industrialwires:blocks/converter/con_ie",
+				"top": "industrialwires:blocks/converter/con_ic",
+				"north": "industrialwires:blocks/converter/ic_to_ie_side",
+				"south": "industrialwires:blocks/converter/ic_to_ie_side",
+				"west": "industrialwires:blocks/converter/ic_to_ie_side",
+				"east": "industrialwires:blocks/converter/ic_to_ie_side"
+			}
+		}],
+		"type": {
+			"ie_motor": {"textures": {
+				"bottom": "industrialwires:blocks/converter/con_ie",
+				"top": "industrialwires:blocks/converter/power_ie",
+				"north": "industrialwires:blocks/converter/motor",
+				"south": "industrialwires:blocks/converter/motor",
+				"west": "industrialwires:blocks/converter/motor",
+				"east": "industrialwires:blocks/converter/motor"
+			}},
+			"ie_to_ic2": {"textures": {
+				"bottom": "industrialwires:blocks/converter/con_ic",
+				"top": "industrialwires:blocks/converter/con_ie",
+				"north": "industrialwires:blocks/converter/ie_to_ic_side",
+				"south": "industrialwires:blocks/converter/ie_to_ic_side",
+				"west": "industrialwires:blocks/converter/ie_to_ic_side",
+				"east": "industrialwires:blocks/converter/ie_to_ic_side"
+			}},
+			"ic2_to_ie": {"textures": {
+				"bottom": "industrialwires:blocks/converter/con_ie",
+				"top": "industrialwires:blocks/converter/con_ic",
+				"north": "industrialwires:blocks/converter/ic_to_ie_side",
+				"south": "industrialwires:blocks/converter/ic_to_ie_side",
+				"west": "industrialwires:blocks/converter/ic_to_ie_side",
+				"east": "industrialwires:blocks/converter/ic_to_ie_side"
+			}}
+		},
+		"facing": {
+			"down": {
+				
+			},
+			"up": {
+				"transform": {
+					"rotation": {
+						"z": 180
+					}
+				}
+			},
+			"north": {
+				"transform": {
+					"rotation": {
+						"x": 90
+					}
+				}
+			},
+			"south": {
+				"transform": {
+					"rotation": {
+						"x": -90
+					}
+				}
+			},
+			"west": {
+				"transform": {
+					"rotation": {
+						"z": -90
+					}
+				}
+			},
+			"east": {
+				"transform": {
+					"rotation": {
+						"z": 90
+					}
+				}
+			}
+		}
+	}
+}

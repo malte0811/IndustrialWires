@@ -48,7 +48,7 @@ public class IWConfig {
 		public static double rotToKinEfficiency = .7;
 		
 		@Comment({"The maximum amount of IC2 kinetic energy that can be converted into IE rotational energy", "by one converter in one tick"})
-		public static int maxKinToRot = 50;
+		public static int maxKinToRot = 2400;
 		@Comment({"The efficiency of the conversion from IC2 kinetic energy to IE rotational energy"})
 		public static double kinToRotEfficiency = .8;
 		

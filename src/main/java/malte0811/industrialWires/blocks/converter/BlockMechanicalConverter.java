@@ -21,6 +21,7 @@ import java.util.List;
 
 import blusunrize.immersiveengineering.api.IEProperties;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDirectionalTile;
+import blusunrize.immersiveengineering.common.util.Utils;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.IMetaEnum;
 import malte0811.industrialWires.blocks.ItemBlockIW;
@@ -38,6 +39,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -51,20 +53,20 @@ public class BlockMechanicalConverter extends Block implements IMetaEnum, ITileE
 		super(Material.IRON);
 		setHardness(3.0F);
 		setResistance(15.0F);
-		String name = "mechanicalConverter";
+		String name = "mechanical_converter";
 		GameRegistry.register(this, new ResourceLocation(IndustrialWires.MODID, name));
 		GameRegistry.register(new ItemBlockIW(this), new ResourceLocation(IndustrialWires.MODID, name));
 		setUnlocalizedName(name);
 		setCreativeTab(IndustrialWires.creativeTab);
 	}
-	
+
 	@Override
 	public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list) {
 		for (int i = 0;i<3;i++) {
 			list.add(new ItemStack(itemIn, 1, i));
 		}
 	}
-	
+
 	@Override
 	protected BlockStateContainer createBlockState() {
 		type = PropertyEnum.create("type", MechanicalBlockType.class);
@@ -75,7 +77,7 @@ public class BlockMechanicalConverter extends Block implements IMetaEnum, ITileE
 		});
 		return container;
 	}
-	
+
 	@Override
 	public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
 		return getExtendedState(state, worldIn, pos);
@@ -139,5 +141,35 @@ public class BlockMechanicalConverter extends Block implements IMetaEnum, ITileE
 	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos,
 			EntityPlayer player) {
 		return new ItemStack(this, 1, damageDropped(state));
+	}
+	//mostly copied from IE
+	@Override
+	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player,
+			EnumHand hand, ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
+		TileEntity te = world.getTileEntity(pos);
+		if(te instanceof IDirectionalTile && Utils.isHammer(heldItem) && !world.isRemote) {
+			IDirectionalTile directionalTe = (IDirectionalTile) te;
+			if (directionalTe.canHammerRotate(side, hitX, hitY, hitZ, player)) {
+				EnumFacing f = directionalTe.getFacing();
+				final EnumFacing original = f;
+				int limit = directionalTe.getFacingLimitation();
+
+				if(limit==0) {
+					f = EnumFacing.VALUES[(f.ordinal() + 1) % EnumFacing.VALUES.length];
+				} else if(limit==1) {
+					f = player.isSneaking()?f.rotateAround(side.getAxis()).getOpposite():f.rotateAround(side.getAxis());
+				} else if(limit == 2 || limit == 5) {
+					f = player.isSneaking()?f.rotateYCCW():f.rotateY();
+				}
+				if (f!=original) {
+					directionalTe.setFacing(f);
+					te.markDirty();
+					world.notifyBlockUpdate(pos,state,state,3);
+					world.addBlockEvent(pos, this, 255, 0);
+				}
+				return true;
+			}
+		}
+		return false;
 	}
 }

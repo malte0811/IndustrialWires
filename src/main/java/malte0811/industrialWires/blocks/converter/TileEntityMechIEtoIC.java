@@ -30,8 +30,8 @@ import net.minecraft.util.EnumFacing;
 public class TileEntityMechIEtoIC extends TileEntityIWBase implements IDirectionalTile, IRotationAcceptor, IKineticSource {
 	EnumFacing dir = EnumFacing.DOWN;
 	double rotBuffer = 0;
-	private static final double rotBufMax = 2*MechConversion.maxRotToKin;
-	private static final int maxOutput = (int)(ConversionUtil.kinPerRot()*MechConversion.maxRotToKin);
+	private final double rotBufMax = 2*MechConversion.maxRotToKin;
+	private final int maxOutput = (int)(ConversionUtil.kinPerRot()*MechConversion.maxRotToKin);
 	
 	@Override
 	public void writeNBT(NBTTagCompound out, boolean updatePacket) {
@@ -56,7 +56,7 @@ public class TileEntityMechIEtoIC extends TileEntityIWBase implements IDirection
 	}
 	@Override
 	public int getFacingLimitation() {
-		return 0;
+		return 1;
 	}
 	@Override
 	public boolean mirrorFacingOnPlacement(EntityLivingBase placer) {
