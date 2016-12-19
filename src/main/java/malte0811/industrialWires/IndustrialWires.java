@@ -21,8 +21,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import blusunrize.immersiveengineering.api.tool.AssemblerHandler;
+import blusunrize.immersiveengineering.api.tool.AssemblerHandler.IRecipeAdapter;
 import blusunrize.immersiveengineering.api.tool.AssemblerHandler.RecipeQuery;
 import blusunrize.immersiveengineering.common.IEContent;
+import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0;
 import blusunrize.immersiveengineering.common.blocks.stone.BlockTypes_StoneDecoration;
 import ic2.api.item.IC2Items;
 import malte0811.industrialWires.blocks.converter.BlockMechanicalConverter;
@@ -60,7 +62,7 @@ public class IndustrialWires {
 	public static BlockMechanicalConverter mechConv;
 	public static ItemIC2Coil coil;
 	public static CreativeTabs creativeTab = new CreativeTabs(MODID) {
-		
+
 		@Override
 		public Item getTabIconItem() {
 			return null;
@@ -112,35 +114,51 @@ public class IndustrialWires {
 		for (int i = 0;i<IC2Wiretype.IC2_TYPES.length;i++) {
 			GameRegistry.addRecipe(new RecipeCoilLength(i));
 		}
-		AssemblerHandler.registerRecipeAdapter(RecipeCoilLength.class, new AssemblerHandler.IRecipeAdapter<RecipeCoilLength>() {
-
-			@Override
-			public RecipeQuery[] getQueriedInputs(RecipeCoilLength recipe, ItemStack[] in) {
-				List<RecipeQuery> ret = new ArrayList<>();
-				for (int i = 0;i<in.length-1;i++) {
-					boolean added = false;
-					for (int j = 0;j<ret.size();j++) {
-						if (ItemStack.areItemStacksEqual((ItemStack)ret.get(j).query, in[i])) {
-							ret.get(j).querySize++;
-							added = true;
-							break;
-						}
-					}
-					if (!added) {
-						ret.add(new RecipeQuery(in[i], 1));
-					}
-				}
-				return ret.toArray(new RecipeQuery[ret.size()]);
-			}
-			@Override
-			public RecipeQuery[] getQueriedInputs(RecipeCoilLength arg0) {
-				return new RecipeQuery[0];
-			}
-			
-		});
+		AssemblerHandler.registerRecipeAdapter(RecipeCoilLength.class, new CoilLengthAdapter());
+		// MECH CONVERTERS
+		ItemStack shaftIron = IC2Items.getItem("crafting", "iron_shaft");
+		ItemStack shaftSteel = IC2Items.getItem("crafting", "steel_shaft");
+		ItemStack ironMechComponent = new ItemStack(IEContent.itemMaterial, 1, 8);
+		ItemStack steelMechComponent = new ItemStack(IEContent.itemMaterial, 1, 9);
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(mechConv, 1, 0), " s ", "ici", "mum", 's', "stickIron",
+				'i', "ingotIron", 'c', new ItemStack(IEContent.blockMetalDecoration0, 1, BlockTypes_MetalDecoration0.COIL_LV.getMeta()),
+				'u', "ingotCopper", 'm', ironMechComponent));
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(mechConv, 1, 2), "iIi", "sbS", "mrm", 's', "blockSheetmetalIron",
+				'i', "plateIron", 'I', shaftIron,
+				'b', "ingotBronze", 'm', steelMechComponent,
+				'S', "blockSheetmetalSteel", 'r', "stickSteel"));
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(mechConv, 1, 1), "mrm", "sbS", "iIi", 's', "blockSheetmetalIron",
+				'i', "plateSteel", 'I', shaftSteel,
+				'b', "ingotBronze", 'm', ironMechComponent,
+				'S', "blockSheetmetalSteel", 'r', "stickIron"));
+		
 	}
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent	 e) {
 		proxy.postInit();
+	}
+	private class CoilLengthAdapter implements IRecipeAdapter<RecipeCoilLength> {
+		@Override
+		public RecipeQuery[] getQueriedInputs(RecipeCoilLength recipe, ItemStack[] in) {
+			List<RecipeQuery> ret = new ArrayList<>();
+			for (int i = 0;i<in.length-1;i++) {
+				boolean added = false;
+				for (int j = 0;j<ret.size();j++) {
+					if (ItemStack.areItemStacksEqual((ItemStack)ret.get(j).query, in[i])) {
+						ret.get(j).querySize++;
+						added = true;
+						break;
+					}
+				}
+				if (!added) {
+					ret.add(new RecipeQuery(in[i], 1));
+				}
+			}
+			return ret.toArray(new RecipeQuery[ret.size()]);
+		}
+		@Override
+		public RecipeQuery[] getQueriedInputs(RecipeCoilLength arg0) {
+			return new RecipeQuery[0];
+		}
 	}
 }

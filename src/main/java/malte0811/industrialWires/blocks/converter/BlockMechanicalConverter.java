@@ -172,4 +172,15 @@ public class BlockMechanicalConverter extends Block implements IMetaEnum, ITileE
 		}
 		return false;
 	}
+	@Override
+	@SuppressWarnings("deprecation")
+	public boolean eventReceived(IBlockState state, World worldIn, BlockPos pos, int id, int param) {
+		boolean def = super.eventReceived(state, worldIn, pos, id, param);
+		if ((id&255)==255) {
+			IBlockState s = worldIn.getBlockState(pos);
+			worldIn.notifyBlockUpdate(pos, s, s, 3);
+			return true;
+		}
+		return def;
+	}
 }

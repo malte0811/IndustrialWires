@@ -39,7 +39,7 @@ ie.manual.entry.industrialWires.wires1=attaching a connector to a power source t
 ie.manual.entry.industrialWires.wires2=tin cables can be replaced by uninsulated copper, gold or HV cables or by glass fiber cable to craft the other coils.
 
 ie.manual.entry.industrialWires.mechConv.name=Mechanical Converters
-ie.manual.entry.industrialWires.mechConv.subtext=
+ie.manual.entry.industrialWires.mechConv.subtext=I made rotational energy for this!
 ie.manual.entry.industrialWires.mechConv0=Both the IC2 and IE company produce products that run on kinetic energy of some sort. The new converters from IndustrialWires allow you to convert between these two forms of energy!<br>To use the "Converter: Rotational To Kinetic" attach a source of IE rotational energy
 ie.manual.entry.industrialWires.mechConv1=like a waterwheel or a motor (see page 3) to the side marked with a gear and a consumer of IC2 kinetic energy to the opposite side. The "Converter: Kinetic To Rotational" is used in a similar way (Rotational and kinetic energy have to be swapped).<br>Unfortunately some energy is
 ie.manual.entry.industrialWires.mechConv2=lost with each conversion.<br>As a little extra the "Mechanical converter" product series also contains a Rotational Motor: It consumes IF to produce IE rotational energy. As with the converters this is not a lossless process.

@@ -22,6 +22,7 @@ import blusunrize.immersiveengineering.api.energy.immersiveflux.FluxStorage;
 import blusunrize.immersiveengineering.api.energy.immersiveflux.IFluxReceiver;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDirectionalTile;
 import malte0811.industrialWires.IWConfig.MechConversion;
+import malte0811.industrialWires.blocks.EnergyAdapter;
 import malte0811.industrialWires.blocks.TileEntityIWBase;
 import malte0811.industrialWires.util.ConversionUtil;
 import net.minecraft.entity.EntityLivingBase;
@@ -30,6 +31,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.energy.CapabilityEnergy;
 
 public class TileEntityIEMotor extends TileEntityIWBase implements ITickable, IFluxReceiver, IDirectionalTile {
 	public final double bufferMax = 2*MechConversion.maxIfToMech*ConversionUtil.rotPerIf();
@@ -81,11 +84,11 @@ public class TileEntityIEMotor extends TileEntityIWBase implements ITickable, IF
 	// Flux energy
 	@Override
 	public boolean canConnectEnergy(EnumFacing from) {
-		return from==dir.getOpposite();
+		return from==dir.getOpposite()||from==null;
 	}
 	@Override
 	public int receiveEnergy(EnumFacing from, int energyIn, boolean simulate) {
-		if (from!=dir) {
+		if (canConnectEnergy(from)) {
 			int ret = energy.receiveEnergy(energyIn, simulate);
 			markDirty();
 			return ret;
@@ -124,5 +127,20 @@ public class TileEntityIEMotor extends TileEntityIWBase implements ITickable, IF
 	@Override
 	public boolean canHammerRotate(EnumFacing side, float hitX, float hitY, float hitZ, EntityLivingBase entity) {
 		return true;
+	}
+	@Override
+	public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
+		if (capability==CapabilityEnergy.ENERGY&&canConnectEnergy(facing)) {
+			return true;
+		}
+		return super.hasCapability(capability, facing);
+	}
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+		if (capability==CapabilityEnergy.ENERGY&&canConnectEnergy(facing)) {
+			return (T) new EnergyAdapter(this, facing);
+		}
+		return super.getCapability(capability, facing);
 	}
 }

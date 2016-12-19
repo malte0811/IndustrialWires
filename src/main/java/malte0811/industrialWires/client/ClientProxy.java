@@ -36,7 +36,6 @@ import net.minecraft.block.Block;
 import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -154,9 +153,9 @@ public class ClientProxy extends CommonProxy {
 				new ManualPages.CraftingMulti(m, "industrialWires.wires2", (Object[])wireRecipes)
 				);
 		m.addEntry("industrialWires.mechConv", "industrialWires",
-				new ManualPages.Crafting(m, "industrialWires.mechConv0", new ItemStack(Items.DIAMOND_PICKAXE)),
-				new ManualPages.Crafting(m, "industrialWires.mechConv1", new ItemStack(Items.DIAMOND_PICKAXE)),
-				new ManualPages.Crafting(m, "industrialWires.mechConv2", new ItemStack(Items.DIAMOND_PICKAXE))
+				new ManualPages.Crafting(m, "industrialWires.mechConv0", new ItemStack(IndustrialWires.mechConv, 1, 1)),
+				new ManualPages.Crafting(m, "industrialWires.mechConv1", new ItemStack(IndustrialWires.mechConv, 1, 2)),
+				new ManualPages.Crafting(m, "industrialWires.mechConv2", new ItemStack(IndustrialWires.mechConv, 1, 0))
 				);
 		
 	}
