@@ -54,7 +54,7 @@ import net.minecraftforge.oredict.RecipeSorter;
 import net.minecraftforge.oredict.RecipeSorter.Category;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 
-@Mod(modid = IndustrialWires.MODID, version = IndustrialWires.VERSION, dependencies="required-after:immersiveengineering@[0.10-43,);required-after:IC2")
+@Mod(modid = IndustrialWires.MODID, version = IndustrialWires.VERSION, dependencies="required-after:immersiveengineering@[0.10-53,);required-after:IC2")
 public class IndustrialWires {
 	public static final String MODID = "industrialwires";
 	public static final String VERSION = "${version}";
@@ -78,16 +78,19 @@ public class IndustrialWires {
 	public void preInit(FMLPreInitializationEvent e) {
 		new IWConfig();
 		ic2conn = new BlockIC2Connector();
-		mechConv = new BlockMechanicalConverter();
+		if (IWConfig.enableConversion)
+			mechConv = new BlockMechanicalConverter();
 		coil = new ItemIC2Coil();
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorTin.class, "ic2ConnectorTin");
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorCopper.class, "ic2ConnectorCopper");
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorGold.class, "ic2ConnectorGold");
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorHV.class, "ic2ConnectorHV");
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorGlass.class, "ic2ConnectorGlass");
-		GameRegistry.registerTileEntity(TileEntityIEMotor.class, MODID+":ieMotor");
-		GameRegistry.registerTileEntity(TileEntityMechICtoIE.class, MODID+":mechIcToIe");
-		GameRegistry.registerTileEntity(TileEntityMechIEtoIC.class, MODID+":mechIeToIc");
+		if (mechConv!=null) {
+			GameRegistry.registerTileEntity(TileEntityIEMotor.class, MODID+":ieMotor");
+			GameRegistry.registerTileEntity(TileEntityMechICtoIE.class, MODID+":mechIcToIe");
+			GameRegistry.registerTileEntity(TileEntityMechIEtoIC.class, MODID+":mechIeToIc");
+		}
 		if (IC2Wiretype.IC2_TYPES==null) {
 			throw new IllegalStateException("No IC2 wires registered");
 		}
@@ -116,22 +119,23 @@ public class IndustrialWires {
 		}
 		AssemblerHandler.registerRecipeAdapter(RecipeCoilLength.class, new CoilLengthAdapter());
 		// MECH CONVERTERS
-		ItemStack shaftIron = IC2Items.getItem("crafting", "iron_shaft");
-		ItemStack shaftSteel = IC2Items.getItem("crafting", "steel_shaft");
-		ItemStack ironMechComponent = new ItemStack(IEContent.itemMaterial, 1, 8);
-		ItemStack steelMechComponent = new ItemStack(IEContent.itemMaterial, 1, 9);
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(mechConv, 1, 0), " s ", "ici", "mum", 's', "stickIron",
-				'i', "ingotIron", 'c', new ItemStack(IEContent.blockMetalDecoration0, 1, BlockTypes_MetalDecoration0.COIL_LV.getMeta()),
-				'u', "ingotCopper", 'm', ironMechComponent));
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(mechConv, 1, 2), "iIi", "sbS", "mrm", 's', "blockSheetmetalIron",
-				'i', "plateIron", 'I', shaftIron,
-				'b', "ingotBronze", 'm', steelMechComponent,
-				'S', "blockSheetmetalSteel", 'r', "stickSteel"));
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(mechConv, 1, 1), "mrm", "sbS", "iIi", 's', "blockSheetmetalIron",
-				'i', "plateSteel", 'I', shaftSteel,
-				'b', "ingotBronze", 'm', ironMechComponent,
-				'S', "blockSheetmetalSteel", 'r', "stickIron"));
-		
+		if (mechConv!=null) {
+			ItemStack shaftIron = IC2Items.getItem("crafting", "iron_shaft");
+			ItemStack shaftSteel = IC2Items.getItem("crafting", "steel_shaft");
+			ItemStack ironMechComponent = new ItemStack(IEContent.itemMaterial, 1, 8);
+			ItemStack steelMechComponent = new ItemStack(IEContent.itemMaterial, 1, 9);
+			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(mechConv, 1, 0), " s ", "ici", "mum", 's', "stickIron",
+					'i', "ingotIron", 'c', new ItemStack(IEContent.blockMetalDecoration0, 1, BlockTypes_MetalDecoration0.COIL_LV.getMeta()),
+					'u', "ingotCopper", 'm', ironMechComponent));
+			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(mechConv, 1, 2), "iIi", "sbS", "mrm", 's', "blockSheetmetalIron",
+					'i', "plateIron", 'I', shaftIron,
+					'b', "ingotBronze", 'm', steelMechComponent,
+					'S', "blockSheetmetalSteel", 'r', "stickSteel"));
+			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(mechConv, 1, 1), "mrm", "sbS", "iIi", 's', "blockSheetmetalIron",
+					'i', "plateSteel", 'I', shaftSteel,
+					'b', "ingotBronze", 'm', ironMechComponent,
+					'S', "blockSheetmetalSteel", 'r', "stickIron"));
+		}
 	}
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent	 e) {

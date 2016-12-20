@@ -86,22 +86,24 @@ public class ClientProxy extends CommonProxy {
 		}
 		Block[] blocks = {IndustrialWires.ic2conn, IndustrialWires.mechConv};
 		for (Block b:blocks) {
-			Item blockItem = Item.getItemFromBlock(b);
-			final ResourceLocation loc = b.getRegistryName();
-			ModelLoader.setCustomMeshDefinition(blockItem, new ItemMeshDefinition() {
-				@Override
-				public ModelResourceLocation getModelLocation(ItemStack stack) {
-					return new ModelResourceLocation(loc, "inventory");
-				}
-			});
-			Object[] v = ((IMetaEnum)b).getValues();
-			for(int meta = 0; meta < v.length; meta++) {
-				String location = loc.toString();
-				String prop = "inventory,type=" + v[meta].toString().toLowerCase(Locale.US);
-				try {
-					ModelLoader.setCustomModelResourceLocation(blockItem, meta, new ModelResourceLocation(location, prop));
-				} catch(NullPointerException npe) {
-					throw new RuntimeException(b + " lacks an item!", npe);
+			if (b!=null) {
+				Item blockItem = Item.getItemFromBlock(b);
+				final ResourceLocation loc = b.getRegistryName();
+				ModelLoader.setCustomMeshDefinition(blockItem, new ItemMeshDefinition() {
+					@Override
+					public ModelResourceLocation getModelLocation(ItemStack stack) {
+						return new ModelResourceLocation(loc, "inventory");
+					}
+				});
+				Object[] v = ((IMetaEnum)b).getValues();
+				for(int meta = 0; meta < v.length; meta++) {
+					String location = loc.toString();
+					String prop = "inventory,type=" + v[meta].toString().toLowerCase(Locale.US);
+					try {
+						ModelLoader.setCustomModelResourceLocation(blockItem, meta, new ModelResourceLocation(location, prop));
+					} catch(NullPointerException npe) {
+						throw new RuntimeException(b + " lacks an item!", npe);
+					}
 				}
 			}
 		}
@@ -152,11 +154,12 @@ public class ClientProxy extends CommonProxy {
 				new ManualPages.Text(m, "industrialWires.wires1"),
 				new ManualPages.CraftingMulti(m, "industrialWires.wires2", (Object[])wireRecipes)
 				);
-		m.addEntry("industrialWires.mechConv", "industrialWires",
-				new ManualPages.Crafting(m, "industrialWires.mechConv0", new ItemStack(IndustrialWires.mechConv, 1, 1)),
-				new ManualPages.Crafting(m, "industrialWires.mechConv1", new ItemStack(IndustrialWires.mechConv, 1, 2)),
-				new ManualPages.Crafting(m, "industrialWires.mechConv2", new ItemStack(IndustrialWires.mechConv, 1, 0))
-				);
-		
+		if (IndustrialWires.mechConv!=null) {
+			m.addEntry("industrialWires.mechConv", "industrialWires",
+					new ManualPages.Crafting(m, "industrialWires.mechConv0", new ItemStack(IndustrialWires.mechConv, 1, 1)),
+					new ManualPages.Crafting(m, "industrialWires.mechConv1", new ItemStack(IndustrialWires.mechConv, 1, 2)),
+					new ManualPages.Crafting(m, "industrialWires.mechConv2", new ItemStack(IndustrialWires.mechConv, 1, 0))
+					);
+		}
 	}
 }

@@ -1,3 +1,11 @@
+#####Version 1.2-5 (10,000 download celebratory release)
+ - added mechanical converters and the rotational motor
+   - they convert between IE rotational energy (windmill, dynamo etc) and IC2 kinetic energy
+   - Rotational motor: produces IE rotational energy from IF
+   - No lossless conversion
+   - Can be disabled in the config
+ - wire coils show when they are out of range (to match the behavior of IE coils in the latest dev version)
+
 #####Version 1.1-4
  - fixed an insane amount of log-spam in an edgecase (probably a Vanilla or Forge bug)
  - added config values for wire length per connection and per coil item

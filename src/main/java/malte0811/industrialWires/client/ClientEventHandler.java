@@ -27,6 +27,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -42,13 +43,25 @@ public class ClientEventHandler {
 				if(player.getHeldItem(hand)!=null) {
 					ItemStack equipped = player.getHeldItem(hand);
 					if(OreDictionary.itemMatches(new ItemStack(IndustrialWires.coil, 1, OreDictionary.WILDCARD_VALUE), equipped, false)) {
-						int color = IC2Wiretype.IC2_TYPES[equipped.getItemDamage()].getColour(null);
+						IC2Wiretype type = IC2Wiretype.IC2_TYPES[equipped.getItemDamage()];
+						int color = type.getColour(null);
 						String s = I18n.format(IndustrialWires.MODID+".desc.wireLength", ItemIC2Coil.getLength(equipped));
 						ClientUtils.font().drawString(s, e.getResolution().getScaledWidth()/2 - ClientUtils.font().getStringWidth(s)/2, e.getResolution().getScaledHeight()-GuiIngameForge.left_height-40, color, true);
 						if(ItemNBTHelper.hasKey(equipped, "linkingPos")) {
 							int[] link = ItemNBTHelper.getIntArray(equipped, "linkingPos");
 							if(link!=null&&link.length>3) {
 								s = I18n.format(Lib.DESC_INFO+"attachedTo", link[1],link[2],link[3]);
+								RayTraceResult focussedBlock = ClientUtils.mc().objectMouseOver;
+								double distSquared;
+								if (focussedBlock!=null&&focussedBlock.getBlockPos()!=null) {
+									distSquared = focussedBlock.getBlockPos().distanceSq(link[1],link[2],link[3]);
+								} else {
+									distSquared = player.getDistanceSq(link[1],link[2],link[3]);
+								}
+								int length = Math.min(ItemIC2Coil.getLength(equipped), type.getMaxLength());
+								if (length*length<distSquared) {
+									color = 0xdd3333;
+								}
 								ClientUtils.font().drawString(s, e.getResolution().getScaledWidth()/2 - ClientUtils.font().getStringWidth(s)/2, e.getResolution().getScaledHeight()-GuiIngameForge.left_height-20, color, true);
 							}
 						}
