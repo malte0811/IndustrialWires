@@ -9,23 +9,37 @@ tile.industrialwires.ic2Connector.hv_relay.name=IC2 HV Wire Relay
 tile.industrialwires.ic2Connector.glass_conn.name=Glass Fiber Wire Connector
 tile.industrialwires.ic2Connector.glass_relay.name=Glass Fiber Wire Relay
 
+tile.mechanical_converter.ie_motor.name=Rotational Motor
+tile.mechanical_converter.ie_to_ic2.name=Converter: Rotational To Kinetic
+tile.mechanical_converter.ic2_to_ie.name=Converter: Kinetic To Rotational
+
+
 item.industrialwires.ic2wireCoil.tin.name=Tin Wire Coil
 item.industrialwires.ic2wireCoil.copper.name=Copper Wire Coil
 item.industrialwires.ic2wireCoil.gold.name=Gold Wire Coil
 item.industrialwires.ic2wireCoil.hv.name=IC2 HV Wire Coil
 item.industrialwires.ic2wireCoil.glass.name=Glass Fiber Wire Coil
 
+
 industrialwires.desc.wireLength=Wire length: %1s block(s)
 industrialwires.desc.recipe=Please check the Engineer's manual for recipe details
 
 industrialwires.chat.tooLong=This coil does not contain enough wire for this connection
 industrialwires.chat.stackSize=Linking is only possible with a stack of size 1
+
  
 itemGroup.industrialwires=Industrial Wires
 
 ie.manual.category.industrialWires.name=Industrial Wires
-ie.manual.entry.industrialWires.all.name=Industrial Wires
-ie.manual.entry.industrialWires.all.subtext=Everything you need to know
-ie.manual.entry.industrialWires.all0=Wires from the IndustrialWires company allow you to transfer energy like you can with cables from the IndustrialCraft2 company.<br>You use them exactly as you would use wires from Immersive Engineering. Each wire transfers as much EU as the corresponding cable would, so
-ie.manual.entry.industrialWires.all1=attaching a connector to a power source that would destroy the cable will destroy the connector.<br>The wire coils for the IC2 cable are different from the Immersive Engineering wire coils in that longer connections use up more wire: The coils are crafted by placing any combination of uninsulated IC2 cables and the corresponding wire coils in a crafting grid. The next page shows some examples of valid recipes and their outputs. The uninsulated
-ie.manual.entry.industrialWires.all2=tin cables can be replaced by uninsulated copper, gold or HV cables or by glass fiber cable to craft the other coils.
+
+ie.manual.entry.industrialWires.wires.name=Industrial Wires
+ie.manual.entry.industrialWires.wires.subtext=No complex impedance!
+ie.manual.entry.industrialWires.wires0=Wires from the IndustrialWires company allow you to transfer energy like you can with cables from the IndustrialCraft2 company.<br>You use them exactly as you would use wires from Immersive Engineering. Each wire transfers as much EU as the corresponding cable would, so
+ie.manual.entry.industrialWires.wires1=attaching a connector to a power source that would destroy the cable will destroy the connector.<br>The wire coils for the IC2 cable are different from the Immersive Engineering wire coils in that longer connections use up more wire: The coils are crafted by placing any combination of uninsulated IC2 cables and the corresponding wire coils in a crafting grid. The next page shows some examples of valid recipes and their outputs. The uninsulated
+ie.manual.entry.industrialWires.wires2=tin cables can be replaced by uninsulated copper, gold or HV cables or by glass fiber cable to craft the other coils.
+
+ie.manual.entry.industrialWires.mechConv.name=Mechanical Converters
+ie.manual.entry.industrialWires.mechConv.subtext=I made rotational energy for this!
+ie.manual.entry.industrialWires.mechConv0=Both the IC2 and IE company produce products that run on kinetic energy of some sort. The new converters from IndustrialWires allow you to convert between these two forms of energy!<br>To use the "Converter: Rotational To Kinetic" attach a source of IE rotational energy
+ie.manual.entry.industrialWires.mechConv1=like a waterwheel or a motor (see page 3) to the side marked with a gear and a consumer of IC2 kinetic energy to the opposite side. The "Converter: Kinetic To Rotational" is used in a similar way (Rotational and kinetic energy have to be swapped).<br>Unfortunately some energy is
+ie.manual.entry.industrialWires.mechConv2=lost with each conversion.<br>As a little extra the "Mechanical converter" product series also contains a Rotational Motor: It consumes IF to produce IE rotational energy. As with the converters this is not a lossless process.

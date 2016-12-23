@@ -84,24 +84,26 @@ public class ClientProxy extends CommonProxy {
 			ModelBakery.registerItemVariants(IndustrialWires.coil, loc);
 			ModelLoader.setCustomModelResourceLocation(IndustrialWires.coil, meta, new ModelResourceLocation(loc, "inventory"));
 		}
-		Item blockItem = Item.getItemFromBlock(IndustrialWires.ic2conn);
-		final ResourceLocation loc = IndustrialWires.ic2conn.getRegistryName();
-		ModelLoader.setCustomMeshDefinition(blockItem, new ItemMeshDefinition() {
-			@Override
-			public ModelResourceLocation getModelLocation(ItemStack stack) {
-				return new ModelResourceLocation(loc, "inventory");
-			}
-		});
-		Block[] blocks = {IndustrialWires.ic2conn};
+		Block[] blocks = {IndustrialWires.ic2conn, IndustrialWires.mechConv};
 		for (Block b:blocks) {
-			Object[] v = ((IMetaEnum)b).getValues();
-			for(int meta = 0; meta < v.length; meta++) {
-				String location = loc.toString();
-				String prop = "inventory,type=" + v[meta].toString().toLowerCase(Locale.US);
-				try {
-					ModelLoader.setCustomModelResourceLocation(blockItem, meta, new ModelResourceLocation(location, prop));
-				} catch(NullPointerException npe) {
-					throw new RuntimeException(b + " lacks an item!", npe);
+			if (b!=null) {
+				Item blockItem = Item.getItemFromBlock(b);
+				final ResourceLocation loc = b.getRegistryName();
+				ModelLoader.setCustomMeshDefinition(blockItem, new ItemMeshDefinition() {
+					@Override
+					public ModelResourceLocation getModelLocation(ItemStack stack) {
+						return new ModelResourceLocation(loc, "inventory");
+					}
+				});
+				Object[] v = ((IMetaEnum)b).getValues();
+				for(int meta = 0; meta < v.length; meta++) {
+					String location = loc.toString();
+					String prop = "inventory,type=" + v[meta].toString().toLowerCase(Locale.US);
+					try {
+						ModelLoader.setCustomModelResourceLocation(blockItem, meta, new ModelResourceLocation(location, prop));
+					} catch(NullPointerException npe) {
+						throw new RuntimeException(b + " lacks an item!", npe);
+					}
 				}
 			}
 		}
@@ -146,11 +148,18 @@ public class ClientProxy extends CommonProxy {
 			ItemIC2Coil.setLength(tmp, lengthSum);
 			wireRecipes[i][9] = new PositionedItemStack(tmp, 18*4+xBase, 18);
 		}
-		m.addEntry("industrialWires.all", "industrialWires",
-				new ManualPages.CraftingMulti(m, "industrialWires.all0", new ItemStack(IndustrialWires.ic2conn, 1, 0), new ItemStack(IndustrialWires.ic2conn, 1, 1), new ItemStack(IndustrialWires.ic2conn, 1, 2), new ItemStack(IndustrialWires.ic2conn, 1, 3),
+		m.addEntry("industrialWires.wires", "industrialWires",
+				new ManualPages.CraftingMulti(m, "industrialWires.wires0", new ItemStack(IndustrialWires.ic2conn, 1, 0), new ItemStack(IndustrialWires.ic2conn, 1, 1), new ItemStack(IndustrialWires.ic2conn, 1, 2), new ItemStack(IndustrialWires.ic2conn, 1, 3),
 						new ItemStack(IndustrialWires.ic2conn, 1, 4), new ItemStack(IndustrialWires.ic2conn, 1, 5), new ItemStack(IndustrialWires.ic2conn, 1, 6), new ItemStack(IndustrialWires.ic2conn, 1, 7)),
-				new ManualPages.Text(m, "industrialWires.all1"),
-				new ManualPages.CraftingMulti(m, "industrialWires.all2", (Object[])wireRecipes)
+				new ManualPages.Text(m, "industrialWires.wires1"),
+				new ManualPages.CraftingMulti(m, "industrialWires.wires2", (Object[])wireRecipes)
 				);
+		if (IndustrialWires.mechConv!=null) {
+			m.addEntry("industrialWires.mechConv", "industrialWires",
+					new ManualPages.Crafting(m, "industrialWires.mechConv0", new ItemStack(IndustrialWires.mechConv, 1, 1)),
+					new ManualPages.Crafting(m, "industrialWires.mechConv1", new ItemStack(IndustrialWires.mechConv, 1, 2)),
+					new ManualPages.Crafting(m, "industrialWires.mechConv2", new ItemStack(IndustrialWires.mechConv, 1, 0))
+					);
+		}
 	}
 }

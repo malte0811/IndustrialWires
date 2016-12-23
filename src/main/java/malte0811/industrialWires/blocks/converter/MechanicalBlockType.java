@@ -15,8 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package malte0811.industrialWires.blocks;
+package malte0811.industrialWires.blocks.converter;
 
-public interface IMetaEnum {
-	Object[] getValues();
+import net.minecraft.util.IStringSerializable;
+
+public enum MechanicalBlockType implements IStringSerializable {
+	IE_MOTOR,
+	IE_TO_IC2,
+	IC2_TO_IE;
+	public static final MechanicalBlockType[] values = values();
+
+	@Override
+	public String getName() {
+		return name().toLowerCase();
+	}
 }

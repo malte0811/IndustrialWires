@@ -6,4 +6,6 @@ An addon for Immersive Engineering and IndustrialCraft2. It adds IE-style wires 
 
 Recipes for the relays, connectors and wires can be found in the Engineer's Manual.
 
-All textures are modified versions of the textures Immersive Engineering uses and the models are loaded out of IE, so all art is at least based on art Mr. Damien Hazard made.
+All textures for the connectors are modified versions of the textures Immersive Engineering uses and the models are loaded out of IE, so all art for the wires is at least based on art Mr. Damien Hazard made.
+
+The textures for the mechanical converters and the Rotational Motor were made by C8H8O4.

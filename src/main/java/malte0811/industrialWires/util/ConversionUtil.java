@@ -15,8 +15,35 @@
  * You should have received a copy of the GNU General Public License
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package malte0811.industrialWires.blocks;
+package malte0811.industrialWires.util;
 
-public interface IMetaEnum {
-	Object[] getValues();
+import blusunrize.immersiveengineering.common.Config;
+import malte0811.industrialWires.IWConfig.MechConversion;
+
+public class ConversionUtil {
+	private ConversionUtil() {}
+	public static double rotPerIf() {
+		return 1/Config.IEConfig.Machines.dynamo_output;
+	}
+	public static double ifPerRot() {
+		return Config.IEConfig.Machines.dynamo_output;
+	}
+	public static double euPerIfIdeal() {
+		return MechConversion.euPerIf;
+	}
+	public static double ifPerEuIdeal() {
+		return 1/MechConversion.euPerIf;
+	}
+	public static double euPerKin() {
+		return 1/euPerKin();
+	}
+	public static double kinPerEu() {
+		return MechConversion.kinPerEu;
+	}
+	public static double kinPerRot() {
+		return kinPerEu()*euPerIfIdeal()*ifPerRot();
+	}
+	public static double rotPerKin() {
+		return 1/kinPerRot();
+	}
 }
