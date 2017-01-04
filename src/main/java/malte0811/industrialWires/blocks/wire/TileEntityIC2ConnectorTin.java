@@ -56,8 +56,10 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	boolean first = true;
 	//IC2 net to IE net buffer
 	double inBuffer = 0;
+	double maxToNet = 0;
 	//IE net to IC2 net buffer
 	double outBuffer = 0;
+	double maxToMachine = 0;
 	double maxStored = IC2Wiretype.IC2_TYPES[0].getTransferRate()/8;
 	int tier = 1;
 	public TileEntityIC2ConnectorTin(boolean rel) {
@@ -77,11 +79,12 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	public void transferPower() {
 		Set<AbstractConnection> conns = new HashSet<>(ImmersiveNetHandler.INSTANCE.getIndirectEnergyConnections(pos, worldObj));
 		Map<AbstractConnection, Pair<IIC2Connector, Double>> maxOutputs = new HashMap<>();
+		double outputMax = Math.min(inBuffer, maxToNet);
 		double sum = 0;
 		for (AbstractConnection c:conns) {
 			IImmersiveConnectable iic = ApiUtils.toIIC(c.end, worldObj);
 			if (iic instanceof IIC2Connector) {
-				double tmp = inBuffer-((IIC2Connector)iic).insertEnergy(inBuffer, true);
+				double tmp = inBuffer-((IIC2Connector)iic).insertEnergy(outputMax, true);
 				if (tmp>.00000001) {
 					maxOutputs.put(c, new ImmutablePair<>((IIC2Connector)iic, tmp));
 					sum+=tmp;
@@ -91,7 +94,7 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 		if (sum<.0001) {
 			return;
 		}
-		final double oldInBuf = inBuffer;
+		final double oldInBuf = outputMax;
 		HashMap<Connection, Integer> transferedPerConn = ImmersiveNetHandler.INSTANCE.getTransferedRates(worldObj.provider.getDimension());
 		for (AbstractConnection c:maxOutputs.keySet()) {
 			Pair<IIC2Connector, Double> p = maxOutputs.get(c);
@@ -123,9 +126,18 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 		}
 		return f;
 	}
+	//Input through the net
 	@Override
 	public double insertEnergy(double eu, boolean simulate) {
-		double insert = Math.min(maxStored-outBuffer, eu);
+		final double insert = Math.min(maxStored-outBuffer, eu);
+		if (insert>0) {
+			if (outBuffer<maxToMachine) {
+				maxToMachine = outBuffer;
+			}
+			if (eu>maxToMachine) {
+				maxToMachine = eu;
+			}
+		}
 		if (!simulate) {
 			outBuffer+=insert;
 		}
@@ -204,7 +216,13 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	@Override
 	public double injectEnergy(EnumFacing directionFrom, double amount, double voltage) {
 		if (inBuffer<maxStored) {
+			if (inBuffer<maxToNet) {
+				maxToNet = inBuffer;
+			}
 			inBuffer += amount;
+			if (amount>maxToNet) {
+				maxToNet = amount;
+			}
 			markDirty();
 			return 0;
 		}
@@ -213,7 +231,7 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 
 	@Override
 	public double getOfferedEnergy() {
-		return outBuffer;
+		return Math.min(maxToMachine, outBuffer);
 	}
 
 	@Override
