@@ -252,6 +252,16 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 		relay = nbt.getBoolean("relay");
 		inBuffer = nbt.getDouble("inBuffer");
 		outBuffer = nbt.getDouble("outBuffer");
+		if (nbt.hasKey("maxToNet")) {
+			maxToNet = nbt.getDouble("maxToNet");
+		} else {
+			maxToNet = inBuffer;
+		}
+		if (nbt.hasKey("maxToMachine")) {
+			maxToMachine = nbt.getDouble("maxToMachine");
+		} else {
+			maxToMachine = outBuffer;
+		}
 	}
 
 	@Override
@@ -261,6 +271,8 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 		nbt.setBoolean("relay", relay);
 		nbt.setDouble("inBuffer", inBuffer);
 		nbt.setDouble("outBuffer", outBuffer);
+		nbt.setDouble("maxToNet", maxToNet);
+		nbt.setDouble("maxToMachine", maxToMachine);
 	}
 
 	@Override

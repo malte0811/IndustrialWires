@@ -1,3 +1,9 @@
+#####Version 1.2-6
+ - reduced the discrepancies between IC2 cables and Industrial Wires
+   - machines don't explode when they shouldn't except in some corner cases
+ - potentially fixed missing textures on the mechanical converters
+ - added Chinese translations (thanks SihenZhang)
+
 #####Version 1.2-5 (10,000 download celebratory release)
  - added mechanical converters and the rotational motor
    - they convert between IE rotational energy (windmill, dynamo etc) and IC2 kinetic energy
