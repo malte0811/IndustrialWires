@@ -96,4 +96,9 @@ public class TileEntityMechIEtoIC extends TileEntityIWBase implements IDirection
 			rotBuffer = Math.min(rotBufMax, rotBuffer+rotation);
 		}
 	}
+
+	@Override
+	public boolean canRotate(EnumFacing axis) {
+		return true;
+	}
 }

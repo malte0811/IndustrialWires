@@ -353,4 +353,9 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 		}
 		return true;
 	}
+
+	@Override
+	public boolean canRotate(EnumFacing axis) {
+		return false;
+	}
 }

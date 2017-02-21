@@ -143,4 +143,9 @@ public class TileEntityIEMotor extends TileEntityIWBase implements ITickable, IF
 		}
 		return super.getCapability(capability, facing);
 	}
+
+	@Override
+	public boolean canRotate(EnumFacing axis) {
+		return true;
+	}
 }

@@ -100,4 +100,9 @@ public class TileEntityMechICtoIE extends TileEntityIWBase implements IDirection
 	public boolean canHammerRotate(EnumFacing side, float hitX, float hitY, float hitZ, EntityLivingBase entity) {
 		return true;
 	}
+
+	@Override
+	public boolean canRotate(EnumFacing axis) {
+		return true;
+	}
 }
