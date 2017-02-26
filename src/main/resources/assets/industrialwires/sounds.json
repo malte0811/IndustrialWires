@@ -1,0 +1,23 @@
+{
+  "jacobs_ladder_start": {
+    "category": "block",
+    "subtitle": "industrialwires.subtitle.jacobs_ladder",
+    "sounds": [
+      "industrialwires:jacobs_ladder/start"
+    ]
+  },
+  "jacobs_ladder_middle": {
+    "category": "block",
+    "subtitle": "industrialwires.subtitle.jacobs_ladder",
+    "sounds": [
+      "industrialwires:jacobs_ladder/middle"
+    ]
+  },
+  "jacobs_ladder_end": {
+    "category": "block",
+    "subtitle": "industrialwires.subtitle.jacobs_ladder",
+    "sounds": [
+      "industrialwires:jacobs_ladder/end"
+    ]
+  }
+}

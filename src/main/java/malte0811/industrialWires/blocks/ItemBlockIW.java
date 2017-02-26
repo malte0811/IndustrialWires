@@ -1,6 +1,6 @@
-/*******************************************************************************
+/*
  * This file is part of Industrial Wires.
- * Copyright (C) 2016 malte0811
+ * Copyright (C) 2016-2017 malte0811
  *
  * Industrial Wires is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,12 +14,19 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
 package malte0811.industrialWires.blocks;
 
+import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 public class ItemBlockIW extends ItemBlock {
 	Object[] values;
@@ -37,5 +44,17 @@ public class ItemBlockIW extends ItemBlock {
 	@Override
 	public int getMetadata(int damage) {
 		return damage;
+	}
+
+	@Override
+	public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState) {
+		boolean ret = super.placeBlockAt(stack, player, world, pos, side, hitX, hitY, hitZ, newState);
+		if(ret) {
+			TileEntity te = world.getTileEntity(pos);
+			if (te instanceof IEBlockInterfaces.IHasDummyBlocks) {
+				((IEBlockInterfaces.IHasDummyBlocks) te).placeDummies(pos, newState, side, hitX, hitY, hitZ);
+			}
+		}
+		return ret;
 	}
 }

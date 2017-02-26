@@ -15,15 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  */
-package malte0811.industrialWires;
 
-import malte0811.industrialWires.blocks.TileEntityJacobsLadder;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+package malte0811.industrialWires.blocks;
 
-public class CommonProxy {
-	public void preInit() {}
-	public void postInit() {}
-	public World getClientWorld() {return null;}
-	public void playJacobsLadderSound(TileEntityJacobsLadder te, int phase, Vec3d soundPos) {}
+import net.minecraft.nbt.NBTTagCompound;
+
+public interface ISyncReceiver {
+	void onSync(NBTTagCompound nbt);
 }

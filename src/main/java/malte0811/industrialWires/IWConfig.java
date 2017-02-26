@@ -1,6 +1,6 @@
-/*******************************************************************************
+/*
  * This file is part of Industrial Wires.
- * Copyright (C) 2016 malte0811
+ * Copyright (C) 2016-2017 malte0811
  *
  * Industrial Wires is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
 package malte0811.industrialWires;
 
 import net.minecraftforge.common.config.Config;
@@ -51,6 +51,10 @@ public class IWConfig {
 		public static int maxKinToRot = 2400;
 		@Comment({"The efficiency of the conversion from IC2 kinetic energy to IE rotational energy"})
 		public static double kinToRotEfficiency = .8;
-		
+	}
+	public  static HVStuff hv = new HVStuff();
+	public static class HVStuff {
+		@Comment({"The amount of Eu a Jacobs Ladder uses per tick, sorted by size of the ladder"})
+		public static double[] jacobsUsageEU = {10, 20, 50};
 	}
 }

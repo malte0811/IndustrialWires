@@ -1,6 +1,6 @@
-/*******************************************************************************
+/*
  * This file is part of Industrial Wires.
- * Copyright (C) 2016 malte0811
+ * Copyright (C) 2016-2017 malte0811
  *
  * Industrial Wires is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,33 +14,43 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
 package malte0811.industrialWires.client;
 
-import java.util.Locale;
-import java.util.Random;
-
-import com.google.common.collect.ImmutableMap;
-
 import blusunrize.immersiveengineering.api.ManualHelper;
+import blusunrize.immersiveengineering.client.ClientUtils;
 import blusunrize.immersiveengineering.client.models.smart.ConnLoader;
 import blusunrize.lib.manual.ManualInstance;
 import blusunrize.lib.manual.ManualPages;
 import blusunrize.lib.manual.ManualPages.PositionedItemStack;
+import com.google.common.collect.ImmutableMap;
 import ic2.api.item.IC2Items;
 import malte0811.industrialWires.CommonProxy;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.IMetaEnum;
+import malte0811.industrialWires.blocks.TileEntityJacobsLadder;
+import malte0811.industrialWires.client.render.TileRenderJacobsLadder;
 import malte0811.industrialWires.items.ItemIC2Coil;
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.ItemMeshDefinition;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.ISound;
+import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
+
+import java.util.Locale;
+import java.util.Random;
+import java.util.WeakHashMap;
 
 public class ClientProxy extends CommonProxy {
 	@Override
@@ -48,68 +58,65 @@ public class ClientProxy extends CommonProxy {
 		super.preInit();
 		ConnLoader.baseModels.put("ic2_conn_tin", new ResourceLocation("immersiveengineering:block/connector/connectorLV.obj"));
 		ConnLoader.textureReplacements.put("ic2_conn_tin", ImmutableMap.of("#immersiveengineering:blocks/connector_connectorLV",
-				IndustrialWires.MODID+":blocks/ic2_connTin"));
+				IndustrialWires.MODID + ":blocks/ic2_connTin"));
 		ConnLoader.baseModels.put("ic2_relay_tin", new ResourceLocation("immersiveengineering:block/connector/connectorLV.obj"));
 		ConnLoader.textureReplacements.put("ic2_relay_tin", ImmutableMap.of("#immersiveengineering:blocks/connector_connectorLV",
-				IndustrialWires.MODID+":blocks/ic2_relayTin"));
+				IndustrialWires.MODID + ":blocks/ic2_relayTin"));
 
 		ConnLoader.baseModels.put("ic2_conn_copper", new ResourceLocation("immersiveengineering:block/connector/connectorLV.obj"));
 		ConnLoader.textureReplacements.put("ic2_conn_copper", ImmutableMap.of("#immersiveengineering:blocks/connector_connectorLV",
-				IndustrialWires.MODID+":blocks/ic2_connCopper"));
+				IndustrialWires.MODID + ":blocks/ic2_connCopper"));
 		ConnLoader.baseModels.put("ic2_relay_copper", new ResourceLocation("immersiveengineering:block/connector/connectorLV.obj"));
 		ConnLoader.textureReplacements.put("ic2_relay_copper", ImmutableMap.of("#immersiveengineering:blocks/connector_connectorLV",
-				IndustrialWires.MODID+":blocks/ic2_relayCopper"));
+				IndustrialWires.MODID + ":blocks/ic2_relayCopper"));
 
 		ConnLoader.baseModels.put("ic2_conn_gold", new ResourceLocation("immersiveengineering:block/connector/connectorMV.obj"));
 		ConnLoader.textureReplacements.put("ic2_conn_gold", ImmutableMap.of("#immersiveengineering:blocks/connector_connectorMV",
-				IndustrialWires.MODID+":blocks/ic2_connGold"));
+				IndustrialWires.MODID + ":blocks/ic2_connGold"));
 		ConnLoader.baseModels.put("ic2_relay_gold", new ResourceLocation("immersiveengineering:block/connector/connectorMV.obj"));
 		ConnLoader.textureReplacements.put("ic2_relay_gold", ImmutableMap.of("#immersiveengineering:blocks/connector_connectorMV",
-				IndustrialWires.MODID+":blocks/ic2_relayGold"));
+				IndustrialWires.MODID + ":blocks/ic2_relayGold"));
 
 		ConnLoader.baseModels.put("ic2_conn_hv", new ResourceLocation("immersiveengineering:block/connector/connectorHV.obj"));
 		ConnLoader.textureReplacements.put("ic2_conn_hv", ImmutableMap.of("#immersiveengineering:blocks/connector_connectorHV",
-				IndustrialWires.MODID+":blocks/ic2_connHV"));
+				IndustrialWires.MODID + ":blocks/ic2_connHV"));
 		ConnLoader.baseModels.put("ic2_relay_hv", new ResourceLocation("immersiveengineering:block/connector/relayHV.obj"));
 
 		ConnLoader.baseModels.put("ic2_conn_glass", new ResourceLocation("immersiveengineering:block/connector/connectorHV.obj"));
 		ConnLoader.textureReplacements.put("ic2_conn_glass", ImmutableMap.of("#immersiveengineering:blocks/connector_connectorHV",
-				IndustrialWires.MODID+":blocks/ic2_connGlass"));
+				IndustrialWires.MODID + ":blocks/ic2_connGlass"));
 		ConnLoader.baseModels.put("ic2_relay_glass", new ResourceLocation("immersiveengineering:block/connector/relayHV.obj"));
 		ConnLoader.textureReplacements.put("ic2_relay_glass", ImmutableMap.of("#immersiveengineering:blocks/connector_relayHV",
-				IndustrialWires.MODID+":blocks/ic2_relayGlass"));
+				IndustrialWires.MODID + ":blocks/ic2_relayGlass"));
 
-		for(int meta = 0; meta < ItemIC2Coil.subNames.length; meta++) {
+		for (int meta = 0; meta < ItemIC2Coil.subNames.length; meta++) {
 			ResourceLocation loc = new ResourceLocation(IndustrialWires.MODID, "ic2wireCoil/" + ItemIC2Coil.subNames[meta]);
 			ModelBakery.registerItemVariants(IndustrialWires.coil, loc);
 			ModelLoader.setCustomModelResourceLocation(IndustrialWires.coil, meta, new ModelResourceLocation(loc, "inventory"));
 		}
-		Block[] blocks = {IndustrialWires.ic2conn, IndustrialWires.mechConv};
-		for (Block b:blocks) {
-			if (b!=null) {
+		Block[] blocks = {IndustrialWires.ic2conn, IndustrialWires.mechConv, IndustrialWires.jacobsLadder};
+		for (Block b : blocks) {
+			if (b != null) {
 				Item blockItem = Item.getItemFromBlock(b);
 				final ResourceLocation loc = b.getRegistryName();
-				ModelLoader.setCustomMeshDefinition(blockItem, new ItemMeshDefinition() {
-					@Override
-					public ModelResourceLocation getModelLocation(ItemStack stack) {
-						return new ModelResourceLocation(loc, "inventory");
-					}
-				});
-				Object[] v = ((IMetaEnum)b).getValues();
-				for(int meta = 0; meta < v.length; meta++) {
+				ModelLoader.setCustomMeshDefinition(blockItem, stack -> new ModelResourceLocation(loc, "inventory"));
+				Object[] v = ((IMetaEnum) b).getValues();
+				for (int meta = 0; meta < v.length; meta++) {
 					String location = loc.toString();
 					String prop = "inventory,type=" + v[meta].toString().toLowerCase(Locale.US);
 					try {
 						ModelLoader.setCustomModelResourceLocation(blockItem, meta, new ModelResourceLocation(location, prop));
-					} catch(NullPointerException npe) {
+					} catch (NullPointerException npe) {
 						throw new RuntimeException(b + " lacks an item!", npe);
 					}
 				}
 			}
 		}
-		//		OBJLoader.INSTANCE.addDomain(IndustrialWires.MODID);
+		OBJLoader.INSTANCE.addDomain(IndustrialWires.MODID);
 		MinecraftForge.EVENT_BUS.register(new ClientEventHandler());
+		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityJacobsLadder.class, new TileRenderJacobsLadder());
 	}
+
 	@Override
 	public void postInit() {
 		super.postInit();
@@ -117,49 +124,83 @@ public class ClientProxy extends CommonProxy {
 		PositionedItemStack[][] wireRecipes = new PositionedItemStack[3][10];
 		int xBase = 15;
 		ItemStack tinCable = IC2Items.getItem("cable", "type:tin,insulation:0");
-		for (int i = 0;i<3;i++) {
-			for (int j = 0;j<3;j++) {
-				wireRecipes[0][3*i+j] = new PositionedItemStack(tinCable.copy(), 18*i+xBase, 18*j);
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
+				wireRecipes[0][3 * i + j] = new PositionedItemStack(tinCable.copy(), 18 * i + xBase, 18 * j);
 			}
 		}
 		ItemStack tmp = new ItemStack(IndustrialWires.coil);
 		ItemIC2Coil.setLength(tmp, 9);
-		wireRecipes[0][9] = new PositionedItemStack(tmp, 18*4+xBase, 18);
+		wireRecipes[0][9] = new PositionedItemStack(tmp, 18 * 4 + xBase, 18);
 		Random r = new Random();
-		for (int i = 1;i<3;i++) {
+		for (int i = 1; i < 3; i++) {
 			int lengthSum = 0;
-			for (int j1 = 0;j1<3;j1++) {
-				for (int j2 = 0;j2<3;j2++) {
+			for (int j1 = 0; j1 < 3; j1++) {
+				for (int j2 = 0; j2 < 3; j2++) {
 					if (r.nextBoolean()) {
 						// cable
 						lengthSum++;
-						wireRecipes[i][3*j1+j2] = new PositionedItemStack(tinCable.copy(), 18*j1+xBase, 18*j2);
+						wireRecipes[i][3 * j1 + j2] = new PositionedItemStack(tinCable.copy(), 18 * j1 + xBase, 18 * j2);
 					} else {
 						// wire coil
-						int length = r.nextInt(99)+1;
+						int length = r.nextInt(99) + 1;
 						tmp = new ItemStack(IndustrialWires.coil);
 						ItemIC2Coil.setLength(tmp, length);
-						wireRecipes[i][3*j1+j2] = new PositionedItemStack(tmp, 18*j1+xBase, 18*j2);
-						lengthSum+=length;
+						wireRecipes[i][3 * j1 + j2] = new PositionedItemStack(tmp, 18 * j1 + xBase, 18 * j2);
+						lengthSum += length;
 					}
 				}
 			}
 			tmp = new ItemStack(IndustrialWires.coil);
 			ItemIC2Coil.setLength(tmp, lengthSum);
-			wireRecipes[i][9] = new PositionedItemStack(tmp, 18*4+xBase, 18);
+			wireRecipes[i][9] = new PositionedItemStack(tmp, 18 * 4 + xBase, 18);
 		}
 		m.addEntry("industrialWires.wires", "industrialWires",
 				new ManualPages.CraftingMulti(m, "industrialWires.wires0", new ItemStack(IndustrialWires.ic2conn, 1, 0), new ItemStack(IndustrialWires.ic2conn, 1, 1), new ItemStack(IndustrialWires.ic2conn, 1, 2), new ItemStack(IndustrialWires.ic2conn, 1, 3),
 						new ItemStack(IndustrialWires.ic2conn, 1, 4), new ItemStack(IndustrialWires.ic2conn, 1, 5), new ItemStack(IndustrialWires.ic2conn, 1, 6), new ItemStack(IndustrialWires.ic2conn, 1, 7)),
 				new ManualPages.Text(m, "industrialWires.wires1"),
-				new ManualPages.CraftingMulti(m, "industrialWires.wires2", (Object[])wireRecipes)
-				);
-		if (IndustrialWires.mechConv!=null) {
+				new ManualPages.CraftingMulti(m, "industrialWires.wires2", (Object[]) wireRecipes)
+		);
+		if (IndustrialWires.mechConv != null) {
 			m.addEntry("industrialWires.mechConv", "industrialWires",
 					new ManualPages.Crafting(m, "industrialWires.mechConv0", new ItemStack(IndustrialWires.mechConv, 1, 1)),
 					new ManualPages.Crafting(m, "industrialWires.mechConv1", new ItemStack(IndustrialWires.mechConv, 1, 2)),
 					new ManualPages.Crafting(m, "industrialWires.mechConv2", new ItemStack(IndustrialWires.mechConv, 1, 0))
-					);
+			);
 		}
+	}
+
+	@Override
+	public World getClientWorld() {
+		return Minecraft.getMinecraft().theWorld;
+	}
+
+	private WeakHashMap<TileEntityJacobsLadder, ISound> playingSounds = new WeakHashMap<>();
+	private static ResourceLocation jacobsStart = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_start");//~470 ms ~=9 ticks
+	private static ResourceLocation jacobsMiddle = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_middle");
+	private static ResourceLocation jacobsEnd = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_end");//~210 ms ~= 4 ticks
+	@Override
+	public void playJacobsLadderSound(TileEntityJacobsLadder te, int phase, Vec3d soundPos) {
+		if (playingSounds.containsKey(te)) {
+			Minecraft.getMinecraft().getSoundHandler().stopSound(playingSounds.get(te));
+			playingSounds.remove(te);
+		}
+		ResourceLocation event;
+		switch (phase) {
+		case 0:
+			event = jacobsStart;
+			break;
+		case 1:
+			event = jacobsMiddle;
+			break;
+		case 2:
+			event = jacobsEnd;
+			break;
+		default:
+			return;
+		}
+		PositionedSoundRecord sound = new PositionedSoundRecord(event, SoundCategory.BLOCKS, 1, 1, false, 0, ISound.AttenuationType.LINEAR, (float)soundPos.xCoord, (float)soundPos.yCoord, (float) soundPos.zCoord);
+		ClientUtils.mc().getSoundHandler().playSound(sound);
+		playingSounds.put(te, sound);
 	}
 }

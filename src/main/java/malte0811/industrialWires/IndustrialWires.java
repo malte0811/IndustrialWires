@@ -1,6 +1,6 @@
-/*******************************************************************************
+/*
  * This file is part of Industrial Wires.
- * Copyright (C) 2016 malte0811
+ * Copyright (C) 2016-2017 malte0811
  *
  * Industrial Wires is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
 package malte0811.industrialWires;
 
 import java.util.ArrayList;
@@ -27,6 +27,8 @@ import blusunrize.immersiveengineering.common.IEContent;
 import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0;
 import blusunrize.immersiveengineering.common.blocks.stone.BlockTypes_StoneDecoration;
 import ic2.api.item.IC2Items;
+import malte0811.industrialWires.blocks.BlockJacobsLadder;
+import malte0811.industrialWires.blocks.TileEntityJacobsLadder;
 import malte0811.industrialWires.blocks.converter.BlockMechanicalConverter;
 import malte0811.industrialWires.blocks.converter.TileEntityIEMotor;
 import malte0811.industrialWires.blocks.converter.TileEntityMechICtoIE;
@@ -39,6 +41,7 @@ import malte0811.industrialWires.blocks.wire.TileEntityIC2ConnectorHV;
 import malte0811.industrialWires.blocks.wire.TileEntityIC2ConnectorTin;
 import malte0811.industrialWires.crafting.RecipeCoilLength;
 import malte0811.industrialWires.items.ItemIC2Coil;
+import malte0811.industrialWires.network.MessageTileSyncIW;
 import malte0811.industrialWires.wires.IC2Wiretype;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
@@ -49,7 +52,10 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.oredict.RecipeSorter;
 import net.minecraftforge.oredict.RecipeSorter.Category;
 import net.minecraftforge.oredict.ShapedOreRecipe;
@@ -60,7 +66,9 @@ public class IndustrialWires {
 	public static final String VERSION = "${version}";
 	public static BlockIC2Connector ic2conn;
 	public static BlockMechanicalConverter mechConv;
+	public static BlockJacobsLadder jacobsLadder;
 	public static ItemIC2Coil coil;
+	public static final SimpleNetworkWrapper packetHandler = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
 	public static CreativeTabs creativeTab = new CreativeTabs(MODID) {
 
 		@Override
@@ -80,12 +88,15 @@ public class IndustrialWires {
 		ic2conn = new BlockIC2Connector();
 		if (IWConfig.enableConversion)
 			mechConv = new BlockMechanicalConverter();
+		jacobsLadder = new BlockJacobsLadder();
 		coil = new ItemIC2Coil();
+		//TODO change to MODID+ when changing to a new MC version
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorTin.class, "ic2ConnectorTin");
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorCopper.class, "ic2ConnectorCopper");
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorGold.class, "ic2ConnectorGold");
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorHV.class, "ic2ConnectorHV");
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorGlass.class, "ic2ConnectorGlass");
+		GameRegistry.registerTileEntity(TileEntityJacobsLadder.class, MODID+":jacobsLadder");
 		if (mechConv!=null) {
 			GameRegistry.registerTileEntity(TileEntityIEMotor.class, MODID+":ieMotor");
 			GameRegistry.registerTileEntity(TileEntityMechICtoIE.class, MODID+":mechIcToIe");
@@ -136,6 +147,7 @@ public class IndustrialWires {
 					'b', "ingotBronze", 'm', ironMechComponent,
 					'S', "blockSheetmetalSteel", 'r', "stickIron"));
 		}
+		packetHandler.registerMessage(MessageTileSyncIW.HandlerClient.class, MessageTileSyncIW.class, 0, Side.CLIENT);
 	}
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent	 e) {
