@@ -35,6 +35,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.common.MinecraftForge;
@@ -44,11 +45,9 @@ import net.minecraftforge.energy.IEnergyStorage;
 
 import javax.annotation.Nullable;
 
-//TODO facing!
-public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickable, IEBlockInterfaces.IHasDummyBlocks, ISyncReceiver, IEnergySink {
-
-	public static final SoundEvent sound = new SoundEvent(new ResourceLocation("industrialwires:jacobs_ladder"));
-	DualEnergyStorage energy;
+public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickable, IHasDummyBlocksIW, ISyncReceiver, IEnergySink {
+	public EnumFacing facing = EnumFacing.NORTH;
+	private DualEnergyStorage energy;
 	public LadderSize size;
 
 	public Vec3d[] controls;
@@ -57,7 +56,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 	// movement of the controls in blocks/tick
 	public Vec3d[] controlMovement;
 	private double t = 0;
-	private int dummy = 0;
+	public int dummy = 0;
 	public int timeTillActive = -1;
 	private double tStep = 0;
 	private double consumtionEU;
@@ -81,7 +80,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 		controlMovement = new Vec3d[size.arcPoints];
 		int sizeId = size.ordinal();
 		consumtionEU = IWConfig.HVStuff.jacobsUsageEU[sizeId];
-		energy = new DualEnergyStorage(20*consumtionEU, 2*consumtionEU);
+		energy = new DualEnergyStorage(20 * consumtionEU, 2 * consumtionEU);
 	}
 
 	@Override
@@ -94,14 +93,14 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 				MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
 				addedToIC2Net = true;
 			}
-			if ((controlControls[0][0] == null || timeTillActive==-1 || t >= 1)&&energy.getEnergyStoredEU()>=2*consumtionEU) {
+			if ((controlControls[0][0] == null || timeTillActive == -1 || t >= 1) && energy.getEnergyStoredEU() >= 2 * consumtionEU) {
 				for (int j = 0; j < size.movementPoints; j++) {
 					double y = j * (size.height + size.extraHeight) / (double) (size.movementPoints - 1) + size.innerPointOffset;
 					double width = widthFromHeight(y);
 					for (int i = 0; i < size.arcPoints - 2; i++) {
 						double z = size.zMax * 2 * (worldObj.rand.nextDouble() - .5);
-						double xMin = width * i / (double) (size.arcPoints - 1) - width / 4;
-						double xDiff = width / (double) (size.arcPoints - 1);
+						double xMin = width * i / (double) (size.arcPoints - 2) - width / 2 + size.bottomDistance / 2;
+						double xDiff = width / (double) (size.arcPoints - 2);
 						double x = worldObj.rand.nextDouble() * xDiff + xMin;
 						controlControls[i][j] = new Vec3d(x, y, z);
 					}
@@ -110,62 +109,69 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 				timeTillActive = size.delay;
 				tStep = 1D / (int) (.875 * size.tickToTop + worldObj.rand.nextInt(size.tickToTop / 4));
 				IndustrialWires.packetHandler.sendToAll(new MessageTileSyncIW(this, writeArcStarter()));
-			} else if (timeTillActive==0&&t<1) {
+			} else if (timeTillActive == 0 && t < 1) {
 				double extracted = energy.extractEU(consumtionEU, false);
-				if (extracted>=consumtionEU) {
+				if (extracted >= consumtionEU) {
 					energy.extractEU(consumtionEU, true);
 				} else {
-					timeTillActive = -1-size.delay;
+					timeTillActive = -1 - size.delay;
 					NBTTagCompound nbt = new NBTTagCompound();
 					nbt.setBoolean("cancel", true);
 					IndustrialWires.packetHandler.sendToAll(new MessageTileSyncIW(this, nbt));
 				}
-			} else if (timeTillActive<-1) {
+			} else if (timeTillActive < -1) {
 				//delay after energy was cut
 				timeTillActive++;
 			}
-		} else  {
-			if (timeTillActive==0&&t<1) {
+		} else {
+			if (timeTillActive == 0 && t < 1) {
 				for (int i = 0; i < size.arcPoints; i++) {
 					controls[i] = controls[i].add(controlMovement[i]);
 				}
 				for (int i = 1; i < size.arcPoints - 1; i++) {
 					controlMovement[i] = Beziers.getPoint(t, controlControls[i - 1]).subtract(controls[i]);
 				}
-				if (t>=7*tStep&&soundPhase==0) {
+				if (soundPhase<0) {
+					IndustrialWires.proxy.playJacobsLadderSound(this, 0, soundPos);
+					soundPhase = 0;
+				}
+				if (t >= 7 * tStep && soundPhase == 0) {
 					IndustrialWires.proxy.playJacobsLadderSound(this, 1, soundPos);
 					soundPhase = 1;
-				} else if (t>=1-(4*tStep)&&soundPhase==1) {
+				} else if (t >= 1 - (4 * tStep) && soundPhase == 1) {
 					IndustrialWires.proxy.playJacobsLadderSound(this, 2, soundPos);
 					soundPhase = 2;
 				}
-			} else if (t>1) {
+			} else if (t > 1) {
 				timeTillActive = -1;
 			}
 		}
 		if (timeTillActive > 0) {
 			timeTillActive--;
-		} else if (timeTillActive==0&&t<1) {
+		} else if (timeTillActive == 0 && t < 1) {
 			t += tStep;
 		}
 	}
 
-	private void initArc() {
+	private void initArc(int delay) {
 		controls[0] = new Vec3d(0, 0, 0);
 		controls[size.arcPoints - 1] = new Vec3d(size.bottomDistance, 0, 0);
-		controlMovement[0] = new Vec3d(-(size.topDistance - size.bottomDistance) / (2*size.height * size.tickToTop), size.height / size.tickToTop, 0);
-		controlMovement[size.arcPoints - 1] = new Vec3d((size.topDistance - size.bottomDistance) / (2*size.height * size.tickToTop), size.height / size.tickToTop, 0);
+		controlMovement[0] = new Vec3d(-(size.topDistance - size.bottomDistance) / (2 * size.tickToTop), size.height / size.tickToTop, 0);
+		controlMovement[size.arcPoints - 1] = new Vec3d((size.topDistance - size.bottomDistance) / (2 * size.tickToTop), size.height / size.tickToTop, 0);
 		t = 0;
 		for (int i = 1; i < size.arcPoints - 1; i++) {
 			controls[i] = Beziers.getPoint(0, controlControls[i - 1]);
 			controlMovement[i] = Beziers.getPoint(tStep, controlControls[i - 1]).subtract(controls[i]);
 		}
-		double soundX = pos.getX()+.5;
-		double soundY = pos.getY()+.5*size.dummyCount+size.heightOffset;
-		double soundZ = pos.getZ()+.5;
+		double soundX = pos.getX() + .5;
+		double soundY = pos.getY() + .5 * size.dummyCount + size.heightOffset;
+		double soundZ = pos.getZ() + .5;
 		soundPos = new Vec3d(soundX, soundY, soundZ);
-		IndustrialWires.proxy.playJacobsLadderSound(this, 0, soundPos);
-		soundPhase = 0;
+		soundPhase = -1;
+		timeTillActive = delay;
+		if (controlMovement==null) {
+			initControl();
+		}
 	}
 
 	private double widthFromHeight(double h) {
@@ -180,13 +186,18 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 			initControl();
 		}
 		dummy = nbt.getInteger("dummy");
+		energy = DualEnergyStorage.readFromNBT(nbt.getCompoundTag("energy"));
+		facing = EnumFacing.HORIZONTALS[nbt.getInteger("facing")];
 	}
 
 	@Override
 	public void writeCustomNBT(NBTTagCompound nbt, boolean descPacket) {
 		nbt.setInteger("size", size.ordinal());
 		nbt.setInteger("dummy", dummy);
+		energy.writeToNbt(nbt, "energy");
+		nbt.setInteger("facing", facing.getHorizontalIndex());
 	}
+
 	private NBTTagCompound writeArcStarter() {
 		NBTTagCompound nbt = new NBTTagCompound();
 		NBTTagList ctrlCtrl = write2DVecArray(controlControls);
@@ -195,26 +206,24 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 		nbt.setDouble("tStep", tStep);
 		return nbt;
 	}
+
 	private void readArcStarter(NBTTagCompound nbt) {
 		controlControls = read2DVecArray(nbt.getTagList("ctrlCtrl", 9));
-		timeTillActive = nbt.getInteger("timeTillActive");
-		if (timeTillActive<=0) {
-			timeTillActive = 1;
-		}
 		tStep = nbt.getDouble("tStep");
-		Minecraft.getMinecraft().addScheduledTask(this::initArc);
+		Minecraft.getMinecraft().addScheduledTask(()->initArc(nbt.getInteger("timeTillActive")));
 	}
+
 	private Vec3d[][] read2DVecArray(NBTTagList nbt) {
 		Vec3d[][] ret = new Vec3d[nbt.tagCount()][];
-		for (int i = 0;i<ret.length;i++) {
-			ret[i] = readVecArray((NBTTagList)nbt.get(i));
+		for (int i = 0; i < ret.length; i++) {
+			ret[i] = readVecArray((NBTTagList) nbt.get(i));
 		}
 		return ret;
 	}
 
 	private Vec3d[] readVecArray(NBTTagList nbt) {
 		Vec3d[] ret = new Vec3d[nbt.tagCount()];
-		for (int i = 0;i<ret.length;i++) {
+		for (int i = 0; i < ret.length; i++) {
 			NBTTagCompound vec = nbt.getCompoundTagAt(i);
 			ret[i] = new Vec3d(vec.getDouble("x"), vec.getDouble("y"), vec.getDouble("z"));
 		}
@@ -223,14 +232,15 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 
 	private NBTTagList write2DVecArray(Vec3d[][] array) {
 		NBTTagList ret = new NBTTagList();
-		for (Vec3d[] subArray:array) {
+		for (Vec3d[] subArray : array) {
 			ret.appendTag(writeVecArray(subArray));
 		}
 		return ret;
 	}
+
 	private NBTTagList writeVecArray(Vec3d[] array) {
 		NBTTagList ret = new NBTTagList();
-		for (Vec3d point:array) {
+		for (Vec3d point : array) {
 			NBTTagCompound vec = new NBTTagCompound();
 			vec.setDouble("x", point.xCoord);
 			vec.setDouble("y", point.yCoord);
@@ -239,13 +249,14 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 		}
 		return ret;
 	}
+
 	@Override
 	public boolean isDummy() {
 		return dummy != 0;
 	}
 
 	@Override
-	public void placeDummies(BlockPos pos, IBlockState state, EnumFacing side, float hitX, float hitY, float hitZ) {
+	public void placeDummies(IBlockState state) {
 		for (int i = 1; i <= size.dummyCount; i++) {
 			BlockPos pos2 = pos.offset(EnumFacing.UP, i);
 			worldObj.setBlockState(pos2, state);
@@ -253,16 +264,16 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 			if (te instanceof TileEntityJacobsLadder) {
 				((TileEntityJacobsLadder) te).size = size;
 				((TileEntityJacobsLadder) te).dummy = i;
-				//TODO facing ((TileEntityJacobsLadder)te).size = size;
+				((TileEntityJacobsLadder) te).facing = facing;
 			}
 		}
 	}
 
 	@Override
-	public void breakDummies(BlockPos pos, IBlockState state) {
+	public void breakDummies() {
 		for (int i = 0; i <= size.dummyCount; i++) {
-			if (i!=dummy&&worldObj.getTileEntity(pos.offset(EnumFacing.UP, i-dummy)) instanceof TileEntityJacobsLadder) {
-				worldObj.setBlockToAir(pos.offset(EnumFacing.UP, i-dummy));
+			if (i != dummy && worldObj.getTileEntity(pos.offset(EnumFacing.UP, i - dummy)) instanceof TileEntityJacobsLadder) {
+				worldObj.setBlockToAir(pos.offset(EnumFacing.UP, i - dummy));
 			}
 		}
 	}
@@ -271,10 +282,12 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 	public void onSync(NBTTagCompound nbt) {
 		if (nbt.getBoolean("cancel")) {
 			timeTillActive = -1;
+			IndustrialWires.proxy.playJacobsLadderSound(this, -1, soundPos);
 		} else {
 			readArcStarter(nbt);
 		}
 	}
+
 	//ENERGY
 	@Override
 	public double getDemandedEnergy() {
@@ -288,12 +301,12 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 
 	@Override
 	public double injectEnergy(EnumFacing dir, double amount, double voltage) {
-		return amount-energy.insertEU(amount, true);
+		return amount - energy.insertEU(amount, true);
 	}
 
 	@Override
 	public boolean acceptsEnergyFrom(IEnergyEmitter iEnergyEmitter, EnumFacing enumFacing) {
-		return !isDummy()&&enumFacing!=EnumFacing.UP;
+		return !isDummy() && enumFacing != EnumFacing.UP;
 	}
 
 	@Override
@@ -301,17 +314,17 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 		if (isDummy()) {
 			return false;
 		}
-		if (facing==EnumFacing.UP) {
+		if (facing == EnumFacing.UP) {
 			return false;
 		}
-		return capability== CapabilityEnergy.ENERGY;
+		return capability == CapabilityEnergy.ENERGY;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing) {
 		if (hasCapability(capability, facing)) {
-			if (capability==CapabilityEnergy.ENERGY) {
+			if (capability == CapabilityEnergy.ENERGY) {
 				return (T) new EnergyCap();
 			}
 		}
@@ -320,7 +333,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 
 	@Override
 	public void onChunkUnload() {
-		if (!worldObj.isRemote&&addedToIC2Net)
+		if (!worldObj.isRemote && addedToIC2Net)
 			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
 		addedToIC2Net = false;
 		super.onChunkUnload();
@@ -328,20 +341,32 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 
 	@Override
 	public void invalidate() {
-		if (!worldObj.isRemote&&addedToIC2Net) {
+		if (!worldObj.isRemote && addedToIC2Net) {
 			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
 		} else if (worldObj.isRemote) {
+			//stop sound
 			IndustrialWires.proxy.playJacobsLadderSound(this, -1, soundPos);
 		}
 		addedToIC2Net = false;
 		super.invalidate();
 	}
 
+	@Override
+	public AxisAlignedBB getRenderBoundingBox() {
+		return new AxisAlignedBB(pos, pos.add(1, 2, 1));
+	}
 
 	public enum LadderSize implements IStringSerializable {
-		SMALL(4, 4, .5, .375, .1, 20, .05, .2, .05, .5, 0, 5, 5, .03725),
-		NORMAL(4, 4, 1.8, 1.125, .25, 30, .2, .5, .3, 1, 1, 5, 10, .075),
-		HUGE(4, 5, 1.8, 2.25, .25, 30, .2, .5, .3, 1, 2, 5, 10, .125);
+		/*
+		all on a block (HV transformer)
+		small: height = .5 bottomDist = .15 topDist = .375
+		normal: height = .95 bottomDist = .2 topDist = .75
+		huge: height = 1.8 bottomDist = .25 topDist = 1
+
+		 */
+		SMALL(4, 4, .5, .375, .15, 20, .05, .2, .05, 1, 1, 5, 8, .03725, 1),
+		NORMAL(4, 4, .95, .75, .2, 25, .15, .3, .15, 1, 1, 5, 9, .075, 2),
+		HUGE(4, 5, 1.8, 1, .25, 30, .2, .5, .3, 1, 2, 5, 10, .125, 3);
 		public final int arcPoints;
 		public final int movementPoints;
 		// height of the electrodes
@@ -364,12 +389,13 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 		public final int renderPoints;
 		public final int dummyCount;
 		public final double renderDiameter;
+		public final float soundVolume;
 
-		private LadderSize(int arcP, int movP, double h, double topD, double bottomD, int ttTop, double zMax, double extraH,
-						   double iOff, double hOff, int dummies, int delay, int points, double renderDia) {
+		LadderSize(int arcP, int movP, double height, double topD, double bottomD, int ttTop, double zMax, double extraH,
+						   double iOff, double hOff, int dummies, int delay, int points, double renderDia, float volume) {
 			arcPoints = arcP;
 			movementPoints = movP;
-			height = h;
+			this.height = height;
 			topDistance = topD;
 			bottomDistance = bottomD;
 			tickToTop = ttTop;
@@ -381,6 +407,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 			this.delay = delay;
 			renderPoints = points;
 			renderDiameter = renderDia;
+			soundVolume = volume;
 		}
 
 		@Override
@@ -388,6 +415,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 			return name().toLowerCase();
 		}
 	}
+
 	public class EnergyCap implements IEnergyStorage {
 
 		@Override

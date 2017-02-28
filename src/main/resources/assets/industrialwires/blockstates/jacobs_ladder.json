@@ -12,55 +12,55 @@
 	"variants": {
 		"inventory,type=small": [
 			{
-				"model": "industrialwires:jacobs_ladder.obj",
+				"model": "industrialwires:jacobs_small.obj",
 				"transform": {
-					"scale": [ 0.5, 0.5, 0.5 ],
-					"firstperson_righthand": { "translation": [ 0, 0.25, 0.125 ]},
-					"firstperson_lefthand": { "translation": [ 0, 0.25, 0.125 ]},
-					"thirdperson_righthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
-					"thirdperson_lefthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
-					"fixed": {"scale": [ 2,2,2 ], "translation": [ 0, 0, 0 ], "rotation": [{ "y": -90 }]},
-					"gui": { "translation": [ 0, 0.125, 0 ], "rotation": [{ "x": 30 },{ "y": 135 },{ "z": 0 }], "scale": [ 1.5, 1.5, 1.5 ] }
+					"scale": [ 0.25, 0.25, 0.25 ],
+					"firstperson_righthand": { "scale": [ 0.9, 0.9, 0.9 ], "rotation": [{ "y": 180 }] },
+					"firstperson_lefthand": { "scale": [ 0.9, 0.9, 0.9 ], "rotation": [{ "y": 180 }] },
+					"thirdperson_righthand": { "translation": [ 0, 0.09375, -0.171875 ], "rotation": [{ "x": 70 }, { "y": 70 }] },
+					"thirdperson_lefthand": { "translation": [ 0, 0.09375, -0.171875 ], "rotation": [{ "x": 70 }, { "y": 70 }] },
+					"fixed": {"scale": [ 2,2,2 ], "translation": [ 0, 0, 0 ], "rotation": [{ "y": 0 }]},
+					"gui": { "translation": [ 0, -0.0625, 0 ], "rotation": [{ "x": 30 },{ "y": 135 }], "scale": [ 2.25, 2.25, 2.25 ] }
 				}
 			}
 		],
 		"inventory,type=normal": [
 			{
-				"model": "industrialwires:jacobs_ladder.obj",
+				"model": "industrialwires:jacobs_normal.obj",
 				"transform": {
-					"scale": [ 0.5, 0.5, 0.5 ],
-					"firstperson_righthand": { "translation": [ 0, 0.25, 0.125 ]},
-					"firstperson_lefthand": { "translation": [ 0, 0.25, 0.125 ]},
-					"thirdperson_righthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
-					"thirdperson_lefthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
-					"fixed": {"scale": [ 2,2,2 ], "translation": [ 0, 0, 0 ], "rotation": [{ "y": -90 }]},
-					"gui": { "translation": [ 0, 0.125, 0 ], "rotation": [{ "x": 30 },{ "y": 135 },{ "z": 0 }], "scale": [ 1.5, 1.5, 1.5 ] }
+					"scale": [ 0.25, 0.25, 0.25 ],
+					"firstperson_righthand": { "scale": [ 0.75, 0.75, 0.75 ], "rotation": [{ "y": 180 }] },
+					"firstperson_lefthand": { "scale": [ 0.75, 0.75, 0.75 ], "rotation": [{ "y": 180 }] },
+					"thirdperson_righthand": { "translation": [ 0, 0.09375, -0.171875 ], "rotation": [{ "x": 70 }, { "y": 70 }] },
+					"thirdperson_lefthand": { "translation": [ 0, 0.09375, -0.171875 ], "rotation": [{ "x": 70 }, { "y": 70 }] },
+					"fixed": {"scale": [ 2,2,2 ], "translation": [ 0, -0.25, 0 ], "rotation": [{ "y": 0 }]},
+					"gui": { "translation": [ 0, -0.1875, 0 ], "rotation": [{ "x": 30 },{ "y": 135 }], "scale": [ 1.6, 1.6, 1.6 ] }
 				}
 			}
 		],
 		"inventory,type=huge": [
 			{
-				"model": "industrialwires:jacobs_ladder.obj",
+				"model": "industrialwires:jacobs_huge.obj",
 				"transform": {
-					"scale": [ 0.5, 0.5, 0.5 ],
-					"firstperson_righthand": { "translation": [ 0, 0.25, 0.125 ]},
-					"firstperson_lefthand": { "translation": [ 0, 0.25, 0.125 ]},
-					"thirdperson_righthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
-					"thirdperson_lefthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
-					"fixed": {"scale": [ 2,2,2 ], "translation": [ 0, 0, 0 ], "rotation": [{ "y": -90 }]},
-					"gui": { "translation": [ 0, 0.125, 0 ], "rotation": [{ "x": 30 },{ "y": 135 },{ "z": 0 }], "scale": [ 1.5, 1.5, 1.5 ] }
+					"scale": [ 0.25, 0.25, 0.25 ],
+					"firstperson_righthand": { "scale": [ 0.75, 0.75, 0.75 ], "rotation": [{ "y": 180 }] },
+					"firstperson_lefthand": { "scale": [ 0.75, 0.75, 0.75 ], "rotation": [{ "y": 180 }] },
+					"thirdperson_righthand": { "translation": [ 0, 0.09375, -0.171875 ], "rotation": [{ "x": 70 }, { "y": 70 }] },
+					"thirdperson_lefthand": { "translation": [ 0, 0.09375, -0.171875 ], "rotation": [{ "x": 70 }, { "y": 70 }] },
+					"fixed": {"scale": [ 2,2,2 ], "translation": [ 0, -0.25, 0 ], "rotation": [{ "y": 0 }]},
+					"gui": { "translation": [ 0, -0.25, 0 ], "rotation": [{ "x": 30 },{ "y": 135 }], "scale": [ 1.2, 1.2, 1.2 ] }
 				}
 			}
 		],
 		"size": {
 			"small": {
-				"model": "builtin/generated"
+				"model": "industrialwires:jacobs_small.obj"
 			},
 			"normal": {
-				"model": "builtin/generated"
+				"model": "industrialwires:jacobs_normal.obj"
 			},
 			"huge": {
-				"model": "industrialwires:jacobs_ladder.obj"
+				"model": "industrialwires:jacobs_huge.obj"
 			}
 		},
 		"_0multiblockslave":
@@ -69,6 +69,21 @@
 			"true":{
 				"model": "builtin/generated"
 			}
+		},
+		"facing":
+		{
+			"north": { "transform": {
+				"rotation": {"y": 0 }
+			}},
+			"south": { "transform": {
+				"rotation": {"y": 180 }
+			}},
+			"west": { "transform": {
+				"rotation": {"y": 90 }
+			}},
+			"east": { "transform": {
+				"rotation": {"y": -90 }
+			}}
 		}
 	}
 }

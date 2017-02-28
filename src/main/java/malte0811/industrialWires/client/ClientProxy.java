@@ -41,6 +41,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
@@ -175,15 +176,15 @@ public class ClientProxy extends CommonProxy {
 		return Minecraft.getMinecraft().theWorld;
 	}
 
-	private WeakHashMap<TileEntityJacobsLadder, ISound> playingSounds = new WeakHashMap<>();
+	private WeakHashMap<BlockPos, ISound> playingSounds = new WeakHashMap<>();
 	private static ResourceLocation jacobsStart = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_start");//~470 ms ~=9 ticks
 	private static ResourceLocation jacobsMiddle = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_middle");
 	private static ResourceLocation jacobsEnd = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_end");//~210 ms ~= 4 ticks
 	@Override
 	public void playJacobsLadderSound(TileEntityJacobsLadder te, int phase, Vec3d soundPos) {
-		if (playingSounds.containsKey(te)) {
-			Minecraft.getMinecraft().getSoundHandler().stopSound(playingSounds.get(te));
-			playingSounds.remove(te);
+		if (playingSounds.containsKey(te.getPos())) {
+			Minecraft.getMinecraft().getSoundHandler().stopSound(playingSounds.get(te.getPos()));
+			playingSounds.remove(te.getPos());
 		}
 		ResourceLocation event;
 		switch (phase) {
@@ -199,8 +200,8 @@ public class ClientProxy extends CommonProxy {
 		default:
 			return;
 		}
-		PositionedSoundRecord sound = new PositionedSoundRecord(event, SoundCategory.BLOCKS, 1, 1, false, 0, ISound.AttenuationType.LINEAR, (float)soundPos.xCoord, (float)soundPos.yCoord, (float) soundPos.zCoord);
+		PositionedSoundRecord sound = new PositionedSoundRecord(event, SoundCategory.BLOCKS, te.size.soundVolume, 1, false, 0, ISound.AttenuationType.LINEAR, (float)soundPos.xCoord, (float)soundPos.yCoord, (float) soundPos.zCoord);
 		ClientUtils.mc().getSoundHandler().playSound(sound);
-		playingSounds.put(te, sound);
+		playingSounds.put(te.getPos(), sound);
 	}
 }

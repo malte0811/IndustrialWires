@@ -18,6 +18,8 @@
 
 package malte0811.industrialWires.util;
 
+import net.minecraft.nbt.NBTTagCompound;
+
 public class DualEnergyStorage {
 	double storedEU;
 	double maxEU;
@@ -25,9 +27,13 @@ public class DualEnergyStorage {
 	double maxInEU;
 
 	public DualEnergyStorage(double maxEU, double maxInEU, double maxOutEU) {
+		this(0, maxEU, maxInEU, maxOutEU);
+	}
+	public DualEnergyStorage(double storedEU, double maxEU, double maxInEU, double maxOutEU) {
 		this.maxEU = maxEU;
 		this.maxInEU = maxInEU;
 		this.maxOutEU = maxOutEU;
+		this.storedEU = storedEU;
 	}
 
 	public DualEnergyStorage(double maxEU, double maxIoEU) {
@@ -94,5 +100,19 @@ public class DualEnergyStorage {
 
 	public double getEURequested() {
 		return Math.min(maxInEU, maxEU - storedEU);
+	}
+
+	public void writeToNbt(NBTTagCompound nbtOuter, String key) {
+		NBTTagCompound nbt = key==null?nbtOuter:new NBTTagCompound();
+		nbt.setDouble("stored", storedEU);
+		nbt.setDouble("maxStored", maxEU);
+		nbt.setDouble("maxIn", maxInEU);
+		nbt.setDouble("maxOut", maxOutEU);
+		if (key!=null) {
+			nbtOuter.setTag(key, nbt);
+		}
+	}
+	public static DualEnergyStorage readFromNBT(NBTTagCompound nbt) {
+		return new DualEnergyStorage(nbt.getDouble("stored"), nbt.getDouble("maxStored"), nbt.getDouble("maxIn"), nbt.getDouble("maxOut"));
 	}
 }

@@ -36,11 +36,11 @@ public class TileRenderJacobsLadder extends TileEntitySpecialRenderer<TileEntity
 	public void renderTileEntityAt(TileEntityJacobsLadder tile, double x, double y, double z, float partialTicks, int destroyStage) {
 		super.renderTileEntityAt(tile, x, y, z, partialTicks, destroyStage);
 		if (!tile.isDummy()&&tile.timeTillActive==0&&tile.controls[0] != null) {
-			//TODO move to size
-			final int steps = 10;
 
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(x + .5 - tile.size.bottomDistance / 2, y + tile.size.heightOffset, z + .5);
+			GlStateManager.translate(x + .5, y + tile.size.heightOffset, z + .5);
+			GlStateManager.rotate(tile.facing.getHorizontalAngle(), 0, 1, 0);
+			GlStateManager.translate( - tile.size.bottomDistance / 2, 0, 0);
 
 			GlStateManager.disableTexture2D();
 			GlStateManager.disableLighting();
@@ -54,10 +54,21 @@ public class TileRenderJacobsLadder extends TileEntitySpecialRenderer<TileEntity
 				Vec3d speed = tile.controlMovement[i];
 				controls[i] = tile.controls[i].addVector(speed.xCoord * partialTicks, speed.yCoord * partialTicks, speed.zCoord * partialTicks);
 			}
-			drawBezier(controls, tile.size.renderDiameter, steps);
+			drawBezier(controls, tile.size.renderDiameter, tile.size.renderPoints);
+			//DEBUG CODE
 			/*for (Vec3d[] c:tile.controlControls) {
 				drawBezier(c, .05, steps);
-			}*/
+			}
+			Vec3d topA = tile.controlMovement[0].scale(tile.size.tickToTop);
+			Vec3d topB = tile.controlMovement[tile.controlMovement.length-1].scale(tile.size.tickToTop).add(new Vec3d(tile.size.bottomDistance, 0, 0));
+
+			Tessellator tes = Tessellator.getInstance();
+			VertexBuffer vertBuffer = tes.getBuffer();
+			vertBuffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION);
+			drawQuad(Vec3d.ZERO, topA, new Vec3d(.005, 0, 0), vertBuffer);
+			drawQuad(new Vec3d(tile.size.bottomDistance, 0, 0), topB, new Vec3d(.005, 0, 0), vertBuffer);
+			tes.draw();*/
+			//END OF DEBUG CODE
 
 			OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, oldBX, oldBY);
 
