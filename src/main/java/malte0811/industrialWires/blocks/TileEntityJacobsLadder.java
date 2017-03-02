@@ -306,18 +306,12 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 
 	@Override
 	public boolean acceptsEnergyFrom(IEnergyEmitter iEnergyEmitter, EnumFacing enumFacing) {
-		return !isDummy() && enumFacing != EnumFacing.UP;
+		return !isDummy() && enumFacing == facing;
 	}
 
 	@Override
-	public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing) {
-		if (isDummy()) {
-			return false;
-		}
-		if (facing == EnumFacing.UP) {
-			return false;
-		}
-		return capability == CapabilityEnergy.ENERGY;
+	public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing from) {
+		return !isDummy() && from == facing && capability == CapabilityEnergy.ENERGY;
 	}
 
 	@Override

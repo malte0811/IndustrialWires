@@ -87,7 +87,7 @@ public class TileRenderJacobsLadder extends TileEntitySpecialRenderer<TileEntity
 
 		vertBuffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION);
 		Vec3d last = Beziers.getPoint(0, controls);
-		for (double d = 1D / steps; d <= 1; d += 1D / steps) {
+		for (double d = 1D / steps; d < 1+1D/(2*steps); d += 1D / steps) {
 			Vec3d pos = Beziers.getPoint(d, controls);
 			drawQuad(last, pos, radY, vertBuffer);
 			drawQuad(last, pos, radZ, vertBuffer);
@@ -98,7 +98,6 @@ public class TileRenderJacobsLadder extends TileEntitySpecialRenderer<TileEntity
 	}
 
 	private void drawQuad(Vec3d v0, Vec3d v1, Vec3d rad, VertexBuffer vertexBuffer) {
-		float r = 1, g = 1F, b = 1, a = 1;
 		TextureAtlasSprite tex = ModelLoader.White.INSTANCE;
 		vertexBuffer.pos(v1.xCoord - rad.xCoord, v1.yCoord - rad.yCoord, v1.zCoord - rad.zCoord).endVertex();
 		vertexBuffer.pos(v0.xCoord - rad.xCoord, v0.yCoord - rad.yCoord, v0.zCoord - rad.zCoord).endVertex();
