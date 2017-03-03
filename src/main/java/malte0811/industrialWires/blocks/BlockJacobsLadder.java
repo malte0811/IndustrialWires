@@ -36,6 +36,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.AxisDirection;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -59,7 +60,7 @@ public class BlockJacobsLadder extends Block implements IMetaEnum {
 		String name = "jacobs_ladder";
 		GameRegistry.register(this, new ResourceLocation(IndustrialWires.MODID, name));
 		GameRegistry.register(new ItemBlockIW(this), new ResourceLocation(IndustrialWires.MODID, name));
-		setUnlocalizedName(name);
+		setUnlocalizedName(IndustrialWires.MODID+"."+name);
 		setCreativeTab(IndustrialWires.creativeTab);
 	}
 
@@ -155,14 +156,14 @@ public class BlockJacobsLadder extends Block implements IMetaEnum {
 
 	@Override
 	public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer, ItemStack stack) {
-		EnumFacing f = facing;
+		EnumFacing f = facing.getOpposite();
 		if (facing.getAxis() == EnumFacing.Axis.Y) {
 			double dX = hitX - .5;
 			double dZ = hitZ - .5;
 			if (Math.abs(dX) > Math.abs(dZ)) {
-				f = EnumFacing.getFacingFromAxis(dX > 0 ? AxisDirection.NEGATIVE : AxisDirection.POSITIVE, EnumFacing.Axis.X);
+				f = EnumFacing.getFacingFromAxis(dX > 0 ? AxisDirection.POSITIVE : AxisDirection.NEGATIVE, EnumFacing.Axis.X);
 			} else {
-				f = EnumFacing.getFacingFromAxis(dZ > 0 ? AxisDirection.NEGATIVE : AxisDirection.POSITIVE, EnumFacing.Axis.Z);
+				f = EnumFacing.getFacingFromAxis(dZ > 0 ? AxisDirection.POSITIVE : AxisDirection.NEGATIVE, EnumFacing.Axis.Z);
 			}
 		}
 		return super.getStateForPlacement(world, pos, facing, hitX, hitY, hitZ, meta, placer, stack).withProperty(IEProperties.FACING_HORIZONTAL, f);
@@ -230,5 +231,18 @@ public class BlockJacobsLadder extends Block implements IMetaEnum {
 	@Override
 	public void onEntityCollidedWithBlock(World worldIn, BlockPos pos, IBlockState state, Entity entityIn) {
 		super.onEntityCollidedWithBlock(worldIn, pos, state, entityIn);
+		TileEntity te = worldIn.getTileEntity(pos);
+		if (te instanceof TileEntityJacobsLadder) {
+			((TileEntityJacobsLadder) te).onEntityTouch(entityIn);
+		}
+	}
+
+	@Override
+	public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, @Nullable ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
+		TileEntity te = worldIn.getTileEntity(pos);
+		if (te instanceof TileEntityJacobsLadder) {
+			return ((TileEntityJacobsLadder) te).onActivated(playerIn, hand, heldItem);
+		}
+		return super.onBlockActivated(worldIn, pos, state, playerIn, hand, heldItem, side, hitX, hitY, hitZ);
 	}
 }

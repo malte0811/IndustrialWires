@@ -56,5 +56,7 @@ public class IWConfig {
 	public static class HVStuff {
 		@Comment({"The amount of Eu a Jacobs Ladder uses per tick, sorted by size of the ladder"})
 		public static double[] jacobsUsageEU = {10, 20, 50};
+		@Comment({"The damage dealt by a small Jacobs Ladder. Normal Ladders deal twice this damage, huge ones 3 times as much"})
+		public static float jacobsBaseDmg = 5;
 	}
 }

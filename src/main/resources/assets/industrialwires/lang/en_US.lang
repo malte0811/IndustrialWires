@@ -13,6 +13,9 @@ tile.mechanical_converter.ie_motor.name=Rotational Motor
 tile.mechanical_converter.ie_to_ic2.name=Converter: Rotational To Kinetic
 tile.mechanical_converter.ic2_to_ie.name=Converter: Kinetic To Rotational
 
+tile.industrialwires.jacobs_ladder.small.name=Small Jacob's ladder
+tile.industrialwires.jacobs_ladder.normal.name=Jacob's ladder
+tile.industrialwires.jacobs_ladder.huge.name=Huge Jacob's ladder
 
 item.industrialwires.ic2wireCoil.tin.name=Tin Wire Coil
 item.industrialwires.ic2wireCoil.copper.name=Copper Wire Coil
@@ -26,6 +29,8 @@ industrialwires.desc.recipe=Please check the Engineer's manual for recipe detail
 
 industrialwires.chat.tooLong=This coil does not contain enough wire for this connection
 industrialwires.chat.stackSize=Linking is only possible with a stack of size 1
+
+death.attack.industrialwires.jacobs_ladder=%1$s was electrocuted by a Jacob's Ladder
 
  
 itemGroup.industrialwires=Industrial Wires
@@ -43,3 +48,7 @@ ie.manual.entry.industrialWires.mechConv.subtext=I made rotational energy for th
 ie.manual.entry.industrialWires.mechConv0=Both the IC2 and IE company produce products that run on kinetic energy of some sort. The new converters from IndustrialWires allow you to convert between these two forms of energy!<br>To use the "Converter: Rotational To Kinetic" attach a source of IE rotational energy
 ie.manual.entry.industrialWires.mechConv1=like a waterwheel or a motor (see page 3) to the side marked with a gear and a consumer of IC2 kinetic energy to the opposite side. The "Converter: Kinetic To Rotational" is used in a similar way (Rotational and kinetic energy have to be swapped).<br>Unfortunately some energy is
 ie.manual.entry.industrialWires.mechConv2=lost with each conversion.<br>As a little extra the "Mechanical converter" product series also contains a Rotational Motor: It consumes IF to produce IE rotational energy. As with the converters this is not a lossless process.
+
+ie.manual.entry.industrialWires.jacobs.name=Jacob's Ladders
+ie.manual.entry.industrialWires.jacobs.subtext=Probably contain PCB's!
+ie.manual.entry.industrialWires.jacobs0=By applying a high voltage between 2 electrodes forming a "V" one can create an arc travelling upwards. They don't serve a particular purpose apart from being a nice-looking waste of power.

@@ -18,8 +18,10 @@
 
 package malte0811.industrialWires.blocks;
 
+import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
 import blusunrize.immersiveengineering.common.blocks.TileEntityIEBase;
+import blusunrize.immersiveengineering.common.util.IELogger;
 import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergyEmitter;
@@ -31,6 +33,10 @@ import malte0811.industrialWires.util.Beziers;
 import malte0811.industrialWires.util.DualEnergyStorage;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
@@ -42,6 +48,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nullable;
 
@@ -63,6 +70,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 	private boolean addedToIC2Net = false;
 	private int soundPhase;
 	private Vec3d soundPos;
+	public double salt;
 
 	public TileEntityJacobsLadder(LadderSize s) {
 		size = s;
@@ -131,7 +139,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 				for (int i = 1; i < size.arcPoints - 1; i++) {
 					controlMovement[i] = Beziers.getPoint(t, controlControls[i - 1]).subtract(controls[i]);
 				}
-				if (soundPhase<0) {
+				if (soundPhase < 0) {
 					IndustrialWires.proxy.playJacobsLadderSound(this, 0, soundPos);
 					soundPhase = 0;
 				}
@@ -150,10 +158,18 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 			timeTillActive--;
 		} else if (timeTillActive == 0 && t < 1) {
 			t += tStep;
+			if (salt > 0) {
+				salt -= 1D/(20*20);//20 seconds per item of salt
+			} else if (salt < 0) {
+				salt = 0;
+			}
 		}
 	}
 
 	private void initArc(int delay) {
+		if (controlMovement == null) {
+			initControl();
+		}
 		controls[0] = new Vec3d(0, 0, 0);
 		controls[size.arcPoints - 1] = new Vec3d(size.bottomDistance, 0, 0);
 		controlMovement[0] = new Vec3d(-(size.topDistance - size.bottomDistance) / (2 * size.tickToTop), size.height / size.tickToTop, 0);
@@ -169,9 +185,6 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 		soundPos = new Vec3d(soundX, soundY, soundZ);
 		soundPhase = -1;
 		timeTillActive = delay;
-		if (controlMovement==null) {
-			initControl();
-		}
 	}
 
 	private double widthFromHeight(double h) {
@@ -188,6 +201,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 		dummy = nbt.getInteger("dummy");
 		energy = DualEnergyStorage.readFromNBT(nbt.getCompoundTag("energy"));
 		facing = EnumFacing.HORIZONTALS[nbt.getInteger("facing")];
+		salt = nbt.getDouble("salt");
 	}
 
 	@Override
@@ -196,6 +210,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 		nbt.setInteger("dummy", dummy);
 		energy.writeToNbt(nbt, "energy");
 		nbt.setInteger("facing", facing.getHorizontalIndex());
+		nbt.setDouble("salt", salt);
 	}
 
 	private NBTTagCompound writeArcStarter() {
@@ -204,13 +219,14 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 		nbt.setTag("ctrlCtrl", ctrlCtrl);
 		nbt.setInteger("timeTillActive", timeTillActive);
 		nbt.setDouble("tStep", tStep);
+		nbt.setBoolean("start", true);
 		return nbt;
 	}
 
 	private void readArcStarter(NBTTagCompound nbt) {
 		controlControls = read2DVecArray(nbt.getTagList("ctrlCtrl", 9));
 		tStep = nbt.getDouble("tStep");
-		Minecraft.getMinecraft().addScheduledTask(()->initArc(nbt.getInteger("timeTillActive")));
+		Minecraft.getMinecraft().addScheduledTask(() -> initArc(nbt.getInteger("timeTillActive")));
 	}
 
 	private Vec3d[][] read2DVecArray(NBTTagList nbt) {
@@ -280,12 +296,69 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 
 	@Override
 	public void onSync(NBTTagCompound nbt) {
+		if (nbt.hasKey("salt")) {
+			salt = nbt.getDouble("salt");
+		}
 		if (nbt.getBoolean("cancel")) {
 			timeTillActive = -1;
 			IndustrialWires.proxy.playJacobsLadderSound(this, -1, soundPos);
-		} else {
+		} else if (nbt.getBoolean("start")) {
 			readArcStarter(nbt);
 		}
+	}
+
+	public boolean isActive() {
+		return timeTillActive == 0 && t < 1;
+	}
+
+	public void onEntityTouch(Entity e) {
+		if (isDummy() && !worldObj.isRemote) {
+			TileEntity master = worldObj.getTileEntity(pos.down(dummy));
+			if (master instanceof TileEntityJacobsLadder && ((TileEntityJacobsLadder) master).isActive()) {
+				hurtEntity(e);
+			}
+		}
+	}
+
+	private void hurtEntity(Entity e) {
+		e.attackEntityFrom(new DamageSource("industrialwires.jacobs_ladder"), IWConfig.HVStuff.jacobsBaseDmg * (size.ordinal() + 1));
+	}
+
+	public boolean onActivated(EntityPlayer playerIn, EnumHand hand, ItemStack heldItem) {
+		TileEntity masterTE = dummy == 0 ? this : worldObj.getTileEntity(pos.down(dummy));
+		if (masterTE instanceof TileEntityJacobsLadder) {
+			TileEntityJacobsLadder master = (TileEntityJacobsLadder) masterTE;
+			if (master.isActive()) {
+				if (!worldObj.isRemote) {
+					hurtEntity(playerIn);
+				}
+				return true;
+			} else if (heldItem != null && ApiUtils.compareToOreName(heldItem, "itemSalt")) {
+				return master.salt(playerIn, hand, heldItem);
+			}
+		}
+		return false;
+	}
+
+	private boolean salt(EntityPlayer player, EnumHand hand, ItemStack held) {
+		IELogger.info("Salt: " + salt);
+		if (salt < 3) {
+			if (!worldObj.isRemote) {
+				salt++;
+				if (!player.isCreative()) {
+					held.stackSize--;
+					if (held.stackSize <= 0) {
+						player.setHeldItem(hand, null);
+					}
+				}
+				NBTTagCompound update = new NBTTagCompound();
+				update.setDouble("salt", salt);
+				markDirty();
+				IndustrialWires.packetHandler.sendToAll(new MessageTileSyncIW(this, update));
+			}
+			return true;
+		}
+		return false;
 	}
 
 	//ENERGY
@@ -386,7 +459,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 		public final float soundVolume;
 
 		LadderSize(int arcP, int movP, double height, double topD, double bottomD, int ttTop, double zMax, double extraH,
-						   double iOff, double hOff, int dummies, int delay, int points, double renderDia, float volume) {
+				   double iOff, double hOff, int dummies, int delay, int points, double renderDia, float volume) {
 			arcPoints = arcP;
 			movementPoints = movP;
 			this.height = height;
