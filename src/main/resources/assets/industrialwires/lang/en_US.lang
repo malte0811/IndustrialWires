@@ -51,4 +51,5 @@ ie.manual.entry.industrialWires.mechConv2=lost with each conversion.<br>As a lit
 
 ie.manual.entry.industrialWires.jacobs.name=Jacob's Ladders
 ie.manual.entry.industrialWires.jacobs.subtext=Probably contain PCB's!
-ie.manual.entry.industrialWires.jacobs0=By applying a high voltage between 2 electrodes forming a "V" one can create an arc travelling upwards. They don't serve a particular purpose apart from being a nice-looking waste of power.
+ie.manual.entry.industrialWires.jacobs0=By applying a high voltage between 2 electrodes forming a "V" one can create an arc travelling upwards. They don't serve a particular purpose apart from being a nice-looking waste of power. Power can be supplied using either Flux or EU. The energy usage varies with the size of the ladder.
+ie.manual.entry.industrialWires.jacobs1=These are the required power values in EU: <config;dA;iwJacobsUsage>. Due to the voltages involved touching the ladder while active is not a good idea. Applying salt to the electrodes will cause the arc to be colored orange for a short time due to the sodium contained in the salt.

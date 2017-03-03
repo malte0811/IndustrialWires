@@ -20,12 +20,14 @@ package malte0811.industrialWires.client;
 import blusunrize.immersiveengineering.api.ManualHelper;
 import blusunrize.immersiveengineering.client.ClientUtils;
 import blusunrize.immersiveengineering.client.models.smart.ConnLoader;
+import blusunrize.immersiveengineering.common.Config;
 import blusunrize.lib.manual.ManualInstance;
 import blusunrize.lib.manual.ManualPages;
 import blusunrize.lib.manual.ManualPages.PositionedItemStack;
 import com.google.common.collect.ImmutableMap;
 import ic2.api.item.IC2Items;
 import malte0811.industrialWires.CommonProxy;
+import malte0811.industrialWires.IWConfig;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.IMetaEnum;
 import malte0811.industrialWires.blocks.TileEntityJacobsLadder;
@@ -169,6 +171,10 @@ public class ClientProxy extends CommonProxy {
 					new ManualPages.Crafting(m, "industrialWires.mechConv2", new ItemStack(IndustrialWires.mechConv, 1, 0))
 			);
 		}
+		Config.manual_doubleA.put("iwJacobsUsage", IWConfig.HVStuff.jacobsUsageEU);
+		m.addEntry("industrialWires.jacobs", "industrialWires",
+				new ManualPages.CraftingMulti(m, "industrialWires.jacobs0", new ItemStack(IndustrialWires.jacobsLadder, 1, 0), new ItemStack(IndustrialWires.jacobsLadder, 1, 1), new ItemStack(IndustrialWires.jacobsLadder, 1, 2)),
+				new ManualPages.Text(m, "industrialWires.jacobs1"));
 	}
 
 	@Override

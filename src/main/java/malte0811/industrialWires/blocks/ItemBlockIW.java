@@ -45,4 +45,12 @@ public class ItemBlockIW extends ItemBlock {
 	public int getMetadata(int damage) {
 		return damage;
 	}
+
+	@Override
+	public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState) {
+		if (block instanceof IPlacementCheck&&!((IPlacementCheck) block).canPlaceBlockAt(world, pos, stack)) {
+			return false;
+		}
+		return super.placeBlockAt(stack, player, world, pos, side, hitX, hitY, hitZ, newState);
+	}
 }

@@ -24,6 +24,7 @@ import blusunrize.immersiveengineering.api.tool.AssemblerHandler;
 import blusunrize.immersiveengineering.api.tool.AssemblerHandler.IRecipeAdapter;
 import blusunrize.immersiveengineering.api.tool.AssemblerHandler.RecipeQuery;
 import blusunrize.immersiveengineering.common.IEContent;
+import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_Connector;
 import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0;
 import blusunrize.immersiveengineering.common.blocks.stone.BlockTypes_StoneDecoration;
 import ic2.api.item.IC2Items;
@@ -44,6 +45,7 @@ import malte0811.industrialWires.items.ItemIC2Coil;
 import malte0811.industrialWires.network.MessageTileSyncIW;
 import malte0811.industrialWires.wires.IC2Wiretype;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.Mod;
@@ -147,6 +149,16 @@ public class IndustrialWires {
 					'b', "ingotBronze", 'm', ironMechComponent,
 					'S', "blockSheetmetalSteel", 'r', "stickIron"));
 		}
+		// JACOB'S LADDERS
+		ItemStack mvTransformer = IC2Items.getItem("te", "mv_transformer");
+		ItemStack copperCable = IC2Items.getItem("cable", "type:copper,insulation:0");
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(jacobsLadder, 1, 0), "c c", " h ", "sts", 'c', copperCable, 'h', Blocks.HARDENED_CLAY,
+				's', "ingotSteel", 't', mvTransformer));
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(jacobsLadder, 1, 1), "c c", "h h", "sts", 'c', "ingotCopper", 'h', Blocks.HARDENED_CLAY,
+				's', "ingotSteel", 't', new ItemStack(IEContent.blockConnectors, 1, BlockTypes_Connector.TRANSFORMER.ordinal())));
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(jacobsLadder, 1, 2), "c c", "hhh", "sts", 'c', "blockCopper", 'h', Blocks.HARDENED_CLAY,
+				's', "ingotSteel", 't', new ItemStack(IEContent.blockConnectors, 1, BlockTypes_Connector.TRANSFORMER_HV.ordinal())));
+
 		packetHandler.registerMessage(MessageTileSyncIW.HandlerClient.class, MessageTileSyncIW.class, 0, Side.CLIENT);
 	}
 	@EventHandler

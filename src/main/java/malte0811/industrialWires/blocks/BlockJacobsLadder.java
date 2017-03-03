@@ -50,7 +50,7 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 
-public class BlockJacobsLadder extends Block implements IMetaEnum {
+public class BlockJacobsLadder extends Block implements IMetaEnum, IPlacementCheck {
 	static PropertyEnum<LadderSize> size_property = PropertyEnum.create("size", LadderSize.class);
 
 	public BlockJacobsLadder() {
@@ -244,5 +244,16 @@ public class BlockJacobsLadder extends Block implements IMetaEnum {
 			return ((TileEntityJacobsLadder) te).onActivated(playerIn, hand, heldItem);
 		}
 		return super.onBlockActivated(worldIn, pos, state, playerIn, hand, heldItem, side, hitX, hitY, hitZ);
+	}
+
+	@Override
+	public boolean canPlaceBlockAt(World w, BlockPos pos, ItemStack stack) {
+		int dummyCount = LadderSize.values()[stack.getMetadata()].dummyCount;
+		for (int i = 1;i<=dummyCount;i++) {
+			if (!w.isAirBlock(pos.up(i))) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
