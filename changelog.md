@@ -1,3 +1,7 @@
+#####Version 1.3-7
+ - added Jacob's Ladders/High voltage travelling arcs
+   - they don't have a particular purpose aside from looking nice
+
 #####Version 1.2-6
  - reduced the discrepancies between IC2 cables and Industrial Wires
    - machines don't explode when they shouldn't except in some corner cases

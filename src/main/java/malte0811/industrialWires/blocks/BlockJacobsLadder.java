@@ -205,7 +205,7 @@ public class BlockJacobsLadder extends Block implements IMetaEnum, IPlacementChe
 				min = new Vec3d(distZ, 0, distX);
 				max = new Vec3d(1 - distZ, h, 1 - distX);
 			}
-			return new AxisAlignedBB(min, max);
+			return new AxisAlignedBB(min.xCoord, min.yCoord, min.zCoord, max.xCoord, max.yCoord, max.zCoord);
 		}
 	}
 
@@ -255,5 +255,22 @@ public class BlockJacobsLadder extends Block implements IMetaEnum, IPlacementChe
 			}
 		}
 		return true;
+	}
+
+	@Override
+	public boolean rotateBlock(World world, BlockPos pos, EnumFacing axis) {
+		TileEntity te = world.getTileEntity(pos);
+		return te instanceof TileEntityJacobsLadder && ((TileEntityJacobsLadder) te).rotate(world, pos, axis);
+	}
+
+	@Override
+	public boolean eventReceived(IBlockState state, World worldIn, BlockPos pos, int id, int param) {
+		boolean def = super.eventReceived(state, worldIn, pos, id, param);
+		if ((id&255)==255) {
+			IBlockState s = worldIn.getBlockState(pos);
+			worldIn.notifyBlockUpdate(pos, s, s, 3);
+			return true;
+		}
+		return def;
 	}
 }

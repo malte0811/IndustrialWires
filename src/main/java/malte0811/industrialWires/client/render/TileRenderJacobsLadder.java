@@ -45,6 +45,7 @@ public class TileRenderJacobsLadder extends TileEntitySpecialRenderer<TileEntity
 
 			GlStateManager.disableTexture2D();
 			GlStateManager.disableLighting();
+			GlStateManager.shadeModel(GL11.GL_SMOOTH);
 
 			float oldBX = OpenGlHelper.lastBrightnessX;
 			float oldBY = OpenGlHelper.lastBrightnessY;
@@ -75,6 +76,7 @@ public class TileRenderJacobsLadder extends TileEntitySpecialRenderer<TileEntity
 
 			GlStateManager.enableTexture2D();
 			GlStateManager.enableLighting();
+			GlStateManager.shadeModel(GL11.GL_FLAT);
 
 			GlStateManager.popMatrix();
 		}
@@ -99,7 +101,6 @@ public class TileRenderJacobsLadder extends TileEntitySpecialRenderer<TileEntity
 			drawQuad(last, pos, radZ, colors[i-1], colors[i], vertBuffer);
 			last = pos;
 		}
-
 		tes.draw();
 	}
 	private final float[] saltColor = {1, 190/255F, 50/255F};

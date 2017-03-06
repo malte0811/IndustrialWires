@@ -41,6 +41,7 @@ import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -304,6 +305,10 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 	}
 
 	public boolean isActive() {
+		if (isDummy()) {
+			TileEntity master = worldObj.getTileEntity(pos.down(dummy));
+			return master instanceof TileEntityJacobsLadder&&((TileEntityJacobsLadder) master).isActive();
+		}
 		return timeTillActive == 0 && t < 1;
 	}
 
@@ -355,6 +360,30 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 		}
 		return false;
 	}
+
+	public boolean rotate(World world, BlockPos pos, EnumFacing axis) {
+		if (isActive()) {
+			return false;
+		}
+		if (!worldObj.isRemote) {
+			EnumFacing targetDir = facing.rotateAround(EnumFacing.Axis.Y);
+			for (int i = -dummy;i<size.dummyCount-dummy+1;i++) {
+				BlockPos currPos = pos.up(i);
+				TileEntity te = world.getTileEntity(currPos);
+				if (te instanceof TileEntityJacobsLadder) {
+					TileEntityJacobsLadder teJacobs = (TileEntityJacobsLadder) te;
+					teJacobs.facing = targetDir;
+					teJacobs.markDirty();
+					IBlockState state = world.getBlockState(currPos).getActualState(world, currPos);
+					world.notifyBlockUpdate(currPos,state,state,3);
+					world.addBlockEvent(currPos, state.getBlock(), 255, 0);
+					world.notifyBlockOfStateChange(currPos, state.getBlock());
+				}
+			}
+		}
+		return true;
+	}
+
 
 	//ENERGY
 	@Override
