@@ -17,8 +17,6 @@
  */
 package malte0811.industrialWires.blocks.converter;
 
-import java.util.List;
-
 import blusunrize.immersiveengineering.api.IEProperties;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDirectionalTile;
 import blusunrize.immersiveengineering.common.util.Utils;
@@ -28,7 +26,6 @@ import malte0811.industrialWires.blocks.ItemBlockIW;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
@@ -46,6 +43,8 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+
+import java.util.List;
 
 public class BlockMechanicalConverter extends Block implements IMetaEnum, ITileEntityProvider {
 	PropertyEnum<MechanicalBlockType> type;
@@ -75,18 +74,15 @@ public class BlockMechanicalConverter extends Block implements IMetaEnum, ITileE
 	}
 
 	@Override
-	public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
-		return getExtendedState(state, worldIn, pos);
-	}
-	@Override
-	public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
-		IBlockState ret = super.getExtendedState(state, world, pos);
+	public IBlockState getActualState(IBlockState state, IBlockAccess world, BlockPos pos) {
+		IBlockState ret = super.getActualState(state, world, pos);
 		TileEntity te = world.getTileEntity(pos);
 		if (te instanceof IDirectionalTile) {
 			ret = ret.withProperty(IEProperties.FACING_ALL, ((IDirectionalTile) te).getFacing());
 		}
 		return ret;
 	}
+
 	@Override
 	public IBlockState getStateFromMeta(int meta) {
 		return getDefaultState().withProperty(type, MechanicalBlockType.values[meta]);
