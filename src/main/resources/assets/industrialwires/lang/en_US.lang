@@ -9,9 +9,9 @@ tile.industrialwires.ic2Connector.hv_relay.name=IC2 HV Wire Relay
 tile.industrialwires.ic2Connector.glass_conn.name=Glass Fiber Wire Connector
 tile.industrialwires.ic2Connector.glass_relay.name=Glass Fiber Wire Relay
 
-tile.mechanical_converter.ie_motor.name=Rotational Motor
-tile.mechanical_converter.ie_to_ic2.name=Converter: Rotational To Kinetic
-tile.mechanical_converter.ic2_to_ie.name=Converter: Kinetic To Rotational
+tile.industrialwires.mechanical_converter.ie_motor.name=Rotational Motor
+tile.industrialwires.mechanical_converter.ie_to_ic2.name=Converter: Rotational To Kinetic
+tile.industrialwires.mechanical_converter.ic2_to_ie.name=Converter: Kinetic To Rotational
 
 tile.industrialwires.jacobs_ladder.small.name=Small Jacob's ladder
 tile.industrialwires.jacobs_ladder.normal.name=Jacob's ladder

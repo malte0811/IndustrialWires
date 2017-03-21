@@ -1,6 +1,6 @@
-/*******************************************************************************
+/*
  * This file is part of Industrial Wires.
- * Copyright (C) 2016 malte0811
+ * Copyright (C) 2016-2017 malte0811
  *
  * Industrial Wires is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,16 +14,19 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+ */
 package malte0811.industrialWires.blocks.wire;
 
 import java.util.Arrays;
+import java.util.List;
 
 import blusunrize.immersiveengineering.api.IEProperties;
 import blusunrize.immersiveengineering.api.energy.wires.TileEntityImmersiveConnectable;
 import blusunrize.immersiveengineering.common.blocks.BlockIETileProvider;
 import blusunrize.immersiveengineering.common.blocks.ItemBlockIEBase;
+import blusunrize.immersiveengineering.common.util.IELogger;
 import malte0811.industrialWires.IndustrialWires;
+import malte0811.industrialWires.blocks.BlockIWBase;
 import malte0811.industrialWires.blocks.IMetaEnum;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -31,6 +34,9 @@ import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
@@ -41,10 +47,10 @@ import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 
-public class BlockIC2Connector extends BlockIETileProvider<BlockTypes_IC2_Connector> implements IMetaEnum {
-
+public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
+	private static PropertyEnum<BlockTypes_IC2_Connector> type = PropertyEnum.create("type", BlockTypes_IC2_Connector.class);
 	public BlockIC2Connector() {
-		super("ic2Connector", Material.IRON, PropertyEnum.create("type", BlockTypes_IC2_Connector.class), ItemBlockIEBase.class, IEProperties.FACING_ALL);
+		super(Material.IRON, "ic2Connector");
 		setHardness(3.0F);
 		setResistance(15.0F);
 		lightOpacity = 0;
@@ -61,6 +67,14 @@ public class BlockIC2Connector extends BlockIETileProvider<BlockTypes_IC2_Connec
 			}
 		}
 	}
+
+	@Override
+	public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list) {
+		for (int i = 0;i<type.getAllowedValues().size();i++) {
+			list.add(new ItemStack(itemIn, 1, i));
+		}
+	}
+
 	@Override
 	protected BlockStateContainer createBlockState() {
 		BlockStateContainer base = super.createBlockState();
@@ -69,6 +83,27 @@ public class BlockIC2Connector extends BlockIETileProvider<BlockTypes_IC2_Connec
 		unlisted[unlisted.length-1] = IEProperties.CONNECTIONS;
 		return new ExtendedBlockState(this, base.getProperties().toArray(new IProperty[0]), unlisted);
 	}
+
+	@Override
+	protected IProperty[] getProperties() {
+		return new IProperty[]{type, IEProperties.FACING_ALL};
+	}
+
+	@Override
+	public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
+		state = super.getActualState(state, worldIn, pos);
+		TileEntity te = worldIn.getTileEntity(pos);
+		if (te instanceof TileEntityIC2ConnectorTin) {
+			state.withProperty(IEProperties.FACING_ALL, ((TileEntityIC2ConnectorTin) te).getFacing());
+		}
+		return state;
+	}
+
+	@Override
+	public IBlockState getStateFromMeta(int meta) {
+		return super.getStateFromMeta(meta).withProperty(type, BlockTypes_IC2_Connector.values()[meta]);
+	}
+
 	@Override
 	public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
 		state = super.getExtendedState(state, world, pos);
@@ -85,34 +120,37 @@ public class BlockIC2Connector extends BlockIETileProvider<BlockTypes_IC2_Connec
 	public boolean isSideSolid(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side) {
 		return false;
 	}
+
 	@Override
-	public TileEntity createNewTileEntity(World worldIn, int meta) {
-		if (meta==0)
-			return new TileEntityIC2ConnectorTin(false);
-		else if (meta==1)
-			return new TileEntityIC2ConnectorTin(true);
-		else if (meta==2)
-			return new TileEntityIC2ConnectorCopper(false);
-		else if (meta==3)
-			return new TileEntityIC2ConnectorCopper(true);
-		else if (meta==4)
-			return new TileEntityIC2ConnectorGold(false);
-		else if (meta==5)
-			return new TileEntityIC2ConnectorGold(true);
-		else if (meta==6)
-			return new TileEntityIC2ConnectorHV(false);
-		else if (meta==7)
-			return new TileEntityIC2ConnectorHV(true);
-		else if (meta==8)
-			return new TileEntityIC2ConnectorGlass(false);
-		else if (meta==9)
-			return new TileEntityIC2ConnectorGlass(true);
-		
-		return null;
+	public boolean hasTileEntity(IBlockState state) {
+		return true;
 	}
+
 	@Override
-	public String createRegistryName() {
-		return IndustrialWires.MODID+":"+name;
+	public TileEntity createTileEntity(World world, IBlockState state) {
+		switch (state.getValue(type)) {
+		case TIN_CONN:
+			return new TileEntityIC2ConnectorTin(false);
+		case TIN_RELAY:
+			return new TileEntityIC2ConnectorTin(true);
+		case COPPER_CONN:
+			return new TileEntityIC2ConnectorCopper(false);
+		case COPPER_RELAY:
+			return new TileEntityIC2ConnectorCopper(true);
+		case GOLD_CONN:
+			return new TileEntityIC2ConnectorGold(false);
+		case GOLD_RELAY:
+			return new TileEntityIC2ConnectorGold(true);
+		case HV_CONN:
+			return new TileEntityIC2ConnectorHV(false);
+		case HV_RELAY:
+			return new TileEntityIC2ConnectorHV(true);
+		case GLASS_CONN:
+			return new TileEntityIC2ConnectorGlass(false);
+		case GLASS_RELAY:
+			return new TileEntityIC2ConnectorGlass(true);
+		}
+		return null;
 	}
 	@Override
 	public boolean canRenderInLayer(BlockRenderLayer layer) {
@@ -140,6 +178,11 @@ public class BlockIC2Connector extends BlockIETileProvider<BlockTypes_IC2_Connec
 	}
 	@Override
 	public Object[] getValues() {
-		return enumValues;
+		return BlockTypes_IC2_Connector.values();
+	}
+
+	@Override
+	public int getMetaFromState(IBlockState state) {
+		return state.getValue(type).ordinal();
 	}
 }

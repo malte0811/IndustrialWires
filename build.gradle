@@ -1,5 +1,5 @@
 def mainVersion = "1.3"
-def buildNumber = "7"
+def buildNumber = "8"
 
 /*
  * This file is part of Industrial Wires.

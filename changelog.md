@@ -1,3 +1,5 @@
+#####Version 1.3-8
+ - the converters and the motor don't have missing textures any more when using Chisel
 #####Version 1.3-7
  - added Jacob's Ladders/High voltage travelling arcs
    - they don't have a particular purpose aside from looking nice

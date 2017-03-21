@@ -22,6 +22,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import malte0811.industrialWires.blocks.IBlockBoundsIW;
+import net.minecraft.util.math.AxisAlignedBB;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -50,17 +52,17 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.common.MinecraftForge;
 
-public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable implements IEnergySource, IEnergySink, IDirectionalTile, ITickable, IIC2Connector, IBlockBounds {
+public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable implements IEnergySource, IEnergySink, IDirectionalTile, ITickable, IIC2Connector, IBlockBoundsIW {
 	EnumFacing f = EnumFacing.NORTH;
 	boolean relay;
-	boolean first = true;
+	private boolean first = true;
 	//IC2 net to IE net buffer
-	double inBuffer = 0;
-	double maxToNet = 0;
+	private double inBuffer = 0;
+	private double maxToNet = 0;
 	//IE net to IC2 net buffer
-	double outBuffer = 0;
-	double maxToMachine = 0;
-	double maxStored = IC2Wiretype.IC2_TYPES[0].getTransferRate()/8;
+	private double outBuffer = 0;
+	private double maxToMachine = 0;
+	protected double maxStored = IC2Wiretype.IC2_TYPES[0].getTransferRate()/8;
 	int tier = 1;
 	public TileEntityIC2ConnectorTin(boolean rel) {
 		relay = rel;
@@ -299,27 +301,28 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	public boolean canHammerRotate(EnumFacing side, float hitX, float hitY, float hitZ, EntityLivingBase entity) {
 		return false;
 	}
+
 	@Override
-	public float[] getBlockBounds() {
+	public AxisAlignedBB getBoundingBox() {
 		float length = this instanceof TileEntityIC2ConnectorHV?(relay?.875f:.75f): this instanceof TileEntityIC2ConnectorGold?.5625f: .5f;
 		float wMin = .3125f;
 		float wMax = .6875f;
 		switch(f.getOpposite() )
 		{
 		case UP:
-			return new float[]{wMin,0,wMin,  wMax,length,wMax};
+			return new AxisAlignedBB(wMin,0,wMin,  wMax,length,wMax);
 		case DOWN:
-			return new float[]{wMin,1-length,wMin,  wMax,1,wMax};
+			return new AxisAlignedBB(wMin,1-length,wMin,  wMax,1,wMax);
 		case SOUTH:
-			return new float[]{wMin,wMin,0,  wMax,wMax,length};
+			return new AxisAlignedBB(wMin,wMin,0,  wMax,wMax,length);
 		case NORTH:
-			return new float[]{wMin,wMin,1-length,  wMax,wMax,1};
+			return new AxisAlignedBB(wMin,wMin,1-length,  wMax,wMax,1);
 		case EAST:
-			return new float[]{0,wMin,wMin,  length,wMax,wMax};
+			return new AxisAlignedBB(0,wMin,wMin,  length,wMax,wMax);
 		case WEST:
-			return new float[]{1-length,wMin,wMin,  1,wMax,wMax};
+			return new AxisAlignedBB(1-length,wMin,wMin,  1,wMax,wMax);
 		}
-		return new float[]{0,0,0,1,1,1};
+		return new AxisAlignedBB(0,0,0,1,1,1);
 	}
 	/*
 	 * regarding equals+hashCode

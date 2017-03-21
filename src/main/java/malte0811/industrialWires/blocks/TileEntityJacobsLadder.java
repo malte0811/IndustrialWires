@@ -29,6 +29,7 @@ import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.network.MessageTileSyncIW;
 import malte0811.industrialWires.util.Beziers;
 import malte0811.industrialWires.util.DualEnergyStorage;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -49,7 +50,7 @@ import net.minecraftforge.energy.IEnergyStorage;
 
 import javax.annotation.Nullable;
 
-public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickable, IHasDummyBlocksIW, ISyncReceiver, IEnergySink {
+public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickable, IHasDummyBlocksIW, ISyncReceiver, IEnergySink, IBlockBoundsIW {
 	public EnumFacing facing = EnumFacing.NORTH;
 	private DualEnergyStorage energy;
 	public LadderSize size;
@@ -446,6 +447,29 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 	public AxisAlignedBB getRenderBoundingBox() {
 		return new AxisAlignedBB(pos, pos.add(1, 2, 1));
 	}
+
+	@Override
+	public AxisAlignedBB getBoundingBox() {
+		if (!isDummy()) {
+			//transformer
+			return Block.FULL_BLOCK_AABB;
+		} else {
+			Vec3d min;
+			Vec3d max;
+			double distX = (1 - size.topDistance) / 2;
+			double distZ = .5 - .0625 * (size.ordinal() + 1);
+			double h = Math.min(1, 1 + size.height - dummy);
+			if (facing.getAxis() == EnumFacing.Axis.Z) {
+				min = new Vec3d(distX, 0, distZ);
+				max = new Vec3d(1 - distX, h, 1 - distZ);
+			} else {
+				min = new Vec3d(distZ, 0, distX);
+				max = new Vec3d(1 - distZ, h, 1 - distX);
+			}
+			return new AxisAlignedBB(min.xCoord, min.yCoord, min.zCoord, max.xCoord, max.yCoord, max.zCoord);
+		}
+	}
+
 
 	public enum LadderSize implements IStringSerializable {
 		/*

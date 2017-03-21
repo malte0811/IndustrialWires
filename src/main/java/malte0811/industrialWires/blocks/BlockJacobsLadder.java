@@ -50,56 +50,29 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 
-public class BlockJacobsLadder extends Block implements IMetaEnum, IPlacementCheck {
-	static PropertyEnum<LadderSize> size_property = PropertyEnum.create("size", LadderSize.class);
+public class BlockJacobsLadder extends BlockIWBase implements IMetaEnum, IPlacementCheck {
+	private static PropertyEnum<LadderSize> size_property = PropertyEnum.create("size", LadderSize.class);
 
 	public BlockJacobsLadder() {
-		super(Material.IRON);
-		setHardness(3.0F);
-		setResistance(15.0F);
-		String name = "jacobs_ladder";
-		GameRegistry.register(this, new ResourceLocation(IndustrialWires.MODID, name));
-		GameRegistry.register(new ItemBlockIW(this), new ResourceLocation(IndustrialWires.MODID, name));
-		setUnlocalizedName(IndustrialWires.MODID+"."+name);
-		setCreativeTab(IndustrialWires.creativeTab);
-	}
-
-	@Override
-	public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
-		TileEntity te = worldIn.getTileEntity(pos);
-		if (te instanceof IHasDummyBlocksIW) {
-			((IHasDummyBlocksIW) te).breakDummies();
-		}
-		super.breakBlock(worldIn, pos, state);
-		worldIn.removeTileEntity(pos);
-	}
-
-	@Override
-	protected BlockStateContainer createBlockState() {
-		BlockStateContainer cont = super.createBlockState();
-		IProperty[] props = cont.getProperties().toArray(new IProperty[0]);
-		props = Arrays.copyOf(props, props.length + 3);
-		props[props.length - 3] = size_property;
-		props[props.length - 2] = IEProperties.MULTIBLOCKSLAVE;
-		props[props.length - 1] = IEProperties.FACING_HORIZONTAL;
-		return new BlockStateContainer(this, props);
+		super(Material.IRON, "jacobs_ladder");
 	}
 
 	@Override
 	public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
+		state = super.getActualState(state, worldIn, pos);
 		TileEntity tile = worldIn.getTileEntity(pos);
-		if (tile instanceof IHasDummyBlocksIW) {
-			state = applyProperty(state, IEProperties.MULTIBLOCKSLAVE, ((IHasDummyBlocksIW) tile).isDummy());
-		}
 		if (tile instanceof TileEntityJacobsLadder) {
 			state = applyProperty(state, size_property, ((TileEntityJacobsLadder) tile).size);
 			state = applyProperty(state, IEProperties.FACING_HORIZONTAL, ((TileEntityJacobsLadder) tile).facing);
 		}
-		return super.getActualState(state, worldIn, pos);
+		return state;
 	}
 
-	private <V extends Comparable<V>> IBlockState applyProperty(IBlockState in, IProperty<V> prop, V val) {
-		return in.withProperty(prop, val);
+	@Override
+	protected IProperty[] getProperties() {
+		return new IProperty[]{
+				size_property, IEProperties.MULTIBLOCKSLAVE, IEProperties.FACING_HORIZONTAL
+		};
 	}
 
 	@Override
@@ -176,51 +149,6 @@ public class BlockJacobsLadder extends Block implements IMetaEnum, IPlacementChe
 		if (te instanceof TileEntityJacobsLadder) {
 			((TileEntityJacobsLadder) te).facing = state.getValue(IEProperties.FACING_HORIZONTAL);
 		}
-		if (te instanceof IHasDummyBlocksIW) {
-			((IHasDummyBlocksIW) te).placeDummies(state);
-		}
-	}
-
-	@Override
-	public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-		TileEntity te = source.getTileEntity(pos);
-		if (!(te instanceof TileEntityJacobsLadder)) {
-			return FULL_BLOCK_AABB;
-		}
-		TileEntityJacobsLadder tile = (TileEntityJacobsLadder) te;
-		if (!tile.isDummy()) {
-			//transformer
-			return FULL_BLOCK_AABB;
-		} else {
-			Vec3d min;
-			Vec3d max;
-			LadderSize size = tile.size;
-			double distX = (1 - size.topDistance) / 2;
-			double distZ = .5 - .0625 * (size.ordinal() + 1);
-			double h = Math.min(1, 1 + size.height - tile.dummy);
-			if (tile.facing.getAxis() == EnumFacing.Axis.Z) {
-				min = new Vec3d(distX, 0, distZ);
-				max = new Vec3d(1 - distX, h, 1 - distZ);
-			} else {
-				min = new Vec3d(distZ, 0, distX);
-				max = new Vec3d(1 - distZ, h, 1 - distX);
-			}
-			return new AxisAlignedBB(min.xCoord, min.yCoord, min.zCoord, max.xCoord, max.yCoord, max.zCoord);
-		}
-	}
-
-	@Nullable
-	@Override
-	public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, World worldIn, BlockPos pos) {
-		return getBoundingBox(blockState, worldIn, pos);
-	}
-
-	@Override
-	public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn) {
-		AxisAlignedBB axisalignedbb = getBoundingBox(state, worldIn, pos).offset(pos);
-		if (entityBox.intersectsWith(axisalignedbb)) {
-			collidingBoxes.add(axisalignedbb);
-		}
 	}
 
 	@Override
@@ -261,16 +189,5 @@ public class BlockJacobsLadder extends Block implements IMetaEnum, IPlacementChe
 	public boolean rotateBlock(World world, BlockPos pos, EnumFacing axis) {
 		TileEntity te = world.getTileEntity(pos);
 		return te instanceof TileEntityJacobsLadder && ((TileEntityJacobsLadder) te).rotate(world, pos, axis);
-	}
-
-	@Override
-	public boolean eventReceived(IBlockState state, World worldIn, BlockPos pos, int id, int param) {
-		boolean def = super.eventReceived(state, worldIn, pos, id, param);
-		if ((id&255)==255) {
-			IBlockState s = worldIn.getBlockState(pos);
-			worldIn.notifyBlockUpdate(pos, s, s, 3);
-			return true;
-		}
-		return def;
 	}
 }
