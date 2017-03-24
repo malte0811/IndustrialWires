@@ -57,7 +57,6 @@ public abstract class BlockIWBase extends Block {
 		setCreativeTab(IndustrialWires.creativeTab);
 	}
 
-
 	@Override
 	protected BlockStateContainer createBlockState() {
 		if (properties==null) {
@@ -79,7 +78,11 @@ public abstract class BlockIWBase extends Block {
 			state = applyProperty(state, IEProperties.MULTIBLOCKSLAVE, ((IHasDummyBlocksIW) tile).isDummy());
 		}
 		if (tile instanceof IEBlockInterfaces.IDirectionalTile) {
-			state = state.withProperty(IEProperties.FACING_ALL, ((IEBlockInterfaces.IDirectionalTile) tile).getFacing());
+			if (((IEBlockInterfaces.IDirectionalTile) tile).getFacingLimitation()==2) {
+				state = state.withProperty(IEProperties.FACING_HORIZONTAL, ((IEBlockInterfaces.IDirectionalTile) tile).getFacing());
+			} else {
+				state = state.withProperty(IEProperties.FACING_ALL, ((IEBlockInterfaces.IDirectionalTile) tile).getFacing());
+			}
 		}
 		return state;
 	}
@@ -103,7 +106,8 @@ public abstract class BlockIWBase extends Block {
 		super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
 		TileEntity te = worldIn.getTileEntity(pos);
 		if (te instanceof IEBlockInterfaces.IDirectionalTile) {
-			((IEBlockInterfaces.IDirectionalTile)te).setFacing(state.getValue(IEProperties.FACING_ALL));
+			((IEBlockInterfaces.IDirectionalTile)te).setFacing(
+					state.getValue(((IEBlockInterfaces.IDirectionalTile) te).getFacingLimitation()==2?IEProperties.FACING_HORIZONTAL:IEProperties.FACING_ALL));
 		}
 		if (te instanceof IHasDummyBlocksIW) {
 			((IHasDummyBlocksIW) te).placeDummies(state);
@@ -164,7 +168,9 @@ public abstract class BlockIWBase extends Block {
 				return true;
 			}
 		} else if (te instanceof IEBlockInterfaces.IPlayerInteraction) {
-			((IEBlockInterfaces.IPlayerInteraction) te).interact(side, player, hand, heldItem, hitX, hitY, hitZ);
+			if (((IEBlockInterfaces.IPlayerInteraction) te).interact(side, player, hand, heldItem, hitX, hitY, hitZ)) {
+				return true;
+			}
 		}
 		return false;
 	}

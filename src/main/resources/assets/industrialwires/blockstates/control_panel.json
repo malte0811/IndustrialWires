@@ -1,0 +1,33 @@
+{
+  "forge_marker": 1,
+  "defaults": {
+    "transform": "forge:default-block",
+    "textures": {
+
+    },
+    "model": "industrialwires:smartmodel/panel_normal",
+    "custom": {
+      "flip-v": true
+    }
+  },
+  "variants": {
+    "facing":
+    {
+      "north": { "transform": {
+        "rotation": {"y": 0 }
+      }},
+      "south": { "transform": {
+        "rotation": {"y": 180 }
+      }},
+      "west": { "transform": {
+        "rotation": {"y": 90 }
+      }},
+      "east": { "transform": {
+        "rotation": {"y": -90 }
+      }}
+    },
+    "inventory": {
+      "model":"industrialwires:panel_normal"
+    }
+  }
+}

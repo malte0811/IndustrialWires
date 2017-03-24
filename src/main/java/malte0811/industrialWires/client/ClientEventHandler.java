@@ -21,14 +21,19 @@ import blusunrize.immersiveengineering.api.Lib;
 import blusunrize.immersiveengineering.client.ClientUtils;
 import blusunrize.immersiveengineering.common.util.ItemNBTHelper;
 import malte0811.industrialWires.IndustrialWires;
+import malte0811.industrialWires.blocks.controlpanel.PanelComponent;
+import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.items.ItemIC2Coil;
 import malte0811.industrialWires.wires.IC2Wiretype;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraftforge.client.GuiIngameForge;
+import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.oredict.OreDictionary;
@@ -66,6 +71,21 @@ public class ClientEventHandler {
 							}
 						}
 					}
+				}
+			}
+		}
+	}
+
+	@SubscribeEvent
+	public void renderBoundingBoxes(DrawBlockHighlightEvent event) {
+		if (!event.isCanceled() && event.getSubID() == 0 && event.getTarget().typeOfHit == RayTraceResult.Type.BLOCK) {
+			TileEntity tile = event.getPlayer().worldObj.getTileEntity(event.getTarget().getBlockPos());
+			if (tile instanceof TileEntityPanel) {
+				TileEntityPanel panel = (TileEntityPanel) tile;
+				PanelComponent pc = panel.getSelectedComponent(Minecraft.getMinecraft().thePlayer, event.getTarget().hitVec, true);
+				if (pc != null) {
+					pc.renderBox(panel);
+					event.setCanceled(true);
 				}
 			}
 		}

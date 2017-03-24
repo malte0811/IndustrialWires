@@ -30,6 +30,8 @@ import blusunrize.immersiveengineering.common.blocks.stone.BlockTypes_StoneDecor
 import ic2.api.item.IC2Items;
 import malte0811.industrialWires.blocks.BlockJacobsLadder;
 import malte0811.industrialWires.blocks.TileEntityJacobsLadder;
+import malte0811.industrialWires.blocks.controlpanel.BlockPanel;
+import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.blocks.converter.BlockMechanicalConverter;
 import malte0811.industrialWires.blocks.converter.TileEntityIEMotor;
 import malte0811.industrialWires.blocks.converter.TileEntityMechICtoIE;
@@ -69,6 +71,7 @@ public class IndustrialWires {
 	public static BlockIC2Connector ic2conn;
 	public static BlockMechanicalConverter mechConv;
 	public static BlockJacobsLadder jacobsLadder;
+	public static BlockPanel panel;
 	public static ItemIC2Coil coil;
 	public static final SimpleNetworkWrapper packetHandler = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
 	public static CreativeTabs creativeTab = new CreativeTabs(MODID) {
@@ -92,6 +95,7 @@ public class IndustrialWires {
 			mechConv = new BlockMechanicalConverter();
 		jacobsLadder = new BlockJacobsLadder();
 		coil = new ItemIC2Coil();
+		panel = new BlockPanel();
 		//TODO change to MODID+ when changing to a new MC version
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorTin.class, "ic2ConnectorTin");
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorCopper.class, "ic2ConnectorCopper");
@@ -99,6 +103,7 @@ public class IndustrialWires {
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorHV.class, "ic2ConnectorHV");
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorGlass.class, "ic2ConnectorGlass");
 		GameRegistry.registerTileEntity(TileEntityJacobsLadder.class, MODID+":jacobsLadder");
+		GameRegistry.registerTileEntity(TileEntityPanel.class, MODID+":control_panels");
 		if (mechConv!=null) {
 			GameRegistry.registerTileEntity(TileEntityIEMotor.class, MODID+":ieMotor");
 			GameRegistry.registerTileEntity(TileEntityMechICtoIE.class, MODID+":mechIcToIe");

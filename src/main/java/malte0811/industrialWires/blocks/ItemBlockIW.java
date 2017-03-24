@@ -29,17 +29,24 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class ItemBlockIW extends ItemBlock {
-	Object[] values;
+	private final Object[] values;
 	public ItemBlockIW(Block b) {
 		super(b);
-		assert b instanceof IMetaEnum;
-		values = ((IMetaEnum)b).getValues();
+		if (b instanceof IMetaEnum) {
+			values = ((IMetaEnum)b).getValues();
+		} else {
+			values = null;
+		}
 		hasSubtypes = true;
 	}
 	@Override
 	public String getUnlocalizedName(ItemStack stack) {
 		int meta = stack.getMetadata();
-		return block.getUnlocalizedName()+"."+values[meta].toString().toLowerCase();
+		if (values!=null) {
+			return block.getUnlocalizedName() + "." + values[meta].toString().toLowerCase();
+		} else {
+			return block.getUnlocalizedName();
+		}
 	}
 	@Override
 	public int getMetadata(int damage) {

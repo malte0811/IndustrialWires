@@ -31,6 +31,7 @@ import malte0811.industrialWires.IWConfig;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.IMetaEnum;
 import malte0811.industrialWires.blocks.TileEntityJacobsLadder;
+import malte0811.industrialWires.client.panelmodel.PanelModelLoader;
 import malte0811.industrialWires.client.render.TileRenderJacobsLadder;
 import malte0811.industrialWires.items.ItemIC2Coil;
 import net.minecraft.block.Block;
@@ -47,6 +48,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -116,6 +118,7 @@ public class ClientProxy extends CommonProxy {
 			}
 		}
 		OBJLoader.INSTANCE.addDomain(IndustrialWires.MODID);
+		ModelLoaderRegistry.registerLoader(new PanelModelLoader());
 		MinecraftForge.EVENT_BUS.register(new ClientEventHandler());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityJacobsLadder.class, new TileRenderJacobsLadder());
 	}
