@@ -19,6 +19,7 @@ package malte0811.industrialWires.blocks.converter;
 
 import blusunrize.immersiveengineering.api.IEProperties;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDirectionalTile;
+import blusunrize.immersiveengineering.common.util.IELogger;
 import blusunrize.immersiveengineering.common.util.Utils;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.BlockIWBase;
@@ -88,6 +89,12 @@ public class BlockMechanicalConverter extends BlockIWBase implements IMetaEnum {
 		}
 		return null;
 	}
+
+	@Override
+	public boolean hasTileEntity(IBlockState state) {
+		return true;
+	}
+
 	@Override
 	public int getMetaFromState(IBlockState state) {
 		return state.getValue(type).ordinal();
@@ -96,8 +103,7 @@ public class BlockMechanicalConverter extends BlockIWBase implements IMetaEnum {
 	public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY,
 			float hitZ, int meta, EntityLivingBase placer, ItemStack stack) {
 		IBlockState base = super.getStateForPlacement(world, pos, facing, hitX, hitY, hitZ, meta, placer, stack);
-		base = base.withProperty(type, MechanicalBlockType.values[meta]);
-		return base.withProperty(IEProperties.FACING_ALL, facing.getOpposite());
+		return base.withProperty(type, MechanicalBlockType.values[meta]);
 	}
 	@Override
 	public int damageDropped(IBlockState state) {

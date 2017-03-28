@@ -20,11 +20,15 @@ package malte0811.industrialWires.blocks.controlpanel;
 
 import blusunrize.immersiveengineering.api.IEProperties;
 import malte0811.industrialWires.blocks.BlockIWBase;
+import malte0811.industrialWires.blocks.IMetaEnum;
 import malte0811.industrialWires.blocks.IPlacementCheck;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -34,7 +38,10 @@ import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 
-public class BlockPanel extends BlockIWBase implements IPlacementCheck {
+import java.util.List;
+
+public class BlockPanel extends BlockIWBase implements IPlacementCheck, IMetaEnum {
+	public static final PropertyEnum<BlockTypes_Panel> type = PropertyEnum.create("type", BlockTypes_Panel.class);
 	public BlockPanel() {
 		super(Material.IRON, "control_panel");
 	}
@@ -46,7 +53,13 @@ public class BlockPanel extends BlockIWBase implements IPlacementCheck {
 
 	@Override
 	public TileEntity createTileEntity(World world, IBlockState state) {
-		return new TileEntityPanel();
+		switch(state.getValue(type)) {
+		case TOP:
+			return new TileEntityPanel();
+		case RS_WIRE:
+			return new TileEntityRSPanelConn();
+		}
+		return null;
 	}
 
 	@Override
@@ -56,15 +69,28 @@ public class BlockPanel extends BlockIWBase implements IPlacementCheck {
 
 	@Override
 	protected IProperty[] getProperties() {
-		return new IProperty[]{IEProperties.FACING_HORIZONTAL};
+		return new IProperty[]{IEProperties.FACING_HORIZONTAL, type};
 	}
 
 	@Override
 	protected BlockStateContainer createBlockState() {
 		BlockStateContainer base = super.createBlockState();
 		return new ExtendedBlockState(this, base.getProperties().toArray(new IProperty[0]), new IUnlistedProperty[]{
-				PropertyComponents.INSTANCE
+				PropertyComponents.INSTANCE, IEProperties.CONNECTIONS
 		});
+	}
+
+	@Override
+	public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
+		state = super.getActualState(state, worldIn, pos);
+		TileEntity te = worldIn.getTileEntity(pos);
+		if (te instanceof TileEntityPanel) {
+			state.withProperty(type, BlockTypes_Panel.TOP);
+		}
+		if (te instanceof TileEntityRSPanelConn) {
+			state.withProperty(type, BlockTypes_Panel.RS_WIRE);
+		}
+		return state;
 	}
 
 	@Override
@@ -81,6 +107,23 @@ public class BlockPanel extends BlockIWBase implements IPlacementCheck {
 
 	@Override
 	public int getMetaFromState(IBlockState state) {
-		return 0;
+		return state.getValue(type).ordinal();
+	}
+
+	@Override
+	public IBlockState getStateFromMeta(int meta) {
+		return super.getStateFromMeta(meta).withProperty(type, BlockTypes_Panel.values()[meta]);
+	}
+
+	@Override
+	public Object[] getValues() {
+		return BlockTypes_Panel.values();
+	}
+
+	@Override
+	public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list) {
+		//TODO figure out a way to properly place control panels...
+		list.add(new ItemStack(itemIn, 1, 0));
+		list.add(new ItemStack(itemIn, 1, 1));
 	}
 }

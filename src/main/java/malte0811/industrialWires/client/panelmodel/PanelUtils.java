@@ -18,20 +18,16 @@
 
 package malte0811.industrialWires.client.panelmodel;
 
-import blusunrize.immersiveengineering.client.ClientUtils;
-import blusunrize.immersiveengineering.common.util.IELogger;
-import com.google.common.collect.ImmutableList;
+import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import malte0811.industrialWires.blocks.controlpanel.PanelComponent;
 import malte0811.industrialWires.blocks.controlpanel.PropertyComponents;
 import malte0811.industrialWires.client.RawQuad;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJModel;
@@ -44,34 +40,39 @@ import java.util.List;
 public final class PanelUtils {
 	private PanelUtils() {}
 
-	public static List<BakedQuad> generateQuads(PropertyComponents.ComponentList components) {
+	public static List<BakedQuad> generateQuads(PropertyComponents.PanelRenderProperties components) {
 		//TODO different sizes of panels?
 		List<BakedQuad> ret = new ArrayList<>();
-		final float panelHeight = .5F;
+		Matrix4 m4 = components.getPanelTopTransform().copy();
+		Matrix4 m4RotOnly = components.getPanelTopTransform();
+		m4RotOnly.invert();
+		m4RotOnly.transpose();
 		for (PanelComponent pc:components) {
+			Matrix4 m4Here = m4.copy().translate(pc.getX(), 0, pc.getY());
 			List<RawQuad> compQuads = pc.getQuads();
 			for (RawQuad bq:compQuads) {
-				ret.add(bakeQuad(bq, new Vector3f(pc.getX(), panelHeight, pc.getY())));
+				ret.add(bakeQuad(bq, m4Here, m4RotOnly));
 			}
 		}
 		return ret;
 	}
 
-	public static BakedQuad bakeQuad(RawQuad raw, Vector3f offset) {
+	public static BakedQuad bakeQuad(RawQuad raw, Matrix4 transform, Matrix4 transfNormal) {
 		VertexFormat format = DefaultVertexFormats.ITEM;
 		UnpackedBakedQuad.Builder builder = new UnpackedBakedQuad.Builder(format);
 		builder.setQuadOrientation(raw.facing);
 		builder.setTexture(raw.tex);
 		Vector3f[] vertices = raw.vertices;
 		float[] uvs = raw.uvs;
-		OBJModel.Normal faceNormal = new OBJModel.Normal(raw.normal.x, raw.normal.y, raw.normal.z);
-		putVertexData(format, builder, vertices[0].translate(offset.x, offset.y, offset.z), faceNormal, uvs[0], uvs[1], raw.tex,
+		Vector3f normal = transfNormal.apply(raw.normal);
+		OBJModel.Normal faceNormal = new OBJModel.Normal(normal.x, normal.y, normal.z);
+		putVertexData(format, builder, transform.apply(vertices[0]), faceNormal, uvs[0], uvs[1], raw.tex,
 				raw.colorA);
-		putVertexData(format, builder, vertices[1].translate(offset.x, offset.y, offset.z), faceNormal, uvs[0], uvs[3], raw.tex,
+		putVertexData(format, builder, transform.apply(vertices[1]), faceNormal, uvs[0], uvs[3], raw.tex,
 				raw.colorA);
-		putVertexData(format, builder, vertices[2].translate(offset.x, offset.y, offset.z), faceNormal, uvs[2], uvs[3], raw.tex,
+		putVertexData(format, builder, transform.apply(vertices[2]), faceNormal, uvs[2], uvs[3], raw.tex,
 				raw.colorA);
-		putVertexData(format, builder, vertices[3].translate(offset.x, offset.y, offset.z), faceNormal, uvs[2], uvs[1], raw.tex,
+		putVertexData(format, builder, transform.apply(vertices[3]), faceNormal, uvs[2], uvs[1], raw.tex,
 				raw.colorA);
 		return builder.build();
 	}

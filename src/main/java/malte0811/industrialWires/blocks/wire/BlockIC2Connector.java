@@ -105,18 +105,6 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 	}
 
 	@Override
-	public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
-		state = super.getExtendedState(state, world, pos);
-		if(state instanceof IExtendedBlockState) {
-			IExtendedBlockState ext = (IExtendedBlockState) state;
-			TileEntity te = world.getTileEntity(pos);
-			if (!(te instanceof TileEntityImmersiveConnectable))
-				return state;
-			state = ext.withProperty(IEProperties.CONNECTIONS, ((TileEntityImmersiveConnectable)te).genConnBlockstate());
-		}
-		return state;
-	}
-	@Override
 	public boolean isSideSolid(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side) {
 		return false;
 	}

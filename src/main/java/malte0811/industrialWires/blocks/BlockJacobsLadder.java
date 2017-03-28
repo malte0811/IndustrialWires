@@ -63,7 +63,6 @@ public class BlockJacobsLadder extends BlockIWBase implements IMetaEnum, IPlacem
 		TileEntity tile = worldIn.getTileEntity(pos);
 		if (tile instanceof TileEntityJacobsLadder) {
 			state = applyProperty(state, size_property, ((TileEntityJacobsLadder) tile).size);
-			state = applyProperty(state, IEProperties.FACING_HORIZONTAL, ((TileEntityJacobsLadder) tile).facing);
 		}
 		return state;
 	}

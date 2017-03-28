@@ -18,8 +18,10 @@
 package malte0811.industrialWires.blocks;
 
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
+import blusunrize.immersiveengineering.common.util.IELogger;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
@@ -58,6 +60,14 @@ public class ItemBlockIW extends ItemBlock {
 		if (block instanceof IPlacementCheck&&!((IPlacementCheck) block).canPlaceBlockAt(world, pos, stack)) {
 			return false;
 		}
-		return super.placeBlockAt(stack, player, world, pos, side, hitX, hitY, hitZ, newState);
+		boolean ret = super.placeBlockAt(stack, player, world, pos, side, hitX, hitY, hitZ, newState);
+		if (ret) {
+			TileEntity te = world.getTileEntity(pos);
+			if (te instanceof IEBlockInterfaces.IDirectionalTile) {
+				EnumFacing dir = ((IEBlockInterfaces.IDirectionalTile) te).getFacingForPlacement(player, pos, side, hitX, hitY, hitZ);
+				((IEBlockInterfaces.IDirectionalTile) te).setFacing(dir);
+			}
+		}
+		return ret;
 	}
 }

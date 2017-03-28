@@ -44,6 +44,7 @@ public abstract class PanelComponent {
 	private static final Map<String, Supplier<PanelComponent>> baseCreaters = new HashMap<>();
 	static {
 		baseCreaters.put("lightedButton", LightedButton::new);
+		baseCreaters.put("label", Label::new);
 	}
 	protected abstract void writeCustomNBT(NBTTagCompound nbt);
 	protected abstract void readCustomNBT(NBTTagCompound nbt);
@@ -52,6 +53,7 @@ public abstract class PanelComponent {
 	@Nonnull
 	public abstract PanelComponent copyOf();
 
+	//well, only relative in the x/z directions
 	public abstract AxisAlignedBB getBlockRelativeAABB();
 
 	public abstract boolean interactWith(Vec3d hitRelative, TileEntityPanel tile);
@@ -108,9 +110,31 @@ public abstract class PanelComponent {
 		double px = te.getPos().getX()-TileEntityRendererDispatcher.staticPlayerX;
 		double py = te.getPos().getY()-TileEntityRendererDispatcher.staticPlayerY;
 		double pz = te.getPos().getZ()-TileEntityRendererDispatcher.staticPlayerZ;
-		RenderGlobal.func_189697_a(getBlockRelativeAABB().expandXyz(0.002).offset(px, py, pz), 0.0F, 0.0F, 0.0F, 0.4F);
+		RenderGlobal.func_189697_a(te.apply(te.components.getPanelTopTransform(), getBlockRelativeAABB()).expandXyz(0.002).offset(px, py, pz), 0.0F, 0.0F, 0.0F, 0.4F);
 		GlStateManager.depthMask(true);
 		GlStateManager.enableTexture2D();
 		GlStateManager.disableBlend();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		PanelComponent that = (PanelComponent) o;
+
+		if (Float.compare(that.panelHeight, panelHeight) != 0) return false;
+		if (Float.compare(that.x, x) != 0) return false;
+		if (Float.compare(that.y, y) != 0) return false;
+		return type.equals(that.type);
+	}
+
+	@Override
+	public int hashCode() {
+		int result = (panelHeight != +0.0f ? Float.floatToIntBits(panelHeight) : 0);
+		result = 31 * result + (x != +0.0f ? Float.floatToIntBits(x) : 0);
+		result = 31 * result + (y != +0.0f ? Float.floatToIntBits(y) : 0);
+		result = 31 * result + type.hashCode();
+		return result;
 	}
 }

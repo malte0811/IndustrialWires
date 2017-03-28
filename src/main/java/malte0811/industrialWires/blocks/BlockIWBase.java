@@ -19,9 +19,14 @@
 package malte0811.industrialWires.blocks;
 
 import blusunrize.immersiveengineering.api.IEProperties;
+import blusunrize.immersiveengineering.api.energy.wires.IImmersiveConnectable;
+import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
 import blusunrize.immersiveengineering.common.util.Utils;
 import malte0811.industrialWires.IndustrialWires;
+import malte0811.industrialWires.blocks.controlpanel.PropertyComponents;
+import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
+import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -39,11 +44,13 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 public abstract class BlockIWBase extends Block {
 	private IProperty[] properties;
@@ -87,6 +94,19 @@ public abstract class BlockIWBase extends Block {
 		return state;
 	}
 
+	@Override
+	public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
+		state = super.getExtendedState(state, world, pos);
+		if (state instanceof IExtendedBlockState) {
+			TileEntity te = world.getTileEntity(pos);
+			if (te instanceof IImmersiveConnectable&&world instanceof World) {
+				Set<ImmersiveNetHandler.Connection> conns = ImmersiveNetHandler.INSTANCE.getConnections((World)world, pos);
+				state = ((IExtendedBlockState) state).withProperty(IEProperties.CONNECTIONS, MiscUtils.genConnBlockstate(conns, (World) world));
+			}
+		}
+		return state;
+	}
+
 	protected  <V extends Comparable<V>> IBlockState applyProperty(IBlockState in, IProperty<V> prop, V val) {
 		return in.withProperty(prop, val);
 	}
@@ -105,10 +125,6 @@ public abstract class BlockIWBase extends Block {
 								ItemStack stack) {
 		super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
 		TileEntity te = worldIn.getTileEntity(pos);
-		if (te instanceof IEBlockInterfaces.IDirectionalTile) {
-			((IEBlockInterfaces.IDirectionalTile)te).setFacing(
-					state.getValue(((IEBlockInterfaces.IDirectionalTile) te).getFacingLimitation()==2?IEProperties.FACING_HORIZONTAL:IEProperties.FACING_ALL));
-		}
 		if (te instanceof IHasDummyBlocksIW) {
 			((IHasDummyBlocksIW) te).placeDummies(state);
 		}

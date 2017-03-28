@@ -33,16 +33,20 @@ public class LightedButton extends PanelComponent {
 	public int color;
 	public boolean active;
 	public boolean latching;
+	public int rsOutputId;
+	public int rsOutputChannel;
 	private AxisAlignedBB aabb;
 	private int ticksTillOff;
 	public LightedButton() {
 		super("lightedButton");
 	}
-	public LightedButton(int color, boolean active, boolean latching) {
+	public LightedButton(int color, boolean active, boolean latching, int rsOutputId, int rsOutputChannel) {
 		this();
 		this.color = color;
 		this.active = active;
 		this.latching = latching;
+		this.rsOutputChannel = rsOutputChannel;
+		this.rsOutputId = rsOutputId;
 	}
 
 	@Override
@@ -51,6 +55,8 @@ public class LightedButton extends PanelComponent {
 		nbt.setInteger("timeout", ticksTillOff);
 		nbt.setBoolean("active", active);
 		nbt.setBoolean("latching", latching);
+		nbt.setInteger("rsChannel", rsOutputChannel);
+		nbt.setInteger("rsId", rsOutputId);
 	}
 
 	@Override
@@ -59,6 +65,8 @@ public class LightedButton extends PanelComponent {
 		ticksTillOff = nbt.getInteger("timeout");
 		active = nbt.getBoolean("active");
 		latching = nbt.getBoolean("latching");
+		rsOutputChannel = nbt.getInteger("rsChannel");
+		rsOutputId = nbt.getInteger("rsId");
 	}
 	private final static float[] sideColor = {.8F, .8F, .8F};
 	private final static float size = .0625F;
@@ -77,7 +85,7 @@ public class LightedButton extends PanelComponent {
 	@Override
 	@Nonnull
 	public PanelComponent copyOf() {
-		LightedButton ret = new LightedButton(color, active, latching);
+		LightedButton ret = new LightedButton(color, active, latching, rsOutputId, rsOutputChannel);
 		ret.setX(x);
 		ret.setY(y);
 		return ret;
@@ -86,7 +94,7 @@ public class LightedButton extends PanelComponent {
 	@Override
 	public AxisAlignedBB getBlockRelativeAABB() {
 		if (aabb==null) {
-			aabb = new AxisAlignedBB(x, panelHeight, y, x+size, panelHeight+size/2, y+size);
+			aabb = new AxisAlignedBB(x, 0, y, x+size, size/2, y+size);
 		}
 		return aabb;
 	}
@@ -96,7 +104,7 @@ public class LightedButton extends PanelComponent {
 		if (!latching&&active) {
 			return false;
 		}
-		active = !active;
+		setOut(!active, tile);
 		if (!latching) {
 			ticksTillOff = 10;
 		}
@@ -111,9 +119,20 @@ public class LightedButton extends PanelComponent {
 			ticksTillOff--;
 			tile.markDirty();
 			if (ticksTillOff==0) {
-				active = false;
-				tile.triggerRenderUpdate();
+				setOut(false, tile);
 			}
+		}
+	}
+
+	private void setOut(boolean on, TileEntityPanel tile) {
+		active = on;
+		tile.markDirty();
+		tile.triggerRenderUpdate();
+		TileEntityRSPanelConn rs = tile.getRSConn(rsOutputId);
+		if (rs!=null) {
+			byte[] oldRS = rs.getCachedOutput();
+			oldRS[rsOutputChannel] = (byte) (on ? 15 : 0);
+			rs.updateInternalRSValues(oldRS);
 		}
 	}
 
@@ -121,6 +140,7 @@ public class LightedButton extends PanelComponent {
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
+		if (!super.equals(o)) return false;
 
 		LightedButton that = (LightedButton) o;
 
@@ -131,7 +151,8 @@ public class LightedButton extends PanelComponent {
 
 	@Override
 	public int hashCode() {
-		int result = color;
+		int result = super.hashCode();
+		result = 31 * result + color;
 		result = 31 * result + (active ? 1 : 0);
 		result = 31 * result + (latching ? 1 : 0);
 		return result;

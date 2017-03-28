@@ -37,6 +37,7 @@ import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.oredict.OreDictionary;
+import org.apache.commons.lang3.tuple.Pair;
 
 public class ClientEventHandler {
 	@SubscribeEvent
@@ -82,9 +83,9 @@ public class ClientEventHandler {
 			TileEntity tile = event.getPlayer().worldObj.getTileEntity(event.getTarget().getBlockPos());
 			if (tile instanceof TileEntityPanel) {
 				TileEntityPanel panel = (TileEntityPanel) tile;
-				PanelComponent pc = panel.getSelectedComponent(Minecraft.getMinecraft().thePlayer, event.getTarget().hitVec, true);
+				Pair<PanelComponent, RayTraceResult> pc = panel.getSelectedComponent(Minecraft.getMinecraft().thePlayer, event.getTarget().hitVec, true);
 				if (pc != null) {
-					pc.renderBox(panel);
+					pc.getLeft().renderBox(panel);
 					event.setCanceled(true);
 				}
 			}

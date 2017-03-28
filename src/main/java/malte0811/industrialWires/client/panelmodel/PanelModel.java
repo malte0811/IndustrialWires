@@ -20,8 +20,9 @@ package malte0811.industrialWires.client.panelmodel;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.ImmutableList;
 import malte0811.industrialWires.blocks.controlpanel.PropertyComponents;
-import malte0811.industrialWires.blocks.controlpanel.PropertyComponents.ComponentList;
+import malte0811.industrialWires.blocks.controlpanel.PropertyComponents.PanelRenderProperties;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
@@ -37,7 +38,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class PanelModel implements IBakedModel {
-	public final static Cache<ComponentList, AssembledBakedModel> modelCache = CacheBuilder.newBuilder()
+	public final static Cache<PanelRenderProperties, AssembledBakedModel> modelCache = CacheBuilder.newBuilder()
 			.maximumSize(100)
 			.expireAfterAccess(60, TimeUnit.SECONDS)
 			.build();//TODO make all components implement equals+hashCode
@@ -50,12 +51,16 @@ public class PanelModel implements IBakedModel {
 
 	@Override
 	public List<BakedQuad> getQuads(@Nullable IBlockState state, @Nullable EnumFacing side, long rand) {
+		if (side!=null) {
+			return ImmutableList.of();
+		}
 		if (state instanceof IExtendedBlockState) {
-			ComponentList cl = ((IExtendedBlockState) state).getValue(PropertyComponents.INSTANCE);
+			PanelRenderProperties cl = ((IExtendedBlockState) state).getValue(PropertyComponents.INSTANCE);
+
 			if (cl == null) {
 				return base.getQuads(state, side, rand);
 			}
-			//modelCache.invalidateAll();//TODO remove
+			modelCache.invalidateAll();//TODO remove
 			AssembledBakedModel m = modelCache.getIfPresent(cl);
 			if (m == null) {
 				m = new AssembledBakedModel(cl, base, rand);
@@ -98,11 +103,11 @@ public class PanelModel implements IBakedModel {
 
 	public class AssembledBakedModel implements IBakedModel {
 		IBakedModel basic;
-		ComponentList components;
+		PanelRenderProperties components;
 		List<BakedQuad> quads;
 
 
-		public AssembledBakedModel(ComponentList comp, IBakedModel b, long posRand) {
+		public AssembledBakedModel(PanelRenderProperties comp, IBakedModel b, long posRand) {
 			basic = b;
 			components = comp;
 		}

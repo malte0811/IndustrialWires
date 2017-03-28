@@ -32,6 +32,7 @@ import malte0811.industrialWires.blocks.BlockJacobsLadder;
 import malte0811.industrialWires.blocks.TileEntityJacobsLadder;
 import malte0811.industrialWires.blocks.controlpanel.BlockPanel;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
+import malte0811.industrialWires.blocks.controlpanel.TileEntityRSPanelConn;
 import malte0811.industrialWires.blocks.converter.BlockMechanicalConverter;
 import malte0811.industrialWires.blocks.converter.TileEntityIEMotor;
 import malte0811.industrialWires.blocks.converter.TileEntityMechICtoIE;
@@ -103,7 +104,8 @@ public class IndustrialWires {
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorHV.class, "ic2ConnectorHV");
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorGlass.class, "ic2ConnectorGlass");
 		GameRegistry.registerTileEntity(TileEntityJacobsLadder.class, MODID+":jacobsLadder");
-		GameRegistry.registerTileEntity(TileEntityPanel.class, MODID+":control_panels");
+		GameRegistry.registerTileEntity(TileEntityPanel.class, MODID+":control_panel");
+		GameRegistry.registerTileEntity(TileEntityRSPanelConn.class, MODID+":control_panel_rs");
 		if (mechConv!=null) {
 			GameRegistry.registerTileEntity(TileEntityIEMotor.class, MODID+":ieMotor");
 			GameRegistry.registerTileEntity(TileEntityMechICtoIE.class, MODID+":mechIcToIe");

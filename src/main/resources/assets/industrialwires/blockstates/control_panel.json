@@ -26,6 +26,14 @@
         "rotation": {"y": -90 }
       }}
     },
+    "type": {
+      "rs_wire": {
+        "model": "immersiveengineering:smartmodel/conn_ic2_conn_gold"
+      },
+      "top": {
+        "model": "industrialwires:smartmodel/panel_normal"
+      }
+    },
     "inventory": {
       "model":"industrialwires:panel_normal"
     }

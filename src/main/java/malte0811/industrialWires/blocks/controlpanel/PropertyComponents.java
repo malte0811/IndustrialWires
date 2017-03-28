@@ -18,11 +18,13 @@
 
 package malte0811.industrialWires.blocks.controlpanel;
 
+import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
+import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.property.IUnlistedProperty;
 
 import java.util.ArrayList;
 
-public class PropertyComponents implements IUnlistedProperty<PropertyComponents.ComponentList> {
+public class PropertyComponents implements IUnlistedProperty<PropertyComponents.PanelRenderProperties> {
 	public static PropertyComponents INSTANCE = new PropertyComponents();
 	@Override
 	public String getName() {
@@ -30,25 +32,28 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 	}
 
 	@Override
-	public boolean isValid(ComponentList value) {
+	public boolean isValid(PanelRenderProperties value) {
 		return value!=null;
 	}
 
 	@Override
-	public Class<ComponentList> getType() {
-		return ComponentList.class;
+	public Class<PanelRenderProperties> getType() {
+		return PanelRenderProperties.class;
 	}
 
 	@Override
-	public String valueToString(ComponentList value) {
+	public String valueToString(PanelRenderProperties value) {
 		return value.toString();
 	}
 
-	public static class ComponentList extends ArrayList<PanelComponent> {
-		public ComponentList() {
+	public static class PanelRenderProperties extends ArrayList<PanelComponent> {
+		public EnumFacing facing = EnumFacing.NORTH;
+		public float height = .5F;
+		public TileEntityPanel panel;//Don't compare this+erase it on copying
+		public PanelRenderProperties() {
 			super();
 		}
-		public ComponentList(int length) {
+		public PanelRenderProperties(int length) {
 			super(length);
 		}
 		@Override
@@ -62,10 +67,38 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 			}
 			return ret+"]";
 		}
-		public ComponentList copyOf() {
-			ComponentList ret = new ComponentList(size());
-			ret.addAll(this);
+		public Matrix4 getPanelTopTransform() {
+			Matrix4 ret = new Matrix4();
+			ret.translate(.5, height, .5);
+			ret.rotate(-facing.getHorizontalAngle()*Math.PI/180+Math.PI, 0, 1, 0);
+			ret.translate(-.5, 0, -.5);
 			return ret;
+		}
+		public PanelRenderProperties copyOf() {
+			PanelRenderProperties ret = new PanelRenderProperties(size());
+			for (PanelComponent pc:this) {
+				ret.add(pc.copyOf());
+			}
+			ret.facing = facing;
+			return ret;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			if (!super.equals(o)) return false;
+
+			PanelRenderProperties that = (PanelRenderProperties) o;
+
+			return facing == that.facing;
+		}
+
+		@Override
+		public int hashCode() {
+			int result = super.hashCode();
+			result = 31 * result + facing.hashCode();
+			return result;
 		}
 	}
 }

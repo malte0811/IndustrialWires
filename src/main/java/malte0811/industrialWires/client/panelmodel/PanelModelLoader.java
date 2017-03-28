@@ -23,6 +23,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import malte0811.industrialWires.IndustrialWires;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.VertexFormat;
@@ -86,6 +87,7 @@ public class PanelModelLoader implements ICustomModelLoader {
 		public Collection<ResourceLocation> getTextures() {
 			try {
 				List<ResourceLocation> ret = new ArrayList<>(ModelLoaderRegistry.getModel(base).getTextures());
+				ret.add(new ResourceLocation("minecraft", "font/ascii"));
 				//ret.add(ModelLoader.White.LOCATION);
 				for (ResourceLocation res:ret) {
 					IELogger.info(res);
