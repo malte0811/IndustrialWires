@@ -31,6 +31,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -44,6 +45,18 @@ public class BlockPanel extends BlockIWBase implements IPlacementCheck, IMetaEnu
 	public static final PropertyEnum<BlockTypes_Panel> type = PropertyEnum.create("type", BlockTypes_Panel.class);
 	public BlockPanel() {
 		super(Material.IRON, "control_panel");
+		lightOpacity = 0;
+	}
+
+	@Override
+	public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer) {
+		switch (state.getValue(type)) {
+		case TOP:
+			return layer==BlockRenderLayer.CUTOUT;
+		case RS_WIRE:
+			return layer==BlockRenderLayer.TRANSLUCENT||layer==BlockRenderLayer.SOLID;
+		}
+		return super.canRenderInLayer(state, layer);
 	}
 
 	@Override
@@ -99,7 +112,7 @@ public class BlockPanel extends BlockIWBase implements IPlacementCheck, IMetaEnu
 		if (state instanceof IExtendedBlockState) {
 			TileEntity te = world.getTileEntity(pos);
 			if (te instanceof TileEntityPanel) {
-				state = ((IExtendedBlockState) state).withProperty(PropertyComponents.INSTANCE, ((TileEntityPanel) te).components);
+				state = ((IExtendedBlockState) state).withProperty(PropertyComponents.INSTANCE, ((TileEntityPanel) te).getComponents());
 			}
 		}
 		return state;
@@ -122,8 +135,28 @@ public class BlockPanel extends BlockIWBase implements IPlacementCheck, IMetaEnu
 
 	@Override
 	public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list) {
-		//TODO figure out a way to properly place control panels...
 		list.add(new ItemStack(itemIn, 1, 0));
 		list.add(new ItemStack(itemIn, 1, 1));
+		list.add(new ItemStack(itemIn, 1, 2));
+	}
+	@Override
+	public boolean isFullBlock(IBlockState state) {
+		return false;
+	}
+	@Override
+	public boolean isFullCube(IBlockState state) {
+		return false;
+	}
+	@Override
+	public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos) {
+		return false;
+	}
+	@Override
+	public boolean isOpaqueCube(IBlockState state) {
+		return false;
+	}
+	@Override
+	public boolean isVisuallyOpaque() {
+		return false;
 	}
 }

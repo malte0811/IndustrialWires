@@ -25,6 +25,7 @@ import malte0811.industrialWires.client.RawQuad;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.util.EnumFacing;
@@ -38,13 +39,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class PanelUtils {
+	public static TextureAtlasSprite IRON_BLOCK_TEX;
 	private PanelUtils() {}
 
 	public static List<BakedQuad> generateQuads(PropertyComponents.PanelRenderProperties components) {
-		//TODO different sizes of panels?
+		if (IRON_BLOCK_TEX==null) {
+			IRON_BLOCK_TEX = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:blocks/iron_block");
+		}
 		List<BakedQuad> ret = new ArrayList<>();
-		Matrix4 m4 = components.getPanelTopTransform().copy();
-		Matrix4 m4RotOnly = components.getPanelTopTransform();
+		Matrix4 m4 = components.getPanelTopTransform();
+		Matrix4 m4RotOnly = m4.copy();
 		m4RotOnly.invert();
 		m4RotOnly.transpose();
 		for (PanelComponent pc:components) {
@@ -54,6 +58,17 @@ public final class PanelUtils {
 				ret.add(bakeQuad(bq, m4Here, m4RotOnly));
 			}
 		}
+		Matrix4 baseTrans = components.getPanelBaseTransform();
+		Matrix4 baseNorm = baseTrans.copy();
+		baseNorm.invert();
+		baseNorm.transpose();
+
+		List<RawQuad> rawOut = new ArrayList<>();
+		addTexturedBox(new Vector3f(0, 0, 0), new Vector3f(1, components.height, 1), rawOut, UV_FULL, IRON_BLOCK_TEX);
+		for (RawQuad bq:rawOut) {
+			ret.add(bakeQuad(bq, baseTrans, baseNorm));
+		}
+
 		return ret;
 	}
 
@@ -103,32 +118,43 @@ public final class PanelUtils {
 				builder.put(e);
 			}
 	}
+	private static final float[] UV_FULL = {0, 0, 16, 16};
+	private static final float[] WHITE = {1, 1, 1, 1};
+	public static void addTexturedBox(Vector3f min, Vector3f size, List<RawQuad> out, float[] uvs, TextureAtlasSprite tex) {
+		addBox(WHITE, WHITE, WHITE, min, size, out, true, uvs, tex);
+	}
 	public static void addColoredBox(float[] colorTop, float[] colorSides, float[] colorBottom, Vector3f min, Vector3f size, List<RawQuad> out, boolean doBottom) {
+		addBox(colorTop, colorSides, colorBottom, min, size, out, doBottom, UV_FULL, ModelLoader.White.INSTANCE);
+	}
+	public static void addBox(float[] colorTop, float[] colorSides, float[] colorBottom, Vector3f min, Vector3f size, List<RawQuad> out, boolean doBottom, float[] uvs, TextureAtlasSprite tex) {
 		addQuad(out, new Vector3f(min.x, min.y+size.y, min.z), new Vector3f(min.x, min.y+size.y, min.z+size.z),
 				new Vector3f(min.x+size.x, min.y+size.y, min.z+size.z), new Vector3f(min.x+size.x, min.y+size.y, min.z),
-				EnumFacing.UP, colorTop);
+				EnumFacing.UP, colorTop, tex, uvs);
 		if (doBottom) {
 			addQuad(out, new Vector3f(min.x, min.y, min.z), new Vector3f(min.x+size.x, min.y, min.z),
 					new Vector3f(min.x+size.x, min.y, min.z+size.z), new Vector3f(min.x, min.y, min.z+size.z),
-					EnumFacing.UP, colorBottom);
+					EnumFacing.UP, colorBottom, tex, uvs);
 		}
 		addQuad(out, new Vector3f(min.x, min.y, min.z), new Vector3f(min.x, min.y, min.z+size.z),
 				new Vector3f(min.x, min.y+size.y, min.z+size.z), new Vector3f(min.x, min.y+size.y, min.z),
-				EnumFacing.WEST, colorSides);
+				EnumFacing.WEST, colorSides, tex, uvs);
 		addQuad(out, new Vector3f(min.x+size.x, min.y, min.z), new Vector3f(min.x+size.x, min.y+size.y, min.z),
 				new Vector3f(min.x+size.x, min.y+size.y, min.z+size.z), new Vector3f(min.x+size.x, min.y, min.z+size.z),
-				EnumFacing.EAST, colorSides);
+				EnumFacing.EAST, colorSides, tex, uvs);
 		addQuad(out, new Vector3f(min.x, min.y, min.z), new Vector3f(min.x, min.y+size.y, min.z),
 				new Vector3f(min.x+size.x, min.y+size.y, min.z), new Vector3f(min.x+size.x, min.y, min.z),
-				EnumFacing.NORTH, colorSides);
+				EnumFacing.NORTH, colorSides, tex, uvs);
 		addQuad(out, new Vector3f(min.x, min.y, min.z+size.z), new Vector3f(min.x+size.x, min.y, min.z+size.z),
 				new Vector3f(min.x+size.x, min.y+size.y, min.z+size.z), new Vector3f(min.x, min.y+size.y, min.z+size.z),
-				EnumFacing.SOUTH, colorSides);
+				EnumFacing.SOUTH, colorSides, tex, uvs);
 	}
-	private static final float[] UV_FULL = {0, 0, 1, 1};
-	public static void addQuad(List<RawQuad> out, Vector3f v0, Vector3f v1, Vector3f v2, Vector3f v3, EnumFacing dir, float[] color) {
+	public static void addColoredQuad(List<RawQuad> out, Vector3f v0, Vector3f v1, Vector3f v2, Vector3f v3, EnumFacing dir, float[] color) {
+		addQuad(out, v0, v1, v2, v3, dir, color, Minecraft.getMinecraft().getTextureMapBlocks().getTextureExtry(ModelLoader.White.LOCATION.toString()), UV_FULL);
+	}
+
+	public static void addQuad(List<RawQuad> out, Vector3f v0, Vector3f v1, Vector3f v2, Vector3f v3, EnumFacing dir, float[] color, TextureAtlasSprite tex, float[] uvs) {
 		Vec3i dirV = dir.getDirectionVec();
-		out.add(new RawQuad(v0, v1, v2, v3, dir, Minecraft.getMinecraft().getTextureMapBlocks().getTextureExtry(ModelLoader.White.LOCATION.toString()),
-				color, new Vector3f(dirV.getX(), dirV.getY(), dirV.getZ()), UV_FULL));
+		out.add(new RawQuad(v0, v1, v2, v3, dir, tex,
+				color, new Vector3f(dirV.getX(), dirV.getY(), dirV.getZ()), uvs));
 	}
 }

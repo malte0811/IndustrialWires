@@ -28,6 +28,7 @@ import org.lwjgl.util.vector.Vector3f;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 public class LightedButton extends PanelComponent {
 	public int color;
@@ -37,6 +38,7 @@ public class LightedButton extends PanelComponent {
 	public int rsOutputChannel;
 	private AxisAlignedBB aabb;
 	private int ticksTillOff;
+	private BiConsumer<Integer, Byte> rsOut;
 	public LightedButton() {
 		super("lightedButton");
 	}
@@ -88,6 +90,7 @@ public class LightedButton extends PanelComponent {
 		LightedButton ret = new LightedButton(color, active, latching, rsOutputId, rsOutputChannel);
 		ret.setX(x);
 		ret.setY(y);
+		ret.panelHeight = panelHeight;
 		return ret;
 	}
 
@@ -124,15 +127,20 @@ public class LightedButton extends PanelComponent {
 		}
 	}
 
+	@Override
+	public void registerRSOutput(int id, @Nonnull BiConsumer<Integer, Byte> out) {
+		if (id==rsOutputId) {
+			rsOut = out;
+			rsOut.accept(rsOutputChannel, (byte) (active?15:0));
+		}
+	}
+
 	private void setOut(boolean on, TileEntityPanel tile) {
 		active = on;
 		tile.markDirty();
 		tile.triggerRenderUpdate();
-		TileEntityRSPanelConn rs = tile.getRSConn(rsOutputId);
-		if (rs!=null) {
-			byte[] oldRS = rs.getCachedOutput();
-			oldRS[rsOutputChannel] = (byte) (on ? 15 : 0);
-			rs.updateInternalRSValues(oldRS);
+		if (rsOut!=null) {
+			rsOut.accept(rsOutputChannel, (byte)(active?15:0));
 		}
 	}
 

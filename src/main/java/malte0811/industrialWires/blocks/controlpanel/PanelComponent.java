@@ -29,9 +29,12 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public abstract class PanelComponent {
@@ -45,6 +48,7 @@ public abstract class PanelComponent {
 	static {
 		baseCreaters.put("lightedButton", LightedButton::new);
 		baseCreaters.put("label", Label::new);
+		baseCreaters.put("indicator_light", IndicatorLight::new);
 	}
 	protected abstract void writeCustomNBT(NBTTagCompound nbt);
 	protected abstract void readCustomNBT(NBTTagCompound nbt);
@@ -59,6 +63,15 @@ public abstract class PanelComponent {
 	public abstract boolean interactWith(Vec3d hitRelative, TileEntityPanel tile);
 
 	public abstract void update(TileEntityPanel tile);
+
+	@Nullable
+	public Consumer<byte[]> getRSInputHandler(int id, TileEntityPanel panel) {
+		return null;
+	}
+
+	public void registerRSOutput(int id, @Nonnull BiConsumer<Integer, Byte> out) {}
+
+	public void unregisterRSOutput(int id, @Nonnull BiConsumer<Integer, Byte> out) {}
 
 	public float getX() {
 		return x;
@@ -110,7 +123,7 @@ public abstract class PanelComponent {
 		double px = te.getPos().getX()-TileEntityRendererDispatcher.staticPlayerX;
 		double py = te.getPos().getY()-TileEntityRendererDispatcher.staticPlayerY;
 		double pz = te.getPos().getZ()-TileEntityRendererDispatcher.staticPlayerZ;
-		RenderGlobal.func_189697_a(te.apply(te.components.getPanelTopTransform(), getBlockRelativeAABB()).expandXyz(0.002).offset(px, py, pz), 0.0F, 0.0F, 0.0F, 0.4F);
+		RenderGlobal.func_189697_a(te.apply(te.getComponents().getPanelTopTransform(), getBlockRelativeAABB()).expandXyz(0.002).offset(px, py, pz), 0.0F, 0.0F, 0.0F, 0.4F);
 		GlStateManager.depthMask(true);
 		GlStateManager.enableTexture2D();
 		GlStateManager.disableBlend();

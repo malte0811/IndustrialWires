@@ -40,15 +40,12 @@ import java.util.*;
 
 public class PanelModelLoader implements ICustomModelLoader {
 	public static final String RESOURCE_BASE = "models/block/";
-	public static final String RESOURCE_LOCATION = "smartmodel/panel_";
-	public static final Map<String, ResourceLocation> baseModels = new HashMap<>();
-	static {
-		baseModels.put("normal", new ResourceLocation(IndustrialWires.MODID, "block/panel_normal"));
-	}
+	public static final String RESOURCE_LOCATION = "smartmodel/panel";
 
 	@Override
 	public void onResourceManagerReload(IResourceManager resourceManager) {
 		PanelModel.modelCache.invalidateAll();
+		PanelUtils.IRON_BLOCK_TEX = null;
 	}
 
 	@Override
@@ -61,37 +58,24 @@ public class PanelModelLoader implements ICustomModelLoader {
 		String resourcePath = modelLocation.getResourcePath();
 		int pos = resourcePath.indexOf(RESOURCE_LOCATION);
 		if (pos >= 0) {
-			pos += RESOURCE_LOCATION.length();
-			String name = resourcePath.substring(pos);
-			ResourceLocation r = baseModels.get(name);
-			if (r != null) {
-				return new PanelModelBase(r);
-			}
+				return new PanelModelBase();
 		}
 		return ModelLoaderRegistry.getMissingModel();
 	}
 
 	private class PanelModelBase implements IModel {
-		ResourceLocation base;
-
-		public PanelModelBase(ResourceLocation b) {
-			base = b;
-		}
 
 		@Override
 		public Collection<ResourceLocation> getDependencies() {
-			return ImmutableList.of(base);
+			return ImmutableList.of();
 		}
 
 		@Override
 		public Collection<ResourceLocation> getTextures() {
 			try {
-				List<ResourceLocation> ret = new ArrayList<>(ModelLoaderRegistry.getModel(base).getTextures());
+				List<ResourceLocation> ret = new ArrayList<>();
 				ret.add(new ResourceLocation("minecraft", "font/ascii"));
-				//ret.add(ModelLoader.White.LOCATION);
-				for (ResourceLocation res:ret) {
-					IELogger.info(res);
-				}
+				ret.add(new ResourceLocation("minecraft", "blocks/iron_block"));
 				return ret;
 			} catch (Exception e) {
 				throw new RuntimeException(e);
@@ -101,12 +85,7 @@ public class PanelModelLoader implements ICustomModelLoader {
 		@Override
 		public IBakedModel bake(IModelState state, VertexFormat format,	Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter) {
 			try {
-				IModel model = ModelLoaderRegistry.getModel(base);
-				if (model instanceof OBJModel) {
-					OBJModel obj = (OBJModel) model;
-					model = obj.process(ImmutableMap.of("flip-v", "true"));
-				}
-				return new PanelModel(model.bake(state, format, bakedTextureGetter));
+				return new PanelModel();
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}

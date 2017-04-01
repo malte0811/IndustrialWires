@@ -49,6 +49,7 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 	public static class PanelRenderProperties extends ArrayList<PanelComponent> {
 		public EnumFacing facing = EnumFacing.NORTH;
 		public float height = .5F;
+		public EnumFacing top = EnumFacing.UP;
 		public TileEntityPanel panel;//Don't compare this+erase it on copying
 		public PanelRenderProperties() {
 			super();
@@ -68,18 +69,36 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 			return ret+"]";
 		}
 		public Matrix4 getPanelTopTransform() {
+			return getPanelBaseTransform().translate(0, height, 0);
+		}
+		public Matrix4 getPanelBaseTransform() {
 			Matrix4 ret = new Matrix4();
-			ret.translate(.5, height, .5);
-			ret.rotate(-facing.getHorizontalAngle()*Math.PI/180+Math.PI, 0, 1, 0);
-			ret.translate(-.5, 0, -.5);
+			ret.translate(.5, .5, .5);
+			switch (top) {
+			case DOWN:
+				ret.rotate(Math.PI, 0, 0, 1);
+			case UP:
+				ret.rotate(-facing.getHorizontalAngle() * Math.PI / 180 + Math.PI, 0, 1, 0);
+				break;
+			case NORTH:
+			case SOUTH:
+			case WEST:
+			case EAST:
+				ret.rotate(Math.PI/2, 1, 0, 0);
+				ret.rotate(top.getHorizontalAngle() * Math.PI / 180, 0, 0, 1);
+				break;
+			}
+			ret.translate(-.5, -.5, -.5);
 			return ret;
 		}
+
 		public PanelRenderProperties copyOf() {
 			PanelRenderProperties ret = new PanelRenderProperties(size());
 			for (PanelComponent pc:this) {
 				ret.add(pc.copyOf());
 			}
 			ret.facing = facing;
+			ret.top = top;
 			return ret;
 		}
 
@@ -91,13 +110,17 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 
 			PanelRenderProperties that = (PanelRenderProperties) o;
 
-			return facing == that.facing;
+			if (Float.compare(that.height, height) != 0) return false;
+			if (facing != that.facing) return false;
+			return top == that.top;
 		}
 
 		@Override
 		public int hashCode() {
 			int result = super.hashCode();
 			result = 31 * result + facing.hashCode();
+			result = 31 * result + (height != +0.0f ? Float.floatToIntBits(height) : 0);
+			result = 31 * result + top.hashCode();
 			return result;
 		}
 	}

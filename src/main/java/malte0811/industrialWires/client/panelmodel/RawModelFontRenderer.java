@@ -25,7 +25,7 @@ public class RawModelFontRenderer extends FontRenderer {
 	public RawModelFontRenderer(GameSettings settings, ResourceLocation font, TextureManager manager, boolean isUnicode, float scale) {
 		super(settings, font, manager, isUnicode);
 		manager.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-		this.scale = scale;
+		this.scale = scale/(9*16);
 		onResourceManagerReload(null);
 	}
 
@@ -71,7 +71,7 @@ public class RawModelFontRenderer extends FontRenderer {
 		colorA[0] = r;
 		colorA[1] = g;
 		colorA[2] = b;
-		colorA[3] = a;
+		colorA[3] = 1;
 	}
 
 	@Override

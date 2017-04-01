@@ -6,7 +6,8 @@ import java.util.Locale;
 
 public enum  BlockTypes_Panel implements IStringSerializable {
 	TOP,
-	RS_WIRE;
+	RS_WIRE,
+	DUMMY;
 
 	@Override
 	public String getName() {

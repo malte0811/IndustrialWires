@@ -24,10 +24,12 @@ import blusunrize.immersiveengineering.common.util.IELogger;
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import malte0811.industrialWires.blocks.IBlockBoundsIW;
 import malte0811.industrialWires.blocks.TileEntityIWBase;
+import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -44,40 +46,34 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTile, IBlockBoundsIW, IPlayerInteraction, ITickable {
-	PropertyComponents.PanelRenderProperties components = new PropertyComponents.PanelRenderProperties();
+	private PropertyComponents.PanelRenderProperties components = new PropertyComponents.PanelRenderProperties();
+	boolean firstTick = true;
 	// non-rendered properties
-	//relative positions!
-	private List<BlockPos> rsWireConns = new ArrayList<>();
+	//TODO does the lambda stuff cause GC issues?
 	{
-		Random r = new Random();
-		PanelComponent b = new LightedButton(0xff<<(8*r.nextInt(3)), false, false, 0, 0);
-		b.setX(3/16F);
-		b.setY(.75F);
-		b.setPanelHeight(components.height);
-		components.add(b);
-		b = new LightedButton(0xff<<(8*r.nextInt(3)), false, true, 0, 1);
-		b.setX(8/16F);
-		b.setY(.75F);
-		b.setPanelHeight(components.height);
-		components.add(b);
-		b = new LightedButton(0xff<<(8*r.nextInt(3)), false, true, 0, 2);
-		b.setX(13/16F);
-		b.setY(.75F);
-		b.setPanelHeight(components.height);
-		components.add(b);
-		b = new Label("TESTtextIII");
-		b.setX(3/16F);
-		b.setY(.25F);
-		b.setPanelHeight(components.height);
-		components.add(b);
-
-		rsWireConns.add(new BlockPos(0, -1, 0));//one RS output 1 block below the panel
+		for (int i = 0;i<16;i++) {
+			int color = EnumDyeColor.byMetadata(i).getMapColor().colorValue;
+			IndicatorLight ind = new IndicatorLight(0, i, color);
+			LightedButton btn = new LightedButton(color, false, true, 1, i);
+			Label lbl = new Label("->", color);
+			ind.setX(0);
+			ind.setY(i/16F);
+			ind.setPanelHeight(.5F);
+			lbl.setX(2/16F);
+			lbl.setY(i/16F);
+			lbl.setPanelHeight(.5F);
+			btn.setX(5/16F);
+			btn.setY(i/16F);
+			btn.setPanelHeight(.5F);
+			components.add(ind);
+			components.add(lbl);
+			components.add(btn);
+		}
 	}
 
 	@Override
@@ -86,10 +82,16 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 			pc.update(this);
 		}
 		if (!worldObj.isRemote) {
-			for (int i = 0; i < rsWireConns.size(); i++) {
-				TileEntityRSPanelConn rs = getRSConn(i);
-				if (rs != null)
-					rs.flushRS();
+			if (firstTick) {
+				List<BlockPos> parts = MiscUtils.discoverPanelParts(worldObj, pos);
+				for (BlockPos bp:parts) {
+					TileEntity te = worldObj.getTileEntity(bp);
+					if (te instanceof TileEntityRSPanelConn) {
+						//TODO deal with people adding 2 RS ports with the same ID!
+						((TileEntityRSPanelConn) te).requestRSConn(this);
+					}
+				}
+				firstTick = false;
 			}
 		}
 	}
@@ -105,11 +107,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		out.setTag("components", comps);
 		out.setInteger("facing", components.facing.getHorizontalIndex());
 		out.setFloat("height", components.height);
-		NBTTagList rsConns = new NBTTagList();
-		for (BlockPos pos:rsWireConns) {
-			rsConns.appendTag(new NBTTagLong(pos.toLong()));
-		}
-		out.setTag("rsConns", rsConns);
+		out.setInteger("top", components.top.getIndex());
 	}
 
 	@Override
@@ -122,13 +120,10 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 				components.add(pc);
 			}
 		}
-		l = in.getTagList("rsConns", 4);
-		rsWireConns.clear();
-		for (int i = 0;i<l.tagCount();i++) {
-			rsWireConns.add(BlockPos.fromLong(((NBTTagLong)l.get(i)).getLong()));
-		}
 		components.facing = EnumFacing.getHorizontal(in.getInteger("facing"));
 		components.height = in.getFloat("height");
+		components.top = EnumFacing.getFront(in.getInteger("top"));
+		defAABB = null;
 	}
 
 	@Override
@@ -144,6 +139,25 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 	@Override
 	public int getFacingLimitation() {
 		return 2;
+	}
+
+	@Override
+	public EnumFacing getFacingForPlacement(EntityLivingBase placer, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ) {
+		switch (side) {
+		case UP:
+			components.top = EnumFacing.UP;
+			return IDirectionalTile.super.getFacingForPlacement(placer, pos, side, hitX, hitY, hitZ);
+		case DOWN:
+			components.top = EnumFacing.DOWN;
+			return IDirectionalTile.super.getFacingForPlacement(placer, pos, side, hitX, hitY, hitZ);
+		case NORTH:
+		case SOUTH:
+		case WEST:
+		case EAST:
+			components.top = side;
+			return EnumFacing.SOUTH;//Should not matter
+		}
+		return components.facing;
 	}
 
 	@Override
@@ -165,7 +179,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 	@Override
 	public AxisAlignedBB getBoundingBox() {
 		if (defAABB==null) {
-			defAABB = new AxisAlignedBB(0, 0, 0, 1, components.height, 1);
+			defAABB = apply(components.getPanelBaseTransform(), new AxisAlignedBB(0, 0, 0, 1, components.height, 1));
 		}
 		return defAABB;
 	}
@@ -208,16 +222,5 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		IBlockState state = worldObj.getBlockState(pos);
 		worldObj.notifyBlockUpdate(pos,state,state,3);
 		worldObj.addBlockEvent(pos, state.getBlock(), 255, 0);
-	}
-
-	public TileEntityRSPanelConn getRSConn(int id) {
-		if (id < 0 || id >= rsWireConns.size()) {
-			return null;
-		}
-		TileEntity te = worldObj.getTileEntity(pos.add(rsWireConns.get(id)));
-		if (te instanceof TileEntityRSPanelConn) {
-			return (TileEntityRSPanelConn) te;
-		}
-		return null;
 	}
 }

@@ -32,6 +32,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -99,9 +100,9 @@ public abstract class BlockIWBase extends Block {
 		state = super.getExtendedState(state, world, pos);
 		if (state instanceof IExtendedBlockState) {
 			TileEntity te = world.getTileEntity(pos);
-			if (te instanceof IImmersiveConnectable&&world instanceof World) {
-				Set<ImmersiveNetHandler.Connection> conns = ImmersiveNetHandler.INSTANCE.getConnections((World)world, pos);
-				state = ((IExtendedBlockState) state).withProperty(IEProperties.CONNECTIONS, MiscUtils.genConnBlockstate(conns, (World) world));
+			if (te instanceof IImmersiveConnectable) {
+				Set<ImmersiveNetHandler.Connection> conns = ImmersiveNetHandler.INSTANCE.getConnections(te.getWorld(), pos);
+				state = ((IExtendedBlockState) state).withProperty(IEProperties.CONNECTIONS, MiscUtils.genConnBlockstate(conns, te.getWorld()));
 			}
 		}
 		return state;
@@ -116,6 +117,10 @@ public abstract class BlockIWBase extends Block {
 		TileEntity te = worldIn.getTileEntity(pos);
 		if (te instanceof IHasDummyBlocksIW) {
 			((IHasDummyBlocksIW) te).breakDummies();
+		}
+		if(te instanceof IImmersiveConnectable) {
+			if(!worldIn.isRemote||!Minecraft.getMinecraft().isSingleplayer())//TODO fix this in IE!!!
+				ImmersiveNetHandler.INSTANCE.clearAllConnectionsFor(Utils.toCC(te), worldIn, !worldIn.isRemote&&worldIn.getGameRules().getBoolean("doTileDrops"));
 		}
 		super.breakBlock(worldIn, pos, state);
 		worldIn.removeTileEntity(pos);

@@ -3,65 +3,93 @@ package malte0811.industrialWires.blocks.controlpanel;
 import blusunrize.immersiveengineering.api.TargetingInfo;
 import blusunrize.immersiveengineering.api.energy.wires.IImmersiveConnectable;
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler;
+import blusunrize.immersiveengineering.api.energy.wires.TileEntityImmersiveConnectable;
 import blusunrize.immersiveengineering.api.energy.wires.WireType;
 import blusunrize.immersiveengineering.api.energy.wires.redstone.IRedstoneConnector;
 import blusunrize.immersiveengineering.api.energy.wires.redstone.RedstoneWireNetwork;
-import malte0811.industrialWires.blocks.TileEntityIWBase;
+import malte0811.industrialWires.util.MiscUtils;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
 
-//TODO implement IRedstoneConnector once there is a Maven build with it
-public class TileEntityRSPanelConn extends TileEntityIWBase implements IRedstoneConnector, ITickable {
+public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implements IRedstoneConnector, ITickable {
 	private byte[] out = new byte[16];
 	private boolean dirty = true;
+	private byte[] oldInput = new byte[16];
+	private Set<Consumer<byte[]>> changeListeners = new HashSet<>();
 	@Nonnull
 	private RedstoneWireNetwork network = new RedstoneWireNetwork().add(this);
-	private boolean hasConn = false;//TODO write to NBT
+	private boolean hasConn = false;
+	private int id;
 	{
 		for (int i = 0;i<16;i++) {
-			out[i] = -1;
+			oldInput[i] = -1;
 		}
 	}
 	private boolean loaded = false;
 
 	@Override
 	public void update() {
-		if(hasWorldObj() && !worldObj.isRemote && !loaded) {
-			loaded = true;
-			// completely reload the network
-			network.removeFromNetwork(null);
+		if(hasWorldObj() && !worldObj.isRemote) {
+			if (!loaded) {
+				loaded = true;
+				// completely reload the network
+				network.removeFromNetwork(null);
+				List<BlockPos> parts = MiscUtils.discoverPanelParts(worldObj, pos);
+				for (BlockPos bp:parts) {
+					TileEntity te = worldObj.getTileEntity(bp);
+					if (te instanceof TileEntityPanel) {
+						requestRSConn(((TileEntityPanel) te));
+					}
+				}
+			}
+			if (dirty) {
+				network.updateValues();
+				dirty = false;
+			}
 		}
 	}
 	@Override
-	public void writeNBT(NBTTagCompound out, boolean updatePacket) {
+	public void writeCustomNBT(NBTTagCompound out, boolean updatePacket) {
+		super.writeCustomNBT(out, updatePacket);
 		out.setByteArray("out", this.out);
+		out.setBoolean("hasConn", hasConn);
+		out.setInteger("rsId", id);
 	}
 
 	@Override
-	public void readNBT(NBTTagCompound in, boolean updatePacket) {
+	public void readCustomNBT(NBTTagCompound in, boolean updatePacket) {
+		super.readCustomNBT(in, updatePacket);
 		out = in.getByteArray("out");
+		hasConn = in.getBoolean("hasConn");
+		id = in.getInteger("rsId");
 	}
-	// <0 means don't care
-	public void updateInternalRSValues(byte[] output) {
-		out = output;
-		dirty = true;
 
-	}
-	public void flushRS() {
-		if (dirty) {
-			network.updateValues();
+	public void requestRSConn(TileEntityPanel panel) {
+		PropertyComponents.PanelRenderProperties p = panel.getComponents();
+		for (PanelComponent pc:p) {
+			Consumer<byte[]> listener = pc.getRSInputHandler(id, panel);
+			if (listener!=null) {
+				changeListeners.add(listener);
+			}
+			pc.registerRSOutput(id, (channel, value)->{
+				if (value!=out[channel]) {
+					dirty = true;
+					out[channel] = value;
+				}
+			});
 		}
-	}
-	public byte[] getInput() {
-		return network.channelValues;
-	}
-	public byte[] getCachedOutput() {
-		return out;
 	}
 
 	@Override
@@ -77,7 +105,12 @@ public class TileEntityRSPanelConn extends TileEntityIWBase implements IRedstone
 
 	@Override
 	public void onChange() {
-
+		if (!Arrays.equals(oldInput, network.channelValues)) {
+			oldInput = Arrays.copyOf(network.channelValues, 16);
+			for (Consumer<byte[]> c:changeListeners) {
+				c.accept(oldInput);
+			}
+		}
 	}
 
 	@Override
@@ -85,21 +118,6 @@ public class TileEntityRSPanelConn extends TileEntityIWBase implements IRedstone
 		for (int i = 0;i<16;i++) {
 			currIn[i] = (byte) Math.max(currIn[i], out[i]);
 		}
-	}
-
-	@Override
-	public boolean canConnect() {
-		return !hasConn;
-	}
-
-	@Override
-	public boolean isEnergyOutput() {
-		return false;
-	}
-
-	@Override
-	public int outputEnergy(int i, boolean b, int i1) {
-		return 0;
 	}
 
 	@Override
@@ -122,7 +140,7 @@ public class TileEntityRSPanelConn extends TileEntityIWBase implements IRedstone
 
 	@Override
 	public WireType getCableLimiter(TargetingInfo targetingInfo) {
-		return hasConn?WireType.REDSTONE:null;
+		return WireType.REDSTONE;
 	}
 
 	@Override
@@ -131,12 +149,14 @@ public class TileEntityRSPanelConn extends TileEntityIWBase implements IRedstone
 	}
 
 	@Override
-	public void onEnergyPassthrough(int i) {}
-
-	@Override
 	public void removeCable(ImmersiveNetHandler.Connection connection) {
 		hasConn = false;
 		network.removeFromNetwork(this);
+		this.markDirty();
+		if(worldObj != null) {
+			IBlockState state = worldObj.getBlockState(pos);
+			worldObj.notifyBlockUpdate(pos, state,state, 3);
+		}
 	}
 
 	@Override

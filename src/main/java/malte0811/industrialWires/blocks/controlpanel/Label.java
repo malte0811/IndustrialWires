@@ -15,10 +15,13 @@ import java.util.List;
 public class Label extends PanelComponent {
 	private static final ResourceLocation font = new ResourceLocation("minecraft", "textures/font/ascii.png");
 	String text;
+	RawModelFontRenderer renderer;
+	int color;
 
-	public Label(String text) {
+	public Label(String text, int color) {
 		this();
 		this.text = text;
+		this.color = color;
 	}
 	public Label() {
 		super("label");
@@ -27,26 +30,29 @@ public class Label extends PanelComponent {
 	@Override
 	protected void writeCustomNBT(NBTTagCompound nbt) {
 		nbt.setString("text", text);
+		nbt.setInteger("color", color);
 	}
 
 	@Override
 	protected void readCustomNBT(NBTTagCompound nbt) {
 		text = nbt.getString("text");
+		color = nbt.getInteger("color");
 	}
 
 	@Override
 	public List<RawQuad> getQuads() {
 		RawModelFontRenderer render = fontRenderer();
-		render.drawString(text, 0, 0, 0xff0000);
+		render.drawString(text, 0, 0, 0xff000000|color);
 		return render.build();
 	}
 
 	@Nonnull
 	@Override
 	public Label copyOf() {
-		Label ret = new Label(text);
+		Label ret = new Label(text, color);
 		ret.setX(x);
 		ret.setY(y);
+		ret.panelHeight = panelHeight;
 		return ret;
 	}
 
@@ -66,8 +72,11 @@ public class Label extends PanelComponent {
 	}
 
 	private RawModelFontRenderer fontRenderer() {
-		return new RawModelFontRenderer(Minecraft.getMinecraft().gameSettings, font, Minecraft.getMinecraft().getTextureManager(),
-				false,  .01F);
+		if (renderer==null) {
+			renderer = new RawModelFontRenderer(Minecraft.getMinecraft().gameSettings, font, Minecraft.getMinecraft().getTextureManager(),
+					false,  1);
+		}
+		return renderer;
 	}
 
 }

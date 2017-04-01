@@ -18,18 +18,21 @@
 
 package malte0811.industrialWires.client.panelmodel;
 
+import blusunrize.immersiveengineering.common.util.IELogger;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
 import malte0811.industrialWires.blocks.controlpanel.PropertyComponents;
 import malte0811.industrialWires.blocks.controlpanel.PropertyComponents.PanelRenderProperties;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.EnumFacing;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
 import javax.annotation.Nullable;
@@ -41,13 +44,7 @@ public class PanelModel implements IBakedModel {
 	public final static Cache<PanelRenderProperties, AssembledBakedModel> modelCache = CacheBuilder.newBuilder()
 			.maximumSize(100)
 			.expireAfterAccess(60, TimeUnit.SECONDS)
-			.build();//TODO make all components implement equals+hashCode
-
-	private IBakedModel base;
-
-	public PanelModel(IBakedModel base) {
-		this.base = base;
-	}
+			.build();
 
 	@Override
 	public List<BakedQuad> getQuads(@Nullable IBlockState state, @Nullable EnumFacing side, long rand) {
@@ -58,17 +55,17 @@ public class PanelModel implements IBakedModel {
 			PanelRenderProperties cl = ((IExtendedBlockState) state).getValue(PropertyComponents.INSTANCE);
 
 			if (cl == null) {
-				return base.getQuads(state, side, rand);
+				return ImmutableList.of();
 			}
-			modelCache.invalidateAll();//TODO remove
+			IELogger.info(modelCache.size());
 			AssembledBakedModel m = modelCache.getIfPresent(cl);
 			if (m == null) {
-				m = new AssembledBakedModel(cl, base, rand);
+				m = new AssembledBakedModel(cl);
 				modelCache.put(cl.copyOf(), m);
 			}
 			return m.getQuads(state, side, rand);
 		}
-		return base.getQuads(state, side, rand);
+		return ImmutableList.of();
 	}
 
 	@Override
@@ -88,7 +85,7 @@ public class PanelModel implements IBakedModel {
 
 	@Override
 	public TextureAtlasSprite getParticleTexture() {
-		return base.getParticleTexture();
+		return PanelUtils.IRON_BLOCK_TEX;
 	}
 
 	@Override
@@ -102,24 +99,21 @@ public class PanelModel implements IBakedModel {
 	}
 
 	public class AssembledBakedModel implements IBakedModel {
-		IBakedModel basic;
 		PanelRenderProperties components;
-		List<BakedQuad> quads;
+		List<BakedQuad> quadsDefault;
 
 
-		public AssembledBakedModel(PanelRenderProperties comp, IBakedModel b, long posRand) {
-			basic = b;
+		public AssembledBakedModel(PanelRenderProperties comp) {
 			components = comp;
 		}
 
 		@Override
 		public List<BakedQuad> getQuads(@Nullable IBlockState state, @Nullable EnumFacing side, long rand) {
-			if (quads == null) {
-				quads = PanelUtils.generateQuads(components);
-				quads.addAll(basic.getQuads(state, side, rand));
-				quads = Collections.synchronizedList(quads);
+			if (quadsDefault == null) {
+				quadsDefault = PanelUtils.generateQuads(components);
+				quadsDefault = Collections.synchronizedList(quadsDefault);
 			}
-			return quads;
+			return quadsDefault;
 		}
 
 		@Override
@@ -139,7 +133,7 @@ public class PanelModel implements IBakedModel {
 
 		@Override
 		public TextureAtlasSprite getParticleTexture() {
-			return basic.getParticleTexture();
+			return PanelUtils.IRON_BLOCK_TEX;
 		}
 
 		@Override
