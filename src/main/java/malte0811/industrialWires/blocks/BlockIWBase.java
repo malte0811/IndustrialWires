@@ -24,8 +24,6 @@ import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
 import blusunrize.immersiveengineering.common.util.Utils;
 import malte0811.industrialWires.IndustrialWires;
-import malte0811.industrialWires.blocks.controlpanel.PropertyComponents;
-import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -119,7 +117,7 @@ public abstract class BlockIWBase extends Block {
 			((IHasDummyBlocksIW) te).breakDummies();
 		}
 		if(te instanceof IImmersiveConnectable) {
-			if(!worldIn.isRemote||!Minecraft.getMinecraft().isSingleplayer())//TODO fix this in IE!!!
+			if(!worldIn.isRemote||!Minecraft.getMinecraft().isSingleplayer())
 				ImmersiveNetHandler.INSTANCE.clearAllConnectionsFor(Utils.toCC(te), worldIn, !worldIn.isRemote&&worldIn.getGameRules().getBoolean("doTileDrops"));
 		}
 		super.breakBlock(worldIn, pos, state);

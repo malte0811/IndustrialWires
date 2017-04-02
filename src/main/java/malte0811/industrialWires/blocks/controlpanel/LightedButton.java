@@ -27,7 +27,9 @@ import org.lwjgl.util.vector.Vector3f;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 public class LightedButton extends PanelComponent {
@@ -38,7 +40,7 @@ public class LightedButton extends PanelComponent {
 	public int rsOutputChannel;
 	private AxisAlignedBB aabb;
 	private int ticksTillOff;
-	private BiConsumer<Integer, Byte> rsOut;
+	private Set<BiConsumer<Integer, Byte>> rsOut = new HashSet<>();
 	public LightedButton() {
 		super("lightedButton");
 	}
@@ -130,8 +132,15 @@ public class LightedButton extends PanelComponent {
 	@Override
 	public void registerRSOutput(int id, @Nonnull BiConsumer<Integer, Byte> out) {
 		if (id==rsOutputId) {
-			rsOut = out;
-			rsOut.accept(rsOutputChannel, (byte) (active?15:0));
+			rsOut.add(out);
+			out.accept(rsOutputChannel, (byte) (active?15:0));
+		}
+	}
+
+	@Override
+	public void unregisterRSOutput(int id, @Nonnull BiConsumer<Integer, Byte> out) {
+		if (id==rsOutputId) {
+			rsOut.remove(out);
 		}
 	}
 
@@ -139,8 +148,8 @@ public class LightedButton extends PanelComponent {
 		active = on;
 		tile.markDirty();
 		tile.triggerRenderUpdate();
-		if (rsOut!=null) {
-			rsOut.accept(rsOutputChannel, (byte)(active?15:0));
+		for (BiConsumer<Integer, Byte> rs:rsOut) {
+			rs.accept(rsOutputChannel, (byte)(active?15:0));
 		}
 	}
 

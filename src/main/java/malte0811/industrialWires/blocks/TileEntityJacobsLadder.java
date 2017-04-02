@@ -19,6 +19,7 @@
 package malte0811.industrialWires.blocks;
 
 import blusunrize.immersiveengineering.api.ApiUtils;
+import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDirectionalTile;
 import blusunrize.immersiveengineering.common.blocks.TileEntityIEBase;
 import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
@@ -33,6 +34,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -50,7 +52,7 @@ import net.minecraftforge.energy.IEnergyStorage;
 
 import javax.annotation.Nullable;
 
-public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickable, IHasDummyBlocksIW, ISyncReceiver, IEnergySink, IBlockBoundsIW {
+public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickable, IHasDummyBlocksIW, ISyncReceiver, IEnergySink, IBlockBoundsIW, IDirectionalTile {
 	public EnumFacing facing = EnumFacing.NORTH;
 	private DualEnergyStorage energy;
 	public LadderSize size;
@@ -468,6 +470,36 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 			}
 			return new AxisAlignedBB(min.xCoord, min.yCoord, min.zCoord, max.xCoord, max.yCoord, max.zCoord);
 		}
+	}
+
+	@Override
+	public EnumFacing getFacing() {
+		return facing;
+	}
+
+	@Override
+	public void setFacing(EnumFacing facing) {
+		this.facing = facing;
+	}
+
+	@Override
+	public int getFacingLimitation() {
+		return 2;
+	}
+
+	@Override
+	public boolean mirrorFacingOnPlacement(EntityLivingBase placer) {
+		return true;
+	}
+
+	@Override
+	public boolean canHammerRotate(EnumFacing side, float hitX, float hitY, float hitZ, EntityLivingBase entity) {
+		return false;
+	}
+
+	@Override
+	public boolean canRotate(EnumFacing axis) {
+		return false;
 	}
 
 

@@ -1,14 +1,11 @@
 package malte0811.industrialWires.blocks.controlpanel;
 
-import blusunrize.immersiveengineering.common.util.IELogger;
-import com.google.common.collect.ImmutableList;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.panelmodel.PanelUtils;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
-import net.minecraftforge.client.model.ModelLoader;
 import org.lwjgl.util.vector.Vector3f;
 
 import javax.annotation.Nonnull;
@@ -18,10 +15,10 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class IndicatorLight extends PanelComponent {
-	int rsInputId;
-	int rsInputChannel;
-	int colorA;
-	byte rsInput;
+	private int rsInputId;
+	private int rsInputChannel;
+	private int colorA;
+	private byte rsInput;
 	public IndicatorLight() {
 		super("indicator_light");
 	}
@@ -31,7 +28,6 @@ public class IndicatorLight extends PanelComponent {
 		rsInputChannel = rsChannel;
 		rsInputId = rsId;
 	}
-
 
 	@Override
 	protected void writeCustomNBT(NBTTagCompound nbt) {
@@ -88,18 +84,20 @@ public class IndicatorLight extends PanelComponent {
 	public void update(TileEntityPanel tile) {
 
 	}
-
+	private TileEntityPanel panel;
+	private Consumer<byte[]> handler = (input)->{
+		if (input[rsInputChannel]!=rsInput) {
+			rsInput = input[rsInputChannel];
+			panel.markDirty();
+			panel.triggerRenderUpdate();
+		}
+	};
 	@Nullable
 	@Override
 	public Consumer<byte[]> getRSInputHandler(int id, TileEntityPanel panel) {
 		if (id==rsInputId) {
-			return (input)->{
-				if (input[rsInputChannel]!=rsInput) {
-					rsInput = input[rsInputChannel];
-					panel.markDirty();
-					panel.triggerRenderUpdate();
-				}
-			};
+			this.panel = panel;
+			return handler;
 		}
 		return null;
 	}
@@ -124,4 +122,3 @@ public class IndicatorLight extends PanelComponent {
 		return result;
 	}
 }
-//TODO optimize RS net in IE, updates multiple times per tick. 0-length pulses?

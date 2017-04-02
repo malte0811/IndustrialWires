@@ -21,7 +21,6 @@ package malte0811.industrialWires.blocks.controlpanel;
 import blusunrize.immersiveengineering.api.IEProperties;
 import malte0811.industrialWires.blocks.BlockIWBase;
 import malte0811.industrialWires.blocks.IMetaEnum;
-import malte0811.industrialWires.blocks.IPlacementCheck;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
@@ -41,7 +40,7 @@ import net.minecraftforge.common.property.IUnlistedProperty;
 
 import java.util.List;
 
-public class BlockPanel extends BlockIWBase implements IPlacementCheck, IMetaEnum {
+public class BlockPanel extends BlockIWBase implements IMetaEnum {
 	public static final PropertyEnum<BlockTypes_Panel> type = PropertyEnum.create("type", BlockTypes_Panel.class);
 	public BlockPanel() {
 		super(Material.IRON, "control_panel");
@@ -57,11 +56,6 @@ public class BlockPanel extends BlockIWBase implements IPlacementCheck, IMetaEnu
 			return layer==BlockRenderLayer.TRANSLUCENT||layer==BlockRenderLayer.SOLID;
 		}
 		return super.canRenderInLayer(state, layer);
-	}
-
-	@Override
-	public boolean canPlaceBlockAt(World w, BlockPos pos, ItemStack stack) {
-		return true;//TODO actually check for space
 	}
 
 	@Override

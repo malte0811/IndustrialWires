@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implements IRedstoneConnector, ITickable {
@@ -28,6 +29,7 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 	private boolean dirty = true;
 	private byte[] oldInput = new byte[16];
 	private Set<Consumer<byte[]>> changeListeners = new HashSet<>();
+	private Set<TileEntityPanel> connectedPanels = new HashSet<>();
 	@Nonnull
 	private RedstoneWireNetwork network = new RedstoneWireNetwork().add(this);
 	private boolean hasConn = false;
@@ -50,7 +52,7 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 				for (BlockPos bp:parts) {
 					TileEntity te = worldObj.getTileEntity(bp);
 					if (te instanceof TileEntityPanel) {
-						requestRSConn(((TileEntityPanel) te));
+						registerPanel(((TileEntityPanel) te));
 					}
 				}
 			}
@@ -76,19 +78,38 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 		id = in.getInteger("rsId");
 	}
 
-	public void requestRSConn(TileEntityPanel panel) {
+	private BiConsumer<Integer, Byte> rsOut = (channel, value)->{
+		if (value!=out[channel]) {
+			dirty = true;
+			out[channel] = value;
+		}
+	};
+
+	public void registerPanel(TileEntityPanel panel) {
 		PropertyComponents.PanelRenderProperties p = panel.getComponents();
 		for (PanelComponent pc:p) {
 			Consumer<byte[]> listener = pc.getRSInputHandler(id, panel);
 			if (listener!=null) {
 				changeListeners.add(listener);
 			}
-			pc.registerRSOutput(id, (channel, value)->{
-				if (value!=out[channel]) {
-					dirty = true;
-					out[channel] = value;
-				}
-			});
+			pc.registerRSOutput(id, rsOut);
+		}
+		panel.registerRS(this);
+		connectedPanels.add(panel);
+	}
+
+	public void unregisterPanel(TileEntityPanel panel, boolean remove) {
+		PropertyComponents.PanelRenderProperties p = panel.getComponents();
+		for (PanelComponent pc:p) {
+			Consumer<byte[]> listener = pc.getRSInputHandler(id, panel);
+			if (listener!=null) {
+				changeListeners.remove(listener);
+			}
+			pc.unregisterRSOutput(id, rsOut);
+		}
+		panel.unregisterRS(this);
+		if (remove) {
+			connectedPanels.remove(panel);
 		}
 	}
 
@@ -167,5 +188,21 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 	@Override
 	public Vec3d getConnectionOffset(ImmersiveNetHandler.Connection connection) {
 		return new Vec3d(.5, .5, .5);//TODO better values
+	}
+
+	@Override
+	public void onChunkUnload() {
+		super.onChunkUnload();
+		for (TileEntityPanel panel:connectedPanels) {
+			unregisterPanel(panel, false);
+		}
+	}
+
+	@Override
+	public void invalidate() {
+		super.invalidate();
+		for (TileEntityPanel panel:connectedPanels) {
+			unregisterPanel(panel, false);
+		}
 	}
 }

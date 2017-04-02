@@ -20,7 +20,6 @@ package malte0811.industrialWires.blocks.controlpanel;
 
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDirectionalTile;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IPlayerInteraction;
-import blusunrize.immersiveengineering.common.util.IELogger;
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import malte0811.industrialWires.blocks.IBlockBoundsIW;
 import malte0811.industrialWires.blocks.TileEntityIWBase;
@@ -33,7 +32,6 @@ import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagLong;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -46,15 +44,15 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
-import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTile, IBlockBoundsIW, IPlayerInteraction, ITickable {
 	private PropertyComponents.PanelRenderProperties components = new PropertyComponents.PanelRenderProperties();
-	boolean firstTick = true;
+	private boolean firstTick = true;
 	// non-rendered properties
-	//TODO does the lambda stuff cause GC issues?
+	Set<TileEntityRSPanelConn> rsPorts = new HashSet<>();
 	{
 		for (int i = 0;i<16;i++) {
 			int color = EnumDyeColor.byMetadata(i).getMapColor().colorValue;
@@ -87,8 +85,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 				for (BlockPos bp:parts) {
 					TileEntity te = worldObj.getTileEntity(bp);
 					if (te instanceof TileEntityRSPanelConn) {
-						//TODO deal with people adding 2 RS ports with the same ID!
-						((TileEntityRSPanelConn) te).requestRSConn(this);
+						((TileEntityRSPanelConn) te).registerPanel(this);
 					}
 				}
 				firstTick = false;
@@ -194,6 +191,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		max = mat.apply(max);
 		return new AxisAlignedBB(min, max);
 	}
+
 	@Nullable
 	public Pair<PanelComponent, RayTraceResult> getSelectedComponent(EntityPlayer player, Vec3d hit, boolean hitAbs) {
 		Matrix4 mat = components.getPanelTopTransform();
@@ -222,5 +220,28 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		IBlockState state = worldObj.getBlockState(pos);
 		worldObj.notifyBlockUpdate(pos,state,state,3);
 		worldObj.addBlockEvent(pos, state.getBlock(), 255, 0);
+	}
+
+	public void registerRS(TileEntityRSPanelConn te) {
+		rsPorts.add(te);
+	}
+	public void unregisterRS(TileEntityRSPanelConn te) {
+		rsPorts.remove(te);
+	}
+
+	@Override
+	public void onChunkUnload() {
+		super.onChunkUnload();
+		for (TileEntityRSPanelConn rs:rsPorts) {
+			rs.unregisterPanel(this, true);
+		}
+	}
+
+	@Override
+	public void invalidate() {
+		super.invalidate();
+		for (TileEntityRSPanelConn rs:rsPorts) {
+			rs.unregisterPanel(this, true);
+		}
 	}
 }
