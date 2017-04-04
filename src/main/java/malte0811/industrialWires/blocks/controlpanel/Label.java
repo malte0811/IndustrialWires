@@ -3,7 +3,6 @@ package malte0811.industrialWires.blocks.controlpanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.panelmodel.RawModelFontRenderer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -69,6 +68,11 @@ public class Label extends PanelComponent {
 	@Override
 	public void update(TileEntityPanel tile) {
 
+	}
+
+	@Override
+	public float getHeight() {
+		return 0;
 	}
 
 	private RawModelFontRenderer fontRenderer() {

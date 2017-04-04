@@ -50,7 +50,6 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 		public EnumFacing facing = EnumFacing.NORTH;
 		public float height = .5F;
 		public EnumFacing top = EnumFacing.UP;
-		public TileEntityPanel panel;//Don't compare this+erase it on copying
 		public PanelRenderProperties() {
 			super();
 		}
@@ -90,6 +89,17 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 			}
 			ret.translate(-.5, -.5, -.5);
 			return ret;
+		}
+
+		public float getMaxHeight() {
+			float ret = 0;
+			for (PanelComponent pc:this) {
+				float hHere = pc.getHeight();
+				if (hHere>ret) {
+					ret = hHere;
+				}
+			}
+			return ret+height;
 		}
 
 		public PanelRenderProperties copyOf() {

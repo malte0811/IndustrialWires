@@ -17,14 +17,7 @@
  */
 package malte0811.industrialWires.blocks.wire;
 
-import java.util.Arrays;
-import java.util.List;
-
 import blusunrize.immersiveengineering.api.IEProperties;
-import blusunrize.immersiveengineering.api.energy.wires.TileEntityImmersiveConnectable;
-import blusunrize.immersiveengineering.common.blocks.BlockIETileProvider;
-import blusunrize.immersiveengineering.common.blocks.ItemBlockIEBase;
-import blusunrize.immersiveengineering.common.util.IELogger;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.BlockIWBase;
 import malte0811.industrialWires.blocks.IMetaEnum;
@@ -44,8 +37,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.property.ExtendedBlockState;
-import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 	private static PropertyEnum<BlockTypes_IC2_Connector> type = PropertyEnum.create("type", BlockTypes_IC2_Connector.class);

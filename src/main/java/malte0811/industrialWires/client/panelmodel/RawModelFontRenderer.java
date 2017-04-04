@@ -1,6 +1,5 @@
 package malte0811.industrialWires.client.panelmodel;
 
-import blusunrize.immersiveengineering.common.util.IELogger;
 import com.google.common.collect.ImmutableList;
 import malte0811.industrialWires.client.RawQuad;
 import net.minecraft.client.Minecraft;

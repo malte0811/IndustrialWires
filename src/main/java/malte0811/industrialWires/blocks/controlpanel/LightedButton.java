@@ -72,7 +72,6 @@ public class LightedButton extends PanelComponent {
 		rsOutputChannel = nbt.getInteger("rsChannel");
 		rsOutputId = nbt.getInteger("rsId");
 	}
-	private final static float[] sideColor = {.8F, .8F, .8F};
 	private final static float size = .0625F;
 	@Override
 	public List<RawQuad> getQuads() {
@@ -82,7 +81,7 @@ public class LightedButton extends PanelComponent {
 			color[i] = ((this.color>>(8*(2-i)))&255)/255F*(active?1:.5F);
 		}
 		List<RawQuad> ret = new ArrayList<>(5);
-		PanelUtils.addColoredBox(color, sideColor, null, new Vector3f(0, 0, 0), new Vector3f(size, size/2, size), ret, false);
+		PanelUtils.addColoredBox(color, gray, null, new Vector3f(0, 0, 0), new Vector3f(size, size/2, size), ret, false);
 		return ret;
 	}
 
@@ -99,7 +98,7 @@ public class LightedButton extends PanelComponent {
 	@Override
 	public AxisAlignedBB getBlockRelativeAABB() {
 		if (aabb==null) {
-			aabb = new AxisAlignedBB(x, 0, y, x+size, size/2, y+size);
+			aabb = new AxisAlignedBB(x, 0, y, x+size, getHeight(), y+size);
 		}
 		return aabb;
 	}
@@ -142,6 +141,11 @@ public class LightedButton extends PanelComponent {
 		if (id==rsOutputId) {
 			rsOut.remove(out);
 		}
+	}
+
+	@Override
+	public float getHeight() {
+		return size/2;
 	}
 
 	private void setOut(boolean on, TileEntityPanel tile) {

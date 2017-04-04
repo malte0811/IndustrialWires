@@ -17,9 +17,6 @@
  */
 package malte0811.industrialWires;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import blusunrize.immersiveengineering.api.tool.AssemblerHandler;
 import blusunrize.immersiveengineering.api.tool.AssemblerHandler.IRecipeAdapter;
 import blusunrize.immersiveengineering.api.tool.AssemblerHandler.RecipeQuery;
@@ -37,14 +34,10 @@ import malte0811.industrialWires.blocks.converter.BlockMechanicalConverter;
 import malte0811.industrialWires.blocks.converter.TileEntityIEMotor;
 import malte0811.industrialWires.blocks.converter.TileEntityMechICtoIE;
 import malte0811.industrialWires.blocks.converter.TileEntityMechIEtoIC;
-import malte0811.industrialWires.blocks.wire.BlockIC2Connector;
-import malte0811.industrialWires.blocks.wire.TileEntityIC2ConnectorCopper;
-import malte0811.industrialWires.blocks.wire.TileEntityIC2ConnectorGlass;
-import malte0811.industrialWires.blocks.wire.TileEntityIC2ConnectorGold;
-import malte0811.industrialWires.blocks.wire.TileEntityIC2ConnectorHV;
-import malte0811.industrialWires.blocks.wire.TileEntityIC2ConnectorTin;
+import malte0811.industrialWires.blocks.wire.*;
 import malte0811.industrialWires.crafting.RecipeCoilLength;
 import malte0811.industrialWires.items.ItemIC2Coil;
+import malte0811.industrialWires.network.MessagePanelInteract;
 import malte0811.industrialWires.network.MessageTileSyncIW;
 import malte0811.industrialWires.wires.IC2Wiretype;
 import net.minecraft.creativetab.CreativeTabs;
@@ -64,6 +57,9 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.oredict.RecipeSorter;
 import net.minecraftforge.oredict.RecipeSorter.Category;
 import net.minecraftforge.oredict.ShapedOreRecipe;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Mod(modid = IndustrialWires.MODID, version = IndustrialWires.VERSION, dependencies="required-after:immersiveengineering@[0.10-53,);required-after:IC2")
 public class IndustrialWires {
@@ -167,6 +163,7 @@ public class IndustrialWires {
 				's', "ingotSteel", 't', new ItemStack(IEContent.blockConnectors, 1, BlockTypes_Connector.TRANSFORMER_HV.ordinal())));
 
 		packetHandler.registerMessage(MessageTileSyncIW.HandlerClient.class, MessageTileSyncIW.class, 0, Side.CLIENT);
+		packetHandler.registerMessage(MessagePanelInteract.HandlerServer.class, MessagePanelInteract.class, 1, Side.SERVER);
 	}
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent	 e) {

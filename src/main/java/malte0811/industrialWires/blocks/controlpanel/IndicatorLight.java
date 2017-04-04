@@ -103,6 +103,11 @@ public class IndicatorLight extends PanelComponent {
 	}
 
 	@Override
+	public float getHeight() {
+		return 0;
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;

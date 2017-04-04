@@ -22,7 +22,6 @@ import blusunrize.immersiveengineering.common.util.IELogger;
 import malte0811.industrialWires.client.RawQuad;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
-import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -41,6 +40,7 @@ public abstract class PanelComponent {
 	protected float panelHeight;
 	protected float x, y;
 	private final String type;
+	protected final static float[] gray = {.8F, .8F, .8F};
 	protected PanelComponent(String type) {
 		this.type = type;
 	}
@@ -49,6 +49,7 @@ public abstract class PanelComponent {
 		baseCreaters.put("lightedButton", LightedButton::new);
 		baseCreaters.put("label", Label::new);
 		baseCreaters.put("indicator_light", IndicatorLight::new);
+		baseCreaters.put("slider", Slider::new);
 	}
 	protected abstract void writeCustomNBT(NBTTagCompound nbt);
 	protected abstract void readCustomNBT(NBTTagCompound nbt);
@@ -81,6 +82,8 @@ public abstract class PanelComponent {
 		return y;
 	}
 
+	public abstract float getHeight();
+
 	public void setX(float x) {
 		this.x = x;
 	}
@@ -110,7 +113,7 @@ public abstract class PanelComponent {
 			ret.setPanelHeight(nbt.getFloat("panelHeight"));
 			return ret;
 		} else {
-			IELogger.info("(IndustrialWires) Unknown panel component: "+type);
+			IELogger.info("(IndustrialWires) Unknown panel component: "+type);//TODO own logger?
 			return null;
 		}
 	}
