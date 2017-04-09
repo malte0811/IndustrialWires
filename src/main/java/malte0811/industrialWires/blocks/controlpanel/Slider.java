@@ -36,10 +36,12 @@ public class Slider extends PanelComponent {
 		super("slider");
 	}
 	@Override
-	protected void writeCustomNBT(NBTTagCompound nbt) {
+	protected void writeCustomNBT(NBTTagCompound nbt, boolean toItem) {
 		nbt.setInteger("color", color);
 		nbt.setFloat("length", length);
-		nbt.setByte("output", out);
+		if (!toItem) {
+			nbt.setByte("output", out);
+		}
 		nbt.setByte("rsChannel", rsChannel);
 		nbt.setInteger("rsId", rsId);
 		nbt.setBoolean("horizontal", horizontal);

@@ -37,6 +37,7 @@ import malte0811.industrialWires.blocks.converter.TileEntityMechIEtoIC;
 import malte0811.industrialWires.blocks.wire.*;
 import malte0811.industrialWires.crafting.RecipeCoilLength;
 import malte0811.industrialWires.items.ItemIC2Coil;
+import malte0811.industrialWires.network.MessageGUIInteract;
 import malte0811.industrialWires.network.MessagePanelInteract;
 import malte0811.industrialWires.network.MessageTileSyncIW;
 import malte0811.industrialWires.wires.IC2Wiretype;
@@ -71,6 +72,8 @@ public class IndustrialWires {
 	public static BlockPanel panel;
 	public static ItemIC2Coil coil;
 	public static final SimpleNetworkWrapper packetHandler = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
+	@Mod.Instance(MODID)
+	public static IndustrialWires instance = new IndustrialWires();
 	public static CreativeTabs creativeTab = new CreativeTabs(MODID) {
 
 		@Override
@@ -164,6 +167,9 @@ public class IndustrialWires {
 
 		packetHandler.registerMessage(MessageTileSyncIW.HandlerClient.class, MessageTileSyncIW.class, 0, Side.CLIENT);
 		packetHandler.registerMessage(MessagePanelInteract.HandlerServer.class, MessagePanelInteract.class, 1, Side.SERVER);
+		packetHandler.registerMessage(MessageGUIInteract.HandlerServer.class, MessageGUIInteract.class, 2, Side.SERVER);
+
+		NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
 	}
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent	 e) {

@@ -18,12 +18,24 @@
 package malte0811.industrialWires;
 
 import malte0811.industrialWires.blocks.TileEntityJacobsLadder;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.IGuiHandler;
 
-public class CommonProxy {
+public class CommonProxy implements IGuiHandler {
 	public void preInit() {}
 	public void postInit() {}
 	public World getClientWorld() {return null;}
 	public void playJacobsLadderSound(TileEntityJacobsLadder te, int phase, Vec3d soundPos) {}
+
+	@Override
+	public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
+		return null;//TODO implement
+	}
+
+	@Override
+	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
+		return null;
+	}
 }

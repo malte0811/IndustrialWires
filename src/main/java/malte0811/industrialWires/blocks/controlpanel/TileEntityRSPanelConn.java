@@ -7,8 +7,10 @@ import blusunrize.immersiveengineering.api.energy.wires.TileEntityImmersiveConne
 import blusunrize.immersiveengineering.api.energy.wires.WireType;
 import blusunrize.immersiveengineering.api.energy.wires.redstone.IRedstoneConnector;
 import blusunrize.immersiveengineering.api.energy.wires.redstone.RedstoneWireNetwork;
+import malte0811.industrialWires.blocks.INetGUI;
 import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
@@ -17,14 +19,11 @@ import net.minecraft.util.math.Vec3d;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implements IRedstoneConnector, ITickable {
+public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implements IRedstoneConnector, ITickable, INetGUI {
 	private byte[] out = new byte[16];
 	private boolean dirty = true;
 	private byte[] oldInput = new byte[16];
@@ -204,5 +203,33 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 		for (TileEntityPanel panel:connectedPanels) {
 			unregisterPanel(panel, false);
 		}
+	}
+
+	@Override
+	public void onChange(NBTTagCompound nbt, EntityPlayer p) {
+		if (nbt.hasKey("rsId")) {
+			List<BlockPos> parts = MiscUtils.discoverPanelParts(worldObj, pos);
+			List<TileEntityPanel> tes = new ArrayList<>(parts.size());
+			for (BlockPos bp:parts) {
+				TileEntity te = worldObj.getTileEntity(bp);
+				if (te instanceof TileEntityPanel) {
+					tes.add((TileEntityPanel) te);
+					unregisterPanel((TileEntityPanel) te, true);
+				}
+			}
+			id = nbt.getInteger("rsId");
+			out = new byte[16];
+			for (TileEntityPanel panel:tes) {
+				registerPanel(panel);
+			}
+			network.updateValues();
+			IBlockState state = worldObj.getBlockState(pos);
+			worldObj.notifyBlockUpdate(pos, state, state, 3);
+			worldObj.addBlockEvent(pos, state.getBlock(), 255, 0);
+		}
+	}
+
+	public int getRsId() {
+		return id;
 	}
 }

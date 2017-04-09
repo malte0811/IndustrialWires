@@ -30,11 +30,13 @@ public class IndicatorLight extends PanelComponent {
 	}
 
 	@Override
-	protected void writeCustomNBT(NBTTagCompound nbt) {
+	protected void writeCustomNBT(NBTTagCompound nbt, boolean toItem) {
 		nbt.setInteger("rsId", rsInputId);
 		nbt.setInteger("rsChannel", rsInputChannel);
 		nbt.setInteger("color", colorA);
-		nbt.setInteger("rsInput", rsInput);
+		if (!toItem) {
+			nbt.setInteger("rsInput", rsInput);
+		}
 	}
 
 	@Override

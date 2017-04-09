@@ -27,7 +27,7 @@ public class Label extends PanelComponent {
 	}
 
 	@Override
-	protected void writeCustomNBT(NBTTagCompound nbt) {
+	protected void writeCustomNBT(NBTTagCompound nbt, boolean toItem) {
 		nbt.setString("text", text);
 		nbt.setInteger("color", color);
 	}

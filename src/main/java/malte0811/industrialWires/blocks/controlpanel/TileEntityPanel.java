@@ -18,6 +18,7 @@
 
 package malte0811.industrialWires.blocks.controlpanel;
 
+import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDirectionalTile;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IPlayerInteraction;
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
@@ -50,31 +51,32 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTile, IBlockBoundsIW, IPlayerInteraction, ITickable {
+public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTile, IBlockBoundsIW, IPlayerInteraction, ITickable, IEBlockInterfaces.ITileDrop {
 	private PropertyComponents.PanelRenderProperties components = new PropertyComponents.PanelRenderProperties();
 	private boolean firstTick = true;
 	// non-rendered properties
 	private Set<TileEntityRSPanelConn> rsPorts = new HashSet<>();
+
 	{
-		for (int i = 2;i<14;i++) {
-			int color = EnumDyeColor.byMetadata(i-2).getMapColor().colorValue;
-			IndicatorLight ind = new IndicatorLight(0, i-2, color);
-			LightedButton btn = new LightedButton(color, false, true, 1, i-2);
+		for (int i = 2; i < 14; i++) {
+			int color = EnumDyeColor.byMetadata(i - 2).getMapColor().colorValue;
+			IndicatorLight ind = new IndicatorLight(0, i - 2, color);
+			LightedButton btn = new LightedButton(color, false, true, 1, i - 2);
 			Label lbl = new Label("->", color);
 			ind.setX(0);
-			ind.setY(i/16F);
+			ind.setY(i / 16F);
 			ind.setPanelHeight(components.height);
-			lbl.setX(2/16F);
-			lbl.setY(i/16F);
+			lbl.setX(2 / 16F);
+			lbl.setY(i / 16F);
 			lbl.setPanelHeight(components.height);
-			btn.setX(5/16F);
-			btn.setY(i/16F);
+			btn.setX(5 / 16F);
+			btn.setY(i / 16F);
 			btn.setPanelHeight(components.height);
 			components.add(ind);
 			components.add(lbl);
 			components.add(btn);
 		}
-		Slider slid = new Slider(.5F, 0x00ff00, true, 1, (byte)1);
+		Slider slid = new Slider(.5F, 0x00ff00, true, 1, (byte) 1);
 		slid.setX(.4F);
 		slid.setY(.25F);
 		slid.setPanelHeight(components.height);
@@ -83,13 +85,13 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 
 	@Override
 	public void update() {
-		for (PanelComponent pc:components) {
+		for (PanelComponent pc : components) {
 			pc.update(this);
 		}
 		if (!worldObj.isRemote) {
 			if (firstTick) {
 				List<BlockPos> parts = MiscUtils.discoverPanelParts(worldObj, pos);
-				for (BlockPos bp:parts) {
+				for (BlockPos bp : parts) {
 					TileEntity te = worldObj.getTileEntity(bp);
 					if (te instanceof TileEntityRSPanelConn) {
 						((TileEntityRSPanelConn) te).registerPanel(this);
@@ -102,32 +104,56 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 
 	@Override
 	public void writeNBT(NBTTagCompound out, boolean updatePacket) {
-		NBTTagList comps = new NBTTagList();
-		for (PanelComponent p:components) {
-			NBTTagCompound nbt = new NBTTagCompound();
-			p.writeToNBT(nbt);
-			comps.appendTag(nbt);
-		}
-		out.setTag("components", comps);
+		writeToItemNBT(out, false);
 		out.setInteger("facing", components.facing.getHorizontalIndex());
-		out.setFloat("height", components.height);
 		out.setInteger("top", components.top.getIndex());
 	}
 
 	@Override
 	public void readNBT(NBTTagCompound in, boolean updatePacket) {
-		NBTTagList l = in.getTagList("components", 10);
+		readFromItemNBT(in);
+		components.facing = EnumFacing.getHorizontal(in.getInteger("facing"));
+		components.top = EnumFacing.getFront(in.getInteger("top"));
+	}
+
+	@Override
+	public ItemStack getTileDrop(EntityPlayer player, IBlockState state) {
+		NBTTagCompound ret = new NBTTagCompound();
+		writeToItemNBT(ret, true);
+		ItemStack retStack = new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.TOP.ordinal());
+		retStack.setTagCompound(ret);
+		return retStack;
+	}
+
+	@Override
+	public void readOnPlacement(@Nullable EntityLivingBase placer, ItemStack stack) {
+		if (stack.hasTagCompound()) {
+			readFromItemNBT(stack.getTagCompound());
+		}
+	}
+
+	public void readFromItemNBT(NBTTagCompound nbt) {
+		NBTTagList l = nbt.getTagList("components", 10);
 		components.clear();
-		for (int i = 0;i<l.tagCount();i++) {
+		for (int i = 0; i < l.tagCount(); i++) {
 			PanelComponent pc = PanelComponent.read(l.getCompoundTagAt(i));
-			if (pc!=null) {
+			if (pc != null) {
 				components.add(pc);
 			}
 		}
-		components.facing = EnumFacing.getHorizontal(in.getInteger("facing"));
-		components.height = in.getFloat("height");
-		components.top = EnumFacing.getFront(in.getInteger("top"));
+		components.height = nbt.getFloat("height");
 		defAABB = null;
+	}
+
+	public void writeToItemNBT(NBTTagCompound nbt, boolean toItem) {
+		NBTTagList comps = new NBTTagList();
+		for (PanelComponent p : components) {
+			NBTTagCompound nbtInner = new NBTTagCompound();
+			p.writeToNBT(nbtInner, toItem);
+			comps.appendTag(nbtInner);
+		}
+		nbt.setTag("components", comps);
+		nbt.setFloat("height", components.height);
 	}
 
 	@Override
@@ -180,9 +206,10 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 	}
 
 	private AxisAlignedBB defAABB;
+
 	@Override
 	public AxisAlignedBB getBoundingBox() {
-		if (defAABB==null) {
+		if (defAABB == null) {
 			defAABB = apply(components.getPanelBaseTransform(), new AxisAlignedBB(0, 0, 0, 1, components.getMaxHeight(), 1));
 		}
 		return defAABB;
@@ -191,6 +218,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 	public PropertyComponents.PanelRenderProperties getComponents() {
 		return components;
 	}
+
 	public AxisAlignedBB apply(Matrix4 mat, AxisAlignedBB in) {
 		Vec3d min = new Vec3d(in.minX, in.minY, in.minZ);
 		Vec3d max = new Vec3d(in.maxX, in.maxY, in.maxZ);
@@ -207,19 +235,19 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		Vec3d playerPos = Minecraft.getMinecraft().thePlayer.getPositionVector().addVector(-pos.getX(), player.getEyeHeight() - pos.getY(), -pos.getZ());
 		for (PanelComponent pc : components) {
 			AxisAlignedBB box = pc.getBlockRelativeAABB();
-			if (box!=null) {
+			if (box != null) {
 				box = apply(mat, box.expandXyz(.002));
 				Vec3d hitVec = hitAbs ? hit.addVector(-pos.getX(), -pos.getY(), -pos.getZ()) : hit;
 				hitVec = hitVec.scale(2).subtract(playerPos);
 				RayTraceResult ray = box.calculateIntercept(playerPos, hitVec);
 				if (ray != null) {
-					if (retPc==null) {
+					if (retPc == null) {
 						retPc = pc;
 						retRay = ray;
 					} else {
 						double oldDist = retRay.hitVec.subtract(playerPos).lengthSquared();
 						double newDist = ray.hitVec.subtract(playerPos).lengthSquared();
-						if (newDist<oldDist) {
+						if (newDist < oldDist) {
 							retPc = pc;
 							retRay = ray;
 						}
@@ -227,7 +255,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 				}
 			}
 		}
-		return retPc!=null?new ImmutablePair<>(retPc, retRay):null;
+		return retPc != null ? new ImmutablePair<>(retPc, retRay) : null;
 	}
 
 	@Override
@@ -247,20 +275,21 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 	}
 
 	public void interactServer(Vec3d hitRelative, int pcId) {
-		if (pcId>=0&&pcId<components.size()) {
+		if (pcId >= 0 && pcId < components.size()) {
 			components.get(pcId).interactWith(hitRelative, this);
 		}
 	}
 
 	public void triggerRenderUpdate() {
 		IBlockState state = worldObj.getBlockState(pos);
-		worldObj.notifyBlockUpdate(pos,state,state,3);
+		worldObj.notifyBlockUpdate(pos, state, state, 3);
 		worldObj.addBlockEvent(pos, state.getBlock(), 255, 0);
 	}
 
 	public void registerRS(TileEntityRSPanelConn te) {
 		rsPorts.add(te);
 	}
+
 	public void unregisterRS(TileEntityRSPanelConn te) {
 		rsPorts.remove(te);
 	}
@@ -268,7 +297,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 	@Override
 	public void onChunkUnload() {
 		super.onChunkUnload();
-		for (TileEntityRSPanelConn rs:rsPorts) {
+		for (TileEntityRSPanelConn rs : rsPorts) {
 			rs.unregisterPanel(this, true);
 		}
 	}
@@ -276,7 +305,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 	@Override
 	public void invalidate() {
 		super.invalidate();
-		for (TileEntityRSPanelConn rs:rsPorts) {
+		for (TileEntityRSPanelConn rs : rsPorts) {
 			rs.unregisterPanel(this, true);
 		}
 	}

@@ -31,6 +31,8 @@ import malte0811.industrialWires.IWConfig;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.IMetaEnum;
 import malte0811.industrialWires.blocks.TileEntityJacobsLadder;
+import malte0811.industrialWires.blocks.controlpanel.TileEntityRSPanelConn;
+import malte0811.industrialWires.client.gui.RSPanelConn;
 import malte0811.industrialWires.client.panelmodel.PanelModelLoader;
 import malte0811.industrialWires.client.render.TileRenderJacobsLadder;
 import malte0811.industrialWires.items.ItemIC2Coil;
@@ -40,8 +42,10 @@ import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
@@ -212,5 +216,14 @@ public class ClientProxy extends CommonProxy {
 		PositionedSoundRecord sound = new PositionedSoundRecord(event, SoundCategory.BLOCKS, te.size.soundVolume, 1, false, 0, ISound.AttenuationType.LINEAR, (float)soundPos.xCoord, (float)soundPos.yCoord, (float) soundPos.zCoord);
 		ClientUtils.mc().getSoundHandler().playSound(sound);
 		playingSounds.put(te.getPos(), sound);
+	}
+
+	@Override
+	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
+		TileEntity te = world.getTileEntity(new BlockPos(x, y, z));
+		if (te instanceof TileEntityRSPanelConn) {
+			return new RSPanelConn((TileEntityRSPanelConn)te);
+		}
+		return null;
 	}
 }

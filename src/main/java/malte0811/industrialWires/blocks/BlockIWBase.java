@@ -205,5 +205,17 @@ public abstract class BlockIWBase extends Block {
 		return def;
 	}
 
+	@Override
+	public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, @Nullable ItemStack stack) {
+		if (te instanceof IEBlockInterfaces.ITileDrop) {
+			ItemStack drop = ((IEBlockInterfaces.ITileDrop) te).getTileDrop(player, state);
+			if (drop!=null) {
+				spawnAsEntity(worldIn, pos, drop);
+				return;
+			}
+		}
+		super.harvestBlock(worldIn, player, pos, state, te, stack);
+	}
+
 	protected abstract IProperty[] getProperties();
 }

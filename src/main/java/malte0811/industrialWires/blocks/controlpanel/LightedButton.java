@@ -54,10 +54,12 @@ public class LightedButton extends PanelComponent {
 	}
 
 	@Override
-	protected void writeCustomNBT(NBTTagCompound nbt) {
+	protected void writeCustomNBT(NBTTagCompound nbt, boolean toItem) {
 		nbt.setInteger("color", color);
 		nbt.setInteger("timeout", ticksTillOff);
-		nbt.setBoolean("active", active);
+		if (!toItem) {
+			nbt.setBoolean("active", active);
+		}
 		nbt.setBoolean("latching", latching);
 		nbt.setInteger("rsChannel", rsOutputChannel);
 		nbt.setInteger("rsId", rsOutputId);

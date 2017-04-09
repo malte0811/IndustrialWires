@@ -51,7 +51,7 @@ public abstract class PanelComponent {
 		baseCreaters.put("indicator_light", IndicatorLight::new);
 		baseCreaters.put("slider", Slider::new);
 	}
-	protected abstract void writeCustomNBT(NBTTagCompound nbt);
+	protected abstract void writeCustomNBT(NBTTagCompound nbt, boolean toItem);
 	protected abstract void readCustomNBT(NBTTagCompound nbt);
 	// DON'T OFFSET BY x, y IN THIS METHOD!
 	public abstract List<RawQuad> getQuads();
@@ -96,8 +96,8 @@ public abstract class PanelComponent {
 		this.panelHeight = panelHeight;
 	}
 
-	public void writeToNBT(NBTTagCompound nbt) {
-		writeCustomNBT(nbt);
+	public void writeToNBT(NBTTagCompound nbt, boolean toItem) {
+		writeCustomNBT(nbt, toItem);
 		nbt.setFloat("x", getX());
 		nbt.setFloat("y", getY());
 		nbt.setFloat("panelHeight", panelHeight);

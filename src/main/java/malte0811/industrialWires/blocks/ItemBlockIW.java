@@ -65,6 +65,9 @@ public class ItemBlockIW extends ItemBlock {
 				EnumFacing dir = ((IEBlockInterfaces.IDirectionalTile) te).getFacingForPlacement(player, pos, side, hitX, hitY, hitZ);
 				((IEBlockInterfaces.IDirectionalTile) te).setFacing(dir);
 			}
+			if (te instanceof IEBlockInterfaces.ITileDrop) {
+				((IEBlockInterfaces.ITileDrop) te).readOnPlacement(player, stack);
+			}
 		}
 		return ret;
 	}
