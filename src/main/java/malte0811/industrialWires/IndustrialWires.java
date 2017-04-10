@@ -29,6 +29,7 @@ import malte0811.industrialWires.blocks.BlockJacobsLadder;
 import malte0811.industrialWires.blocks.TileEntityJacobsLadder;
 import malte0811.industrialWires.blocks.controlpanel.BlockPanel;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
+import malte0811.industrialWires.blocks.controlpanel.TileEntityPanelCreator;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityRSPanelConn;
 import malte0811.industrialWires.blocks.converter.BlockMechanicalConverter;
 import malte0811.industrialWires.blocks.converter.TileEntityIEMotor;
@@ -105,6 +106,7 @@ public class IndustrialWires {
 		GameRegistry.registerTileEntity(TileEntityJacobsLadder.class, MODID+":jacobsLadder");
 		GameRegistry.registerTileEntity(TileEntityPanel.class, MODID+":control_panel");
 		GameRegistry.registerTileEntity(TileEntityRSPanelConn.class, MODID+":control_panel_rs");
+		GameRegistry.registerTileEntity(TileEntityPanelCreator.class, MODID+":panel_creator");
 		if (mechConv!=null) {
 			GameRegistry.registerTileEntity(TileEntityIEMotor.class, MODID+":ieMotor");
 			GameRegistry.registerTileEntity(TileEntityMechICtoIE.class, MODID+":mechIcToIe");

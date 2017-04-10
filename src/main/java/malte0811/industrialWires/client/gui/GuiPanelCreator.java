@@ -15,34 +15,32 @@
  * You should have received a copy of the GNU General Public License
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  */
-package malte0811.industrialWires.blocks.wire;
 
-import blusunrize.immersiveengineering.common.blocks.BlockIEBase.IBlockEnum;
+package malte0811.industrialWires.client.gui;
 
-public enum BlockTypes_IC2_Connector implements IBlockEnum {
-	TIN_CONN,
-	TIN_RELAY,
-	COPPER_CONN,
-	COPPER_RELAY,
-	GOLD_CONN,
-	GOLD_RELAY,
-	HV_CONN,
-	HV_RELAY,
-	GLASS_CONN,
-	GLASS_RELAY;
-	@Override
-	public String getName() {
-		return toString().toLowerCase();
+import malte0811.industrialWires.blocks.controlpanel.TileEntityPanelCreator;
+import malte0811.industrialWires.containers.ContainerPanelCreator;
+import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.entity.player.InventoryPlayer;
+
+public class GuiPanelCreator extends GuiContainer {
+	public GuiPanelCreator(InventoryPlayer ip, TileEntityPanelCreator te) {
+		super(new ContainerPanelCreator(ip, te));
+		ySize=207;
 	}
 
 	@Override
-	public int getMeta() {
-		return ordinal();
+	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+
 	}
 
 	@Override
-	public boolean listForCreative() {
-		return true;
+	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+		super.drawScreen(mouseX, mouseY, partialTicks);
 	}
 
+	@Override
+	public void initGui() {
+		super.initGui();
+	}
 }

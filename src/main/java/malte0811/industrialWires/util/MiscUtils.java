@@ -1,3 +1,21 @@
+/*
+ * This file is part of Industrial Wires.
+ * Copyright (C) 2016-2017 malte0811
+ *
+ * Industrial Wires is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Industrial Wires is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package malte0811.industrialWires.util;
 
 import blusunrize.immersiveengineering.api.ApiUtils;
@@ -12,9 +30,11 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.function.BiPredicate;
-import java.util.function.Predicate;
 
 public final class MiscUtils {
 	private MiscUtils() {}
@@ -58,7 +78,7 @@ public final class MiscUtils {
 				return false;
 			}
 			IBlockState state = w.getBlockState(pos);
-			return state.getBlock()== IndustrialWires.panel;
+			return state.getBlock() == IndustrialWires.panel && state.getValue(BlockPanel.type) != BlockTypes_Panel.CREATOR;
 		};
 		List<BlockPos> all = discoverLocal(w, here, isValid);
 		List<BlockPos> ret = new ArrayList<>();

@@ -15,34 +15,42 @@
  * You should have received a copy of the GNU General Public License
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  */
-package malte0811.industrialWires.blocks.wire;
 
-import blusunrize.immersiveengineering.common.blocks.BlockIEBase.IBlockEnum;
+package malte0811.industrialWires.blocks.controlpanel;
 
-public enum BlockTypes_IC2_Connector implements IBlockEnum {
-	TIN_CONN,
-	TIN_RELAY,
-	COPPER_CONN,
-	COPPER_RELAY,
-	GOLD_CONN,
-	GOLD_RELAY,
-	HV_CONN,
-	HV_RELAY,
-	GLASS_CONN,
-	GLASS_RELAY;
+import blusunrize.immersiveengineering.common.util.inventory.IIEInventory;
+import malte0811.industrialWires.blocks.TileEntityIWBase;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+
+public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInventory {
 	@Override
-	public String getName() {
-		return toString().toLowerCase();
+	public void writeNBT(NBTTagCompound out, boolean updatePacket) {
+
 	}
 
 	@Override
-	public int getMeta() {
-		return ordinal();
+	public void readNBT(NBTTagCompound in, boolean updatePacket) {
+
 	}
 
 	@Override
-	public boolean listForCreative() {
-		return true;
+	public ItemStack[] getInventory() {
+		return new ItemStack[0];
 	}
 
+	@Override
+	public boolean isStackValid(int slot, ItemStack stack) {
+		return false;
+	}
+
+	@Override
+	public int getSlotLimit(int slot) {
+		return 0;
+	}
+
+	@Override
+	public void doGraphicalUpdates(int slot) {
+
+	}
 }

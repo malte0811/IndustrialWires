@@ -15,34 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  */
-package malte0811.industrialWires.blocks.wire;
 
-import blusunrize.immersiveengineering.common.blocks.BlockIEBase.IBlockEnum;
+package malte0811.industrialWires.containers;
 
-public enum BlockTypes_IC2_Connector implements IBlockEnum {
-	TIN_CONN,
-	TIN_RELAY,
-	COPPER_CONN,
-	COPPER_RELAY,
-	GOLD_CONN,
-	GOLD_RELAY,
-	HV_CONN,
-	HV_RELAY,
-	GLASS_CONN,
-	GLASS_RELAY;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.Container;
+
+public class ContainerRSPanelConn extends Container {
 	@Override
-	public String getName() {
-		return toString().toLowerCase();
+	public boolean canInteractWith(EntityPlayer playerIn) {
+		return false;
 	}
-
-	@Override
-	public int getMeta() {
-		return ordinal();
-	}
-
-	@Override
-	public boolean listForCreative() {
-		return true;
-	}
-
 }

@@ -80,7 +80,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		slid.setX(.4F);
 		slid.setY(.25F);
 		slid.setPanelHeight(components.height);
-		components.add(slid);
+		//components.add(slid);
 	}
 
 	@Override
@@ -224,7 +224,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		Vec3d max = new Vec3d(in.maxX, in.maxY, in.maxZ);
 		min = mat.apply(min);
 		max = mat.apply(max);
-		return new AxisAlignedBB(min, max);
+		return new AxisAlignedBB(min.xCoord, min.yCoord, min.zCoord, max.xCoord, max.yCoord, max.zCoord);
 	}
 
 	@Nullable

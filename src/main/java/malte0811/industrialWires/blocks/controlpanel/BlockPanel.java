@@ -69,6 +69,8 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 			return new TileEntityPanel();
 		case RS_WIRE:
 			return new TileEntityRSPanelConn();
+		case CREATOR:
+			return new TileEntityPanelCreator();
 		}
 		return null;
 	}
@@ -136,6 +138,7 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 		list.add(new ItemStack(itemIn, 1, 0));
 		list.add(new ItemStack(itemIn, 1, 1));
 		list.add(new ItemStack(itemIn, 1, 2));
+		list.add(new ItemStack(itemIn, 1, 3));
 	}
 	@Override
 	public boolean isFullBlock(IBlockState state) {
@@ -160,16 +163,22 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 
 	@Override
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
-		if (!super.onBlockActivated(world, pos, state, player, hand, heldItem, side, hitX, hitY, hitZ)) {
+		if (!super.onBlockActivated(world, pos, state, player, hand, heldItem, side, hitX, hitY, hitZ)&&hand==EnumHand.MAIN_HAND) {
 			TileEntity te = world.getTileEntity(pos);
 			if (te instanceof TileEntityRSPanelConn){
-				if (world.isRemote) {
+				if (!world.isRemote) {
 					player.openGui(IndustrialWires.instance, 0, te.getWorld(), te.getPos().getX(), te.getPos().getY(), te.getPos().getZ());
+				}
+				return true;
+			}
+			if (te instanceof TileEntityPanelCreator) {
+				if (!world.isRemote) {
+					player.openGui(IndustrialWires.instance, 1, te.getWorld(), te.getPos().getX(), te.getPos().getY(), te.getPos().getZ());
 				}
 				return true;
 			}
 			return false;
 		}
-		return true;
+		return state.getValue(type)==BlockTypes_Panel.TOP;
 	}
 }
