@@ -34,6 +34,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -245,6 +246,11 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 			worldObj.notifyBlockUpdate(pos, state, state, 3);
 			worldObj.addBlockEvent(pos, state.getBlock(), 255, 0);
 		}
+	}
+
+	@Override
+	public World getConnectorWorld() {
+		return worldObj;
 	}
 
 	public int getRsId() {

@@ -73,9 +73,16 @@ public class Label extends PanelComponent {
 		return ret;
 	}
 
+	@Nonnull
 	@Override
 	public AxisAlignedBB getBlockRelativeAABB() {
-		return null;
+		if (aabb == null) {
+			RawModelFontRenderer fr = fontRenderer();
+			float width = fr.getStringWidth(text) * fr.scale;
+			float height = fr.FONT_HEIGHT * fr.scale;
+			aabb = new AxisAlignedBB(getX(), 0, getY(), getX() + width, 0, getY() + height);
+		}
+		return aabb;
 	}
 
 	@Override

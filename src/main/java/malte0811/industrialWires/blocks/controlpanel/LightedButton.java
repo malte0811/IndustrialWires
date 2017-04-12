@@ -38,7 +38,6 @@ public class LightedButton extends PanelComponent {
 	public boolean latching;
 	public int rsOutputId;
 	public int rsOutputChannel;
-	private AxisAlignedBB aabb;
 	private int ticksTillOff;
 	private Set<BiConsumer<Integer, Byte>> rsOut = new HashSet<>();
 	public LightedButton() {
@@ -97,6 +96,7 @@ public class LightedButton extends PanelComponent {
 		return ret;
 	}
 
+	@Nonnull
 	@Override
 	public AxisAlignedBB getBlockRelativeAABB() {
 		if (aabb==null) {

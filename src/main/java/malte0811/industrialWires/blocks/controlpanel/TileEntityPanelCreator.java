@@ -22,16 +22,42 @@ import blusunrize.immersiveengineering.common.util.inventory.IIEInventory;
 import malte0811.industrialWires.blocks.TileEntityIWBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInventory {
-	@Override
-	public void writeNBT(NBTTagCompound out, boolean updatePacket) {
+	public List<PanelComponent> components = new ArrayList<>();
+	public float height = 0.5F;
 
+	@Override
+	public void readNBT(NBTTagCompound nbt, boolean updatePacket) {
+		NBTTagList l = nbt.getTagList("components", 10);
+		components.clear();
+		for (int i = 0; i < l.tagCount(); i++) {
+			PanelComponent pc = PanelComponent.read(l.getCompoundTagAt(i));
+			if (pc != null) {
+				components.add(pc);
+			}
+		}
+		height = nbt.getFloat("height");
 	}
 
 	@Override
-	public void readNBT(NBTTagCompound in, boolean updatePacket) {
+	public void writeNBT(NBTTagCompound nbt, boolean updatePacket) {
+		writeToItemNBT(nbt, false);
+	}
 
+	public void writeToItemNBT(NBTTagCompound nbt, boolean toItem) {
+		NBTTagList comps = new NBTTagList();
+		for (PanelComponent p : components) {
+			NBTTagCompound nbtInner = new NBTTagCompound();
+			p.writeToNBT(nbtInner, toItem);
+			comps.appendTag(nbtInner);
+		}
+		nbt.setTag("components", comps);
+		nbt.setFloat("height", height);
 	}
 
 	@Override

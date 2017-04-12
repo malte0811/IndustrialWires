@@ -235,7 +235,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		Vec3d playerPos = Minecraft.getMinecraft().thePlayer.getPositionVector().addVector(-pos.getX(), player.getEyeHeight() - pos.getY(), -pos.getZ());
 		for (PanelComponent pc : components) {
 			AxisAlignedBB box = pc.getBlockRelativeAABB();
-			if (box != null) {
+			if (box.maxY>box.minY) {
 				box = apply(mat, box.expandXyz(.002));
 				Vec3d hitVec = hitAbs ? hit.addVector(-pos.getX(), -pos.getY(), -pos.getZ()) : hit;
 				hitVec = hitVec.scale(2).subtract(playerPos);

@@ -110,7 +110,7 @@ public class Slider extends PanelComponent {
 		return ret;
 	}
 
-	private AxisAlignedBB aabb;
+	@Nonnull
 	@Override
 	public AxisAlignedBB getBlockRelativeAABB() {
 		if (aabb==null) {

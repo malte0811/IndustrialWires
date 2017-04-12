@@ -20,6 +20,8 @@ package malte0811.industrialWires.blocks.controlpanel;
 
 import blusunrize.immersiveengineering.common.util.IELogger;
 import malte0811.industrialWires.client.RawQuad;
+import malte0811.industrialWires.client.gui.GuiPanelCreator;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
@@ -38,6 +40,7 @@ import java.util.function.Supplier;
 
 public abstract class PanelComponent {
 	protected float panelHeight;
+	protected AxisAlignedBB aabb = null;
 	protected float x, y;
 	private final String type;
 	protected final static float[] gray = {.8F, .8F, .8F};
@@ -59,6 +62,7 @@ public abstract class PanelComponent {
 	public abstract PanelComponent copyOf();
 
 	//well, only relative in the x/z directions
+	@Nonnull
 	public abstract AxisAlignedBB getBlockRelativeAABB();
 
 	public abstract boolean interactWith(Vec3d hitRelative, TileEntityPanel tile);
@@ -86,10 +90,12 @@ public abstract class PanelComponent {
 
 	public void setX(float x) {
 		this.x = x;
+		aabb = null;
 	}
 
 	public void setY(float y) {
 		this.y = y;
+		aabb = null;
 	}
 
 	public void setPanelHeight(float panelHeight) {
@@ -130,6 +136,30 @@ public abstract class PanelComponent {
 		GlStateManager.depthMask(true);
 		GlStateManager.enableTexture2D();
 		GlStateManager.disableBlend();
+	}
+
+	public void renderInGUI(GuiPanelCreator gui) {
+		//TODO override in special components
+		AxisAlignedBB aabb = getBlockRelativeAABB();
+		int left = (int) (gui.getX0()+aabb.minX*gui.panelSize);
+		int top = (int) (gui.getY0()+aabb.minZ*gui.panelSize);
+		int right = (int) (gui.getX0()+aabb.maxX*gui.panelSize);
+		int bottom = (int) (gui.getY0()+aabb.maxZ*gui.panelSize);
+		Gui.drawRect(left, top, right, bottom, 0xffffffff);
+	}
+
+	public boolean isValidPos() {
+		AxisAlignedBB aabb = getBlockRelativeAABB().offset(0, panelHeight, 0);
+		if (aabb.minX<0||aabb.maxX>1) {
+			return false;
+		}
+		if (aabb.minY<0||aabb.maxY>1) {
+			return false;
+		}
+		if (aabb.minZ<0||aabb.maxZ>1) {
+			return false;
+		}
+		return true;
 	}
 
 	@Override

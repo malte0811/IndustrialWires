@@ -90,9 +90,13 @@ public class IndicatorLight extends PanelComponent {
 		return ret;
 	}
 
+	@Nonnull
 	@Override
 	public AxisAlignedBB getBlockRelativeAABB() {
-		return null;
+		if (aabb==null) {
+			aabb = new AxisAlignedBB(x, 0, y, x+size, 0, y+size);
+		}
+		return aabb;
 	}
 
 	@Override

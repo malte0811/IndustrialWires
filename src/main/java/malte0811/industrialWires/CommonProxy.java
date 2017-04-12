@@ -19,7 +19,9 @@ package malte0811.industrialWires;
 
 import malte0811.industrialWires.blocks.TileEntityJacobsLadder;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanelCreator;
+import malte0811.industrialWires.blocks.controlpanel.TileEntityRSPanelConn;
 import malte0811.industrialWires.containers.ContainerPanelCreator;
+import malte0811.industrialWires.containers.ContainerRSPanelConn;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -38,6 +40,9 @@ public class CommonProxy implements IGuiHandler {
 		TileEntity te = world.getTileEntity(new BlockPos(x, y, z));
 		if (te instanceof TileEntityPanelCreator) {
 			return new ContainerPanelCreator(player.inventory, (TileEntityPanelCreator)te);
+		}
+		if (te instanceof TileEntityRSPanelConn) {
+			return new ContainerRSPanelConn((TileEntityRSPanelConn)te);
 		}
 		return null;
 	}

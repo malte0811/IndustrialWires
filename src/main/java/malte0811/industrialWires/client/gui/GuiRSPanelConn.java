@@ -28,10 +28,10 @@ import net.minecraft.nbt.NBTTagCompound;
 
 import java.io.IOException;
 
-public class RSPanelConn extends GuiScreen {
+public class GuiRSPanelConn extends GuiScreen {
 	private TileEntityRSPanelConn te;
 	private int curr = 0;
-	public RSPanelConn(TileEntityRSPanelConn tile) {
+	public GuiRSPanelConn(TileEntityRSPanelConn tile) {
 		te = tile;
 	}
 	@Override

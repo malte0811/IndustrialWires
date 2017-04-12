@@ -32,8 +32,8 @@ public class IWConfig {
 	
 	public static MechConversion mc = new MechConversion();
 	public static class MechConversion {
-		@Comment({"The amount of EU that would be produced by an ideal converter from 1 IF (default: 4)"})
-		public static double euPerIf = 4;
+		@Comment({"The amount of EU that would be produced by an ideal converter from 1 IF (default: 0.25)"})
+		public static double euPerIf = .25;
 		@Comment({"The amount of IC2 kinetic energy that an ideal converter produces from 1 EU"})
 		public static double kinPerEu = 4;
 		

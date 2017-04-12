@@ -35,7 +35,7 @@ public class RawModelFontRenderer extends FontRenderer {
 	float[] colorA = new float[4];
 	private ImmutableList.Builder<RawQuad> builder = ImmutableList.builder();
 	private final Vector3f normal = new Vector3f(0, 1, 0);
-	private final float scale;
+	public final float scale;
 
 	private TextureAtlasSprite sprite;
 
