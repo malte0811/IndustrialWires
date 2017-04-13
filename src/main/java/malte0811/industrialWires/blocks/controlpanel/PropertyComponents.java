@@ -19,6 +19,7 @@
 package malte0811.industrialWires.blocks.controlpanel;
 
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
+import malte0811.industrialWires.controlpanel.PanelComponent;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.property.IUnlistedProperty;
 

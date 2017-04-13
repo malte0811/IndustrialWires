@@ -16,10 +16,11 @@
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package malte0811.industrialWires.blocks.controlpanel;
+package malte0811.industrialWires.controlpanel;
 
+import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
-import malte0811.industrialWires.client.panelmodel.PanelUtils;
+import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
@@ -33,7 +34,7 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 
 public class LightedButton extends PanelComponent {
-	public int color;
+	public int color = 0xFF0000;
 	public boolean active;
 	public boolean latching;
 	public int rsOutputId;
@@ -41,7 +42,7 @@ public class LightedButton extends PanelComponent {
 	private int ticksTillOff;
 	private Set<BiConsumer<Integer, Byte>> rsOut = new HashSet<>();
 	public LightedButton() {
-		super("lightedButton");
+		super("lighted_button");
 	}
 	public LightedButton(int color, boolean active, boolean latching, int rsOutputId, int rsOutputChannel) {
 		this();
@@ -54,24 +55,24 @@ public class LightedButton extends PanelComponent {
 
 	@Override
 	protected void writeCustomNBT(NBTTagCompound nbt, boolean toItem) {
-		nbt.setInteger("color", color);
+		nbt.setInteger(COLOR, color);
 		nbt.setInteger("timeout", ticksTillOff);
 		if (!toItem) {
 			nbt.setBoolean("active", active);
 		}
-		nbt.setBoolean("latching", latching);
-		nbt.setInteger("rsChannel", rsOutputChannel);
-		nbt.setInteger("rsId", rsOutputId);
+		nbt.setBoolean(LATCHING, latching);
+		nbt.setInteger(RS_CHANNEL, rsOutputChannel);
+		nbt.setInteger(RS_ID, rsOutputId);
 	}
 
 	@Override
 	protected void readCustomNBT(NBTTagCompound nbt) {
-		color = nbt.getInteger("color");
+		color = nbt.getInteger(COLOR);
 		ticksTillOff = nbt.getInteger("timeout");
 		active = nbt.getBoolean("active");
-		latching = nbt.getBoolean("latching");
-		rsOutputChannel = nbt.getInteger("rsChannel");
-		rsOutputId = nbt.getInteger("rsId");
+		latching = nbt.getBoolean(LATCHING);
+		rsOutputChannel = nbt.getInteger(RS_CHANNEL);
+		rsOutputId = nbt.getInteger(RS_ID);
 	}
 	private final static float size = .0625F;
 	@Override
@@ -82,7 +83,7 @@ public class LightedButton extends PanelComponent {
 			color[i] = ((this.color>>(8*(2-i)))&255)/255F*(active?1:.5F);
 		}
 		List<RawQuad> ret = new ArrayList<>(5);
-		PanelUtils.addColoredBox(color, gray, null, new Vector3f(0, 0, 0), new Vector3f(size, size/2, size), ret, false);
+		PanelUtils.addColoredBox(color, GRAY, null, new Vector3f(0, 0, 0), new Vector3f(size, size/2, size), ret, false);
 		return ret;
 	}
 
@@ -148,6 +149,11 @@ public class LightedButton extends PanelComponent {
 	@Override
 	public float getHeight() {
 		return size/2;
+	}
+
+	@Override
+	public void renderInGUI(GuiPanelCreator gui) {
+		renderInGUIDefault(gui, 0xff000000|color);
 	}
 
 	private void setOut(boolean on, TileEntityPanel tile) {

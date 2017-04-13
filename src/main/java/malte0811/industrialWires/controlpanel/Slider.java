@@ -16,10 +16,12 @@
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package malte0811.industrialWires.blocks.controlpanel;
+package malte0811.industrialWires.controlpanel;
 
+import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
-import malte0811.industrialWires.client.panelmodel.PanelUtils;
+import malte0811.industrialWires.client.gui.GuiPanelCreator;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -35,8 +37,8 @@ import java.util.function.BiConsumer;
 
 public class Slider extends PanelComponent {
 	private static final float WIDTH = .0625F;
-	private float length;
-	private int color;
+	private float length = .5F;
+	private int color = 0xffff00;
 	private boolean horizontal;
 	private byte out;
 	private byte rsChannel;
@@ -55,24 +57,24 @@ public class Slider extends PanelComponent {
 	}
 	@Override
 	protected void writeCustomNBT(NBTTagCompound nbt, boolean toItem) {
-		nbt.setInteger("color", color);
-		nbt.setFloat("length", length);
+		nbt.setInteger(COLOR, color);
+		nbt.setFloat(LENGTH, length);
 		if (!toItem) {
 			nbt.setByte("output", out);
 		}
-		nbt.setByte("rsChannel", rsChannel);
-		nbt.setInteger("rsId", rsId);
-		nbt.setBoolean("horizontal", horizontal);
+		nbt.setByte(RS_CHANNEL, rsChannel);
+		nbt.setInteger(RS_ID, rsId);
+		nbt.setBoolean(HORIZONTAL, horizontal);
 	}
 
 	@Override
 	protected void readCustomNBT(NBTTagCompound nbt) {
-		color = nbt.getInteger("color");
-		length = nbt.getFloat("length");
+		color = nbt.getInteger(COLOR);
+		length = nbt.getFloat(LENGTH);
 		out = nbt.getByte("output");
-		rsChannel = nbt.getByte("rsChannel");
-		rsId = nbt.getInteger("rsId");
-		horizontal = nbt.getBoolean("horizontal");
+		rsChannel = nbt.getByte(RS_CHANNEL);
+		rsId = nbt.getInteger(RS_ID);
+		horizontal = nbt.getBoolean(HORIZONTAL);
 	}
 
 	@Override
@@ -82,7 +84,7 @@ public class Slider extends PanelComponent {
 		float xSize = horizontal?length:WIDTH;
 		float ySize = horizontal?WIDTH:length;
 		PanelUtils.addColoredQuad(ret, new Vector3f(0, yOff, 0), new Vector3f(0, yOff, ySize), new Vector3f(xSize, yOff, ySize), new Vector3f(xSize, yOff, 0),
-				EnumFacing.UP, gray);
+				EnumFacing.UP, GRAY);
 		float[] color = new float[4];
 		color[3] = 1;
 		for (int i = 0;i<3;i++) {
@@ -94,7 +96,7 @@ public class Slider extends PanelComponent {
 		} else {
 			val = (1-out/15F)*(length-.0625F);
 		}
-		PanelUtils.addColoredBox(color, gray, null, new Vector3f(horizontal?val:0, 0, horizontal?0:val),
+		PanelUtils.addColoredBox(color, GRAY, null, new Vector3f(horizontal?val:0, 0, horizontal?0:val),
 				new Vector3f(.0625F, getHeight(), .0625F), ret, false);
 		return ret;
 	}
@@ -158,6 +160,18 @@ public class Slider extends PanelComponent {
 	@Override
 	public float getHeight() {
 		return .0625F/2;
+	}
+
+	@Override
+	public void renderInGUI(GuiPanelCreator gui) {
+		renderInGUIDefault(gui, GRAY_INT);
+		double middleX = (getX()+(horizontal?length:.0625)/2);
+		double middleY = (getY()+(horizontal?.0625:length)/2);
+		int left = gui.getX0()+(int) ((middleX-.0625/2)*gui.panelSize);
+		int right = gui.getX0()+(int) ((middleX+.0625/2)*gui.panelSize);
+		int top = gui.getY0()+(int) ((middleY-.0625/2)*gui.panelSize);
+		int bottom = gui.getY0()+(int) ((middleY+.0625/2)*gui.panelSize);
+		Gui.drawRect(left, top, right, bottom, 0xff000000|color);
 	}
 
 	@Override

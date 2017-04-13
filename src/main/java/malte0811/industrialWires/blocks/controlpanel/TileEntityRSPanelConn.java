@@ -26,6 +26,7 @@ import blusunrize.immersiveengineering.api.energy.wires.WireType;
 import blusunrize.immersiveengineering.api.energy.wires.redstone.IRedstoneConnector;
 import blusunrize.immersiveengineering.api.energy.wires.redstone.RedstoneWireNetwork;
 import malte0811.industrialWires.blocks.INetGUI;
+import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;

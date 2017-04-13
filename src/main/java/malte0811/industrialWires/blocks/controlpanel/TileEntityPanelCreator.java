@@ -18,8 +18,17 @@
 
 package malte0811.industrialWires.blocks.controlpanel;
 
+import blusunrize.immersiveengineering.api.ApiUtils;
+import blusunrize.immersiveengineering.common.util.IELogger;
+import blusunrize.immersiveengineering.common.util.Utils;
 import blusunrize.immersiveengineering.common.util.inventory.IIEInventory;
+import malte0811.industrialWires.IndustrialWires;
+import malte0811.industrialWires.blocks.INetGUI;
 import malte0811.industrialWires.blocks.TileEntityIWBase;
+import malte0811.industrialWires.controlpanel.MessageType;
+import malte0811.industrialWires.controlpanel.PanelComponent;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -27,9 +36,10 @@ import net.minecraft.nbt.NBTTagList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInventory {
+public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInventory, INetGUI {
 	public List<PanelComponent> components = new ArrayList<>();
 	public float height = 0.5F;
+	public ItemStack[] inv = new ItemStack[1];
 
 	@Override
 	public void readNBT(NBTTagCompound nbt, boolean updatePacket) {
@@ -42,11 +52,13 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInven
 			}
 		}
 		height = nbt.getFloat("height");
+		inv = Utils.readInventory(nbt.getTagList("inventory", 10), inv.length);
 	}
 
 	@Override
 	public void writeNBT(NBTTagCompound nbt, boolean updatePacket) {
 		writeToItemNBT(nbt, false);
+		nbt.setTag("inventory", Utils.writeInventory(inv));
 	}
 
 	public void writeToItemNBT(NBTTagCompound nbt, boolean toItem) {
@@ -62,21 +74,76 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInven
 
 	@Override
 	public ItemStack[] getInventory() {
-		return new ItemStack[0];
+		return inv;
 	}
 
 	@Override
 	public boolean isStackValid(int slot, ItemStack stack) {
-		return false;
+		if (slot==0) {
+			return ApiUtils.compareToOreName(stack, "plateIron");
+		}
+		return true;
 	}
 
 	@Override
 	public int getSlotLimit(int slot) {
-		return 0;
+		return slot==0?1:64;
 	}
 
 	@Override
 	public void doGraphicalUpdates(int slot) {
 
+	}
+
+	@Override
+	public void onChange(NBTTagCompound nbt, EntityPlayer p) {
+		int type = nbt.getInteger("type");
+		switch (MessageType.values()[type]) {
+		case ADD:
+			PanelComponent pc = PanelComponent.read(nbt.getCompoundTag("component"));
+			if (pc!=null) {
+				pc.setPanelHeight(height);
+				components.add(pc);
+				ItemStack curr = p.inventory.getItemStack();
+				if (curr!=null) {
+					curr.stackSize--;
+					if (curr.stackSize<=0) {
+						p.inventory.setItemStack(null);
+					}
+					p.inventory.markDirty();
+				}
+			} else {
+				IELogger.info("(IndustrialWires) Failed to load panel component send by "+p.getDisplayNameString());
+			}
+			break;
+		case REMOVE:
+			components.remove(nbt.getInteger("id"));
+			break;
+		case CHANGE:
+			pc = PanelComponent.read(nbt.getCompoundTag("component"));
+			if (pc!=null) {
+				pc.setPanelHeight(height);
+				components.set(nbt.getInteger("id"), pc);
+			} else {
+				IELogger.info("(IndustrialWires) Failed to load panel component send by "+p.getDisplayNameString());
+			}
+			break;
+		case CREATE_PANEL:
+			if (ApiUtils.compareToOreName(inv[0], "plateIron")) {
+				//TODO remove components from inventory
+				NBTTagCompound panelNBT = new NBTTagCompound();
+				writeToItemNBT(panelNBT, true);
+				ItemStack panel = new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.TOP.ordinal());
+				panel.setTagCompound(panelNBT);
+				inv[0] = panel;
+			}
+			break;
+		case REMOVE_ALL:
+			components.clear();
+			break;
+		}
+		markDirty();
+		IBlockState state = worldObj.getBlockState(pos);
+		worldObj.notifyBlockUpdate(pos, state, state, 3);
 	}
 }

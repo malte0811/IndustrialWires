@@ -23,9 +23,20 @@ item.industrialwires.ic2wireCoil.gold.name=Gold Wire Coil
 item.industrialwires.ic2wireCoil.hv.name=IC2 HV Wire Coil
 item.industrialwires.ic2wireCoil.glass.name=Glass Fiber Wire Coil
 
+item.industrialwires.panel_component.lighted_button.name=Lighted Button
+item.industrialwires.panel_component.label.name=Label
+item.industrialwires.panel_component.indicator_light.name=Indicator Light
+item.industrialwires.panel_component.slider.name=Slider
+
 
 industrialwires.desc.wireLength=Wire length: %1s block(s)
 industrialwires.desc.recipe=Please check the Engineer's manual for recipe details
+industrialwires.desc.horizontal=Horizontal
+industrialwires.desc.vertical=Vertical
+industrialwires.desc.rsId=Redstone Connector ID: %1s
+industrialwires.desc.text=Text: %1s
+industrialwires.desc.latching=Stays on indefinitely
+industrialwires.desc.instantaneous=Turns off after half a second
 
 industrialwires.chat.tooLong=This coil does not contain enough wire for this connection
 industrialwires.chat.stackSize=Linking is only possible with a stack of size 1

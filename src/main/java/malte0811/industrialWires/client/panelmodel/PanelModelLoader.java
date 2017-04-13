@@ -20,6 +20,7 @@ package malte0811.industrialWires.client.panelmodel;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
+import malte0811.industrialWires.controlpanel.PanelUtils;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.VertexFormat;

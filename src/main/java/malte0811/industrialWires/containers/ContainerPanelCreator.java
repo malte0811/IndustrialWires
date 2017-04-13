@@ -19,9 +19,7 @@
 package malte0811.industrialWires.containers;
 
 import blusunrize.immersiveengineering.common.gui.ContainerIEBase;
-import malte0811.industrialWires.blocks.controlpanel.Label;
-import malte0811.industrialWires.blocks.controlpanel.LightedButton;
-import malte0811.industrialWires.blocks.controlpanel.PanelComponent;
+import malte0811.industrialWires.controlpanel.*;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanelCreator;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -35,9 +33,8 @@ public class ContainerPanelCreator extends ContainerIEBase<TileEntityPanelCreato
 	public ContainerPanelCreator(InventoryPlayer inventoryPlayer, TileEntityPanelCreator tile) {
 		super(inventoryPlayer, tile);
 		int slotH = 130;
-		slotCount = 38;
-		addSlotToContainer(new ComponentFakeSlot(inventoryPlayer, 36, 0, 0, new LightedButton(0xff00, false, false, 0, 0)));
-		addSlotToContainer(new ComponentFakeSlot(inventoryPlayer, 37, 0, 18, new Label("TEST", 0xff00)));
+		slotCount = 1;
+		addSlotToContainer(new Slot(inv, 0, 0, 36));
 		for (int i = 0; i < 3; i++)
 			for (int j = 0; j < 9; j++)
 				addSlotToContainer(new Slot(inventoryPlayer, j+i*9+9, 8+j*18, slotH+i*18));

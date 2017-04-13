@@ -16,15 +16,18 @@
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package malte0811.industrialWires.blocks.controlpanel;
+package malte0811.industrialWires.controlpanel;
 
 import blusunrize.immersiveengineering.common.util.IELogger;
+import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
@@ -43,13 +46,21 @@ public abstract class PanelComponent {
 	protected AxisAlignedBB aabb = null;
 	protected float x, y;
 	private final String type;
-	protected final static float[] gray = {.8F, .8F, .8F};
+	protected final static float[] GRAY = {.8F, .8F, .8F};
+	protected final static int GRAY_INT = 0xFFD0D0D0;
 	protected PanelComponent(String type) {
 		this.type = type;
 	}
-	private static final Map<String, Supplier<PanelComponent>> baseCreaters = new HashMap<>();
+	public static final Map<String, Supplier<PanelComponent>> baseCreaters = new HashMap<>();
+	public final static String COLOR = "color";
+	public final static String RS_CHANNEL = "rsChannel";
+	public final static String RS_ID = "rsId";
+	public final static String TEXT = "text";
+	public static final String HORIZONTAL = "horizontal";
+	public static final String LENGTH = "length";
+	public static final String LATCHING = "latching";
 	static {
-		baseCreaters.put("lightedButton", LightedButton::new);
+		baseCreaters.put("lighted_button", LightedButton::new);
 		baseCreaters.put("label", Label::new);
 		baseCreaters.put("indicator_light", IndicatorLight::new);
 		baseCreaters.put("slider", Slider::new);
@@ -138,15 +149,18 @@ public abstract class PanelComponent {
 		GlStateManager.disableBlend();
 	}
 
-	public void renderInGUI(GuiPanelCreator gui) {
-		//TODO override in special components
+	public abstract void renderInGUI(GuiPanelCreator gui);
+
+	public void renderInGUIDefault(GuiPanelCreator gui, int color) {
+		color |= 0xff000000;
 		AxisAlignedBB aabb = getBlockRelativeAABB();
 		int left = (int) (gui.getX0()+aabb.minX*gui.panelSize);
 		int top = (int) (gui.getY0()+aabb.minZ*gui.panelSize);
 		int right = (int) (gui.getX0()+aabb.maxX*gui.panelSize);
 		int bottom = (int) (gui.getY0()+aabb.maxZ*gui.panelSize);
-		Gui.drawRect(left, top, right, bottom, 0xffffffff);
+		Gui.drawRect(left, top, right, bottom, color);
 	}
+
 
 	public boolean isValidPos() {
 		AxisAlignedBB aabb = getBlockRelativeAABB().offset(0, panelHeight, 0);
@@ -182,5 +196,9 @@ public abstract class PanelComponent {
 		result = 31 * result + (y != +0.0f ? Float.floatToIntBits(y) : 0);
 		result = 31 * result + type.hashCode();
 		return result;
+	}
+	//TODO make abstract & implement
+	public ItemStack getIngredientStack() {
+		return new ItemStack(Items.BEETROOT_SOUP);
 	}
 }

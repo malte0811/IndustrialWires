@@ -23,6 +23,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
 import malte0811.industrialWires.blocks.controlpanel.PropertyComponents;
 import malte0811.industrialWires.blocks.controlpanel.PropertyComponents.PanelRenderProperties;
+import malte0811.industrialWires.controlpanel.PanelUtils;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;

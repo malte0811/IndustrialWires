@@ -217,5 +217,10 @@ public abstract class BlockIWBase extends Block {
 		super.harvestBlock(worldIn, player, pos, state, te, stack);
 	}
 
+	@Override
+	public boolean rotateBlock(World world, BlockPos pos, EnumFacing axis) {
+		return false;
+	}
+
 	protected abstract IProperty[] getProperties();
 }

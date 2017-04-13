@@ -38,6 +38,7 @@ import malte0811.industrialWires.blocks.converter.TileEntityMechIEtoIC;
 import malte0811.industrialWires.blocks.wire.*;
 import malte0811.industrialWires.crafting.RecipeCoilLength;
 import malte0811.industrialWires.items.ItemIC2Coil;
+import malte0811.industrialWires.items.ItemPanelComponent;
 import malte0811.industrialWires.network.MessageGUIInteract;
 import malte0811.industrialWires.network.MessagePanelInteract;
 import malte0811.industrialWires.network.MessageTileSyncIW;
@@ -72,6 +73,7 @@ public class IndustrialWires {
 	public static BlockJacobsLadder jacobsLadder;
 	public static BlockPanel panel;
 	public static ItemIC2Coil coil;
+	public static ItemPanelComponent panelComponent;
 	public static final SimpleNetworkWrapper packetHandler = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
 	@Mod.Instance(MODID)
 	public static IndustrialWires instance = new IndustrialWires();
@@ -96,6 +98,7 @@ public class IndustrialWires {
 			mechConv = new BlockMechanicalConverter();
 		jacobsLadder = new BlockJacobsLadder();
 		coil = new ItemIC2Coil();
+		panelComponent = new ItemPanelComponent();
 		panel = new BlockPanel();
 		//TODO change to MODID+ when changing to a new MC version
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorTin.class, "ic2ConnectorTin");

@@ -25,6 +25,7 @@ import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.IBlockBoundsIW;
 import malte0811.industrialWires.blocks.TileEntityIWBase;
+import malte0811.industrialWires.controlpanel.*;
 import malte0811.industrialWires.network.MessagePanelInteract;
 import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.block.state.IBlockState;
@@ -291,7 +292,9 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 	}
 
 	public void unregisterRS(TileEntityRSPanelConn te) {
-		rsPorts.remove(te);
+		if (!tileEntityInvalid) {
+			rsPorts.remove(te);
+		}
 	}
 
 	@Override

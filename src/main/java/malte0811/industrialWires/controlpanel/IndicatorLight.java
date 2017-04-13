@@ -16,10 +16,11 @@
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package malte0811.industrialWires.blocks.controlpanel;
+package malte0811.industrialWires.controlpanel;
 
 import malte0811.industrialWires.client.RawQuad;
-import malte0811.industrialWires.client.panelmodel.PanelUtils;
+import malte0811.industrialWires.client.gui.GuiPanelCreator;
+import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -35,7 +36,7 @@ import java.util.function.Consumer;
 public class IndicatorLight extends PanelComponent {
 	private int rsInputId;
 	private int rsInputChannel;
-	private int colorA;
+	private int colorA = 0xff00;
 	private byte rsInput;
 	public IndicatorLight() {
 		super("indicator_light");
@@ -49,9 +50,9 @@ public class IndicatorLight extends PanelComponent {
 
 	@Override
 	protected void writeCustomNBT(NBTTagCompound nbt, boolean toItem) {
-		nbt.setInteger("rsId", rsInputId);
-		nbt.setInteger("rsChannel", rsInputChannel);
-		nbt.setInteger("color", colorA);
+		nbt.setInteger(RS_ID, rsInputId);
+		nbt.setInteger(RS_CHANNEL, rsInputChannel);
+		nbt.setInteger(COLOR, colorA);
 		if (!toItem) {
 			nbt.setInteger("rsInput", rsInput);
 		}
@@ -59,9 +60,9 @@ public class IndicatorLight extends PanelComponent {
 
 	@Override
 	protected void readCustomNBT(NBTTagCompound nbt) {
-		rsInputId = nbt.getInteger("rsId");
-		rsInputChannel = nbt.getInteger("rsChannel");
-		colorA = nbt.getInteger("color");
+		rsInputId = nbt.getInteger(RS_ID);
+		rsInputChannel = nbt.getInteger(RS_CHANNEL);
+		colorA = nbt.getInteger(COLOR);
 		rsInput = nbt.getByte("rsInput");
 	}
 
@@ -149,5 +150,10 @@ public class IndicatorLight extends PanelComponent {
 		result = 31 * result + colorA;
 		result = 31 * result + (int) rsInput;
 		return result;
+	}
+
+	@Override
+	public void renderInGUI(GuiPanelCreator gui) {
+		renderInGUIDefault(gui, colorA);
 	}
 }

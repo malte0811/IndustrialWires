@@ -16,9 +16,11 @@
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package malte0811.industrialWires.blocks.controlpanel;
+package malte0811.industrialWires.controlpanel;
 
+import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
+import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import malte0811.industrialWires.client.panelmodel.RawModelFontRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
@@ -31,9 +33,9 @@ import java.util.List;
 
 public class Label extends PanelComponent {
 	private static final ResourceLocation font = new ResourceLocation("minecraft", "textures/font/ascii.png");
-	String text;
+	String text = "Test";
 	RawModelFontRenderer renderer;
-	int color;
+	int color = 0x808080;
 
 	public Label(String text, int color) {
 		this();
@@ -46,14 +48,14 @@ public class Label extends PanelComponent {
 
 	@Override
 	protected void writeCustomNBT(NBTTagCompound nbt, boolean toItem) {
-		nbt.setString("text", text);
-		nbt.setInteger("color", color);
+		nbt.setString(TEXT, text);
+		nbt.setInteger(COLOR, color);
 	}
 
 	@Override
 	protected void readCustomNBT(NBTTagCompound nbt) {
-		text = nbt.getString("text");
-		color = nbt.getInteger("color");
+		text = nbt.getString(TEXT);
+		color = nbt.getInteger(COLOR);
 	}
 
 	@Override
@@ -108,4 +110,10 @@ public class Label extends PanelComponent {
 		return renderer;
 	}
 
+	@Override
+	public void renderInGUI(GuiPanelCreator gui) {
+		int left = (int) (gui.getX0()+getX()*gui.panelSize);
+		int top = (int) (gui.getY0()+getY()*gui.panelSize);
+		gui.mc.fontRendererObj.drawString(text, left, top, 0xff000000|color);
+	}
 }

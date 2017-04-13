@@ -21,7 +21,7 @@ import blusunrize.immersiveengineering.api.Lib;
 import blusunrize.immersiveengineering.client.ClientUtils;
 import blusunrize.immersiveengineering.common.util.ItemNBTHelper;
 import malte0811.industrialWires.IndustrialWires;
-import malte0811.industrialWires.blocks.controlpanel.PanelComponent;
+import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.items.ItemIC2Coil;
 import malte0811.industrialWires.wires.IC2Wiretype;

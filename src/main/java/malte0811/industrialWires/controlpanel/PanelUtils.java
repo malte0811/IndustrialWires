@@ -16,18 +16,23 @@
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package malte0811.industrialWires.client.panelmodel;
+package malte0811.industrialWires.controlpanel;
 
+import blusunrize.immersiveengineering.api.Lib;
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
-import malte0811.industrialWires.blocks.controlpanel.PanelComponent;
+import malte0811.industrialWires.IndustrialWires;
+import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.blocks.controlpanel.PropertyComponents;
 import malte0811.industrialWires.client.RawQuad;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.item.EnumDyeColor;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3i;
 import net.minecraftforge.client.model.ModelLoader;
@@ -37,6 +42,10 @@ import org.lwjgl.util.vector.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static malte0811.industrialWires.controlpanel.PanelComponent.*;
+import static malte0811.industrialWires.controlpanel.PanelComponent.RS_CHANNEL;
+import static malte0811.industrialWires.controlpanel.PanelComponent.RS_ID;
 
 public final class PanelUtils {
 	public static TextureAtlasSprite IRON_BLOCK_TEX;
@@ -156,5 +165,46 @@ public final class PanelUtils {
 		Vec3i dirV = dir.getDirectionVec();
 		out.add(new RawQuad(v0, v1, v2, v3, dir, tex,
 				color, new Vector3f(dirV.getX(), dirV.getY(), dirV.getZ()), uvs));
+	}
+
+	public static void addInfo(ItemStack stack, List<String> list, NBTTagCompound data) {
+		switch (stack.getMetadata()) {
+		case 0: //button
+			addCommonInfo(data, list, true, true);
+			if (data.hasKey(LATCHING)) {
+				list.add(I18n.format(IndustrialWires.MODID+".desc."+(data.getBoolean(LATCHING)?"latching":"instantaneous")));
+			}
+			break;
+		case 1: //label
+			if (data.hasKey(TEXT)) {
+				list.add(I18n.format(IndustrialWires.MODID+".desc.text", data.getString(TEXT)));
+			}
+			addCommonInfo(data, list, true, false);
+			break;
+		case 2: //indicator light
+			addCommonInfo(data, list, true, true);
+			break;
+		case 3: //slider
+			addCommonInfo(data, list, true, true);
+			if (data.hasKey(HORIZONTAL)) {
+				list.add(I18n.format(IndustrialWires.MODID+".desc."+(data.getBoolean(HORIZONTAL)?"horizontal":"vertical")));
+			}
+			break;
+		}
+	}
+
+	public static void addCommonInfo(NBTTagCompound data, List<String> list, boolean color, boolean rs) {
+		if (color&&data.hasKey(COLOR)) {
+			String hexCol = String.format("%6s", Integer.toHexString(data.getInteger(COLOR))).replace(' ', '0');
+			list.add(I18n.format(Lib.DESC_INFO+"colour", "<hexcol="+hexCol+":#"+hexCol+">"));
+		}
+		if (rs&&data.hasKey(RS_CHANNEL)) {
+			EnumDyeColor channColor = EnumDyeColor.byMetadata(data.getInteger(RS_CHANNEL));
+			String hexCol = Integer.toHexString(channColor.getMapColor().colorValue);
+			list.add(I18n.format("desc.immersiveengineering.info.redstoneChannel", "<hexcol="+hexCol+":"+channColor.getUnlocalizedName()+">"));
+		}
+		if (rs&&data.hasKey(RS_ID)) {
+			list.add(I18n.format(IndustrialWires.MODID+".desc.rsId", data.getInteger(RS_ID)));
+		}
 	}
 }
