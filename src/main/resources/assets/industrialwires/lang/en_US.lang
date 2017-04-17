@@ -37,6 +37,10 @@ industrialwires.desc.rsId=Redstone Connector ID: %1s
 industrialwires.desc.text=Text: %1s
 industrialwires.desc.latching=Stays on indefinitely
 industrialwires.desc.instantaneous=Turns off after half a second
+industrialwires.desc.remove_all=Remove all components from this panel
+industrialwires.desc.create_panel=Create a new control panel
+industrialwires.desc.enable_snap=Snap new components to the 16*16 grid
+industrialwires.desc.disable_snap=Allow free placing of components
 
 industrialwires.chat.tooLong=This coil does not contain enough wire for this connection
 industrialwires.chat.stackSize=Linking is only possible with a stack of size 1

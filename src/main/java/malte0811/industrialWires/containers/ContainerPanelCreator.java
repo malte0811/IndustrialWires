@@ -19,49 +19,24 @@
 package malte0811.industrialWires.containers;
 
 import blusunrize.immersiveengineering.common.gui.ContainerIEBase;
-import malte0811.industrialWires.controlpanel.*;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanelCreator;
-import net.minecraft.entity.player.EntityPlayer;
+import malte0811.industrialWires.controlpanel.PanelComponent;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Slot;
-import net.minecraft.item.ItemStack;
 
 //TODO remove dependency on core IE
 public class ContainerPanelCreator extends ContainerIEBase<TileEntityPanelCreator> {
 	public PanelComponent toPlace = null;
 	public ContainerPanelCreator(InventoryPlayer inventoryPlayer, TileEntityPanelCreator tile) {
 		super(inventoryPlayer, tile);
-		int slotH = 130;
+		int slotH = 150;
+		int slotX = 14;
 		slotCount = 1;
-		addSlotToContainer(new Slot(inv, 0, 0, 36));
+		addSlotToContainer(new Slot(inv, 0, 7, 37));
 		for (int i = 0; i < 3; i++)
 			for (int j = 0; j < 9; j++)
-				addSlotToContainer(new Slot(inventoryPlayer, j+i*9+9, 8+j*18, slotH+i*18));
+				addSlotToContainer(new Slot(inventoryPlayer, j+i*9+9, slotX+j*18, slotH+i*18));
 		for (int i = 0; i < 9; i++)
-			addSlotToContainer(new Slot(inventoryPlayer, i, 8+i*18, slotH+58));
-	}
-
-	@Override
-	public ItemStack slotClick(int id, int button, ClickType clickType, EntityPlayer player) {
-		if (id >= 0) {
-			Slot s = getSlot(id);
-			if (s instanceof ComponentFakeSlot) {
-				if (!((ComponentFakeSlot) s).isSelected()) {
-					toPlace = ((ComponentFakeSlot) s).select();
-					for (int i = 0; i < slotCount; i++) {
-						Slot slot = getSlot(i);
-						if (slot != s && slot instanceof ComponentFakeSlot) {
-							((ComponentFakeSlot) slot).unselect();
-						}
-					}
-				} else {
-					toPlace = null;
-					((ComponentFakeSlot) s).unselect();
-				}
-				return null;
-			}
-		}
-		return super.slotClick(id, button, clickType, player);
+			addSlotToContainer(new Slot(inventoryPlayer, i, slotX+i*18, slotH+58));
 	}
 }

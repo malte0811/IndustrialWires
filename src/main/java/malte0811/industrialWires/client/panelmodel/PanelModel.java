@@ -81,7 +81,7 @@ public class PanelModel implements IBakedModel {
 
 	@Override
 	public TextureAtlasSprite getParticleTexture() {
-		return PanelUtils.IRON_BLOCK_TEX;
+		return PanelUtils.PANEL_TEXTURE;
 	}
 
 	@Override
@@ -129,7 +129,7 @@ public class PanelModel implements IBakedModel {
 
 		@Override
 		public TextureAtlasSprite getParticleTexture() {
-			return PanelUtils.IRON_BLOCK_TEX;
+			return PanelUtils.PANEL_TEXTURE;
 		}
 
 		@Override

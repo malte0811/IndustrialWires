@@ -68,6 +68,9 @@ public class ItemBlockIW extends ItemBlock {
 			if (te instanceof IEBlockInterfaces.ITileDrop) {
 				((IEBlockInterfaces.ITileDrop) te).readOnPlacement(player, stack);
 			}
+			if (te instanceof IHasDummyBlocksIW) {
+				((IHasDummyBlocksIW) te).placeDummies(world.getBlockState(pos));
+			}
 		}
 		return ret;
 	}

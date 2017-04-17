@@ -51,7 +51,7 @@ public class BlockMechanicalConverter extends BlockIWBase implements IMetaEnum {
 	}
 
 	@Override
-	protected IProperty[] getProperties() {
+	protected IProperty<?>[] getProperties() {
 		return new IProperty[]{type, IEProperties.FACING_ALL};
 	}
 

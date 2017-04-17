@@ -32,7 +32,6 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -69,7 +68,7 @@ public abstract class BlockIWBase extends Block {
 			properties = getProperties();
 		}
 		BlockStateContainer cont = super.createBlockState();
-		IProperty[] props = cont.getProperties().toArray(new IProperty[0]);
+		IProperty<?>[] props = cont.getProperties().toArray(new IProperty[0]);
 		int oldLength = props.length;
 		props = Arrays.copyOf(props, oldLength + properties.length);
 		System.arraycopy(properties, 0, props, oldLength, properties.length);
@@ -122,15 +121,6 @@ public abstract class BlockIWBase extends Block {
 		}
 		super.breakBlock(worldIn, pos, state);
 		worldIn.removeTileEntity(pos);
-	}
-	@Override
-	public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer,
-								ItemStack stack) {
-		super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
-		TileEntity te = worldIn.getTileEntity(pos);
-		if (te instanceof IHasDummyBlocksIW) {
-			((IHasDummyBlocksIW) te).placeDummies(state);
-		}
 	}
 
 	@Nullable

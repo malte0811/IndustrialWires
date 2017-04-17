@@ -19,13 +19,10 @@
 package malte0811.industrialWires.blocks;
 
 import blusunrize.immersiveengineering.api.IEProperties;
-import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.TileEntityJacobsLadder.LadderSize;
-import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
-import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
@@ -37,17 +34,12 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.AxisDirection;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
 import java.util.List;
 
 public class BlockJacobsLadder extends BlockIWBase implements IMetaEnum, IPlacementCheck {
@@ -68,7 +60,7 @@ public class BlockJacobsLadder extends BlockIWBase implements IMetaEnum, IPlacem
 	}
 
 	@Override
-	protected IProperty[] getProperties() {
+	protected IProperty<?>[] getProperties() {
 		return new IProperty[]{
 				size_property, IEProperties.MULTIBLOCKSLAVE, IEProperties.FACING_HORIZONTAL
 		};
@@ -139,15 +131,6 @@ public class BlockJacobsLadder extends BlockIWBase implements IMetaEnum, IPlacem
 			}
 		}
 		return super.getStateForPlacement(world, pos, facing, hitX, hitY, hitZ, meta, placer, stack).withProperty(IEProperties.FACING_HORIZONTAL, f);
-	}
-
-	@Override
-	public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
-		super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
-		TileEntity te = worldIn.getTileEntity(pos);
-		if (te instanceof TileEntityJacobsLadder) {
-			((TileEntityJacobsLadder) te).facing = state.getValue(IEProperties.FACING_HORIZONTAL);
-		}
 	}
 
 	@Override

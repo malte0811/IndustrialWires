@@ -21,7 +21,6 @@ package malte0811.industrialWires.controlpanel;
 import blusunrize.immersiveengineering.api.Lib;
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import malte0811.industrialWires.IndustrialWires;
-import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.blocks.controlpanel.PropertyComponents;
 import malte0811.industrialWires.client.RawQuad;
 import net.minecraft.client.Minecraft;
@@ -44,16 +43,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static malte0811.industrialWires.controlpanel.PanelComponent.*;
-import static malte0811.industrialWires.controlpanel.PanelComponent.RS_CHANNEL;
-import static malte0811.industrialWires.controlpanel.PanelComponent.RS_ID;
 
 public final class PanelUtils {
-	public static TextureAtlasSprite IRON_BLOCK_TEX;
+	public static TextureAtlasSprite PANEL_TEXTURE;
 	private PanelUtils() {}
 
 	public static List<BakedQuad> generateQuads(PropertyComponents.PanelRenderProperties components) {
-		if (IRON_BLOCK_TEX==null) {
-			IRON_BLOCK_TEX = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:blocks/iron_block");
+		if (PANEL_TEXTURE==null) {
+			PANEL_TEXTURE = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(IndustrialWires.MODID+":blocks/control_panel");
 		}
 		List<BakedQuad> ret = new ArrayList<>();
 		Matrix4 m4 = components.getPanelTopTransform();
@@ -64,7 +61,7 @@ public final class PanelUtils {
 			Matrix4 m4Here = m4.copy().translate(pc.getX(), 0, pc.getY());
 			List<RawQuad> compQuads = pc.getQuads();
 			for (RawQuad bq:compQuads) {
-				ret.add(bakeQuad(bq, m4Here, m4RotOnly));
+				ret.add(bakeQuad(bq, m4Here, m4RotOnly, false));
 			}
 		}
 		Matrix4 baseTrans = components.getPanelBaseTransform();
@@ -73,15 +70,34 @@ public final class PanelUtils {
 		baseNorm.transpose();
 
 		List<RawQuad> rawOut = new ArrayList<>();
-		addTexturedBox(new Vector3f(0, 0, 0), new Vector3f(1, components.height, 1), rawOut, UV_FULL, IRON_BLOCK_TEX);
+		//addTexturedBox(new Vector3f(0, 0, 0), new Vector3f(1, components.height, 1), rawOut, UV_FULL, PANEL_TEXTURE);
+		float vMax = 16*components.height;
+		addQuad(rawOut, new Vector3f(0, components.height, 0), new Vector3f(0, components.height, 1),
+				new Vector3f(1, components.height, 1), new Vector3f(1, components.height, 0),
+				EnumFacing.UP, WHITE, PANEL_TEXTURE, UV_FULL);
+		addQuad(rawOut, new Vector3f(0, 0, 0), new Vector3f(1, 0, 0),
+				new Vector3f(1, 0, 1), new Vector3f(0, 0, 1),
+				EnumFacing.DOWN, WHITE, PANEL_TEXTURE, new float[]{0, 16, 16, 0});
+		addQuad(rawOut, new Vector3f(0, 0, 0), new Vector3f(0, 0, 1),
+				new Vector3f(0, components.height, 1), new Vector3f(0, components.height, 0),
+				EnumFacing.WEST, WHITE, PANEL_TEXTURE, new float[]{0, vMax, 16, 0});
+		addQuad(rawOut, new Vector3f(1, 0, 0), new Vector3f(1, components.height, 0),
+				new Vector3f(1, components.height, 1), new Vector3f(1, 0, 1),
+				EnumFacing.EAST, WHITE, PANEL_TEXTURE, new float[]{16, vMax, 0, 0});
+		addQuad(rawOut, new Vector3f(1, 0, 0), new Vector3f(0, 0, 0),
+				new Vector3f(0, components.height, 0), new Vector3f(1, components.height, 0),
+				EnumFacing.NORTH, WHITE, PANEL_TEXTURE, new float[]{0, vMax, 16, 0});
+		addQuad(rawOut, new Vector3f(0, 0, 1), new Vector3f(1, 0, 1),
+				new Vector3f(1, components.height, 1), new Vector3f(0, components.height, 1),
+				EnumFacing.SOUTH, WHITE, PANEL_TEXTURE, new float[]{0, vMax, 16, 0});
 		for (RawQuad bq:rawOut) {
-			ret.add(bakeQuad(bq, baseTrans, baseNorm));
+			ret.add(bakeQuad(bq, baseTrans, baseNorm, bq.facing!=EnumFacing.EAST&&bq.facing!=EnumFacing.UP));//flip south and west
 		}
 
 		return ret;
 	}
 
-	public static BakedQuad bakeQuad(RawQuad raw, Matrix4 transform, Matrix4 transfNormal) {
+	public static BakedQuad bakeQuad(RawQuad raw, Matrix4 transform, Matrix4 transfNormal, boolean flip) {
 		VertexFormat format = DefaultVertexFormats.ITEM;
 		UnpackedBakedQuad.Builder builder = new UnpackedBakedQuad.Builder(format);
 		builder.setQuadOrientation(raw.facing);
@@ -92,11 +108,11 @@ public final class PanelUtils {
 		OBJModel.Normal faceNormal = new OBJModel.Normal(normal.x, normal.y, normal.z);
 		putVertexData(format, builder, transform.apply(vertices[0]), faceNormal, uvs[0], uvs[1], raw.tex,
 				raw.colorA);
-		putVertexData(format, builder, transform.apply(vertices[1]), faceNormal, uvs[0], uvs[3], raw.tex,
+		putVertexData(format, builder, transform.apply(vertices[1]), faceNormal, uvs[flip?2:0], uvs[flip?1:3], raw.tex,
 				raw.colorA);
 		putVertexData(format, builder, transform.apply(vertices[2]), faceNormal, uvs[2], uvs[3], raw.tex,
 				raw.colorA);
-		putVertexData(format, builder, transform.apply(vertices[3]), faceNormal, uvs[2], uvs[1], raw.tex,
+		putVertexData(format, builder, transform.apply(vertices[3]), faceNormal, uvs[flip?0:2], uvs[flip?3:1], raw.tex,
 				raw.colorA);
 		return builder.build();
 	}

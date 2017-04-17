@@ -18,9 +18,7 @@
 
 package malte0811.industrialWires.items;
 
-import blusunrize.immersiveengineering.api.Lib;
 import blusunrize.immersiveengineering.client.ClientProxy;
-import blusunrize.immersiveengineering.client.ClientUtils;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.controlpanel.PanelUtils;
@@ -29,20 +27,15 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.client.config.GuiUtils;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
-
-import static malte0811.industrialWires.controlpanel.PanelComponent.*;
 
 public class ItemPanelComponent extends Item {
 	private static final String[] types = {
@@ -95,6 +88,33 @@ public class ItemPanelComponent extends Item {
 		return PanelComponent.read(loadFrom);
 	}
 
+	@Nullable
+	public ItemStack stackFromComponent(PanelComponent pc) {
+		NBTTagCompound inner = new NBTTagCompound();
+		pc.writeToNBT(inner, true);
+		NBTTagCompound outer = new NBTTagCompound();
+		outer.setTag("data", inner);
+		int meta = getMetaFromPC(inner.getString("type"));
+		inner.removeTag("x");
+		inner.removeTag("y");
+		inner.removeTag("type");
+		if (meta>=0) {
+			ItemStack ret = new ItemStack(this, 1, meta);
+			ret.setTagCompound(outer);
+			return ret;
+		}
+		return null;
+	}
+
+	private int getMetaFromPC(String pc) {
+		for (int i = 0;i<types.length;i++) {
+			if (pc.equals(types[i])) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
 	@Nonnull
 	public static NBTTagCompound getTagCompound(ItemStack stack) {
 		if (!stack.hasTagCompound()) {
@@ -107,6 +127,9 @@ public class ItemPanelComponent extends Item {
 			if (asCmp != null) {
 				NBTTagCompound written = new NBTTagCompound();
 				asCmp.writeToNBT(written, true);
+				written.removeTag("x");
+				written.removeTag("y");
+				written.removeTag("type");
 				nbt.setTag("data", written);
 			}
 		}

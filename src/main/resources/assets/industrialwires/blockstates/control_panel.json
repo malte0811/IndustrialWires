@@ -32,7 +32,15 @@
       },
       "top": {
         "model": "industrialwires:smartmodel/panel_normal"
-      }
+      },
+	  "dummy": {
+		  "model": "cube_all",
+		  "textures": {"all": "industrialwires:blocks/control_panel"}
+	  },
+	  "creator": {
+		  "model": "cube_all",
+		  "textures": {"all": "minecraft:blocks/diamond_block"}
+	  }
     },
     "inventory": {
       "model":"industrialwires:panel_normal"

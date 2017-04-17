@@ -18,59 +18,57 @@
 
 package malte0811.industrialWires.client.gui;
 
-import blusunrize.immersiveengineering.api.ApiUtils;
-import blusunrize.immersiveengineering.common.util.IELogger;
+import blusunrize.immersiveengineering.client.ClientUtils;
+import com.google.common.collect.ImmutableList;
 import malte0811.industrialWires.IndustrialWires;
-import malte0811.industrialWires.blocks.controlpanel.BlockTypes_Panel;
-import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanelCreator;
-import malte0811.industrialWires.containers.ComponentFakeSlot;
 import malte0811.industrialWires.containers.ContainerPanelCreator;
 import malte0811.industrialWires.controlpanel.MessageType;
+import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.network.MessageGUIInteract;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
-import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.text.ITextComponent;
 
 import java.io.IOException;
 
 public class GuiPanelCreator extends GuiContainer {
-	private int heightWithoutInv = 130;
 	public int panelSize = 128;
 	private ContainerPanelCreator container;
+	private boolean snapToGrid = false;
+	private ResourceLocation textureLoc = new ResourceLocation(IndustrialWires.MODID, "textures/gui/panel_creator.png");
 
 	public GuiPanelCreator(InventoryPlayer ip, TileEntityPanelCreator te) {
 		super(new ContainerPanelCreator(ip, te));
 		container = (ContainerPanelCreator) inventorySlots;
-		ySize = 207;
+		ySize = 231;
 	}
 
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
 		//TODO proper background
+		textureLoc = new ResourceLocation(IndustrialWires.MODID, "textures/gui/panel_creator.png");
+		GlStateManager.color(1,1,1,1);
+		mc.getTextureManager().bindTexture(textureLoc);
+		this.drawTexturedModalRect(guiLeft,guiTop, 0, 0, xSize, ySize);
 		int x0 = getX0();
 		int y0 = getY0();
 		int xRel = mouseX - x0;
 		int yRel = mouseY - y0;
-		GlStateManager.color(1, 1, 1, 1);
-		mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-		TextureAtlasSprite sprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:blocks/iron_block");
-		drawTexturedRect(x0, x0 + panelSize, y0, y0 + panelSize, sprite.getMinU(), sprite.getMaxU(), sprite.getMinV(), sprite.getMaxV());
+		if (snapToGrid) {
+			xRel = (int) Math.floor(xRel*16/panelSize)*panelSize/16;
+			yRel = (int) Math.floor(yRel*16/panelSize)*panelSize/16;
+		}
 		PanelComponent curr = getFloatingPC();
 		if (curr!=null && 0 <= xRel && xRel <= panelSize && 0 <= yRel && yRel <= panelSize) {
 			drawPanelComponent(curr, xRel, yRel);
@@ -79,13 +77,26 @@ public class GuiPanelCreator extends GuiContainer {
 			drawPanelComponent(pc, -1, -1);
 		}
 	}
-	private void drawPanel() {
-
-	}
 
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		super.drawScreen(mouseX, mouseY, partialTicks);
+		String tooltip = null;
+		if (buttonList.get(0).isMouseOver()) {
+			tooltip = I18n.format(IndustrialWires.MODID+".desc.create_panel");
+			ClientUtils.drawHoveringText(ImmutableList.of("Create a new panel"), mouseX, mouseY, mc.fontRendererObj);
+		} else if (buttonList.get(1).isMouseOver()) {
+			tooltip = I18n.format(IndustrialWires.MODID+".desc.remove_all");
+		} else if (buttonList.get(2).isMouseOver()) {
+			if (snapToGrid) {
+				tooltip = I18n.format(IndustrialWires.MODID+".desc.disable_snap");
+			} else {
+				tooltip = I18n.format(IndustrialWires.MODID+".desc.enable_snap");
+			}
+		}
+		if (tooltip!=null) {
+			ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRendererObj);
+		}
 	}
 
 	private void drawPanelComponent(PanelComponent pc, int x, int y) {
@@ -109,8 +120,10 @@ public class GuiPanelCreator extends GuiContainer {
 	public void initGui() {
 		super.initGui();
 		buttonList.clear();
-		buttonList.add(new GuiButton(0, guiLeft, guiTop+54, 16, 16, "C"));
-		buttonList.add(new GuiButton(1, guiLeft, guiTop+72, 16, 16, "D"));
+		int buttonTop = guiTop+62;
+		buttonList.add(new GuiButton(0, guiLeft+2, buttonTop, 20, 20, "C"));
+		buttonList.add(new GuiButton(1, guiLeft+2, buttonTop+22, 20, 20, "D"));
+		buttonList.add(new GuiButton(2, guiLeft+2, buttonTop+44, 20, 20, "S"));
 	}
 
 	private void drawTexturedRect(float xMin, float xMax, float yMin, float yMax, float uMin, float uMax, float vMin, float vMax) {
@@ -125,20 +138,16 @@ public class GuiPanelCreator extends GuiContainer {
 	}
 
 	@Override
-	protected void drawSlot(Slot slot) {
-		if (slot instanceof ComponentFakeSlot && ((ComponentFakeSlot) slot).isSelected()) {
-			drawRect(slot.xDisplayPosition, slot.yDisplayPosition, slot.xDisplayPosition + 16, slot.yDisplayPosition + 16, 0x8000ff00);
-		}
-		super.drawSlot(slot);
-	}
-
-	@Override
 	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
 		super.mouseClicked(mouseX, mouseY, mouseButton);
 		int x0 = getX0();
 		int y0 = getY0();
 		int xRel = mouseX - x0;
 		int yRel = mouseY - y0;
+		if (snapToGrid) {
+			xRel = (int) Math.floor(xRel*16/panelSize)*panelSize/16;
+			yRel = (int) Math.floor(yRel*16/panelSize)*panelSize/16;
+		}
 		PanelComponent curr = getFloatingPC();
 		if (curr != null && 0 <= xRel && xRel <= panelSize && 0 <= yRel && yRel <= panelSize) {
 			if (curr.isValidPos()) {
@@ -161,11 +170,11 @@ public class GuiPanelCreator extends GuiContainer {
 	}
 
 	public int getX0() {
-		return (width - panelSize) / 2;
+		return 30+guiLeft;
 	}
 
 	public int getY0() {
-		return heightWithoutInv - panelSize;
+		return 6+guiTop;
 	}
 
 	@Override
@@ -178,6 +187,9 @@ public class GuiPanelCreator extends GuiContainer {
 			break;
 		case 1:// Delete all
 			nbt.setInteger("type", MessageType.REMOVE_ALL.ordinal());
+			break;
+		case 2:
+			snapToGrid = !snapToGrid;
 			break;
 		}
 		if (!nbt.hasNoTags()) {

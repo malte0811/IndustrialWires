@@ -20,6 +20,7 @@ package malte0811.industrialWires.client.panelmodel;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
+import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.controlpanel.PanelUtils;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -43,7 +44,7 @@ public class PanelModelLoader implements ICustomModelLoader {
 	@Override
 	public void onResourceManagerReload(IResourceManager resourceManager) {
 		PanelModel.modelCache.invalidateAll();
-		PanelUtils.IRON_BLOCK_TEX = null;
+		PanelUtils.PANEL_TEXTURE = null;
 	}
 
 	@Override
@@ -73,7 +74,7 @@ public class PanelModelLoader implements ICustomModelLoader {
 			try {
 				List<ResourceLocation> ret = new ArrayList<>();
 				ret.add(new ResourceLocation("minecraft", "font/ascii"));
-				ret.add(new ResourceLocation("minecraft", "blocks/iron_block"));
+				ret.add(new ResourceLocation(IndustrialWires.MODID, "blocks/control_panel"));
 				return ret;
 			} catch (Exception e) {
 				throw new RuntimeException(e);

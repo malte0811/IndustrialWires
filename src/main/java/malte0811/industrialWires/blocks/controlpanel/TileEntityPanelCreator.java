@@ -34,6 +34,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInventory, INetGUI {
@@ -130,7 +131,6 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInven
 			break;
 		case CREATE_PANEL:
 			if (ApiUtils.compareToOreName(inv[0], "plateIron")) {
-				//TODO remove components from inventory
 				NBTTagCompound panelNBT = new NBTTagCompound();
 				writeToItemNBT(panelNBT, true);
 				ItemStack panel = new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.TOP.ordinal());
@@ -139,7 +139,18 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInven
 			}
 			break;
 		case REMOVE_ALL:
-			components.clear();
+			Iterator<PanelComponent> it = components.iterator();
+			while (it.hasNext()) {
+				PanelComponent next = it.next();
+				ItemStack nextStack = IndustrialWires.panelComponent.stackFromComponent(next);
+				if (nextStack!=null) {
+					if (p.inventory.addItemStackToInventory(nextStack)) {
+						it.remove();
+					}
+				} else {
+					it.remove();
+				}
+			}
 			break;
 		}
 		markDirty();

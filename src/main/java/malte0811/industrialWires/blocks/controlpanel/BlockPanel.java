@@ -58,8 +58,9 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 			return layer==BlockRenderLayer.CUTOUT;
 		case RS_WIRE:
 			return layer==BlockRenderLayer.TRANSLUCENT||layer==BlockRenderLayer.SOLID;
+		default:
+			return super.canRenderInLayer(state, layer);
 		}
-		return super.canRenderInLayer(state, layer);
 	}
 
 	@Override
@@ -71,8 +72,9 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 			return new TileEntityRSPanelConn();
 		case CREATOR:
 			return new TileEntityPanelCreator();
+		default:
+			return null;
 		}
-		return null;
 	}
 
 	@Override
@@ -81,7 +83,7 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 	}
 
 	@Override
-	protected IProperty[] getProperties() {
+	protected IProperty<?>[] getProperties() {
 		return new IProperty[]{IEProperties.FACING_HORIZONTAL, type};
 	}
 
