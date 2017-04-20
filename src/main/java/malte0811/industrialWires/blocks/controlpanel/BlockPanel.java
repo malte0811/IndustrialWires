@@ -175,7 +175,7 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 			}
 			if (te instanceof TileEntityPanelCreator) {
 				if (!world.isRemote) {
-					player.openGui(IndustrialWires.instance, 1, te.getWorld(), te.getPos().getX(), te.getPos().getY(), te.getPos().getZ());
+					player.openGui(IndustrialWires.instance, 0, te.getWorld(), te.getPos().getX(), te.getPos().getY(), te.getPos().getZ());
 				}
 				return true;
 			}

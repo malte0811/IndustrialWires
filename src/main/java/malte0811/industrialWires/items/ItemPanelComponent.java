@@ -30,7 +30,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import javax.annotation.Nonnull;
@@ -134,5 +138,14 @@ public class ItemPanelComponent extends Item {
 			}
 		}
 		return nbt;
+	}
+
+	@Override
+	@Nonnull
+	public ActionResult<ItemStack> onItemRightClick(@Nonnull ItemStack itemStackIn, World worldIn, EntityPlayer playerIn, EnumHand hand) {
+		if(!worldIn.isRemote) {
+			playerIn.openGui(IndustrialWires.MODID, 1, worldIn, 0, 0, hand==EnumHand.MAIN_HAND?1:0);
+		}
+		return new ActionResult<>(EnumActionResult.SUCCESS, itemStackIn);
 	}
 }

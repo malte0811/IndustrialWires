@@ -33,6 +33,7 @@ import malte0811.industrialWires.blocks.IMetaEnum;
 import malte0811.industrialWires.blocks.TileEntityJacobsLadder;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanelCreator;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityRSPanelConn;
+import malte0811.industrialWires.client.gui.GuiPanelComponent;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import malte0811.industrialWires.client.gui.GuiRSPanelConn;
 import malte0811.industrialWires.client.panelmodel.PanelModelLoader;
@@ -49,6 +50,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
@@ -223,12 +225,20 @@ public class ClientProxy extends CommonProxy {
 
 	@Override
 	public Gui getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-		TileEntity te = world.getTileEntity(new BlockPos(x, y, z));
-		if (te instanceof TileEntityRSPanelConn) {
-			return new GuiRSPanelConn((TileEntityRSPanelConn)te);
-		}
-		if (te instanceof TileEntityPanelCreator) {
-			return new GuiPanelCreator(player.inventory, (TileEntityPanelCreator) te);
+		if (ID==0) {
+			TileEntity te = world.getTileEntity(new BlockPos(x, y, z));
+			if (te instanceof TileEntityRSPanelConn) {
+				return new GuiRSPanelConn((TileEntityRSPanelConn) te);
+			}
+			if (te instanceof TileEntityPanelCreator) {
+				return new GuiPanelCreator(player.inventory, (TileEntityPanelCreator) te);
+			}
+		} else if (ID==1) {
+			EnumHand h = z == 1 ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
+			ItemStack held = player.getHeldItem(h);
+			if (held != null && held.getItem() == IndustrialWires.panelComponent) {
+				return new GuiPanelComponent(h, IndustrialWires.panelComponent.componentFromStack(held));
+			}
 		}
 		return null;
 	}

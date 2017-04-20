@@ -89,6 +89,8 @@ public abstract class PanelComponent {
 
 	public void unregisterRSOutput(int id, @Nonnull BiConsumer<Integer, Byte> out) {}
 
+	public void invalidate(TileEntityPanel te) {}
+
 	public float getX() {
 		return x;
 	}

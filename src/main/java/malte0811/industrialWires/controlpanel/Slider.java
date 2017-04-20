@@ -175,6 +175,13 @@ public class Slider extends PanelComponent {
 	}
 
 	@Override
+	public void invalidate(TileEntityPanel te) {
+		for (BiConsumer<Integer, Byte> out:outputs) {
+			out.accept((int)rsChannel, (byte) 0);
+		}
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;

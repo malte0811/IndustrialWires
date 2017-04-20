@@ -20,29 +20,49 @@ package malte0811.industrialWires;
 import malte0811.industrialWires.blocks.TileEntityJacobsLadder;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanelCreator;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityRSPanelConn;
+import malte0811.industrialWires.containers.ContainerPanelComponent;
 import malte0811.industrialWires.containers.ContainerPanelCreator;
 import malte0811.industrialWires.containers.ContainerRSPanelConn;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.Container;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.IGuiHandler;
 
 public class CommonProxy implements IGuiHandler {
-	public void preInit() {}
-	public void postInit() {}
-	public World getClientWorld() {return null;}
-	public void playJacobsLadderSound(TileEntityJacobsLadder te, int phase, Vec3d soundPos) {}
+	public void preInit() {
+	}
+
+	public void postInit() {
+	}
+
+	public World getClientWorld() {
+		return null;
+	}
+
+	public void playJacobsLadderSound(TileEntityJacobsLadder te, int phase, Vec3d soundPos) {
+	}
 
 	@Override
-	public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-		TileEntity te = world.getTileEntity(new BlockPos(x, y, z));
-		if (te instanceof TileEntityPanelCreator) {
-			return new ContainerPanelCreator(player.inventory, (TileEntityPanelCreator)te);
-		}
-		if (te instanceof TileEntityRSPanelConn) {
-			return new ContainerRSPanelConn((TileEntityRSPanelConn)te);
+	public Container getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
+		if (ID == 0) {//TILE GUI
+			TileEntity te = world.getTileEntity(new BlockPos(x, y, z));
+			if (te instanceof TileEntityPanelCreator) {
+				return new ContainerPanelCreator(player.inventory, (TileEntityPanelCreator) te);
+			}
+			if (te instanceof TileEntityRSPanelConn) {
+				return new ContainerRSPanelConn((TileEntityRSPanelConn) te);
+			}
+		} else if (ID == 1) {//ITEM GUI
+			EnumHand h = z == 1 ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
+			ItemStack held = player.getHeldItem(h);
+			if (held != null && held.getItem() == IndustrialWires.panelComponent) {
+				return new ContainerPanelComponent(h);
+			}
 		}
 		return null;
 	}

@@ -136,6 +136,7 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInven
 				ItemStack panel = new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.TOP.ordinal());
 				panel.setTagCompound(panelNBT);
 				inv[0] = panel;
+				components.clear();
 			}
 			break;
 		case REMOVE_ALL:

@@ -300,6 +300,9 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 	@Override
 	public void onChunkUnload() {
 		super.onChunkUnload();
+		for (PanelComponent pc:components) {
+			pc.invalidate(this);
+		}
 		for (TileEntityRSPanelConn rs : rsPorts) {
 			rs.unregisterPanel(this, true);
 		}
@@ -308,6 +311,9 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 	@Override
 	public void invalidate() {
 		super.invalidate();
+		for (PanelComponent pc:components) {
+			pc.invalidate(this);
+		}
 		for (TileEntityRSPanelConn rs : rsPorts) {
 			rs.unregisterPanel(this, true);
 		}

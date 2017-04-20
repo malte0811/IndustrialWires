@@ -39,6 +39,7 @@ import malte0811.industrialWires.blocks.wire.*;
 import malte0811.industrialWires.crafting.RecipeCoilLength;
 import malte0811.industrialWires.items.ItemIC2Coil;
 import malte0811.industrialWires.items.ItemPanelComponent;
+import malte0811.industrialWires.network.MessageComponentSync;
 import malte0811.industrialWires.network.MessageGUIInteract;
 import malte0811.industrialWires.network.MessagePanelInteract;
 import malte0811.industrialWires.network.MessageTileSyncIW;
@@ -173,6 +174,7 @@ public class IndustrialWires {
 		packetHandler.registerMessage(MessageTileSyncIW.HandlerClient.class, MessageTileSyncIW.class, 0, Side.CLIENT);
 		packetHandler.registerMessage(MessagePanelInteract.HandlerServer.class, MessagePanelInteract.class, 1, Side.SERVER);
 		packetHandler.registerMessage(MessageGUIInteract.HandlerServer.class, MessageGUIInteract.class, 2, Side.SERVER);
+		packetHandler.registerMessage(MessageComponentSync.HandlerServer.class, MessageComponentSync.class, 3, Side.SERVER);
 
 		NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
 	}
