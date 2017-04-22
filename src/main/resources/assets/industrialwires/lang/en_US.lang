@@ -31,16 +31,27 @@ item.industrialwires.panel_component.slider.name=Slider
 
 industrialwires.desc.wireLength=Wire length: %1s block(s)
 industrialwires.desc.recipe=Please check the Engineer's manual for recipe details
-industrialwires.desc.horizontal=Horizontal
-industrialwires.desc.vertical=Vertical
-industrialwires.desc.rsId=Redstone Connector ID: %1s
-industrialwires.desc.text=Text: %1s
-industrialwires.desc.latching=Stays on indefinitely
-industrialwires.desc.instantaneous=Turns off after half a second
 industrialwires.desc.remove_all=Remove all components from this panel
 industrialwires.desc.create_panel=Create a new control panel
 industrialwires.desc.enable_snap=Snap new components to the 16*16 grid
 industrialwires.desc.disable_snap=Allow free placing of components
+industrialwires.desc.latching=Latching
+industrialwires.desc.latching_info=Does this button stay on indefinitely?
+industrialwires.desc.rschannel_info=The channel/color to output a signal to
+industrialwires.desc.rsid_info=The ID of the panel connector to output a signal to
+industrialwires.desc.label_text=The text in this label
+industrialwires.desc.red=Red
+industrialwires.desc.green=Green
+industrialwires.desc.blue=Blue
+industrialwires.desc.length=Length
+
+industrialwires.tooltip.horizontal=Horizontal
+industrialwires.tooltip.vertical=Vertical
+industrialwires.tooltip.rsId=Redstone Connector ID: %1s
+industrialwires.tooltip.text=Text: %1s
+industrialwires.tooltip.latching=Stays on indefinitely
+industrialwires.tooltip.instantaneous=Turns off after half a second
+industrialwires.tooltip.length=Length: %1s
 
 industrialwires.chat.tooLong=This coil does not contain enough wire for this connection
 industrialwires.chat.stackSize=Linking is only possible with a stack of size 1

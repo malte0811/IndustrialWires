@@ -134,6 +134,7 @@ public class ItemPanelComponent extends Item {
 				written.removeTag("x");
 				written.removeTag("y");
 				written.removeTag("type");
+				written.removeTag("panelHeight");
 				nbt.setTag("data", written);
 			}
 		}

@@ -18,11 +18,15 @@
 
 package malte0811.industrialWires.controlpanel;
 
+import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
-import malte0811.industrialWires.controlpanel.properties.IConfigurableComponent;
-import net.minecraft.nbt.*;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTTagByte;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import org.lwjgl.util.vector.Vector3f;
@@ -78,13 +82,11 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 	private final static float size = .0625F;
 	@Override
 	public List<RawQuad> getQuads() {
-		float[] color = getFloatColor(active);
+		float[] color = PanelUtils.getFloatColor(active, this.color);
 		List<RawQuad> ret = new ArrayList<>(5);
 		PanelUtils.addColoredBox(color, GRAY, null, new Vector3f(0, 0, 0), new Vector3f(size, size/2, size), ret, false);
 		return ret;
 	}
-
-
 
 	@Override
 	@Nonnull
@@ -210,8 +212,7 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 				}
 				break;
 			case FLOAT:
-				color &= ~(0xff<<(8*id));
-				color |= (int)(255*(((NBTTagFloat)value).getFloat()))<<(8*id);
+				color = PanelUtils.setColor(color, id, value);
 				break;
 		}
 	}
@@ -220,12 +221,12 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 	public String fomatConfigName(ConfigType type, int id) {
 		switch (type) {
 			case BOOL:
-				return "Latching";
+				return I18n.format(IndustrialWires.MODID+".desc.latching");
 			case RS_CHANNEL:
 			case INT:
 				return null;
 			case FLOAT:
-				return id==0?"Red":(id==1?"Green":"Blue");
+				return I18n.format(IndustrialWires.MODID+".desc."+(id==0?"red":(id==1?"green":"blue")));
 			default:
 				return "INVALID";
 		}
@@ -233,14 +234,13 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 
 	@Override
 	public String fomatConfigDescription(ConfigType type, int id) {
-		//TODO localize
 		switch (type) {
 			case BOOL:
-				return "Does this button stay on indefinitely?";
+				return I18n.format(IndustrialWires.MODID+".desc.latching_info");
 			case RS_CHANNEL:
-				return "The RS channel to output on";
+				return I18n.format(IndustrialWires.MODID+".desc.rschannel_info");
 			case INT:
-				return "The RS connector output ID";
+				return I18n.format(IndustrialWires.MODID+".desc.rsid_info");
 			case FLOAT:
 				return null;
 			default:
@@ -265,20 +265,11 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 
 	@Override
 	public FloatConfig[] getFloatOptions() {
-		float[] color = getFloatColor(true);
+		float[] color = PanelUtils.getFloatColor(true, this.color);
 		return new FloatConfig[]{
 				new FloatConfig("red", 0, 100, color[0], 60),
 				new FloatConfig("green", 0, 120, color[1], 60),
 				new FloatConfig("blue", 0, 140, color[2], 60)
 		};
-	}
-
-	public float[] getFloatColor(boolean active) {
-		float[] ret = new float[4];
-		ret[3] = 1;
-		for (int i = 0;i<3;i++) {
-			ret[i] = ((color>>(8*(2-i)))&255)/255F*(active?1:.5F);
-		}
-		return ret;
 	}
 }

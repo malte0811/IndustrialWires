@@ -18,21 +18,33 @@
 
 package malte0811.industrialWires.containers;
 
+import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.common.gui.ContainerIEBase;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanelCreator;
-import malte0811.industrialWires.controlpanel.PanelComponent;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
+
+import javax.annotation.Nullable;
 
 //TODO remove dependency on core IE
 public class ContainerPanelCreator extends ContainerIEBase<TileEntityPanelCreator> {
-	public PanelComponent toPlace = null;
 	public ContainerPanelCreator(InventoryPlayer inventoryPlayer, TileEntityPanelCreator tile) {
 		super(inventoryPlayer, tile);
 		int slotH = 150;
 		int slotX = 14;
 		slotCount = 1;
-		addSlotToContainer(new Slot(inv, 0, 7, 37));
+		addSlotToContainer(new Slot(inv, 0, 7, 37) {
+			@Override
+			public int getSlotStackLimit() {
+				return 1;
+			}
+
+			@Override
+			public boolean isItemValid(@Nullable ItemStack stack) {
+				return ApiUtils.compareToOreName(stack, "plateIron");
+			}
+		});
 		for (int i = 0; i < 3; i++)
 			for (int j = 0; j < 9; j++)
 				addSlotToContainer(new Slot(inventoryPlayer, j+i*9+9, slotX+j*18, slotH+i*18));

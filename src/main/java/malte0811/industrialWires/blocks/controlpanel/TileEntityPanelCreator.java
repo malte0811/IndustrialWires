@@ -101,11 +101,13 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInven
 		int type = nbt.getInteger("type");
 		switch (MessageType.values()[type]) {
 		case ADD:
-			PanelComponent pc = PanelComponent.read(nbt.getCompoundTag("component"));
+			ItemStack curr = p.inventory.getItemStack();
+			PanelComponent pc = IndustrialWires.panelComponent.componentFromStack(curr);
 			if (pc!=null) {
+				pc.setX(nbt.getFloat("x"));
+				pc.setY(nbt.getFloat("y"));
 				pc.setPanelHeight(height);
 				components.add(pc);
-				ItemStack curr = p.inventory.getItemStack();
 				if (curr!=null) {
 					curr.stackSize--;
 					if (curr.stackSize<=0) {
@@ -119,15 +121,6 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInven
 			break;
 		case REMOVE:
 			components.remove(nbt.getInteger("id"));
-			break;
-		case CHANGE:
-			pc = PanelComponent.read(nbt.getCompoundTag("component"));
-			if (pc!=null) {
-				pc.setPanelHeight(height);
-				components.set(nbt.getInteger("id"), pc);
-			} else {
-				IELogger.info("(IndustrialWires) Failed to load panel component send by "+p.getDisplayNameString());
-			}
 			break;
 		case CREATE_PANEL:
 			if (ApiUtils.compareToOreName(inv[0], "plateIron")) {

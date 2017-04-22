@@ -18,10 +18,11 @@
 
 package malte0811.industrialWires.network;
 
+import blusunrize.immersiveengineering.api.ApiUtils;
 import io.netty.buffer.ByteBuf;
 import malte0811.industrialWires.IndustrialWires;
+import malte0811.industrialWires.controlpanel.IConfigurableComponent;
 import malte0811.industrialWires.controlpanel.PanelComponent;
-import malte0811.industrialWires.controlpanel.properties.IConfigurableComponent;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -80,7 +81,7 @@ public class MessageComponentSync implements IMessage {
 							x.printStackTrace();
 						}
 					}
-					ItemStack newCmp = IndustrialWires.panelComponent.stackFromComponent(old);
+					ItemStack newCmp = ApiUtils.copyStackWithAmount(IndustrialWires.panelComponent.stackFromComponent(old), held.stackSize);
 					player.setHeldItem(msg.hand, newCmp);
 				}
 			}

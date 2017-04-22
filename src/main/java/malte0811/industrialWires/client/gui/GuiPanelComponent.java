@@ -8,12 +8,13 @@ import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.client.gui.elements.GuiChannelPicker;
 import malte0811.industrialWires.client.gui.elements.GuiIntChooser;
 import malte0811.industrialWires.containers.ContainerPanelComponent;
+import malte0811.industrialWires.controlpanel.IConfigurableComponent;
 import malte0811.industrialWires.controlpanel.PanelComponent;
-import malte0811.industrialWires.controlpanel.properties.IConfigurableComponent;
 import malte0811.industrialWires.network.MessageComponentSync;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumHand;
@@ -56,7 +57,9 @@ public class GuiPanelComponent extends GuiContainer {
 			IConfigurableComponent.StringConfig[] strings = confComp.getStringOptions();
 			stringTexts.clear();
 			for (IConfigurableComponent.StringConfig sc : strings) {
-				stringTexts.add(new GuiTextField(0, mc.fontRendererObj, guiLeft + sc.x, guiTop + sc.y, 58, 12));
+				GuiTextField toAdd = new GuiTextField(0, mc.fontRendererObj, guiLeft + sc.x, guiTop + sc.y, 58, 12);
+				toAdd.setText(sc.value);
+				stringTexts.add(toAdd);
 			}
 			IConfigurableComponent.RSChannelConfig[] rs = confComp.getRSChannelOptions();
 			rsChannelChoosers.clear();
@@ -150,6 +153,18 @@ public class GuiPanelComponent extends GuiContainer {
 			GuiSliderIE slider = floatSliders.get(i);
 			double oldV = slider.getValue();
 			slider.mousePressed(mc, mouseX, mouseY);
+			if (oldV!=slider.getValue()) {
+				sync(i, (float) slider.getValue());
+			}
+		}
+	}
+
+	@Override
+	protected void mouseReleased(int mouseX, int mouseY, int state) {
+		super.mouseReleased(mouseX, mouseY, state);
+		for (int i = 0;i<floatSliders.size();i++) {
+			GuiSliderIE slider = floatSliders.get(i);
+			double oldV = slider.getValue();
 			slider.mouseReleased(mouseX, mouseY);
 			if (oldV!=slider.getValue()) {
 				sync(i, (float) slider.getValue());
@@ -161,9 +176,25 @@ public class GuiPanelComponent extends GuiContainer {
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		super.drawScreen(mouseX, mouseY, partialTicks);
 		GlStateManager.color(1, 1, 1, 1);
+		RenderHelper.disableStandardItemLighting();
+		for (GuiChannelPicker pick : rsChannelChoosers) {
+			pick.drawButton(mc, mouseX, mouseY);
+		}
+		for (GuiButtonCheckbox box : boolButtons) {
+			box.drawButton(mc, mouseX, mouseY);
+		}
+		for (GuiTextField field : stringTexts) {
+			field.drawTextBox();
+		}
+		for (GuiIntChooser choose : intChoosers) {
+			choose.drawChooser();
+		}
+		for (GuiSliderIE choose : floatSliders) {
+			choose.drawButton(mc, mouseX, mouseY);
+		}
+		//TOOLTIPS
 		for (int i = 0;i<rsChannelChoosers.size();i++) {
 			GuiChannelPicker pick = rsChannelChoosers.get(i);
-			pick.drawButton(mc, mouseX, mouseY);
 			String tooltip = confComp.fomatConfigDescription(IConfigurableComponent.ConfigType.RS_CHANNEL, i);
 			if (tooltip!=null&&pick.isHovered()) {
 				ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRendererObj);
@@ -171,7 +202,6 @@ public class GuiPanelComponent extends GuiContainer {
 		}
 		for (int i = 0;i<boolButtons.size();i++) {
 			GuiButtonCheckbox box = boolButtons.get(i);
-			box.drawButton(mc, mouseX, mouseY);
 			String tooltip = confComp.fomatConfigDescription(IConfigurableComponent.ConfigType.BOOL, i);
 			if (tooltip!=null&&box.isMouseOver()) {
 				ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRendererObj);
@@ -179,7 +209,6 @@ public class GuiPanelComponent extends GuiContainer {
 		}
 		for (int i = 0;i<stringTexts.size();i++) {
 			GuiTextField field = stringTexts.get(i);
-			field.drawTextBox();
 			String tooltip = confComp.fomatConfigDescription(IConfigurableComponent.ConfigType.STRING, i);
 			if (tooltip!=null&&mouseX>=field.xPosition&&mouseX<field.xPosition+field.width&&
 					mouseY>=field.yPosition&&mouseY<field.yPosition+field.height) {
@@ -188,7 +217,6 @@ public class GuiPanelComponent extends GuiContainer {
 		}
 		for (int i = 0;i<intChoosers.size();i++) {
 			GuiIntChooser choose = intChoosers.get(i);
-			choose.drawChooser();
 			String tooltip = confComp.fomatConfigDescription(IConfigurableComponent.ConfigType.INT, i);
 			if (tooltip!=null&&choose.isMouseOver(mouseX, mouseY)) {
 				ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRendererObj);
@@ -196,7 +224,6 @@ public class GuiPanelComponent extends GuiContainer {
 		}
 		for (int i = 0;i<floatSliders.size();i++) {
 			GuiSliderIE choose = floatSliders.get(i);
-			choose.drawButton(mc, mouseX, mouseY);
 			String tooltip = confComp.fomatConfigDescription(IConfigurableComponent.ConfigType.INT, i);
 			if (tooltip!=null&&choose.isMouseOver()) {
 				ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRendererObj);

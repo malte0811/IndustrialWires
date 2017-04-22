@@ -18,20 +18,25 @@
 
 package malte0811.industrialWires.controlpanel;
 
+import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import malte0811.industrialWires.client.panelmodel.RawModelFontRenderer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
-public class Label extends PanelComponent {
+public class Label extends PanelComponent implements IConfigurableComponent {
 	private static final ResourceLocation font = new ResourceLocation("minecraft", "textures/font/ascii.png");
 	String text = "Test";
 	RawModelFontRenderer renderer;
@@ -115,5 +120,56 @@ public class Label extends PanelComponent {
 		int left = (int) (gui.getX0()+getX()*gui.panelSize);
 		int top = (int) (gui.getY0()+getY()*gui.panelSize);
 		gui.mc.fontRendererObj.drawString(text, left, top, 0xff000000|color);
+	}
+
+	@Override
+	public void applyConfigOption(ConfigType type, int id, NBTBase value) {
+		switch (type) {
+		case STRING:
+			text = ((NBTTagString)value).getString();
+			break;
+		case FLOAT:
+			color = PanelUtils.setColor(color, id, value);
+			break;
+		}
+	}
+
+	@Nullable
+	@Override
+	public String fomatConfigName(ConfigType type, int id) {
+		switch (type) {
+		case FLOAT:
+			return I18n.format(IndustrialWires.MODID+".desc."+(id==0?"red":(id==1?"green":"blue")));
+		default:
+			return null;
+		}
+	}
+
+	@Nullable
+	@Override
+	public String fomatConfigDescription(ConfigType type, int id) {
+		switch (type) {
+		case STRING:
+			return I18n.format(IndustrialWires.MODID+".desc.label_text");
+		default:
+			return null;
+		}
+	}
+
+	@Override
+	public StringConfig[] getStringOptions() {
+		return new StringConfig[]{
+				new StringConfig("text", 0, 0, text)
+		};
+	}
+
+	@Override
+	public FloatConfig[] getFloatOptions() {
+		float[] color = PanelUtils.getFloatColor(true, this.color);
+		return new FloatConfig[]{
+				new FloatConfig("red", 0, 20, color[0], 60),
+				new FloatConfig("green", 0, 40, color[1], 60),
+				new FloatConfig("blue", 0, 60, color[2], 60)
+		};
 	}
 }

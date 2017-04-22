@@ -18,11 +18,13 @@
 
 package malte0811.industrialWires.controlpanel;
 
+import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.nbt.*;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
@@ -35,7 +37,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
-public class Slider extends PanelComponent {
+public class Slider extends PanelComponent implements IConfigurableComponent {
 	private static final float WIDTH = .0625F;
 	private float length = .5F;
 	private int color = 0xffff00;
@@ -207,5 +209,92 @@ public class Slider extends PanelComponent {
 		result = 31 * result + (int) rsChannel;
 		result = 31 * result + rsId;
 		return result;
+	}
+
+	@Override
+	public void applyConfigOption(ConfigType type, int id, NBTBase value) {
+		switch (type) {
+		case BOOL:
+			horizontal = ((NBTTagByte)value).getByte()!=0;
+			break;
+		case RS_CHANNEL:
+			rsChannel = ((NBTTagByte)value).getByte();
+			break;
+		case INT:
+			rsId = ((NBTTagInt)value).getInt();
+			break;
+		case FLOAT:
+			if (id<3) {
+				color = PanelUtils.setColor(color, id, value);
+			} else {
+				length = ((NBTTagFloat)value).getFloat()/100;
+			}
+			break;
+		}
+	}
+
+	@Override
+	public String fomatConfigName(ConfigType type, int id) {
+		switch (type) {
+		case BOOL:
+			return I18n.format(IndustrialWires.MODID+".tooltip.horizontal");
+		case RS_CHANNEL:
+		case INT:
+			return null;
+		case FLOAT:
+			return I18n.format(IndustrialWires.MODID+".desc."+(id==0?"red":(id==1?"green":id==2?"blue":"length")));
+		default:
+			return "INVALID";
+		}
+	}
+
+	@Override
+	public String fomatConfigDescription(ConfigType type, int id) {
+		switch (type) {
+		case BOOL:
+			return null;
+		case RS_CHANNEL:
+			return I18n.format(IndustrialWires.MODID+".desc.rschannel_info");
+		case INT:
+			return I18n.format(IndustrialWires.MODID+".desc.rsid_info");
+		case FLOAT:
+			return null;
+		default:
+			return "INVALID?";
+		}
+	}
+
+	@Override
+	public RSChannelConfig[] getRSChannelOptions() {
+		return new RSChannelConfig[] {
+				new RSChannelConfig("channel", 0, 0, rsChannel)
+		};
+	}
+
+	@Override
+	public IntConfig[] getIntegerOptions() {
+		return new IntConfig[] {
+				new IntConfig("rsId", 0, 50, rsId, 3, false)
+		};
+	}
+
+	@Override
+	public BoolConfig[] getBooleanOptions() {
+		return new BoolConfig[] {
+				new BoolConfig("horizontal", 0, 70, horizontal)
+		};
+	}
+
+	@Override
+	public FloatConfig[] getFloatOptions() {
+		float[] color = PanelUtils.getFloatColor(true, this.color);
+		int x = 70;
+		int yOffset = 10;
+		return new FloatConfig[]{
+				new FloatConfig("red", x, yOffset+20, color[0], 60),
+				new FloatConfig("green", x, yOffset+40, color[1], 60),
+				new FloatConfig("blue", x, yOffset+60, color[2], 60),
+				new FloatConfig("length", x, yOffset, length, 60)
+		};
 	}
 }

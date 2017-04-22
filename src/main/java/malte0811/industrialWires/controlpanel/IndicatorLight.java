@@ -18,10 +18,15 @@
 
 package malte0811.industrialWires.controlpanel;
 
+import malte0811.industrialWires.IndustrialWires;
+import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
-import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
@@ -33,15 +38,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class IndicatorLight extends PanelComponent {
+public class IndicatorLight extends PanelComponent implements IConfigurableComponent {
 	private int rsInputId;
-	private int rsInputChannel;
+	private byte rsInputChannel;
 	private int colorA = 0xff00;
 	private byte rsInput;
 	public IndicatorLight() {
 		super("indicator_light");
 	}
-	public IndicatorLight(int rsId, int rsChannel, int color) {
+	public IndicatorLight(int rsId, byte rsChannel, int color) {
 		this();
 		colorA = color;
 		rsInputChannel = rsChannel;
@@ -51,7 +56,7 @@ public class IndicatorLight extends PanelComponent {
 	@Override
 	protected void writeCustomNBT(NBTTagCompound nbt, boolean toItem) {
 		nbt.setInteger(RS_ID, rsInputId);
-		nbt.setInteger(RS_CHANNEL, rsInputChannel);
+		nbt.setByte(RS_CHANNEL, rsInputChannel);
 		nbt.setInteger(COLOR, colorA);
 		if (!toItem) {
 			nbt.setInteger("rsInput", rsInput);
@@ -61,7 +66,7 @@ public class IndicatorLight extends PanelComponent {
 	@Override
 	protected void readCustomNBT(NBTTagCompound nbt) {
 		rsInputId = nbt.getInteger(RS_ID);
-		rsInputChannel = nbt.getInteger(RS_CHANNEL);
+		rsInputChannel = nbt.getByte(RS_CHANNEL);
 		colorA = nbt.getInteger(COLOR);
 		rsInput = nbt.getByte("rsInput");
 	}
@@ -155,5 +160,72 @@ public class IndicatorLight extends PanelComponent {
 	@Override
 	public void renderInGUI(GuiPanelCreator gui) {
 		renderInGUIDefault(gui, colorA);
+	}
+
+	@Override
+	public void applyConfigOption(ConfigType type, int id, NBTBase value) {
+		switch (type) {
+		case RS_CHANNEL:
+			rsInputChannel = ((NBTTagByte)value).getByte();
+			break;
+		case INT:
+			rsInputId = ((NBTTagInt)value).getInt();
+			break;
+		case FLOAT:
+			colorA = PanelUtils.setColor(colorA, id, value);
+			break;
+		}
+	}
+
+	@Nullable
+	@Override
+	public String fomatConfigName(ConfigType type, int id) {
+		switch (type) {
+		case FLOAT:
+			return I18n.format(IndustrialWires.MODID+".desc."+(id==0?"red":(id==1?"green":"blue")));
+		case RS_CHANNEL:
+		case INT:
+		default:
+			return null;
+		}
+	}
+
+	@Nullable
+	@Override
+	public String fomatConfigDescription(ConfigType type, int id) {
+		switch (type) {
+		case FLOAT:
+			return null;
+		case RS_CHANNEL:
+			return I18n.format(IndustrialWires.MODID+".desc.rschannel_info");
+		case INT:
+			return I18n.format(IndustrialWires.MODID+".desc.rsid_info");
+		default:
+			return null;
+		}
+	}
+
+	@Override
+	public RSChannelConfig[] getRSChannelOptions() {
+		return new RSChannelConfig[] {
+				new RSChannelConfig("channel", 0, 0, rsInputChannel)
+		};
+	}
+
+	@Override
+	public IntConfig[] getIntegerOptions() {
+		return new IntConfig[] {
+				new IntConfig("rsId", 0, 45, rsInputId, 3, false)
+		};
+	}
+
+	@Override
+	public FloatConfig[] getFloatOptions() {
+		float[] color = PanelUtils.getFloatColor(true, this.colorA);
+		return new FloatConfig[]{
+				new FloatConfig("red", 0, 70, color[0], 60),
+				new FloatConfig("green", 0, 90, color[1], 60),
+				new FloatConfig("blue", 0, 110, color[2], 60)
+		};
 	}
 }

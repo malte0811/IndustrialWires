@@ -31,7 +31,9 @@ import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagFloat;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3i;
 import net.minecraftforge.client.model.ModelLoader;
@@ -46,21 +48,23 @@ import static malte0811.industrialWires.controlpanel.PanelComponent.*;
 
 public final class PanelUtils {
 	public static TextureAtlasSprite PANEL_TEXTURE;
-	private PanelUtils() {}
+
+	private PanelUtils() {
+	}
 
 	public static List<BakedQuad> generateQuads(PropertyComponents.PanelRenderProperties components) {
-		if (PANEL_TEXTURE==null) {
-			PANEL_TEXTURE = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(IndustrialWires.MODID+":blocks/control_panel");
+		if (PANEL_TEXTURE == null) {
+			PANEL_TEXTURE = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(IndustrialWires.MODID + ":blocks/control_panel");
 		}
 		List<BakedQuad> ret = new ArrayList<>();
 		Matrix4 m4 = components.getPanelTopTransform();
 		Matrix4 m4RotOnly = m4.copy();
 		m4RotOnly.invert();
 		m4RotOnly.transpose();
-		for (PanelComponent pc:components) {
+		for (PanelComponent pc : components) {
 			Matrix4 m4Here = m4.copy().translate(pc.getX(), 0, pc.getY());
 			List<RawQuad> compQuads = pc.getQuads();
-			for (RawQuad bq:compQuads) {
+			for (RawQuad bq : compQuads) {
 				ret.add(bakeQuad(bq, m4Here, m4RotOnly, false));
 			}
 		}
@@ -71,7 +75,7 @@ public final class PanelUtils {
 
 		List<RawQuad> rawOut = new ArrayList<>();
 		//addTexturedBox(new Vector3f(0, 0, 0), new Vector3f(1, components.height, 1), rawOut, UV_FULL, PANEL_TEXTURE);
-		float vMax = 16*components.height;
+		float vMax = 16 * components.height;
 		addQuad(rawOut, new Vector3f(0, components.height, 0), new Vector3f(0, components.height, 1),
 				new Vector3f(1, components.height, 1), new Vector3f(1, components.height, 0),
 				EnumFacing.UP, WHITE, PANEL_TEXTURE, UV_FULL);
@@ -90,8 +94,8 @@ public final class PanelUtils {
 		addQuad(rawOut, new Vector3f(0, 0, 1), new Vector3f(1, 0, 1),
 				new Vector3f(1, components.height, 1), new Vector3f(0, components.height, 1),
 				EnumFacing.SOUTH, WHITE, PANEL_TEXTURE, new float[]{0, vMax, 16, 0});
-		for (RawQuad bq:rawOut) {
-			ret.add(bakeQuad(bq, baseTrans, baseNorm, bq.facing!=EnumFacing.EAST&&bq.facing!=EnumFacing.UP));//flip south and west
+		for (RawQuad bq : rawOut) {
+			ret.add(bakeQuad(bq, baseTrans, baseNorm, bq.facing != EnumFacing.EAST && bq.facing != EnumFacing.UP));//flip south and west
 		}
 
 		return ret;
@@ -108,20 +112,19 @@ public final class PanelUtils {
 		OBJModel.Normal faceNormal = new OBJModel.Normal(normal.x, normal.y, normal.z);
 		putVertexData(format, builder, transform.apply(vertices[0]), faceNormal, uvs[0], uvs[1], raw.tex,
 				raw.colorA);
-		putVertexData(format, builder, transform.apply(vertices[1]), faceNormal, uvs[flip?2:0], uvs[flip?1:3], raw.tex,
+		putVertexData(format, builder, transform.apply(vertices[1]), faceNormal, uvs[flip ? 2 : 0], uvs[flip ? 1 : 3], raw.tex,
 				raw.colorA);
 		putVertexData(format, builder, transform.apply(vertices[2]), faceNormal, uvs[2], uvs[3], raw.tex,
 				raw.colorA);
-		putVertexData(format, builder, transform.apply(vertices[3]), faceNormal, uvs[flip?0:2], uvs[flip?3:1], raw.tex,
+		putVertexData(format, builder, transform.apply(vertices[3]), faceNormal, uvs[flip ? 0 : 2], uvs[flip ? 3 : 1], raw.tex,
 				raw.colorA);
 		return builder.build();
 	}
+
 	//mostly copied from IE's ClientUtils, it has protected access there...
-	public static void putVertexData(VertexFormat format, UnpackedBakedQuad.Builder builder, Vector3f pos, OBJModel.Normal faceNormal, double u, double v, TextureAtlasSprite sprite, float[] colorA)
-	{
-		for(int e = 0; e < format.getElementCount(); e++)
-			switch(format.getElement(e).getUsage())
-			{
+	public static void putVertexData(VertexFormat format, UnpackedBakedQuad.Builder builder, Vector3f pos, OBJModel.Normal faceNormal, double u, double v, TextureAtlasSprite sprite, float[] colorA) {
+		for (int e = 0; e < format.getElementCount(); e++)
+			switch (format.getElement(e).getUsage()) {
 			case POSITION:
 				builder.put(e, pos.getX(), pos.getY(), pos.getZ(), 0);
 				break;
@@ -129,7 +132,7 @@ public final class PanelUtils {
 				builder.put(e, colorA[0], colorA[1], colorA[2], colorA[3]);
 				break;
 			case UV:
-				if(sprite == null)//Double Safety. I have no idea how it even happens, but it somehow did .-.
+				if (sprite == null)//Double Safety. I have no idea how it even happens, but it somehow did .-.
 					sprite = Minecraft.getMinecraft().getTextureMapBlocks().getMissingSprite();
 				builder.put(e,
 						sprite.getInterpolatedU(u),
@@ -143,36 +146,41 @@ public final class PanelUtils {
 				builder.put(e);
 			}
 	}
+
 	private static final float[] UV_FULL = {0, 0, 16, 16};
 	private static final float[] WHITE = {1, 1, 1, 1};
+
 	public static void addTexturedBox(Vector3f min, Vector3f size, List<RawQuad> out, float[] uvs, TextureAtlasSprite tex) {
 		addBox(WHITE, WHITE, WHITE, min, size, out, true, uvs, tex);
 	}
+
 	public static void addColoredBox(float[] colorTop, float[] colorSides, float[] colorBottom, Vector3f min, Vector3f size, List<RawQuad> out, boolean doBottom) {
 		addBox(colorTop, colorSides, colorBottom, min, size, out, doBottom, UV_FULL, ModelLoader.White.INSTANCE);
 	}
+
 	public static void addBox(float[] colorTop, float[] colorSides, float[] colorBottom, Vector3f min, Vector3f size, List<RawQuad> out, boolean doBottom, float[] uvs, TextureAtlasSprite tex) {
-		addQuad(out, new Vector3f(min.x, min.y+size.y, min.z), new Vector3f(min.x, min.y+size.y, min.z+size.z),
-				new Vector3f(min.x+size.x, min.y+size.y, min.z+size.z), new Vector3f(min.x+size.x, min.y+size.y, min.z),
+		addQuad(out, new Vector3f(min.x, min.y + size.y, min.z), new Vector3f(min.x, min.y + size.y, min.z + size.z),
+				new Vector3f(min.x + size.x, min.y + size.y, min.z + size.z), new Vector3f(min.x + size.x, min.y + size.y, min.z),
 				EnumFacing.UP, colorTop, tex, uvs);
 		if (doBottom) {
-			addQuad(out, new Vector3f(min.x, min.y, min.z), new Vector3f(min.x+size.x, min.y, min.z),
-					new Vector3f(min.x+size.x, min.y, min.z+size.z), new Vector3f(min.x, min.y, min.z+size.z),
+			addQuad(out, new Vector3f(min.x, min.y, min.z), new Vector3f(min.x + size.x, min.y, min.z),
+					new Vector3f(min.x + size.x, min.y, min.z + size.z), new Vector3f(min.x, min.y, min.z + size.z),
 					EnumFacing.UP, colorBottom, tex, uvs);
 		}
-		addQuad(out, new Vector3f(min.x, min.y, min.z), new Vector3f(min.x, min.y, min.z+size.z),
-				new Vector3f(min.x, min.y+size.y, min.z+size.z), new Vector3f(min.x, min.y+size.y, min.z),
+		addQuad(out, new Vector3f(min.x, min.y, min.z), new Vector3f(min.x, min.y, min.z + size.z),
+				new Vector3f(min.x, min.y + size.y, min.z + size.z), new Vector3f(min.x, min.y + size.y, min.z),
 				EnumFacing.WEST, colorSides, tex, uvs);
-		addQuad(out, new Vector3f(min.x+size.x, min.y, min.z), new Vector3f(min.x+size.x, min.y+size.y, min.z),
-				new Vector3f(min.x+size.x, min.y+size.y, min.z+size.z), new Vector3f(min.x+size.x, min.y, min.z+size.z),
+		addQuad(out, new Vector3f(min.x + size.x, min.y, min.z), new Vector3f(min.x + size.x, min.y + size.y, min.z),
+				new Vector3f(min.x + size.x, min.y + size.y, min.z + size.z), new Vector3f(min.x + size.x, min.y, min.z + size.z),
 				EnumFacing.EAST, colorSides, tex, uvs);
-		addQuad(out, new Vector3f(min.x, min.y, min.z), new Vector3f(min.x, min.y+size.y, min.z),
-				new Vector3f(min.x+size.x, min.y+size.y, min.z), new Vector3f(min.x+size.x, min.y, min.z),
+		addQuad(out, new Vector3f(min.x, min.y, min.z), new Vector3f(min.x, min.y + size.y, min.z),
+				new Vector3f(min.x + size.x, min.y + size.y, min.z), new Vector3f(min.x + size.x, min.y, min.z),
 				EnumFacing.NORTH, colorSides, tex, uvs);
-		addQuad(out, new Vector3f(min.x, min.y, min.z+size.z), new Vector3f(min.x+size.x, min.y, min.z+size.z),
-				new Vector3f(min.x+size.x, min.y+size.y, min.z+size.z), new Vector3f(min.x, min.y+size.y, min.z+size.z),
+		addQuad(out, new Vector3f(min.x, min.y, min.z + size.z), new Vector3f(min.x + size.x, min.y, min.z + size.z),
+				new Vector3f(min.x + size.x, min.y + size.y, min.z + size.z), new Vector3f(min.x, min.y + size.y, min.z + size.z),
 				EnumFacing.SOUTH, colorSides, tex, uvs);
 	}
+
 	public static void addColoredQuad(List<RawQuad> out, Vector3f v0, Vector3f v1, Vector3f v2, Vector3f v3, EnumFacing dir, float[] color) {
 		addQuad(out, v0, v1, v2, v3, dir, color, Minecraft.getMinecraft().getTextureMapBlocks().getTextureExtry(ModelLoader.White.LOCATION.toString()), UV_FULL);
 	}
@@ -188,12 +196,12 @@ public final class PanelUtils {
 		case 0: //button
 			addCommonInfo(data, list, true, true);
 			if (data.hasKey(LATCHING)) {
-				list.add(I18n.format(IndustrialWires.MODID+".desc."+(data.getBoolean(LATCHING)?"latching":"instantaneous")));
+				list.add(I18n.format(IndustrialWires.MODID + ".tooltip." + (data.getBoolean(LATCHING) ? "latching" : "instantaneous")));
 			}
 			break;
 		case 1: //label
 			if (data.hasKey(TEXT)) {
-				list.add(I18n.format(IndustrialWires.MODID+".desc.text", data.getString(TEXT)));
+				list.add(I18n.format(IndustrialWires.MODID + ".tooltip.text", data.getString(TEXT)));
 			}
 			addCommonInfo(data, list, true, false);
 			break;
@@ -203,24 +211,44 @@ public final class PanelUtils {
 		case 3: //slider
 			addCommonInfo(data, list, true, true);
 			if (data.hasKey(HORIZONTAL)) {
-				list.add(I18n.format(IndustrialWires.MODID+".desc."+(data.getBoolean(HORIZONTAL)?"horizontal":"vertical")));
+				list.add(I18n.format(IndustrialWires.MODID + ".tooltip." + (data.getBoolean(HORIZONTAL) ? "horizontal" : "vertical")));
 			}
+			if (data.hasKey(LENGTH)) {
+				list.add(I18n.format(IndustrialWires.MODID + ".tooltip.length", data.getFloat(LENGTH)));
+			}
+
 			break;
 		}
 	}
 
 	public static void addCommonInfo(NBTTagCompound data, List<String> list, boolean color, boolean rs) {
-		if (color&&data.hasKey(COLOR)) {
-			String hexCol = String.format("%6s", Integer.toHexString(data.getInteger(COLOR))).replace(' ', '0');
-			list.add(I18n.format(Lib.DESC_INFO+"colour", "<hexcol="+hexCol+":#"+hexCol+">"));
+		if (color && data.hasKey(COLOR)) {
+			String hexCol = String.format("%6s", Integer.toHexString(data.getInteger(COLOR)&0xffffff)).replace(' ', '0');
+			list.add(I18n.format(Lib.DESC_INFO + "colour", "<hexcol=" + hexCol + ":#" + hexCol + ">"));
 		}
-		if (rs&&data.hasKey(RS_CHANNEL)) {
+		if (rs && data.hasKey(RS_CHANNEL)) {
 			EnumDyeColor channColor = EnumDyeColor.byMetadata(data.getInteger(RS_CHANNEL));
 			String hexCol = Integer.toHexString(channColor.getMapColor().colorValue);
-			list.add(I18n.format("desc.immersiveengineering.info.redstoneChannel", "<hexcol="+hexCol+":"+channColor.getUnlocalizedName()+">"));
+			list.add(I18n.format("desc.immersiveengineering.info.redstoneChannel", "<hexcol=" + hexCol + ":" + channColor.getUnlocalizedName() + ">"));
 		}
-		if (rs&&data.hasKey(RS_ID)) {
-			list.add(I18n.format(IndustrialWires.MODID+".desc.rsId", data.getInteger(RS_ID)));
+		if (rs && data.hasKey(RS_ID)) {
+			list.add(I18n.format(IndustrialWires.MODID + ".tooltip.rsId", data.getInteger(RS_ID)));
 		}
+	}
+
+	public static int setColor(int color, int id, NBTBase value) {
+		id = 2-id;
+		color &= ~(0xff << (8 * id));
+		color |= (int) (2.55 * (((NBTTagFloat) value).getFloat())) << (8 * id);
+		return color;
+	}
+
+	public static float[] getFloatColor(boolean active, int color) {
+		float[] ret = new float[4];
+		ret[3] = 1;
+		for (int i = 0; i < 3; i++) {
+			ret[i] = ((color >> (8 * (2 - i))) & 255) / 255F * (active ? 1 : .5F);
+		}
+		return ret;
 	}
 }

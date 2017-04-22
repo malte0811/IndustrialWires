@@ -21,7 +21,6 @@ package malte0811.industrialWires.controlpanel;
 public enum MessageType {
 	ADD,
 	REMOVE,
-	CHANGE,
 	CREATE_PANEL,
 	REMOVE_ALL;
 }

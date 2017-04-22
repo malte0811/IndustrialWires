@@ -69,12 +69,12 @@ public class GuiPanelCreator extends GuiContainer {
 			xRel = (int) Math.floor(xRel*16/panelSize)*panelSize/16;
 			yRel = (int) Math.floor(yRel*16/panelSize)*panelSize/16;
 		}
+		for (PanelComponent pc : container.tile.components) {
+			drawPanelComponent(pc, -1, -1);
+		}
 		PanelComponent curr = getFloatingPC();
 		if (curr!=null && 0 <= xRel && xRel <= panelSize && 0 <= yRel && yRel <= panelSize) {
 			drawPanelComponent(curr, xRel, yRel);
-		}
-		for (PanelComponent pc : container.tile.components) {
-			drawPanelComponent(pc, -1, -1);
 		}
 	}
 
@@ -152,8 +152,8 @@ public class GuiPanelCreator extends GuiContainer {
 		if (curr != null && 0 <= xRel && xRel <= panelSize && 0 <= yRel && yRel <= panelSize) {
 			if (curr.isValidPos()) {
 				NBTTagCompound nbt = new NBTTagCompound();
-				nbt.setTag("component", new NBTTagCompound());
-				curr.writeToNBT(nbt.getCompoundTag("component"), true);
+				nbt.setFloat("x", curr.getX());
+				nbt.setFloat("y", curr.getY());
 				nbt.setInteger("type", MessageType.ADD.ordinal());
 				IndustrialWires.packetHandler.sendToServer(new MessageGUIInteract(container.tile, nbt));
 				container.tile.components.add(curr.copyOf());
