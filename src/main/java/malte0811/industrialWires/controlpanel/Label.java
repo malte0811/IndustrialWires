@@ -24,6 +24,7 @@ import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import malte0811.industrialWires.client.panelmodel.RawModelFontRenderer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -119,7 +120,12 @@ public class Label extends PanelComponent implements IConfigurableComponent {
 	public void renderInGUI(GuiPanelCreator gui) {
 		int left = (int) (gui.getX0()+getX()*gui.panelSize);
 		int top = (int) (gui.getY0()+getY()*gui.panelSize);
-		gui.mc.fontRendererObj.drawString(text, left, top, 0xff000000|color);
+		GlStateManager.pushMatrix();
+		float scale = gui.mc.fontRendererObj.FONT_HEIGHT*gui.panelSize/(16F*9F*9F);
+		GlStateManager.translate(left, top, 0);
+		GlStateManager.scale(scale, scale, scale);
+		gui.mc.fontRendererObj.drawString(text, 0, 0, 0xff000000|color);
+		GlStateManager.popMatrix();
 	}
 
 	@Override

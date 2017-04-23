@@ -99,15 +99,20 @@ public class ItemPanelComponent extends Item {
 		NBTTagCompound outer = new NBTTagCompound();
 		outer.setTag("data", inner);
 		int meta = getMetaFromPC(inner.getString("type"));
-		inner.removeTag("x");
-		inner.removeTag("y");
-		inner.removeTag("type");
+		removeIrrelevantTags(inner);
 		if (meta>=0) {
 			ItemStack ret = new ItemStack(this, 1, meta);
 			ret.setTagCompound(outer);
 			return ret;
 		}
 		return null;
+	}
+
+	private static void removeIrrelevantTags(NBTTagCompound inner) {
+		inner.removeTag("x");
+		inner.removeTag("y");
+		inner.removeTag("type");
+		inner.removeTag("panelHeight");
 	}
 
 	private int getMetaFromPC(String pc) {
@@ -131,10 +136,7 @@ public class ItemPanelComponent extends Item {
 			if (asCmp != null) {
 				NBTTagCompound written = new NBTTagCompound();
 				asCmp.writeToNBT(written, true);
-				written.removeTag("x");
-				written.removeTag("y");
-				written.removeTag("type");
-				written.removeTag("panelHeight");
+				removeIrrelevantTags(written);
 				nbt.setTag("data", written);
 			}
 		}

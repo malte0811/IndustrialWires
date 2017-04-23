@@ -227,10 +227,14 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 			if (id<3) {
 				color = PanelUtils.setColor(color, id, value);
 			} else {
-				length = ((NBTTagFloat)value).getFloat()/100;
+				length = scaleToRangePercent(((NBTTagFloat)value).getFloat(), .125F, 1);
 			}
 			break;
 		}
+	}
+
+	private float scaleToRangePercent(float x, float min, float max) {
+		return min + x / 100F * (max - min);
 	}
 
 	@Override
@@ -294,7 +298,7 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 				new FloatConfig("red", x, yOffset+20, color[0], 60),
 				new FloatConfig("green", x, yOffset+40, color[1], 60),
 				new FloatConfig("blue", x, yOffset+60, color[2], 60),
-				new FloatConfig("length", x, yOffset, length, 60)
+				new FloatConfig("length", x, yOffset, (length-.125F)/(1-.125F), 60)
 		};
 	}
 }

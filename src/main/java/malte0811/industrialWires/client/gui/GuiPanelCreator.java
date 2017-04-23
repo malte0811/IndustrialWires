@@ -30,9 +30,6 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
@@ -104,7 +101,7 @@ public class GuiPanelCreator extends GuiContainer {
 			pc.setX(x / (float) panelSize);
 			pc.setY(y / (float) panelSize);
 		}
-		if (!pc.isValidPos()) {
+		if (!pc.isValidPos(container.tile.components)) {
 			AxisAlignedBB aabb = pc.getBlockRelativeAABB();
 			int left = (int) (getX0()+aabb.minX*panelSize)-1;
 			int top = (int) (getY0()+aabb.minZ*panelSize)-1;
@@ -126,17 +123,6 @@ public class GuiPanelCreator extends GuiContainer {
 		buttonList.add(new GuiButton(2, guiLeft+2, buttonTop+44, 20, 20, "S"));
 	}
 
-	private void drawTexturedRect(float xMin, float xMax, float yMin, float yMax, float uMin, float uMax, float vMin, float vMax) {
-		Tessellator tes = Tessellator.getInstance();
-		VertexBuffer buf = tes.getBuffer();
-		buf.begin(7, DefaultVertexFormats.POSITION_TEX);
-		buf.pos(xMin, yMax, zLevel).tex(uMin, vMax).endVertex();
-		buf.pos(xMax, yMax, zLevel).tex(uMax, vMax).endVertex();
-		buf.pos(xMax, yMin, zLevel).tex(uMax, vMin).endVertex();
-		buf.pos(xMin, yMin, zLevel).tex(uMin, vMin).endVertex();
-		tes.draw();
-	}
-
 	@Override
 	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
 		super.mouseClicked(mouseX, mouseY, mouseButton);
@@ -150,7 +136,7 @@ public class GuiPanelCreator extends GuiContainer {
 		}
 		PanelComponent curr = getFloatingPC();
 		if (curr != null && 0 <= xRel && xRel <= panelSize && 0 <= yRel && yRel <= panelSize) {
-			if (curr.isValidPos()) {
+			if (curr.isValidPos(container.tile.components)) {
 				NBTTagCompound nbt = new NBTTagCompound();
 				nbt.setFloat("x", curr.getX());
 				nbt.setFloat("y", curr.getY());

@@ -26,8 +26,6 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
@@ -164,7 +162,7 @@ public abstract class PanelComponent {
 	}
 
 
-	public boolean isValidPos() {
+	public boolean isValidPos(List<PanelComponent> components) {
 		AxisAlignedBB aabb = getBlockRelativeAABB().offset(0, panelHeight, 0);
 		if (aabb.minX<0||aabb.maxX>1) {
 			return false;
@@ -174,6 +172,16 @@ public abstract class PanelComponent {
 		}
 		if (aabb.minZ<0||aabb.maxZ>1) {
 			return false;
+		}
+		aabb = getBlockRelativeAABB();
+		for (PanelComponent pc:components) {
+			if (pc==this) {
+				continue;
+			}
+			AxisAlignedBB otherBB = pc.getBlockRelativeAABB();
+			if (PanelUtils.intersectXZ(aabb, otherBB)) {
+				return false;
+			}
 		}
 		return true;
 	}
@@ -198,9 +206,5 @@ public abstract class PanelComponent {
 		result = 31 * result + (y != +0.0f ? Float.floatToIntBits(y) : 0);
 		result = 31 * result + type.hashCode();
 		return result;
-	}
-	//TODO make abstract & implement
-	public ItemStack getIngredientStack() {
-		return new ItemStack(Items.BEETROOT_SOUP);
 	}
 }

@@ -35,6 +35,7 @@ import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagFloat;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3i;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJModel;
@@ -223,7 +224,7 @@ public final class PanelUtils {
 
 	public static void addCommonInfo(NBTTagCompound data, List<String> list, boolean color, boolean rs) {
 		if (color && data.hasKey(COLOR)) {
-			String hexCol = String.format("%6s", Integer.toHexString(data.getInteger(COLOR)&0xffffff)).replace(' ', '0');
+			String hexCol = String.format("%6s", Integer.toHexString(data.getInteger(COLOR) & 0xffffff)).replace(' ', '0');
 			list.add(I18n.format(Lib.DESC_INFO + "colour", "<hexcol=" + hexCol + ":#" + hexCol + ">"));
 		}
 		if (rs && data.hasKey(RS_CHANNEL)) {
@@ -237,7 +238,7 @@ public final class PanelUtils {
 	}
 
 	public static int setColor(int color, int id, NBTBase value) {
-		id = 2-id;
+		id = 2 - id;
 		color &= ~(0xff << (8 * id));
 		color |= (int) (2.55 * (((NBTTagFloat) value).getFloat())) << (8 * id);
 		return color;
@@ -250,5 +251,9 @@ public final class PanelUtils {
 			ret[i] = ((color >> (8 * (2 - i))) & 255) / 255F * (active ? 1 : .5F);
 		}
 		return ret;
+	}
+
+	public static boolean intersectXZ(AxisAlignedBB aabb1, AxisAlignedBB aabb2) {
+		return aabb1.minX < aabb2.maxX && aabb1.maxX > aabb2.minX && aabb1.minZ < aabb2.maxZ && aabb1.maxZ > aabb2.minZ;
 	}
 }
