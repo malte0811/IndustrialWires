@@ -103,6 +103,7 @@ public class ClientProxy extends CommonProxy {
 		ConnLoader.textureReplacements.put("ic2_relay_glass", ImmutableMap.of("#immersiveengineering:blocks/connector_relayHV",
 				IndustrialWires.MODID + ":blocks/ic2_relayGlass"));
 
+		ConnLoader.baseModels.put("rs_panel_conn", new ResourceLocation("industrialwires:block/rs_panel_conn.obj"));
 		for (int meta = 0; meta < ItemIC2Coil.subNames.length; meta++) {
 			ResourceLocation loc = new ResourceLocation(IndustrialWires.MODID, "ic2wireCoil/" + ItemIC2Coil.subNames[meta]);
 			ModelBakery.registerItemVariants(IndustrialWires.coil, loc);

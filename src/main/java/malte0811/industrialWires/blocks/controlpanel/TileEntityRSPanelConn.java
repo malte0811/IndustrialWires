@@ -25,13 +25,16 @@ import blusunrize.immersiveengineering.api.energy.wires.TileEntityImmersiveConne
 import blusunrize.immersiveengineering.api.energy.wires.WireType;
 import blusunrize.immersiveengineering.api.energy.wires.redstone.IRedstoneConnector;
 import blusunrize.immersiveengineering.api.energy.wires.redstone.RedstoneWireNetwork;
+import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
 import malte0811.industrialWires.blocks.INetGUI;
 import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -43,12 +46,13 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implements IRedstoneConnector, ITickable, INetGUI {
+public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implements IRedstoneConnector, ITickable, INetGUI, IEBlockInterfaces.IDirectionalTile {
 	private byte[] out = new byte[16];
 	private boolean dirty = true;
 	private byte[] oldInput = new byte[16];
 	private Set<Consumer<byte[]>> changeListeners = new HashSet<>();
 	private Set<TileEntityPanel> connectedPanels = new HashSet<>();
+	private EnumFacing facing = EnumFacing.NORTH;
 	@Nonnull
 	private RedstoneWireNetwork network = new RedstoneWireNetwork().add(this);
 	private boolean hasConn = false;
@@ -87,6 +91,7 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 		out.setByteArray("out", this.out);
 		out.setBoolean("hasConn", hasConn);
 		out.setInteger("rsId", id);
+		out.setInteger("facing", facing.getIndex());
 	}
 
 	@Override
@@ -95,6 +100,7 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 		out = in.getByteArray("out");
 		hasConn = in.getBoolean("hasConn");
 		id = in.getInteger("rsId");
+		facing = EnumFacing.VALUES[in.getInteger("facing")];
 	}
 
 	private BiConsumer<Integer, Byte> rsOut = (channel, value)->{
@@ -201,12 +207,15 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 
 	@Override
 	public Vec3d getRaytraceOffset(IImmersiveConnectable other) {
-		return new Vec3d(.5, .5, .5);//TODO better values
+		EnumFacing side = facing.getOpposite();
+		return new Vec3d(.5 + side.getFrontOffsetX() * .0625, .5 + side.getFrontOffsetY() * .0625, .5 + side.getFrontOffsetZ() * .0625);
 	}
 
 	@Override
 	public Vec3d getConnectionOffset(ImmersiveNetHandler.Connection connection) {
-		return new Vec3d(.5, .5, .5);//TODO better values
+		EnumFacing side = facing.getOpposite();
+		double conRadius = connection.cableType.getRenderDiameter() / 2;
+		return new Vec3d(.5 - conRadius * side.getFrontOffsetX(), .5 - conRadius * side.getFrontOffsetY(), .5 - conRadius * side.getFrontOffsetZ());
 	}
 
 	@Override
@@ -256,5 +265,35 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 
 	public int getRsId() {
 		return id;
+	}
+
+	@Override
+	public EnumFacing getFacing() {
+		return facing;
+	}
+
+	@Override
+	public void setFacing(EnumFacing facing) {
+		this.facing = facing;
+	}
+
+	@Override
+	public int getFacingLimitation() {
+		return 0;
+	}
+
+	@Override
+	public boolean mirrorFacingOnPlacement(EntityLivingBase placer) {
+		return true;
+	}
+
+	@Override
+	public boolean canHammerRotate(EnumFacing side, float hitX, float hitY, float hitZ, EntityLivingBase entity) {
+		return false;
+	}
+
+	@Override
+	public boolean canRotate(EnumFacing axis) {
+		return false;
 	}
 }

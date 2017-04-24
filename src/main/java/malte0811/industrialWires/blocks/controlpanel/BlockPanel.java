@@ -36,6 +36,7 @@ import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.property.ExtendedBlockState;
@@ -84,7 +85,7 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 
 	@Override
 	protected IProperty<?>[] getProperties() {
-		return new IProperty[]{IEProperties.FACING_HORIZONTAL, type};
+		return new IProperty[]{IEProperties.FACING_ALL, type};
 	}
 
 	@Override
@@ -182,5 +183,16 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 			return false;
 		}
 		return state.getValue(type)==BlockTypes_Panel.TOP;
+	}
+
+	@Override
+	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
+		if (state.getValue(type)==BlockTypes_Panel.TOP) {
+			TileEntity te = world.getTileEntity(pos);
+			if (te instanceof TileEntityPanel) {
+				return ((TileEntityPanel) te).getTileDrop(player, state);
+			}
+		}
+		return super.getPickBlock(state, target, world, pos, player);
 	}
 }

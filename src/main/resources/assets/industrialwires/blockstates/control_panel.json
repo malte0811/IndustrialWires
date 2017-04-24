@@ -11,24 +11,49 @@
     }
   },
   "variants": {
-    "facing":
-    {
-      "north": { "transform": {
-        "rotation": {"y": 0 }
-      }},
-      "south": { "transform": {
-        "rotation": {"y": 180 }
-      }},
-      "west": { "transform": {
-        "rotation": {"y": 90 }
-      }},
-      "east": { "transform": {
-        "rotation": {"y": -90 }
-      }}
+    "facing": {
+      "down": {
+
+      },
+      "up": {
+        "transform": {
+          "rotation": {
+            "z": 180
+          }
+        }
+      },
+      "north": {
+        "transform": {
+          "rotation": {
+            "x": 90
+          }
+        }
+      },
+      "south": {
+        "transform": {
+          "rotation": {
+            "x": -90
+          }
+        }
+      },
+      "west": {
+        "transform": {
+          "rotation": {
+            "z": -90
+          }
+        }
+      },
+      "east": {
+        "transform": {
+          "rotation": {
+            "z": 90
+          }
+        }
+      }
     },
     "type": {
       "rs_wire": {
-        "model": "immersiveengineering:smartmodel/conn_ic2_conn_gold"
+        "model": "immersiveengineering:smartmodel/conn_rs_panel_conn"
       },
       "top": {
         "model": "industrialwires:smartmodel/panel_normal"

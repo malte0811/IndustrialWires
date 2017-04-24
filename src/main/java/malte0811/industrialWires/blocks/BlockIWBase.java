@@ -212,5 +212,9 @@ public abstract class BlockIWBase extends Block {
 		return false;
 	}
 
+	@Override
+	public int damageDropped(IBlockState state) {
+		return getMetaFromState(state);
+	}
 	protected abstract IProperty[] getProperties();
 }
