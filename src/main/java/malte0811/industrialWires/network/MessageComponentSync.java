@@ -23,6 +23,7 @@ import io.netty.buffer.ByteBuf;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.controlpanel.IConfigurableComponent;
 import malte0811.industrialWires.controlpanel.PanelComponent;
+import malte0811.industrialWires.items.ItemPanelComponent;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -68,7 +69,7 @@ public class MessageComponentSync implements IMessage {
 		private void handle(MessageComponentSync msg, EntityPlayerMP player) {
 			ItemStack held = player.getHeldItem(msg.hand);
 			if (held!=null&&held.getItem()== IndustrialWires.panelComponent) {
-				PanelComponent old = IndustrialWires.panelComponent.componentFromStack(held);
+				PanelComponent old = ItemPanelComponent.componentFromStack(held);
 				if (old instanceof IConfigurableComponent) {
 					NBTTagList changes = msg.data.getTagList("data", 10);
 					IConfigurableComponent cmp = (IConfigurableComponent) old;
@@ -81,7 +82,7 @@ public class MessageComponentSync implements IMessage {
 							x.printStackTrace();
 						}
 					}
-					ItemStack newCmp = ApiUtils.copyStackWithAmount(IndustrialWires.panelComponent.stackFromComponent(old), held.stackSize);
+					ItemStack newCmp = ApiUtils.copyStackWithAmount(ItemPanelComponent.stackFromComponent(old), held.stackSize);
 					player.setHeldItem(msg.hand, newCmp);
 				}
 			}

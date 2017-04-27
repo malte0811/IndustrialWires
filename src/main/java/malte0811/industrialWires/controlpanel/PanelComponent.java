@@ -78,6 +78,8 @@ public abstract class PanelComponent {
 
 	public abstract void update(TileEntityPanel tile);
 
+	public abstract int getColor();
+
 	@Nullable
 	public Consumer<byte[]> getRSInputHandler(int id, TileEntityPanel panel) {
 		return null;

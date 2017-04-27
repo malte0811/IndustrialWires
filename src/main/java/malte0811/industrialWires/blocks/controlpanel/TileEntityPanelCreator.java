@@ -27,6 +27,7 @@ import malte0811.industrialWires.blocks.INetGUI;
 import malte0811.industrialWires.blocks.TileEntityIWBase;
 import malte0811.industrialWires.controlpanel.MessageType;
 import malte0811.industrialWires.controlpanel.PanelComponent;
+import malte0811.industrialWires.items.ItemPanelComponent;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -80,7 +81,7 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInven
 
 	@Override
 	public boolean isStackValid(int slot, ItemStack stack) {
-		if (slot==0) {
+		if (slot == 0) {
 			return ApiUtils.compareToOreName(stack, "plateIron");
 		}
 		return true;
@@ -88,7 +89,7 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInven
 
 	@Override
 	public int getSlotLimit(int slot) {
-		return slot==0?1:64;
+		return slot == 0 ? 1 : 64;
 	}
 
 	@Override
@@ -102,25 +103,32 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInven
 		switch (MessageType.values()[type]) {
 		case ADD:
 			ItemStack curr = p.inventory.getItemStack();
-			PanelComponent pc = IndustrialWires.panelComponent.componentFromStack(curr);
-			if (pc!=null) {
+			PanelComponent pc = ItemPanelComponent.componentFromStack(curr);
+			if (pc != null) {
 				pc.setX(nbt.getFloat("x"));
 				pc.setY(nbt.getFloat("y"));
 				pc.setPanelHeight(height);
 				components.add(pc);
-				if (curr!=null) {
+				if (curr != null) {
 					curr.stackSize--;
-					if (curr.stackSize<=0) {
+					if (curr.stackSize <= 0) {
 						p.inventory.setItemStack(null);
 					}
 					p.inventory.markDirty();
 				}
 			} else {
-				IELogger.info("(IndustrialWires) Failed to load panel component send by "+p.getDisplayNameString());
+				IELogger.info("(IndustrialWires) Failed to load panel component send by " + p.getDisplayNameString());
 			}
 			break;
 		case REMOVE:
-			components.remove(nbt.getInteger("id"));
+			int id = nbt.getInteger("id");
+			if (id >= 0 && id < components.size() && p.inventory.getItemStack() == null) {
+				PanelComponent removed = components.get(id);
+				ItemStack remItem = ItemPanelComponent.stackFromComponent(removed);
+				p.inventory.setItemStack(remItem);
+				p.inventory.markDirty();
+				components.remove(id);
+			}
 			break;
 		case CREATE_PANEL:
 			if (ApiUtils.compareToOreName(inv[0], "plateIron")) {
@@ -136,8 +144,8 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInven
 			Iterator<PanelComponent> it = components.iterator();
 			while (it.hasNext()) {
 				PanelComponent next = it.next();
-				ItemStack nextStack = IndustrialWires.panelComponent.stackFromComponent(next);
-				if (nextStack!=null) {
+				ItemStack nextStack = ItemPanelComponent.stackFromComponent(next);
+				if (nextStack != null) {
 					if (p.inventory.addItemStackToInventory(nextStack)) {
 						it.remove();
 					}

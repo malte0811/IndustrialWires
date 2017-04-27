@@ -1,0 +1,7 @@
+{
+  "parent":"item/generated",
+  "textures": {
+    "layer0":"industrialwires:items/indicator_light_back",
+    "layer1":"industrialwires:items/indicator_light"
+  }
+}

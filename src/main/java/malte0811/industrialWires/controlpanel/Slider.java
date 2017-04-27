@@ -301,4 +301,9 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 				new FloatConfig("length", x, yOffset, (length-.125F)/(1-.125F), 60)
 		};
 	}
+
+	@Override
+	public int getColor() {
+		return color;
+	}
 }

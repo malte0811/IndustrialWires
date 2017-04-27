@@ -104,6 +104,11 @@ public class Label extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
+	public int getColor() {
+		return color;
+	}
+
+	@Override
 	public float getHeight() {
 		return 0;
 	}

@@ -228,4 +228,9 @@ public class IndicatorLight extends PanelComponent implements IConfigurableCompo
 				new FloatConfig("blue", 0, 110, color[2], 60)
 		};
 	}
+
+	@Override
+	public int getColor() {
+		return colorA;
+	}
 }

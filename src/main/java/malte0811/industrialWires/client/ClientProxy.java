@@ -38,7 +38,9 @@ import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import malte0811.industrialWires.client.gui.GuiRSPanelConn;
 import malte0811.industrialWires.client.panelmodel.PanelModelLoader;
 import malte0811.industrialWires.client.render.TileRenderJacobsLadder;
+import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.items.ItemIC2Coil;
+import malte0811.industrialWires.items.ItemPanelComponent;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
@@ -109,6 +111,12 @@ public class ClientProxy extends CommonProxy {
 			ModelBakery.registerItemVariants(IndustrialWires.coil, loc);
 			ModelLoader.setCustomModelResourceLocation(IndustrialWires.coil, meta, new ModelResourceLocation(loc, "inventory"));
 		}
+		for (int meta = 0; meta < ItemPanelComponent.types.length; meta++) {
+			ResourceLocation loc = new ResourceLocation(IndustrialWires.MODID, "panel_component/" + ItemPanelComponent.types[meta]);
+			ModelBakery.registerItemVariants(IndustrialWires.panelComponent, loc);
+			ModelLoader.setCustomModelResourceLocation(IndustrialWires.panelComponent, meta, new ModelResourceLocation(loc, "inventory"));
+		}
+
 		Block[] blocks = {IndustrialWires.ic2conn, IndustrialWires.mechConv, IndustrialWires.jacobsLadder};
 		for (Block b : blocks) {
 			if (b != null) {
@@ -171,6 +179,17 @@ public class ClientProxy extends CommonProxy {
 			ItemIC2Coil.setLength(tmp, lengthSum);
 			wireRecipes[i][9] = new PositionedItemStack(tmp, 18 * 4 + xBase, 18);
 		}
+
+		ClientUtils.mc().getItemColors().registerItemColorHandler((stack, pass) -> {
+			if (pass==1) {
+				PanelComponent pc = ItemPanelComponent.componentFromStack(stack);
+				if (pc != null) {
+					return 0xff000000 | pc.getColor();
+				}
+			}
+			return ~0;
+		}, IndustrialWires.panelComponent);
+
 		m.addEntry("industrialWires.wires", "industrialWires",
 				new ManualPages.CraftingMulti(m, "industrialWires.wires0", new ItemStack(IndustrialWires.ic2conn, 1, 0), new ItemStack(IndustrialWires.ic2conn, 1, 1), new ItemStack(IndustrialWires.ic2conn, 1, 2), new ItemStack(IndustrialWires.ic2conn, 1, 3),
 						new ItemStack(IndustrialWires.ic2conn, 1, 4), new ItemStack(IndustrialWires.ic2conn, 1, 5), new ItemStack(IndustrialWires.ic2conn, 1, 6), new ItemStack(IndustrialWires.ic2conn, 1, 7)),
@@ -238,7 +257,7 @@ public class ClientProxy extends CommonProxy {
 			EnumHand h = z == 1 ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
 			ItemStack held = player.getHeldItem(h);
 			if (held != null && held.getItem() == IndustrialWires.panelComponent) {
-				return new GuiPanelComponent(h, IndustrialWires.panelComponent.componentFromStack(held));
+				return new GuiPanelComponent(h, ItemPanelComponent.componentFromStack(held));
 			}
 		}
 		return null;

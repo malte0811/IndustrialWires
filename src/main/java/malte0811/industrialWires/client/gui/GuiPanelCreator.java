@@ -25,6 +25,7 @@ import malte0811.industrialWires.blocks.controlpanel.TileEntityPanelCreator;
 import malte0811.industrialWires.containers.ContainerPanelCreator;
 import malte0811.industrialWires.controlpanel.MessageType;
 import malte0811.industrialWires.controlpanel.PanelComponent;
+import malte0811.industrialWires.items.ItemPanelComponent;
 import malte0811.industrialWires.network.MessageGUIInteract;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
@@ -38,6 +39,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 
 import java.io.IOException;
+import java.util.List;
 
 public class GuiPanelCreator extends GuiContainer {
 	public int panelSize = 128;
@@ -135,20 +137,40 @@ public class GuiPanelCreator extends GuiContainer {
 			yRel = (int) Math.floor(yRel*16/panelSize)*panelSize/16;
 		}
 		PanelComponent curr = getFloatingPC();
-		if (curr != null && 0 <= xRel && xRel <= panelSize && 0 <= yRel && yRel <= panelSize) {
-			if (curr.isValidPos(container.tile.components)) {
-				NBTTagCompound nbt = new NBTTagCompound();
-				nbt.setFloat("x", curr.getX());
-				nbt.setFloat("y", curr.getY());
-				nbt.setInteger("type", MessageType.ADD.ordinal());
-				IndustrialWires.packetHandler.sendToServer(new MessageGUIInteract(container.tile, nbt));
-				container.tile.components.add(curr.copyOf());
-				ItemStack currStack = mc.thePlayer.inventory.getItemStack();
-				if (currStack != null) {
-					currStack.stackSize--;
-					if (currStack.stackSize <= 0) {
-						mc.thePlayer.inventory.setItemStack(null);
+		if (0 <= xRel && xRel <= panelSize && 0 <= yRel && yRel <= panelSize) {
+			List<PanelComponent> components = container.tile.components;
+			if (curr != null) {
+				if (curr.isValidPos(components)) {
+					NBTTagCompound nbt = new NBTTagCompound();
+					nbt.setFloat("x", curr.getX());
+					nbt.setFloat("y", curr.getY());
+					nbt.setInteger("type", MessageType.ADD.ordinal());
+					IndustrialWires.packetHandler.sendToServer(new MessageGUIInteract(container.tile, nbt));
+					components.add(curr.copyOf());
+					ItemStack currStack = mc.thePlayer.inventory.getItemStack();
+					if (currStack != null) {
+						currStack.stackSize--;
+						if (currStack.stackSize <= 0) {
+							mc.thePlayer.inventory.setItemStack(null);
 
+						}
+					}
+				}
+			} else if (mc.thePlayer.inventory.getItemStack()==null) {
+				float xRelFloat = xRel/(float) panelSize;
+				float yRelFloat = yRel/(float) panelSize;
+ 				for (int i = 0;i<components.size();i++) {
+					PanelComponent pc = components.get(i);
+					AxisAlignedBB aabb = pc.getBlockRelativeAABB();
+					if (aabb.minX<=xRelFloat&&aabb.maxX>xRelFloat&&aabb.minZ<=yRelFloat&&aabb.maxZ>yRelFloat) {
+						PanelComponent removed = components.get(i);
+						ItemStack remItem = ItemPanelComponent.stackFromComponent(removed);
+						mc.thePlayer.inventory.setItemStack(remItem);
+						NBTTagCompound nbt = new NBTTagCompound();
+						nbt.setInteger("type", MessageType.REMOVE.ordinal());
+						nbt.setInteger("id", i);
+						IndustrialWires.packetHandler.sendToServer(new MessageGUIInteract(container.tile, nbt));
+						break;
 					}
 				}
 			}
@@ -193,7 +215,7 @@ public class GuiPanelCreator extends GuiContainer {
 			return lastFloatingPC;
 		}
 		lastFloating = floating.copy();
-		lastFloatingPC = IndustrialWires.panelComponent.componentFromStack(floating);
+		lastFloatingPC = ItemPanelComponent.componentFromStack(floating);
 		return lastFloatingPC;
 	}
 }

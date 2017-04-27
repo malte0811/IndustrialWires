@@ -42,7 +42,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public class ItemPanelComponent extends Item {
-	private static final String[] types = {
+	public static final String[] types = {
 			"lighted_button", "label", "indicator_light", "slider"
 	};
 
@@ -86,14 +86,14 @@ public class ItemPanelComponent extends Item {
 	}
 
 	@Nullable
-	public PanelComponent componentFromStack(ItemStack stack) {
+	public static PanelComponent componentFromStack(ItemStack stack) {
 		NBTTagCompound loadFrom = getTagCompound(stack).getCompoundTag("data").copy();
 		loadFrom.setString("type", types[stack.getMetadata()]);
 		return PanelComponent.read(loadFrom);
 	}
 
 	@Nullable
-	public ItemStack stackFromComponent(PanelComponent pc) {
+	public static ItemStack stackFromComponent(PanelComponent pc) {
 		NBTTagCompound inner = new NBTTagCompound();
 		pc.writeToNBT(inner, true);
 		NBTTagCompound outer = new NBTTagCompound();
@@ -101,7 +101,7 @@ public class ItemPanelComponent extends Item {
 		int meta = getMetaFromPC(inner.getString("type"));
 		removeIrrelevantTags(inner);
 		if (meta>=0) {
-			ItemStack ret = new ItemStack(this, 1, meta);
+			ItemStack ret = new ItemStack(IndustrialWires.panelComponent, 1, meta);
 			ret.setTagCompound(outer);
 			return ret;
 		}
@@ -115,7 +115,7 @@ public class ItemPanelComponent extends Item {
 		inner.removeTag("panelHeight");
 	}
 
-	private int getMetaFromPC(String pc) {
+	private static int getMetaFromPC(String pc) {
 		for (int i = 0;i<types.length;i++) {
 			if (pc.equals(types[i])) {
 				return i;

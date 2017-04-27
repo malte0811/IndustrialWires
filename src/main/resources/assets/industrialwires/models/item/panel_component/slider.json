@@ -1,0 +1,7 @@
+{
+  "parent":"item/generated",
+  "textures": {
+    "layer0":"industrialwires:items/slider_track",
+    "layer1":"industrialwires:items/slider_button"
+  }
+}

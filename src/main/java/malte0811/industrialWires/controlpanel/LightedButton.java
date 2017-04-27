@@ -272,4 +272,9 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 				new FloatConfig("blue", 0, 140, color[2], 60)
 		};
 	}
+
+	@Override
+	public int getColor() {
+		return color;
+	}
 }
