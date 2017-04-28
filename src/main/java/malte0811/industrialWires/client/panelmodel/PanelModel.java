@@ -21,21 +21,28 @@ package malte0811.industrialWires.client.panelmodel;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
+import malte0811.industrialWires.IndustrialWires;
+import malte0811.industrialWires.blocks.controlpanel.BlockTypes_Panel;
 import malte0811.industrialWires.blocks.controlpanel.PropertyComponents;
 import malte0811.industrialWires.blocks.controlpanel.PropertyComponents.PanelRenderProperties;
+import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.controlpanel.PanelUtils;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.IBakedModel;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.block.model.ItemOverrideList;
+import net.minecraft.client.renderer.block.model.*;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.world.World;
 import net.minecraftforge.common.property.IExtendedBlockState;
+import org.lwjgl.util.vector.Vector3f;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 public class PanelModel implements IBakedModel {
@@ -71,7 +78,7 @@ public class PanelModel implements IBakedModel {
 
 	@Override
 	public boolean isGui3d() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -91,10 +98,11 @@ public class PanelModel implements IBakedModel {
 
 	@Override
 	public ItemOverrideList getOverrides() {
-		return ItemOverrideList.NONE;
+		return INSTANCE;
 	}
 
-	public class AssembledBakedModel implements IBakedModel {
+
+	public static class AssembledBakedModel implements IBakedModel {
 		PanelRenderProperties components;
 		List<BakedQuad> quadsDefault;
 
@@ -132,15 +140,53 @@ public class PanelModel implements IBakedModel {
 			return PanelUtils.PANEL_TEXTURE;
 		}
 
+		ItemCameraTransforms transform = new ItemCameraTransforms(new ItemTransformVec3f(new Vector3f(45, 0, 0), new Vector3f(0, .2F, 0), new Vector3f(.5F, .5F, .5F)),//3Left
+				new ItemTransformVec3f(new Vector3f(45, 0, 0), new Vector3f(0, .2F, 0), new Vector3f(.5F, .5F, .5F)),//3Right
+				new ItemTransformVec3f(new Vector3f(), new Vector3f(0, .2F, 0), new Vector3f(.5F, .5F, .5F)),//1Left
+				new ItemTransformVec3f(new Vector3f(), new Vector3f(0, .2F, 0), new Vector3f(.5F, .5F, .5F)),//1Right
+				new ItemTransformVec3f(new Vector3f(), new Vector3f(), new Vector3f()),//Head?
+				new ItemTransformVec3f(new Vector3f(30, 45, 0), new Vector3f(0, .125F, 0), new Vector3f(.6F, .6F, .6F)),//GUI
+				new ItemTransformVec3f(new Vector3f(), new Vector3f(0, .1F, 0), new Vector3f(.25F, .25F, .25F)),//Ground
+				new ItemTransformVec3f(new Vector3f(0, 180, 45), new Vector3f(0, 0, -.1875F), new Vector3f(.5F, .5F, .5F)));//Fixed;
 		@Override
-		public ItemCameraTransforms getItemCameraTransforms() {
-			return ItemCameraTransforms.DEFAULT;
+		public ItemCameraTransforms getItemCameraTransforms() {//TODO very much cache this!
+			return transform;
 		}
 
 		@Override
 		public ItemOverrideList getOverrides() {
-			return ItemOverrideList.NONE;
+			return INSTANCE;
 		}
 
+	}
+
+	private static final Item panel = new ItemStack(IndustrialWires.panel).getItem();
+	private static final PanelItemOverride INSTANCE = new PanelItemOverride();
+
+	private static class PanelItemOverride extends ItemOverrideList {
+		private static Cache<ItemStack, AssembledBakedModel> ITEM_MODEL_CACHE = CacheBuilder.newBuilder()
+				.maximumSize(100)
+				.expireAfterAccess(60, TimeUnit.SECONDS)
+				.build();
+		public PanelItemOverride() {
+			super(ImmutableList.of());
+		}
+
+		@Nonnull
+		@Override
+		public IBakedModel handleItemState(@Nonnull IBakedModel originalModel, ItemStack stack, World world, EntityLivingBase entity) {
+			if (stack != null && stack.getItem() == panel && stack.getMetadata() == BlockTypes_Panel.TOP.ordinal()) {
+				try {
+					return ITEM_MODEL_CACHE.get(stack, ()-> {
+						TileEntityPanel te = new TileEntityPanel();
+						te.readFromItemNBT(stack.getTagCompound());
+						return new AssembledBakedModel(te.getComponents());
+					});
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
+			}
+			return originalModel;
+		}
 	}
 }

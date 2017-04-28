@@ -21,7 +21,7 @@ package malte0811.industrialWires.controlpanel;
 import blusunrize.immersiveengineering.api.Lib;
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import malte0811.industrialWires.IndustrialWires;
-import malte0811.industrialWires.blocks.controlpanel.PropertyComponents;
+import malte0811.industrialWires.blocks.controlpanel.PropertyComponents.PanelRenderProperties;
 import malte0811.industrialWires.client.RawQuad;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -34,6 +34,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagFloat;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3i;
@@ -42,6 +43,7 @@ import net.minecraftforge.client.model.obj.OBJModel;
 import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad;
 import org.lwjgl.util.vector.Vector3f;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,7 +55,7 @@ public final class PanelUtils {
 	private PanelUtils() {
 	}
 
-	public static List<BakedQuad> generateQuads(PropertyComponents.PanelRenderProperties components) {
+	public static List<BakedQuad> generateQuads(PanelRenderProperties components) {
 		if (PANEL_TEXTURE == null) {
 			PANEL_TEXTURE = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(IndustrialWires.MODID + ":blocks/control_panel");
 		}
@@ -255,5 +257,14 @@ public final class PanelUtils {
 
 	public static boolean intersectXZ(AxisAlignedBB aabb1, AxisAlignedBB aabb2) {
 		return aabb1.minX < aabb2.maxX && aabb1.maxX > aabb2.minX && aabb1.minZ < aabb2.maxZ && aabb1.maxZ > aabb2.minZ;
+	}
+	public static void readListFromNBT(NBTTagList list, @Nonnull List<PanelComponent> base) {
+		base.clear();
+		for (int i = 0; i < list.tagCount(); i++) {
+			PanelComponent pc = PanelComponent.read(list.getCompoundTagAt(i));
+			if (pc != null) {
+				base.add(pc);
+			}
+		}
 	}
 }

@@ -27,6 +27,7 @@ import malte0811.industrialWires.blocks.INetGUI;
 import malte0811.industrialWires.blocks.TileEntityIWBase;
 import malte0811.industrialWires.controlpanel.MessageType;
 import malte0811.industrialWires.controlpanel.PanelComponent;
+import malte0811.industrialWires.controlpanel.PanelUtils;
 import malte0811.industrialWires.items.ItemPanelComponent;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -46,13 +47,7 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInven
 	@Override
 	public void readNBT(NBTTagCompound nbt, boolean updatePacket) {
 		NBTTagList l = nbt.getTagList("components", 10);
-		components.clear();
-		for (int i = 0; i < l.tagCount(); i++) {
-			PanelComponent pc = PanelComponent.read(l.getCompoundTagAt(i));
-			if (pc != null) {
-				components.add(pc);
-			}
-		}
+		PanelUtils.readListFromNBT(l, components);
 		height = nbt.getFloat("height");
 		inv = Utils.readInventory(nbt.getTagList("inventory", 10), inv.length);
 	}

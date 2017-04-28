@@ -21,11 +21,13 @@ import blusunrize.immersiveengineering.api.Lib;
 import blusunrize.immersiveengineering.client.ClientUtils;
 import blusunrize.immersiveengineering.common.util.ItemNBTHelper;
 import malte0811.industrialWires.IndustrialWires;
-import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
+import malte0811.industrialWires.client.panelmodel.PanelModel;
+import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.items.ItemIC2Coil;
 import malte0811.industrialWires.wires.IC2Wiretype;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -34,6 +36,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.client.event.DrawBlockHighlightEvent;
+import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.oredict.OreDictionary;
@@ -90,5 +93,9 @@ public class ClientEventHandler {
 				}
 			}
 		}
+	}
+	@SubscribeEvent
+	public void bakeModel(ModelBakeEvent event) {
+		event.getModelRegistry().putObject(new ModelResourceLocation(IndustrialWires.MODID+":control_panel", "inventory,type=top"), new PanelModel());
 	}
 }

@@ -132,10 +132,6 @@ public class GuiPanelCreator extends GuiContainer {
 		int y0 = getY0();
 		int xRel = mouseX - x0;
 		int yRel = mouseY - y0;
-		if (snapToGrid) {
-			xRel = (int) Math.floor(xRel*16/panelSize)*panelSize/16;
-			yRel = (int) Math.floor(yRel*16/panelSize)*panelSize/16;
-		}
 		PanelComponent curr = getFloatingPC();
 		if (0 <= xRel && xRel <= panelSize && 0 <= yRel && yRel <= panelSize) {
 			List<PanelComponent> components = container.tile.components;

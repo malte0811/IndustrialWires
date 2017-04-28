@@ -117,7 +117,7 @@ public class ClientProxy extends CommonProxy {
 			ModelLoader.setCustomModelResourceLocation(IndustrialWires.panelComponent, meta, new ModelResourceLocation(loc, "inventory"));
 		}
 
-		Block[] blocks = {IndustrialWires.ic2conn, IndustrialWires.mechConv, IndustrialWires.jacobsLadder};
+		Block[] blocks = {IndustrialWires.ic2conn, IndustrialWires.mechConv, IndustrialWires.jacobsLadder, IndustrialWires.panel};
 		for (Block b : blocks) {
 			if (b != null) {
 				Item blockItem = Item.getItemFromBlock(b);

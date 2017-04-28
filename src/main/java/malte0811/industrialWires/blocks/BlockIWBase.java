@@ -82,7 +82,7 @@ public abstract class BlockIWBase extends Block {
 		if (tile instanceof IHasDummyBlocksIW) {
 			state = applyProperty(state, IEProperties.MULTIBLOCKSLAVE, ((IHasDummyBlocksIW) tile).isDummy());
 		}
-		if (tile instanceof IEBlockInterfaces.IDirectionalTile) {
+		if (tile instanceof IEBlockInterfaces.IDirectionalTile&&((IEBlockInterfaces.IDirectionalTile) tile).getFacingLimitation()>=0) {
 			if (((IEBlockInterfaces.IDirectionalTile) tile).getFacingLimitation()==2) {
 				state = state.withProperty(IEProperties.FACING_HORIZONTAL, ((IEBlockInterfaces.IDirectionalTile) tile).getFacing());
 			} else {

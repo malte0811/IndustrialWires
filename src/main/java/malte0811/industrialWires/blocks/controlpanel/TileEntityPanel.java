@@ -134,15 +134,11 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 	}
 
 	public void readFromItemNBT(NBTTagCompound nbt) {
-		NBTTagList l = nbt.getTagList("components", 10);
-		components.clear();
-		for (int i = 0; i < l.tagCount(); i++) {
-			PanelComponent pc = PanelComponent.read(l.getCompoundTagAt(i));
-			if (pc != null) {
-				components.add(pc);
-			}
+		if (nbt!=null) {
+			NBTTagList l = nbt.getTagList("components", 10);
+			PanelUtils.readListFromNBT(l, components);
+			components.height = nbt.getFloat("height");
 		}
-		components.height = nbt.getFloat("height");
 		defAABB = null;
 	}
 
@@ -169,7 +165,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 
 	@Override
 	public int getFacingLimitation() {
-		return 2;
+		return 0;
 	}
 
 	@Override
@@ -177,10 +173,10 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		switch (side) {
 		case UP:
 			components.top = EnumFacing.UP;
-			return IDirectionalTile.super.getFacingForPlacement(placer, pos, side, hitX, hitY, hitZ);
+			return EnumFacing.fromAngle(placer.rotationYaw);
 		case DOWN:
 			components.top = EnumFacing.DOWN;
-			return IDirectionalTile.super.getFacingForPlacement(placer, pos, side, hitX, hitY, hitZ);
+			return EnumFacing.fromAngle(placer.rotationYaw);
 		case NORTH:
 		case SOUTH:
 		case WEST:

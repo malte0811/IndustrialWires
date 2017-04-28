@@ -26,6 +26,7 @@ import blusunrize.immersiveengineering.api.energy.wires.WireType;
 import blusunrize.immersiveengineering.api.energy.wires.redstone.IRedstoneConnector;
 import blusunrize.immersiveengineering.api.energy.wires.redstone.RedstoneWireNetwork;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
+import malte0811.industrialWires.blocks.IBlockBoundsIW;
 import malte0811.industrialWires.blocks.INetGUI;
 import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.util.MiscUtils;
@@ -36,6 +37,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -46,7 +48,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implements IRedstoneConnector, ITickable, INetGUI, IEBlockInterfaces.IDirectionalTile {
+public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implements IRedstoneConnector, ITickable, INetGUI, IEBlockInterfaces.IDirectionalTile, IBlockBoundsIW {
 	private byte[] out = new byte[16];
 	private boolean dirty = true;
 	private byte[] oldInput = new byte[16];
@@ -101,6 +103,7 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 		hasConn = in.getBoolean("hasConn");
 		id = in.getInteger("rsId");
 		facing = EnumFacing.VALUES[in.getInteger("facing")];
+		aabb = null;
 	}
 
 	private BiConsumer<Integer, Byte> rsOut = (channel, value)->{
@@ -295,5 +298,34 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 	@Override
 	public boolean canRotate(EnumFacing axis) {
 		return false;
+	}
+
+	private AxisAlignedBB aabb;
+	@Override
+	public AxisAlignedBB getBoundingBox() {
+		if (aabb==null) {
+			double h = 9 / 16D;
+			switch (facing) {
+			case DOWN:
+				aabb = new AxisAlignedBB(0, 0, 0, 1, h, 1);
+				break;
+			case UP:
+				aabb = new AxisAlignedBB(0, 1-h, 0, 1, 1, 1);
+				break;
+			case NORTH:
+				aabb = new AxisAlignedBB(0, 0, 0, 1, 1, h);
+				break;
+			case SOUTH:
+				aabb = new AxisAlignedBB(0, 0, 1-h, 1, 1, 1);
+				break;
+			case WEST:
+				aabb = new AxisAlignedBB(0, 0, 0, h, 1, 1);
+				break;
+			case EAST:
+				aabb = new AxisAlignedBB(1-h, 0, 0, 0, 1, 1);
+				break;
+			}
+		}
+		return aabb;
 	}
 }
