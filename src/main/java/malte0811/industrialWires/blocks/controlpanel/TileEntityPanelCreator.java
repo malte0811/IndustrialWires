@@ -23,6 +23,7 @@ import blusunrize.immersiveengineering.common.util.IELogger;
 import blusunrize.immersiveengineering.common.util.Utils;
 import blusunrize.immersiveengineering.common.util.inventory.IIEInventory;
 import malte0811.industrialWires.IndustrialWires;
+import malte0811.industrialWires.blocks.IBlockBoundsIW;
 import malte0811.industrialWires.blocks.INetGUI;
 import malte0811.industrialWires.blocks.TileEntityIWBase;
 import malte0811.industrialWires.controlpanel.MessageType;
@@ -34,12 +35,13 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.math.AxisAlignedBB;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInventory, INetGUI {
+public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInventory, INetGUI, IBlockBoundsIW {
 	public List<PanelComponent> components = new ArrayList<>();
 	public float height = 0.5F;
 	public ItemStack[] inv = new ItemStack[1];
@@ -153,5 +155,11 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInven
 		markDirty();
 		IBlockState state = worldObj.getBlockState(pos);
 		worldObj.notifyBlockUpdate(pos, state, state, 3);
+	}
+
+	private static final AxisAlignedBB aabb = new AxisAlignedBB(0, 0,0, 1, 14/16D, 1);
+	@Override
+	public AxisAlignedBB getBoundingBox() {
+		return aabb;
 	}
 }
