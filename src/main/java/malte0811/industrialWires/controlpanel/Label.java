@@ -178,9 +178,9 @@ public class Label extends PanelComponent implements IConfigurableComponent {
 	public FloatConfig[] getFloatOptions() {
 		float[] color = PanelUtils.getFloatColor(true, this.color);
 		return new FloatConfig[]{
-				new FloatConfig("red", 0, 20, color[0], 60),
-				new FloatConfig("green", 0, 40, color[1], 60),
-				new FloatConfig("blue", 0, 60, color[2], 60)
+				new FloatConfig("red", 0, 30, color[0], 60),
+				new FloatConfig("green", 0, 50, color[1], 60),
+				new FloatConfig("blue", 0, 70, color[2], 60)
 		};
 	}
 }

@@ -22,5 +22,6 @@ public enum MessageType {
 	ADD,
 	REMOVE,
 	CREATE_PANEL,
-	REMOVE_ALL;
+	REMOVE_ALL,
+	DISASSEMBLE;
 }

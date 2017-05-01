@@ -133,7 +133,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		}
 	}
 
-	public void readFromItemNBT(NBTTagCompound nbt) {
+	public void readFromItemNBT(@Nullable NBTTagCompound nbt) {
 		if (nbt!=null) {
 			NBTTagList l = nbt.getTagList("components", 10);
 			PanelUtils.readListFromNBT(l, components);

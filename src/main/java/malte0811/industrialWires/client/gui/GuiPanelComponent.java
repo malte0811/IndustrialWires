@@ -11,6 +11,7 @@ import malte0811.industrialWires.containers.ContainerPanelComponent;
 import malte0811.industrialWires.controlpanel.IConfigurableComponent;
 import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.network.MessageComponentSync;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
@@ -18,6 +19,7 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
 import org.lwjgl.input.Keyboard;
 
 import java.io.IOException;
@@ -34,7 +36,6 @@ public class GuiPanelComponent extends GuiContainer {
 	private List<GuiIntChooser> intChoosers = new ArrayList<>();
 	private List<GuiSliderIE> floatSliders = new ArrayList<>();
 
-	//TODO int, float
 	public GuiPanelComponent(EnumHand h, PanelComponent pc) {
 		super(new ContainerPanelComponent(h));
 		container = (ContainerPanelComponent) inventorySlots;
@@ -44,46 +45,53 @@ public class GuiPanelComponent extends GuiContainer {
 	@Override
 	public void initGui() {
 		super.initGui();
+		xSize = 150;
+		ySize = 150;
 		Keyboard.enableRepeatEvents(true);
 		if (component instanceof IConfigurableComponent) {
 			confComp = (IConfigurableComponent) component;
 			IConfigurableComponent.BoolConfig[] bools = confComp.getBooleanOptions();
 			boolButtons.clear();
+			int componentLeft = this.guiLeft+5;
+			int componentTop = this.guiTop+5;
 			for (int i = 0;i<bools.length;i++) {
 				IConfigurableComponent.BoolConfig bc = bools[i];
-				//TODO check whether ID==0 is a bad thing when using custom button lists
-				boolButtons.add(new GuiButtonCheckbox(0, guiLeft + bc.x, guiTop + bc.y, confComp.fomatConfigName(IConfigurableComponent.ConfigType.BOOL, i), bc.value));
+				boolButtons.add(new GuiButtonCheckbox(0, componentLeft + bc.x, componentTop + bc.y, confComp.fomatConfigName(IConfigurableComponent.ConfigType.BOOL, i), bc.value));
 			}
 			IConfigurableComponent.StringConfig[] strings = confComp.getStringOptions();
 			stringTexts.clear();
 			for (IConfigurableComponent.StringConfig sc : strings) {
-				GuiTextField toAdd = new GuiTextField(0, mc.fontRendererObj, guiLeft + sc.x, guiTop + sc.y, 58, 12);
+				GuiTextField toAdd = new GuiTextField(0, mc.fontRendererObj, componentLeft + sc.x, componentTop + sc.y, 58, 12);
 				toAdd.setText(sc.value);
 				stringTexts.add(toAdd);
 			}
 			IConfigurableComponent.RSChannelConfig[] rs = confComp.getRSChannelOptions();
 			rsChannelChoosers.clear();
 			for (IConfigurableComponent.RSChannelConfig rc : rs) {
-				rsChannelChoosers.add(new GuiChannelPicker(0, guiLeft + rc.x, guiTop + rc.y, 40, rc.value));
+				rsChannelChoosers.add(new GuiChannelPicker(0, componentLeft + rc.x, componentTop + rc.y, 40, rc.value));
 			}
 			intChoosers.clear();
 			IConfigurableComponent.IntConfig[] is = confComp.getIntegerOptions();
 			for (IConfigurableComponent.IntConfig ic : is) {
-				intChoosers.add(new GuiIntChooser(guiLeft+ic.x, guiTop+ic.y, ic.allowNegative, ic.value, ic.digits));
+				intChoosers.add(new GuiIntChooser(componentLeft+ic.x, componentTop+ic.y, ic.allowNegative, ic.value, ic.digits));
 			}
 			floatSliders.clear();
 			IConfigurableComponent.FloatConfig[] fs = confComp.getFloatOptions();
 			for (int i = 0;i<fs.length;i++) {
 				IConfigurableComponent.FloatConfig fc = fs[i];
-				floatSliders.add(new GuiSliderIE(0, guiLeft+fc.x, guiTop+fc.y, fc.width,
+				floatSliders.add(new GuiSliderIE(0, componentLeft+fc.x, componentTop+fc.y, fc.width,
 						confComp.fomatConfigName(IConfigurableComponent.ConfigType.FLOAT, i), fc.value));
 			}
 		}
 	}
 
+	private ResourceLocation textureLoc = new ResourceLocation(IndustrialWires.MODID, "textures/gui/panel_component.png");
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
-		//TODO background
+		ResourceLocation textureLoc = new ResourceLocation(IndustrialWires.MODID, "textures/gui/panel_component.png");
+		GlStateManager.color(1,1,1,1);
+		mc.getTextureManager().bindTexture(textureLoc);
+		Gui.drawModalRectWithCustomSizedTexture(guiLeft, guiTop, 0, 0, xSize, ySize, 150, 150);
 	}
 
 	@Override
@@ -224,7 +232,7 @@ public class GuiPanelComponent extends GuiContainer {
 		}
 		for (int i = 0;i<floatSliders.size();i++) {
 			GuiSliderIE choose = floatSliders.get(i);
-			String tooltip = confComp.fomatConfigDescription(IConfigurableComponent.ConfigType.INT, i);
+			String tooltip = confComp.fomatConfigDescription(IConfigurableComponent.ConfigType.FLOAT, i);
 			if (tooltip!=null&&choose.isMouseOver()) {
 				ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRendererObj);
 			}

@@ -20,6 +20,7 @@ package malte0811.industrialWires.controlpanel;
 
 import blusunrize.immersiveengineering.api.Lib;
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
+import ic2.api.item.IC2Items;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.controlpanel.PropertyComponents.PanelRenderProperties;
 import malte0811.industrialWires.client.RawQuad;
@@ -30,6 +31,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.EnumDyeColor;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -51,6 +53,8 @@ import static malte0811.industrialWires.controlpanel.PanelComponent.*;
 
 public final class PanelUtils {
 	public static TextureAtlasSprite PANEL_TEXTURE;
+	public static final Item PANEL_ITEM = new ItemStack(IndustrialWires.panel).getItem();
+	private static ItemStack panelBase;
 
 	private PanelUtils() {
 	}
@@ -266,5 +270,12 @@ public final class PanelUtils {
 				base.add(pc);
 			}
 		}
+	}
+
+	public static ItemStack getPanelBase() {
+		if (panelBase==null) {
+			panelBase = IC2Items.getItem("resource", "machine");
+		}
+		return panelBase;
 	}
 }

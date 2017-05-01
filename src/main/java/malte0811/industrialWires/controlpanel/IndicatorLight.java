@@ -215,17 +215,19 @@ public class IndicatorLight extends PanelComponent implements IConfigurableCompo
 	@Override
 	public IntConfig[] getIntegerOptions() {
 		return new IntConfig[] {
-				new IntConfig("rsId", 0, 45, rsInputId, 3, false)
+				new IntConfig("rsId", 0, 45, rsInputId, 2, false)
 		};
 	}
 
 	@Override
 	public FloatConfig[] getFloatOptions() {
 		float[] color = PanelUtils.getFloatColor(true, this.colorA);
+		int x = 70;
+		int yOffset = 10;
 		return new FloatConfig[]{
-				new FloatConfig("red", 0, 70, color[0], 60),
-				new FloatConfig("green", 0, 90, color[1], 60),
-				new FloatConfig("blue", 0, 110, color[2], 60)
+				new FloatConfig("red", x, yOffset, color[0], 60),
+				new FloatConfig("green", x, yOffset+20, color[1], 60),
+				new FloatConfig("blue", x, yOffset+40, color[2], 60)
 		};
 	}
 

@@ -18,9 +18,9 @@
 
 package malte0811.industrialWires.containers;
 
-import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.common.gui.ContainerIEBase;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanelCreator;
+import malte0811.industrialWires.controlpanel.PanelUtils;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
@@ -42,8 +42,9 @@ public class ContainerPanelCreator extends ContainerIEBase<TileEntityPanelCreato
 
 			@Override
 			public boolean isItemValid(@Nullable ItemStack stack) {
-				return ApiUtils.compareToOreName(stack, "plateIron");
+				return  stack != null && (ItemStack.areItemStacksEqual(stack, PanelUtils.getPanelBase()) || stack.getItem() == PanelUtils.PANEL_ITEM);
 			}
+
 		});
 		for (int i = 0; i < 3; i++)
 			for (int j = 0; j < 9; j++)

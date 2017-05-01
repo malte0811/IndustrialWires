@@ -278,7 +278,7 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 	@Override
 	public IntConfig[] getIntegerOptions() {
 		return new IntConfig[] {
-				new IntConfig("rsId", 0, 50, rsId, 3, false)
+				new IntConfig("rsId", 0, 50, rsId, 2, false)
 		};
 	}
 

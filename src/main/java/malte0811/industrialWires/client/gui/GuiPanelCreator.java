@@ -55,8 +55,6 @@ public class GuiPanelCreator extends GuiContainer {
 
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
-		//TODO proper background
-		textureLoc = new ResourceLocation(IndustrialWires.MODID, "textures/gui/panel_creator.png");
 		GlStateManager.color(1,1,1,1);
 		mc.getTextureManager().bindTexture(textureLoc);
 		this.drawTexturedModalRect(guiLeft,guiTop, 0, 0, xSize, ySize);
@@ -121,8 +119,9 @@ public class GuiPanelCreator extends GuiContainer {
 		buttonList.clear();
 		int buttonTop = guiTop+62;
 		buttonList.add(new GuiButton(0, guiLeft+2, buttonTop, 20, 20, "C"));
-		buttonList.add(new GuiButton(1, guiLeft+2, buttonTop+22, 20, 20, "D"));
+		buttonList.add(new GuiButton(1, guiLeft+2, buttonTop+22, 20, 20, "R"));
 		buttonList.add(new GuiButton(2, guiLeft+2, buttonTop+44, 20, 20, "S"));
+		buttonList.add(new GuiButton(3, guiLeft+2, buttonTop-54, 20, 20, "D"));
 	}
 
 	@Override
@@ -194,6 +193,9 @@ public class GuiPanelCreator extends GuiContainer {
 			break;
 		case 2:
 			snapToGrid = !snapToGrid;
+			break;
+		case 3:
+			nbt.setInteger("type", MessageType.DISASSEMBLE.ordinal());
 			break;
 		}
 		if (!nbt.hasNoTags()) {

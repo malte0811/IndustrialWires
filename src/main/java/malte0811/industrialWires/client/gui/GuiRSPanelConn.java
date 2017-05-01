@@ -20,54 +20,56 @@ package malte0811.industrialWires.client.gui;
 
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityRSPanelConn;
+import malte0811.industrialWires.client.gui.elements.GuiIntChooser;
+import malte0811.industrialWires.containers.ContainerRSPanelConn;
 import malte0811.industrialWires.network.MessageGUIInteract;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiLabel;
-import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ResourceLocation;
 
 import java.io.IOException;
 
-public class GuiRSPanelConn extends GuiScreen {
+public class GuiRSPanelConn extends GuiContainer {
 	private TileEntityRSPanelConn te;
-	private int curr = 0;
+	private GuiIntChooser chooser;
 	public GuiRSPanelConn(TileEntityRSPanelConn tile) {
+		super(new ContainerRSPanelConn(tile));
 		te = tile;
 	}
 	@Override
 	public void initGui() {
 		super.initGui();
-		buttonList.clear();
-		buttonList.add(new GuiButton(0, width/2-8, height/2-32, 16, 16, "+1"));
-		buttonList.add(new GuiButton(1, width/2-8, height/2+32, 16, 16, "-1"));
-		buttonList.add(new GuiButton(2, width/2-8, height/2+48, 16, 16, "Ok"));
-		curr = te.getRsId();
-		onChange();
+		chooser = new GuiIntChooser((width-32)/2, (height-4)/2, false, te.getRsId(), 2);
+		xSize = 64;
+		ySize = 64;
+		guiLeft = (width-xSize)/2;
+		guiTop = (height-ySize)/2;
 	}
 
 	@Override
-	protected void actionPerformed(GuiButton button) throws IOException {
-		super.actionPerformed(button);
-		switch (button.id) {
-		case 0:
-			curr++;
-			onChange();
-			break;
-		case 1:
-			curr--;
-			onChange();
-			break;
-		case 2:
-			mc.displayGuiScreen(null);
-			mc.setIngameFocus();
-			break;
-		}
+	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+		super.mouseClicked(mouseX, mouseY, mouseButton);
+		chooser.click(mouseX, mouseY);
 	}
 
 	@Override
-	public void drawBackground(int tint) {
-		super.drawBackground(tint);
-		//TODO proper background
+	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+		super.drawScreen(mouseX, mouseY, partialTicks);
+		GlStateManager.color(1, 1, 1, 1);
+		RenderHelper.disableStandardItemLighting();
+		chooser.drawChooser();
+		RenderHelper.enableStandardItemLighting();
+	}
+
+	private ResourceLocation textureLoc = new ResourceLocation(IndustrialWires.MODID, "textures/gui/rs_wire_controller.png");
+	@Override
+	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+		GlStateManager.color(1,1,1,1);
+		mc.getTextureManager().bindTexture(textureLoc);
+		Gui.drawModalRectWithCustomSizedTexture(guiLeft, guiTop, 0, 0, xSize, ySize, 64, 64);
 	}
 
 	@Override
@@ -75,14 +77,16 @@ public class GuiRSPanelConn extends GuiScreen {
 		return false;
 	}
 
+	@Override
+	public void onGuiClosed() {
+		super.onGuiClosed();
+		onChange();
+	}
+
 	private void onChange() {
-		curr = Math.max(0, curr);
-		labelList.clear();
-		labelList.add(new GuiLabel(mc.fontRendererObj, 0, width/2-8, height/2-8, 16, 16, 0xff0000));
-		labelList.get(0).addLine(Integer.toString(curr));
-		if (curr!=te.getRsId()) {
+		if (chooser.getValue()!=te.getRsId()) {
 			NBTTagCompound nbt = new NBTTagCompound();
-			nbt.setInteger("rsId", curr);
+			nbt.setInteger("rsId", chooser.getValue());
 			IndustrialWires.packetHandler.sendToServer(new MessageGUIInteract(te, nbt));
 		}
 	}

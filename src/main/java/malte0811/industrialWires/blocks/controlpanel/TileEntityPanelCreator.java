@@ -128,7 +128,7 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInven
 			}
 			break;
 		case CREATE_PANEL:
-			if (ApiUtils.compareToOreName(inv[0], "plateIron")) {
+			if (PanelUtils.getPanelBase().equals(inv[0])) {
 				NBTTagCompound panelNBT = new NBTTagCompound();
 				writeToItemNBT(panelNBT, true);
 				ItemStack panel = new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.TOP.ordinal());
@@ -149,6 +149,15 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInven
 				} else {
 					it.remove();
 				}
+			}
+			break;
+		case DISASSEMBLE:
+			if (components.size() == 0 && inv[0] != null && inv[0].getItem() == PanelUtils.PANEL_ITEM) {
+				TileEntityPanel te = new TileEntityPanel();
+				te.readFromItemNBT(inv[0].getTagCompound());
+				components = new ArrayList<>(te.getComponents());
+				height = te.getComponents().height;
+				inv[0] = null;
 			}
 			break;
 		}

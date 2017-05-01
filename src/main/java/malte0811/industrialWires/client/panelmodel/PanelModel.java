@@ -21,7 +21,6 @@ package malte0811.industrialWires.client.panelmodel;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
-import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.controlpanel.BlockTypes_Panel;
 import malte0811.industrialWires.blocks.controlpanel.PropertyComponents;
 import malte0811.industrialWires.blocks.controlpanel.PropertyComponents.PanelRenderProperties;
@@ -31,7 +30,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.*;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
@@ -160,7 +158,6 @@ public class PanelModel implements IBakedModel {
 
 	}
 
-	private static final Item panel = new ItemStack(IndustrialWires.panel).getItem();
 	private static final PanelItemOverride INSTANCE = new PanelItemOverride();
 
 	private static class PanelItemOverride extends ItemOverrideList {
@@ -175,7 +172,7 @@ public class PanelModel implements IBakedModel {
 		@Nonnull
 		@Override
 		public IBakedModel handleItemState(@Nonnull IBakedModel originalModel, ItemStack stack, World world, EntityLivingBase entity) {
-			if (stack != null && stack.getItem() == panel && stack.getMetadata() == BlockTypes_Panel.TOP.ordinal()) {
+			if (stack != null && stack.getItem() == PanelUtils.PANEL_ITEM && stack.getMetadata() == BlockTypes_Panel.TOP.ordinal()) {
 				try {
 					return ITEM_MODEL_CACHE.get(stack, ()-> {
 						TileEntityPanel te = new TileEntityPanel();
