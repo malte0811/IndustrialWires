@@ -128,7 +128,7 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInven
 			}
 			break;
 		case CREATE_PANEL:
-			if (PanelUtils.getPanelBase().equals(inv[0])) {
+			if (ItemStack.areItemStacksEqual(PanelUtils.getPanelBase(), inv[0])) {
 				NBTTagCompound panelNBT = new NBTTagCompound();
 				writeToItemNBT(panelNBT, true);
 				ItemStack panel = new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.TOP.ordinal());

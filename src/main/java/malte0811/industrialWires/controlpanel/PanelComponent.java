@@ -62,6 +62,7 @@ public abstract class PanelComponent {
 		baseCreaters.put("label", Label::new);
 		baseCreaters.put("indicator_light", IndicatorLight::new);
 		baseCreaters.put("slider", Slider::new);
+		baseCreaters.put("variac", Variac::new);
 	}
 	protected abstract void writeCustomNBT(NBTTagCompound nbt, boolean toItem);
 	protected abstract void readCustomNBT(NBTTagCompound nbt);

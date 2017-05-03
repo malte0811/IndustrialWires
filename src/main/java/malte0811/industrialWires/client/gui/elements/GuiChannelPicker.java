@@ -8,8 +8,8 @@ import net.minecraft.item.EnumDyeColor;
 import javax.annotation.Nonnull;
 
 public class GuiChannelPicker extends GuiButton {
-	private byte selected;
-	private byte currHovered;
+	protected byte selected;
+	protected byte currHovered;
 	public GuiChannelPicker(int id, int x, int y, int size, byte selectedChannel) {
 		super(id, x, y, size, size, "");
 		selected = selectedChannel;
@@ -46,7 +46,15 @@ public class GuiChannelPicker extends GuiButton {
 		}
 	}
 
-	public void select() {
+	public boolean click(int x, int y) {
+		if (xPosition<=x&&xPosition+width>=x&&yPosition<=y&&yPosition+height>=y) {
+			select();
+			return true;
+		}
+		return false;
+	}
+
+	protected void select() {
 		if (currHovered>=0) {
 			selected = currHovered;
 		}
@@ -54,7 +62,7 @@ public class GuiChannelPicker extends GuiButton {
 	public byte getSelected() {
 		return selected;
 	}
-	public boolean isHovered() {
-		return currHovered>=0;
+	public boolean isHovered(int x, int y) {
+		return xPosition<=x&&xPosition+width>=x&&yPosition<=y&&yPosition+height>=y;
 	}
 }

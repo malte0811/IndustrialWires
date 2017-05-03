@@ -84,8 +84,13 @@ public interface IConfigurableComponent {
 	}
 
 	class RSChannelConfig extends UniversalConfig<Byte> {
+		public boolean small;
 		public RSChannelConfig(String name, int x, int y, Byte value) {
+			this(name, x, y, value, false);
+		}
+		public RSChannelConfig(String name, int x, int y, Byte value, boolean small) {
 			super(name, x, y, value);
+			this.small = small;
 		}
 	}
 

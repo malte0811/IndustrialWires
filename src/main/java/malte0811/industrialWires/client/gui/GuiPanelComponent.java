@@ -6,6 +6,7 @@ import blusunrize.immersiveengineering.client.gui.elements.GuiSliderIE;
 import com.google.common.collect.ImmutableList;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.client.gui.elements.GuiChannelPicker;
+import malte0811.industrialWires.client.gui.elements.GuiChannelPickerSmall;
 import malte0811.industrialWires.client.gui.elements.GuiIntChooser;
 import malte0811.industrialWires.containers.ContainerPanelComponent;
 import malte0811.industrialWires.controlpanel.IConfigurableComponent;
@@ -68,7 +69,11 @@ public class GuiPanelComponent extends GuiContainer {
 			IConfigurableComponent.RSChannelConfig[] rs = confComp.getRSChannelOptions();
 			rsChannelChoosers.clear();
 			for (IConfigurableComponent.RSChannelConfig rc : rs) {
-				rsChannelChoosers.add(new GuiChannelPicker(0, componentLeft + rc.x, componentTop + rc.y, 40, rc.value));
+				if (rc.small) {
+					rsChannelChoosers.add(new GuiChannelPickerSmall(0, componentLeft + rc.x, componentTop + rc.y, 10, 40, rc.value));
+				} else {
+					rsChannelChoosers.add(new GuiChannelPicker(0, componentLeft + rc.x, componentTop + rc.y, 40, rc.value));
+				}
 			}
 			intChoosers.clear();
 			IConfigurableComponent.IntConfig[] is = confComp.getIntegerOptions();
@@ -88,7 +93,6 @@ public class GuiPanelComponent extends GuiContainer {
 	private ResourceLocation textureLoc = new ResourceLocation(IndustrialWires.MODID, "textures/gui/panel_component.png");
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
-		ResourceLocation textureLoc = new ResourceLocation(IndustrialWires.MODID, "textures/gui/panel_component.png");
 		GlStateManager.color(1,1,1,1);
 		mc.getTextureManager().bindTexture(textureLoc);
 		Gui.drawModalRectWithCustomSizedTexture(guiLeft, guiTop, 0, 0, xSize, ySize, 150, 150);
@@ -121,24 +125,23 @@ public class GuiPanelComponent extends GuiContainer {
 	@Override
 	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
 		super.mouseClicked(mouseX, mouseY, mouseButton);
+		for (int i = 0;i<rsChannelChoosers.size();i++) {
+			GuiChannelPicker picker = rsChannelChoosers.get(i);
+			int old = picker.getSelected();
+			boolean stopNow = picker.click(mouseX, mouseY);
+			if (old != picker.getSelected()) {
+				sync(i, picker.getSelected());
+			}
+			if (stopNow) {
+				return;
+			}
+		}
 		for (int i = 0;i<stringTexts.size();i++) {
 			GuiTextField field = stringTexts.get(i);
 			boolean focus = field.isFocused();
 			field.mouseClicked(mouseX, mouseY, mouseButton);
 			if (focus&&!field.isFocused()) {
 				sync(i, field.getText());
-			}
-		}
-		for (int i = 0;i<rsChannelChoosers.size();i++) {
-			GuiChannelPicker picker = rsChannelChoosers.get(i);
-			int mXRel = mouseX-picker.xPosition;
-			int mYRel = mouseY-picker.yPosition;
-			if (mXRel>=0&&mXRel<picker.width&&mYRel>=0&&mYRel<picker.height) {
-				int old = picker.getSelected();
-				picker.select();
-				if (old != picker.getSelected()) {
-					sync(i, picker.getSelected());
-				}
 			}
 		}
 		for (int i = 0;i<boolButtons.size();i++) {
@@ -204,7 +207,7 @@ public class GuiPanelComponent extends GuiContainer {
 		for (int i = 0;i<rsChannelChoosers.size();i++) {
 			GuiChannelPicker pick = rsChannelChoosers.get(i);
 			String tooltip = confComp.fomatConfigDescription(IConfigurableComponent.ConfigType.RS_CHANNEL, i);
-			if (tooltip!=null&&pick.isHovered()) {
+			if (tooltip!=null&&pick.isHovered(mouseX, mouseY)) {
 				ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRendererObj);
 			}
 		}

@@ -18,6 +18,7 @@
 
 package malte0811.industrialWires.client;
 
+import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.EnumFacing;
 import org.lwjgl.util.vector.Vector3f;
@@ -48,5 +49,11 @@ public class RawQuad {
 		}
 		this.normal = normal;
 		this.uvs = uvs;
+	}
+	public RawQuad apply(Matrix4 mat) {
+		Matrix4 matNormal = mat.copy().transpose();
+		matNormal.invert();
+		return new RawQuad(mat.apply(vertices[0]), mat.apply(vertices[1]), mat.apply(vertices[2]), mat.apply(vertices[3]),
+				facing, tex, colorA, matNormal.apply(normal), uvs);
 	}
 }

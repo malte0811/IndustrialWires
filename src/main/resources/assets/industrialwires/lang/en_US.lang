@@ -32,6 +32,7 @@ item.industrialwires.panel_component.lighted_button.name=Lighted Button
 item.industrialwires.panel_component.label.name=Label
 item.industrialwires.panel_component.indicator_light.name=Indicator Light
 item.industrialwires.panel_component.slider.name=Slider
+item.industrialwires.panel_component.variac.name=Variac®
 
 
 industrialwires.desc.wireLength=Wire length: %1s block(s)
