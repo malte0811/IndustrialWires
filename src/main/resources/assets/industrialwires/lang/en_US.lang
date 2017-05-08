@@ -43,7 +43,8 @@ industrialwires.desc.enable_snap=Snap new components to the 16*16 grid
 industrialwires.desc.disable_snap=Allow free placing of components
 industrialwires.desc.latching=Latching
 industrialwires.desc.latching_info=Does this button stay on indefinitely?
-industrialwires.desc.rschannel_info=The channel/color to output a signal to
+industrialwires.desc.latching_info=Does this button stay on indefinitely?
+industrialwires.desc.disassemble=Disassemble the panel
 industrialwires.desc.rsid_info=The ID of the redstone wire controller to output a signal to
 industrialwires.desc.label_text=The text in this label
 industrialwires.desc.red=Red
@@ -68,6 +69,7 @@ death.attack.industrialwires.jacobs_ladder=%1$s was electrocuted by a Jacob's La
 itemGroup.industrialwires=Industrial Wires
 
 ie.manual.category.industrialWires.name=Industrial Wires
+ie.manual.category.control_panels.name=Control Panels
 
 ie.manual.entry.industrialWires.wires.name=Industrial Wires
 ie.manual.entry.industrialWires.wires.subtext=No complex impedance!
@@ -85,3 +87,33 @@ ie.manual.entry.industrialWires.jacobs.name=Jacob's Ladders
 ie.manual.entry.industrialWires.jacobs.subtext=Probably contain PCB's!
 ie.manual.entry.industrialWires.jacobs0=By applying a high voltage between 2 electrodes forming a "V" one can create an arc travelling upwards. They don't serve a particular purpose apart from being a nice-looking waste of power. Power can be supplied using either Flux or EU. The energy usage varies with the size of the ladder.
 ie.manual.entry.industrialWires.jacobs1=These are the required power values in EU: <config;dA;iwJacobsUsage>. Due to the voltages involved touching the ladder while active is not a good idea. Applying salt to the electrodes will cause the arc to be colored orange for a short time due to the sodium contained in the salt.
+
+
+
+ie.manual.entry.industrialWires.intro.name=Introduction
+ie.manual.entry.industrialWires.intro.subtext=
+ie.manual.entry.industrialWires.intro0=Control Panels allow you to monitor and control a large amount of redstone signals using only a few blocks. Those signals can currently be connected using redstone wires and connectors.<br>Buttons, switches, indicator lights and other things that can be placed on a control panel are called §l(Panel) Components§r<br>To create a control panel you will need a Panel Creator, the individual components and a basic machine casing as the enclosure of the panel. Each
+ie.manual.entry.industrialWires.intro1=component is described in the entry "Panel Components". Right-clicking with a panel component opens up a GUI in which the properties of the component, like the redstone channel and ID or the color, can be configured.
+ie.manual.entry.industrialWires.intro2=A §l(panel) network§r is formed by panel blocks connected to each other, directly or through other panel blocks. Panel blocks include the control panel itself, the panel connector and the Redstone Wire Controller. If multiple components in one network are configured to modify the same
+ie.manual.entry.industrialWires.intro3=redstone signal, the resulting behavior is undefined (but won't crash the game). Having multiple components accepting the same signal on a network is valid though.
+
+ie.manual.entry.industrialWires.panel_creator.name=Panel Creator
+ie.manual.entry.industrialWires.panel_creator.subtext=
+ie.manual.entry.industrialWires.panel_creator0=The GUI of the panel creator consists of two major sections: The controls on the left and the panel on the right. Components can be placed on the panel by "placing" the items in the corresponding point in the GUI. If the component is surrounded by a red area, it can not be placed in that
+ie.manual.entry.industrialWires.panel_creator1=position on the panel. This usually means that it is either overlapping with an other component or isn't completely on the panel. The top button on the left (D) disassembles an existing control panel when it is placed in the slot beneath the button: The components of that panel are placed in the GUI, allowing them to be repositioned. The machine casing is lost in this process. The next button (C) turns a machine casing in the slot into a control panel with the components as positioned in the right of the GUI. The button
+ie.manual.entry.industrialWires.panel_creator2=labeled R removes all components from the GUI panel area and places them in your inventory. Finally the last button (S) changes between being able to place components anywhere on the panel to only being able to place them on a 16x16 grid.
+
+ie.manual.entry.industrialWires.redstone.name=Redstone Connections
+ie.manual.entry.industrialWires.redstone.subtext=AKA blood vessels
+ie.manual.entry.industrialWires.redstone0=A panel network can contain any amount of §lRedstone Wire Controllers§r. Each controller should be assigned a different ID in its GUI. Each component that interacts with redstone signals has two settings in its GUI: A redstone channel color and a controller ID. To get the redstone signals out of and
+ie.manual.entry.industrialWires.redstone1=into the controller it needs to be connected to redstone connectors from Immersive Engineering.
+
+ie.manual.entry.industrialWires.components.name=Panel Components
+ie.manual.entry.industrialWires.components.subtext=
+ie.manual.entry.industrialWires.button=A simple button that activates a redstone signal when pressed. Its color can be changed. The button either stays on until clicked again (latching) or tuns off after half a second (non-latching).
+ie.manual.entry.industrialWires.label=A text that can be placed on the control panel, for example to indicate the purpose of some other component. The color and obviously the text can be edited.
+ie.manual.entry.industrialWires.indicator_light=A small indicator that brightens as the input redstone signal is increased. The color can be changed.
+ie.manual.entry.industrialWires.slider=A sliding switch that can set an output redstone signal to any desired signal strength. It can be either vertically or horizontally aligned and can have any length between one eighth of a block and one block. The color of the sliding knob can be changed.
+ie.manual.entry.industrialWires.toggle_switch=A switch to turn a signal on or off. The covered version includes a cover to prevent accidental activation: When clicked for the first time the cover will open, the signal will be turned on by clicking once again. Another click will close the cover and turn off the output signal. If the cover was
+ie.manual.entry.industrialWires.toggle_switch1=opened by accident it can be closed by shift-right-clicking the switch. The color of the cover can be configured.
+ie.manual.entry.industrialWires.variac=A Variac® is a variable autotransformer. The output signal of the transformer increases as the knob is turned to the right. The signal strenght can only be increased by one unit per click.

@@ -68,7 +68,7 @@ public class MessagePanelInteract implements IMessage {
 			return null;
 		}
 		private void handle(MessagePanelInteract msg, EntityPlayerMP player) {
-			if (player.getDistanceSqToCenter(msg.pos)<100) {//closer than 10 blocks TODO use player reach distance?
+			if (player.getDistanceSqToCenter(msg.pos)<100) {//closer than 10 blocks
 				TileEntity te = player.worldObj.getTileEntity(msg.pos);
 				if (te instanceof TileEntityPanel) {
 					((TileEntityPanel) te).interactServer(msg.hitRelative, msg.pcId, player);

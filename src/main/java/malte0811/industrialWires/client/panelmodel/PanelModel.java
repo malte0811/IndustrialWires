@@ -18,6 +18,7 @@
 
 package malte0811.industrialWires.client.panelmodel;
 
+import blusunrize.immersiveengineering.api.IEApi;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
@@ -48,7 +49,10 @@ public class PanelModel implements IBakedModel {
 			.maximumSize(100)
 			.expireAfterAccess(60, TimeUnit.SECONDS)
 			.build();
-
+	static {
+		IEApi.renderCacheClearers.add(modelCache::invalidateAll);
+		IEApi.renderCacheClearers.add(PanelItemOverride.ITEM_MODEL_CACHE::invalidateAll);
+	}
 	@Override
 	public List<BakedQuad> getQuads(@Nullable IBlockState state, @Nullable EnumFacing side, long rand) {
 		if (side!=null) {

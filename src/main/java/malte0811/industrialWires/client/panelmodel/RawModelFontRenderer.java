@@ -24,7 +24,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.util.EnumFacing;
@@ -41,7 +40,6 @@ public class RawModelFontRenderer extends FontRenderer {
 
 	public RawModelFontRenderer(GameSettings settings, ResourceLocation font, TextureManager manager, boolean isUnicode, float scale) {
 		super(settings, font, manager, isUnicode);
-		manager.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 		this.scale = scale/(9*16);
 		onResourceManagerReload(null);
 	}
@@ -101,5 +99,8 @@ public class RawModelFontRenderer extends FontRenderer {
 		return ret;
 	}
 
-
+	@Override
+	protected void bindTexture(ResourceLocation location) {
+		//NO-OP
+	}
 }

@@ -49,6 +49,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -207,6 +208,32 @@ public class ClientProxy extends CommonProxy {
 		m.addEntry("industrialWires.jacobs", "industrialWires",
 				new ManualPages.CraftingMulti(m, "industrialWires.jacobs0", new ItemStack(IndustrialWires.jacobsLadder, 1, 0), new ItemStack(IndustrialWires.jacobsLadder, 1, 1), new ItemStack(IndustrialWires.jacobsLadder, 1, 2)),
 				new ManualPages.Text(m, "industrialWires.jacobs1"));
+
+
+		m.addEntry("industrialWires.intro", "control_panels",
+				new ManualPages.Text(m, "industrialWires.intro0"),
+				new ManualPages.Text(m, "industrialWires.intro1"),
+				new ManualPages.Crafting(m, "industrialWires.intro2", new ItemStack(Blocks.BEACON)),//IndustrialWires.panel, 1, BlockTypes_Panel.DUMMY.ordinal()))//TODO recipes
+				new ManualPages.Text(m, "industrialWires.intor3")
+		);
+		m.addEntry("industrialWires.panel_creator", "control_panels",
+				new ManualPages.Crafting(m, "industrialWires.panel_creator0", new ItemStack(Blocks.BEACON)),//IndustrialWires.panel, 1, BlockTypes_Panel.CREATOR.ordinal()))//TODO recipes
+				new ManualPages.Text(m, "industrialWires.panel_creator1"),
+				new ManualPages.Text(m, "industrialWires.panel_creator2")
+		);
+		m.addEntry("industrialWires.redstone", "control_panels",
+				new ManualPages.Crafting(m, "industrialWires.redstone0", new ItemStack(Blocks.BEACON)),//IndustrialWires.panel, 1, BlockTypes_Panel.RS_WIRE.ordinal()))//TODO recipes
+				new ManualPages.Text(m, "industrialWires.redstone1")
+		);
+		m.addEntry("industrialWires.components", "control_panels",
+				new ManualPages.Crafting(m, "industrialWires.button", new ItemStack(Blocks.BEACON)),//IndustrialWires.panelComponent, 1, 0)),//TODO recipes
+				new ManualPages.Crafting(m, "industrialWires.label", new ItemStack(Blocks.BEACON)),//IndustrialWires.panelComponent, 1, 1)),//TODO recipes
+				new ManualPages.Crafting(m, "industrialWires.indicator_light", new ItemStack(Blocks.BEACON)),//IndustrialWires.panelComponent, 1, 2)),//TODO recipes
+				new ManualPages.Crafting(m, "industrialWires.slider", new ItemStack(Blocks.BEACON)),//IndustrialWires.panelComponent, 1, 3)),//TODO recipes
+				new ManualPages.CraftingMulti(m, "industrialWires.toggle_switch", new ItemStack(Blocks.BEACON)),//IndustrialWires.panelComponent, 1, 5), new ItemStack(IndustrialWires.panelComponent, 1, 6)),//TODO recipes
+				new ManualPages.Text(m, "industrialWires.toggle_switch1"),
+				new ManualPages.Crafting(m, "industrialWires.variac", new ItemStack(Blocks.BEACON))//IndustrialWires.panelComponent, 1, 4)),//TODO recipes
+		);
 	}
 
 	@Override

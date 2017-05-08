@@ -36,6 +36,8 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -67,6 +69,7 @@ public class ItemPanelComponent extends Item {
 	}
 
 	@Nonnull
+	@SideOnly(Side.CLIENT)
 	@Override
 	public FontRenderer getFontRenderer(ItemStack stack) {
 		return ClientProxy.itemFont;//TODO non-core-IE solution?

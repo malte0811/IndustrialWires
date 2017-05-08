@@ -61,7 +61,7 @@ public class MessageGUIInteract implements IMessage {
 			return null;
 		}
 		private void handle(MessageGUIInteract msg, EntityPlayerMP player) {
-			if (player.getDistanceSqToCenter(msg.pos)<100) {//closer than 10 blocks TODO use player reach distance?
+			if (player.getDistanceSqToCenter(msg.pos)<100) {//closer than 10 blocks
 				TileEntity te = player.worldObj.getTileEntity(msg.pos);
 				if (te instanceof INetGUI) {
 					((INetGUI) te).onChange(msg.data, player);

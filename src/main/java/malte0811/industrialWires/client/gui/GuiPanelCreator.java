@@ -90,6 +90,8 @@ public class GuiPanelCreator extends GuiContainer {
 			} else {
 				tooltip = I18n.format(IndustrialWires.MODID+".desc.enable_snap");
 			}
+		} else if (buttonList.get(3).isMouseOver()) {
+			tooltip = I18n.format(IndustrialWires.MODID+".desc.disassemble");
 		}
 		if (tooltip!=null) {
 			ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRendererObj);

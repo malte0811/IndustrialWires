@@ -147,14 +147,14 @@ public class ToggleSwitch extends PanelComponent implements IConfigurableCompone
 		return .0625F*3/2;
 	}
 
-	@Override//TODO implement
+	@Override
 	public void renderInGUI(GuiPanelCreator gui) {
 		AxisAlignedBB aabb = getBlockRelativeAABB();
-		double zOffset = (aabb.maxY-aabb.minY-sizeX)/2;
+		double zOffset = (aabb.maxZ-aabb.minZ-sizeX)/2;
 		int left = (int) (gui.getX0()+aabb.minX*gui.panelSize);
-		int top = (int) Math.floor(gui.getY0()+(aabb.minZ+zOffset)*gui.panelSize);
+		int top = (int) Math.ceil(gui.getY0()+(aabb.minZ+zOffset)*gui.panelSize);
 		int right = (int) (gui.getX0()+aabb.maxX*gui.panelSize);
-		int bottom = (int) Math.ceil(gui.getY0()+(aabb.maxZ-zOffset)*gui.panelSize);
+		int bottom = (int) Math.floor(gui.getY0()+(aabb.maxZ-zOffset)*gui.panelSize);
 		Gui.drawRect(left, top, right, bottom, GRAY_INT);
 		double xOffset = (aabb.maxX-aabb.minX-rodRadius)/2;
 		left = (int) (gui.getX0()+(aabb.minX+xOffset)*gui.panelSize);
@@ -220,7 +220,6 @@ public class ToggleSwitch extends PanelComponent implements IConfigurableCompone
 	@Override
 	public String fomatConfigName(ConfigType type, int id) {
 		switch (type) {
-			case BOOL:
 			case RS_CHANNEL:
 			case INT:
 				return null;

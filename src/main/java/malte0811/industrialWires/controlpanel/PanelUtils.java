@@ -43,6 +43,8 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJModel;
 import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.util.vector.Vector3f;
 
 import javax.annotation.Nonnull;
@@ -60,6 +62,7 @@ public final class PanelUtils {
 	private PanelUtils() {
 	}
 
+	@SideOnly(Side.CLIENT)
 	public static List<BakedQuad> generateQuads(PanelRenderProperties components) {
 		if (PANEL_TEXTURE == null) {
 			PANEL_TEXTURE = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(IndustrialWires.MODID + ":blocks/control_panel");
@@ -109,6 +112,7 @@ public final class PanelUtils {
 		return ret;
 	}
 
+	@SideOnly(Side.CLIENT)
 	public static BakedQuad bakeQuad(RawQuad raw, Matrix4 transform, Matrix4 transfNormal, boolean flip) {
 		VertexFormat format = DefaultVertexFormats.ITEM;
 		UnpackedBakedQuad.Builder builder = new UnpackedBakedQuad.Builder(format);
@@ -130,6 +134,7 @@ public final class PanelUtils {
 	}
 
 	//mostly copied from IE's ClientUtils, it has protected access there...
+	@SideOnly(Side.CLIENT)
 	public static void putVertexData(VertexFormat format, UnpackedBakedQuad.Builder builder, Vector3f pos, OBJModel.Normal faceNormal, double u, double v, TextureAtlasSprite sprite, float[] colorA) {
 		for (int e = 0; e < format.getElementCount(); e++)
 			switch (format.getElement(e).getUsage()) {
@@ -158,22 +163,27 @@ public final class PanelUtils {
 	private static final float[] UV_FULL = {0, 0, 16, 16};
 	private static final float[] WHITE = {1, 1, 1, 1};
 
+	@SideOnly(Side.CLIENT)
 	public static void addTexturedBox(Vector3f min, Vector3f size, List<RawQuad> out, float[] uvs, TextureAtlasSprite tex) {
 		addBox(WHITE, WHITE, WHITE, min, size, out, true, uvs, tex, null, false);
 	}
 
+	@SideOnly(Side.CLIENT)
 	public static void addColoredBox(float[] colorTop, float[] colorSides, float[] colorBottom, Vector3f min, Vector3f size, List<RawQuad> out, boolean doBottom) {
 		addBox(colorTop, colorSides, colorBottom, min, size, out, doBottom, UV_FULL, ModelLoader.White.INSTANCE, null, false);
 	}
 
+	@SideOnly(Side.CLIENT)
 	public static void addColoredBox(float[] colorTop, float[] colorSides, float[] colorBottom, Vector3f min, Vector3f size, List<RawQuad> out, boolean doBottom, @Nullable Matrix4 mat) {
 		addBox(colorTop, colorSides, colorBottom, min, size, out, doBottom, UV_FULL, ModelLoader.White.INSTANCE, mat, false);
 	}
 
+	@SideOnly(Side.CLIENT)
 	public static void addColoredBox(float[] colorTop, float[] colorSides, float[] colorBottom, Vector3f min, Vector3f size, List<RawQuad> out, boolean doBottom, @Nullable Matrix4 mat, boolean inside) {
 		addBox(colorTop, colorSides, colorBottom, min, size, out, doBottom, UV_FULL, ModelLoader.White.INSTANCE, mat, inside);
 	}
 
+	@SideOnly(Side.CLIENT)
 	public static void addBox(float[] colorTop, float[] colorSides, float[] colorBottom, Vector3f min, Vector3f size, List<RawQuad> out, boolean doBottom, float[] uvs, TextureAtlasSprite tex,
 			@Nullable Matrix4 mat, boolean inside) {
 		addQuad(out, new Vector3f(min.x, min.y + size.y, min.z), new Vector3f(min.x, min.y + size.y, min.z + size.z),
@@ -198,14 +208,17 @@ public final class PanelUtils {
 				EnumFacing.SOUTH, colorSides, tex, uvs, mat, inside);
 	}
 
+	@SideOnly(Side.CLIENT)
 	public static void addColoredQuad(List<RawQuad> out, Vector3f v0, Vector3f v1, Vector3f v2, Vector3f v3, EnumFacing dir, float[] color) {
 		addQuad(out, v0, v1, v2, v3, dir, color, Minecraft.getMinecraft().getTextureMapBlocks().getTextureExtry(ModelLoader.White.LOCATION.toString()), UV_FULL, null, false);
 	}
 
+	@SideOnly(Side.CLIENT)
 	public static void addColoredQuad(List<RawQuad> out, Vector3f v0, Vector3f v1, Vector3f v2, Vector3f v3, EnumFacing dir, float[] color, @Nullable Matrix4 mat) {
 		addQuad(out, v0, v1, v2, v3, dir, color, Minecraft.getMinecraft().getTextureMapBlocks().getTextureExtry(ModelLoader.White.LOCATION.toString()), UV_FULL, mat, false);
 	}
 
+	@SideOnly(Side.CLIENT)
 	public static void addQuad(List<RawQuad> out, Vector3f v0, Vector3f v1, Vector3f v2, Vector3f v3, EnumFacing dir, float[] color, TextureAtlasSprite tex, float[] uvs, @Nullable Matrix4 mat, boolean bidirectional) {
 		Vec3i dirV = dir.getDirectionVec();
 		RawQuad quad = new RawQuad(v0, v1, v2, v3, dir, tex,
@@ -214,13 +227,15 @@ public final class PanelUtils {
 			quad = quad.apply(mat);
 		}
 		out.add(quad);
-		dirV = dir.getOpposite().getDirectionVec();
-		quad = new RawQuad(v3, v2, v1, v0, dir, tex,
-				color, new Vector3f(dirV.getX(), dirV.getY(), dirV.getZ()), uvs);
-		if (mat!=null) {
-			quad = quad.apply(mat);
+		if (bidirectional) {
+			dirV = dir.getOpposite().getDirectionVec();
+			quad = new RawQuad(v3, v2, v1, v0, dir, tex,
+					color, new Vector3f(dirV.getX(), dirV.getY(), dirV.getZ()), uvs);
+			if (mat != null) {
+				quad = quad.apply(mat);
+			}
+			out.add(quad);
 		}
-		out.add(quad);
 	}
 
 	public static void addInfo(ItemStack stack, List<String> list, NBTTagCompound data) {
@@ -255,6 +270,9 @@ public final class PanelUtils {
 			break;
 		case 5://Toggle switch
 			addCommonInfo(data, list, false, true);
+			break;
+		case 6://Covered toggle switch
+			addCommonInfo(data, list, true, true);
 			break;
 		}
 	}
