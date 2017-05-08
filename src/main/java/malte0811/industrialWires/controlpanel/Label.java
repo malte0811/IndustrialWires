@@ -26,6 +26,7 @@ import malte0811.industrialWires.client.panelmodel.RawModelFontRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagString;
@@ -94,7 +95,7 @@ public class Label extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
-	public boolean interactWith(Vec3d hitRelative, TileEntityPanel tile) {
+	public boolean interactWith(Vec3d hitRelative, TileEntityPanel tile, EntityPlayerMP player) {
 		return false;
 	}
 

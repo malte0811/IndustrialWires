@@ -18,16 +18,19 @@
 
 package malte0811.industrialWires.controlpanel;
 
+import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagInt;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import org.lwjgl.util.vector.Vector3f;
@@ -39,60 +42,63 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
-public class LightedButton extends PanelComponent implements IConfigurableComponent {
-	public int color = 0xFF0000;
+public class ToggleSwitch extends PanelComponent implements IConfigurableComponent {
 	public boolean active;
-	public boolean latching;
 	public int rsOutputId;
-	public int rsOutputChannel;
-	private int ticksTillOff;
+	public byte rsOutputChannel;
 	private Set<BiConsumer<Integer, Byte>> rsOut = new HashSet<>();
-	public LightedButton() {
-		super("lighted_button");
+	public ToggleSwitch() {
+		super("toggle_switch");
 	}
-	public LightedButton(int color, boolean active, boolean latching, int rsOutputId, int rsOutputChannel) {
+	public ToggleSwitch(String name) {
+		super(name);
+	}
+	public ToggleSwitch(boolean active, int rsOutputId, byte rsOutputChannel) {
 		this();
-		this.color = color;
 		this.active = active;
-		this.latching = latching;
 		this.rsOutputChannel = rsOutputChannel;
 		this.rsOutputId = rsOutputId;
 	}
 
 	@Override
 	protected void writeCustomNBT(NBTTagCompound nbt, boolean toItem) {
-		nbt.setInteger(COLOR, color);
-		nbt.setInteger("timeout", ticksTillOff);
 		if (!toItem) {
 			nbt.setBoolean("active", active);
 		}
-		nbt.setBoolean(LATCHING, latching);
-		nbt.setInteger(RS_CHANNEL, rsOutputChannel);
+		nbt.setByte(RS_CHANNEL, rsOutputChannel);
 		nbt.setInteger(RS_ID, rsOutputId);
 	}
 
 	@Override
 	protected void readCustomNBT(NBTTagCompound nbt) {
-		color = nbt.getInteger(COLOR);
-		ticksTillOff = nbt.getInteger("timeout");
 		active = nbt.getBoolean("active");
-		latching = nbt.getBoolean(LATCHING);
-		rsOutputChannel = nbt.getInteger(RS_CHANNEL);
+		rsOutputChannel = nbt.getByte(RS_CHANNEL);
 		rsOutputId = nbt.getInteger(RS_ID);
 	}
-	private final static float size = .0625F;
+	protected float sizeX = .0625F;
+	protected float sizeY = 1.5F*sizeX;
+	protected float rodRadius = sizeX*.25F;
+	protected float rodLength = 3/32F;
+	protected float yOffset = .0001F;
 	@Override
 	public List<RawQuad> getQuads() {
-		float[] color = PanelUtils.getFloatColor(active, this.color);
-		List<RawQuad> ret = new ArrayList<>(5);
-		PanelUtils.addColoredBox(color, GRAY, null, new Vector3f(0, 0, 0), new Vector3f(size, size/2, size), ret, false);
+		List<RawQuad> ret = new ArrayList<>();
+		PanelUtils.addColoredQuad(ret, new Vector3f(sizeX, yOffset, (sizeY-sizeX)/2),
+				new Vector3f(0, yOffset, (sizeY-sizeX)/2),
+				new Vector3f(0, yOffset, (sizeY+sizeX)/2),
+				new Vector3f(sizeX, yOffset, (sizeY+sizeX)/2), EnumFacing.UP, GRAY);
+		Matrix4 rot = new Matrix4();
+		rot.translate((sizeX)/2, -.01F, sizeY/2);
+		rot.rotate(Math.PI*1/16*(active?-1:1), 1, 0, 0);
+		PanelUtils.addColoredBox(GRAY, GRAY, null, new Vector3f(-rodRadius, 0, -rodRadius), new Vector3f(2*rodRadius, rodLength, 2*rodRadius), ret,
+				false, rot);
 		return ret;
 	}
 
 	@Override
 	@Nonnull
 	public PanelComponent copyOf() {
-		LightedButton ret = new LightedButton(color, active, latching, rsOutputId, rsOutputChannel);
+		ToggleSwitch ret = new ToggleSwitch(active, rsOutputId, rsOutputChannel);
 		ret.setX(x);
 		ret.setY(y);
 		ret.panelHeight = panelHeight;
@@ -103,20 +109,14 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 	@Override
 	public AxisAlignedBB getBlockRelativeAABB() {
 		if (aabb==null) {
-			aabb = new AxisAlignedBB(x, 0, y, x+size, getHeight(), y+size);
+			aabb = new AxisAlignedBB(x, 0, y, x+sizeX, getHeight(), y +sizeY);
 		}
 		return aabb;
 	}
 
 	@Override
 	public boolean interactWith(Vec3d hitRel, TileEntityPanel tile, EntityPlayerMP player) {
-		if (!latching&&active) {
-			return false;
-		}
 		setOut(!active, tile);
-		if (!latching) {
-			ticksTillOff = 10;
-		}
 		tile.markDirty();
 		tile.triggerRenderUpdate();
 		return true;
@@ -124,20 +124,14 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 
 	@Override
 	public void update(TileEntityPanel tile) {
-		if (!latching&&ticksTillOff>0) {
-			ticksTillOff--;
-			tile.markDirty();
-			if (ticksTillOff==0) {
-				setOut(false, tile);
-			}
-		}
+
 	}
 
 	@Override
 	public void registerRSOutput(int id, @Nonnull BiConsumer<Integer, Byte> out) {
 		if (id==rsOutputId) {
 			rsOut.add(out);
-			out.accept(rsOutputChannel, (byte) (active?15:0));
+			out.accept((int) rsOutputChannel, (byte) (active?15:0));
 		}
 	}
 
@@ -150,12 +144,25 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 
 	@Override
 	public float getHeight() {
-		return size/2;
+		return .0625F*3/2;
 	}
 
-	@Override
+	@Override//TODO implement
 	public void renderInGUI(GuiPanelCreator gui) {
-		renderInGUIDefault(gui, 0xff000000|color);
+		AxisAlignedBB aabb = getBlockRelativeAABB();
+		double zOffset = (aabb.maxY-aabb.minY-sizeX)/2;
+		int left = (int) (gui.getX0()+aabb.minX*gui.panelSize);
+		int top = (int) Math.floor(gui.getY0()+(aabb.minZ+zOffset)*gui.panelSize);
+		int right = (int) (gui.getX0()+aabb.maxX*gui.panelSize);
+		int bottom = (int) Math.ceil(gui.getY0()+(aabb.maxZ-zOffset)*gui.panelSize);
+		Gui.drawRect(left, top, right, bottom, GRAY_INT);
+		double xOffset = (aabb.maxX-aabb.minX-rodRadius)/2;
+		left = (int) (gui.getX0()+(aabb.minX+xOffset)*gui.panelSize);
+		top = (int) Math.floor(gui.getY0()+(aabb.minZ+aabb.maxZ)/2*gui.panelSize);
+		right = (int) (gui.getX0()+(aabb.maxX-xOffset)*gui.panelSize);
+		bottom = (int) Math.ceil(gui.getY0()+aabb.maxZ*gui.panelSize);
+		Gui.drawRect(left, top, right, bottom, GRAY_INT+0x101010);
+
 	}
 
 	@Override
@@ -163,12 +170,12 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 		setOut(false, te);
 	}
 
-	private void setOut(boolean on, TileEntityPanel tile) {
+	protected void setOut(boolean on, TileEntityPanel tile) {
 		active = on;
 		tile.markDirty();
 		tile.triggerRenderUpdate();
 		for (BiConsumer<Integer, Byte> rs:rsOut) {
-			rs.accept(rsOutputChannel, (byte)(active?15:0));
+			rs.accept((int)rsOutputChannel, (byte)(active?15:0));
 		}
 	}
 
@@ -178,30 +185,25 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 		if (o == null || getClass() != o.getClass()) return false;
 		if (!super.equals(o)) return false;
 
-		LightedButton that = (LightedButton) o;
+		ToggleSwitch that = (ToggleSwitch) o;
 
-		if (color != that.color) return false;
 		if (active != that.active) return false;
-		return latching == that.latching;
+		if (rsOutputId != that.rsOutputId) return false;
+		return rsOutputChannel == that.rsOutputChannel;
 	}
 
 	@Override
 	public int hashCode() {
 		int result = super.hashCode();
-		result = 31 * result + color;
 		result = 31 * result + (active ? 1 : 0);
-		result = 31 * result + (latching ? 1 : 0);
+		result = 31 * result + rsOutputId;
+		result = 31 * result + (int) rsOutputChannel;
 		return result;
 	}
 
 	@Override
 	public void applyConfigOption(ConfigType type, int id, NBTBase value) {
 		switch (type) {
-			case BOOL:
-				if (id==0) {
-					latching = ((NBTTagByte)value).getByte()!=0;
-				}
-				break;
 			case RS_CHANNEL:
 				if (id==0) {
 					rsOutputChannel = ((NBTTagByte)value).getByte();
@@ -212,9 +214,6 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 					rsOutputId = ((NBTTagInt)value).getInt();
 				}
 				break;
-			case FLOAT:
-				color = PanelUtils.setColor(color, id, value);
-				break;
 		}
 	}
 
@@ -222,7 +221,6 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 	public String fomatConfigName(ConfigType type, int id) {
 		switch (type) {
 			case BOOL:
-				return I18n.format(IndustrialWires.MODID+".desc.latching");
 			case RS_CHANNEL:
 			case INT:
 				return null;
@@ -236,8 +234,6 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 	@Override
 	public String fomatConfigDescription(ConfigType type, int id) {
 		switch (type) {
-			case BOOL:
-				return I18n.format(IndustrialWires.MODID+".desc.latching_info");
 			case RS_CHANNEL:
 				return I18n.format(IndustrialWires.MODID+".desc.rschannel_info");
 			case INT:
@@ -260,24 +256,7 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 	}
 
 	@Override
-	public BoolConfig[] getBooleanOptions() {
-		return new BoolConfig[]{new BoolConfig("latching", 0, 70, latching)};
-	}
-
-	@Override
-	public FloatConfig[] getFloatOptions() {
-		float[] color = PanelUtils.getFloatColor(true, this.color);
-		int x = 70;
-		int yOffset = 10;
-		return new FloatConfig[]{
-				new FloatConfig("red", x, yOffset, color[0], 60),
-				new FloatConfig("green", x, yOffset+20, color[1], 60),
-				new FloatConfig("blue", x, yOffset+40, color[2], 60)
-		};
-	}
-
-	@Override
 	public int getColor() {
-		return color;
+		return 0xffffffff;
 	}
 }

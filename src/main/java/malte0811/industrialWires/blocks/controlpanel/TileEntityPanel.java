@@ -32,6 +32,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -94,7 +95,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 				List<BlockPos> parts = MiscUtils.discoverPanelParts(worldObj, pos);
 				for (BlockPos bp : parts) {
 					TileEntity te = worldObj.getTileEntity(bp);
-					if (te instanceof TileEntityRSPanelConn) {
+					if (te instanceof TileEntityRSPanelConn&&!rsPorts.contains(te)) {
 						((TileEntityRSPanelConn) te).registerPanel(this);
 					}
 				}
@@ -271,9 +272,9 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		return true;
 	}
 
-	public void interactServer(Vec3d hitRelative, int pcId) {
+	public void interactServer(Vec3d hitRelative, int pcId, EntityPlayerMP player) {
 		if (pcId >= 0 && pcId < components.size()) {
-			components.get(pcId).interactWith(hitRelative, this);
+			components.get(pcId).interactWith(hitRelative, this, player);
 		}
 	}
 

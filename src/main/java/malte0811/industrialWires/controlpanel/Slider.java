@@ -24,6 +24,7 @@ import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.*;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -124,7 +125,7 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
-	public boolean interactWith(Vec3d hitRelative, TileEntityPanel tile) {
+	public boolean interactWith(Vec3d hitRelative, TileEntityPanel tile, EntityPlayerMP player) {
 		double pos = horizontal?hitRelative.xCoord:(length-hitRelative.zCoord);
 		byte newLevel = (byte)(Math.min(pos*16/length, 15));
 		if (newLevel!=out) {

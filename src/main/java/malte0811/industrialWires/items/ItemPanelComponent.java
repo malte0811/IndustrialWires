@@ -43,7 +43,7 @@ import java.util.List;
 
 public class ItemPanelComponent extends Item {
 	public static final String[] types = {
-			"lighted_button", "label", "indicator_light", "slider", "variac"
+			"lighted_button", "label", "indicator_light", "slider", "variac", "toggle_switch", "toggle_switch_covered"
 	};
 
 	public ItemPanelComponent() {

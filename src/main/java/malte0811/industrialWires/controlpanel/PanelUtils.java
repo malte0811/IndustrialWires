@@ -86,22 +86,22 @@ public final class PanelUtils {
 		float vMax = 16 * components.height;
 		addQuad(rawOut, new Vector3f(0, components.height, 0), new Vector3f(0, components.height, 1),
 				new Vector3f(1, components.height, 1), new Vector3f(1, components.height, 0),
-				EnumFacing.UP, WHITE, PANEL_TEXTURE, UV_FULL, null);
+				EnumFacing.UP, WHITE, PANEL_TEXTURE, UV_FULL, null, false);
 		addQuad(rawOut, new Vector3f(0, 0, 0), new Vector3f(1, 0, 0),
 				new Vector3f(1, 0, 1), new Vector3f(0, 0, 1),
-				EnumFacing.DOWN, WHITE, PANEL_TEXTURE, new float[]{0, 16, 16, 0}, null);
+				EnumFacing.DOWN, WHITE, PANEL_TEXTURE, new float[]{0, 16, 16, 0}, null, false);
 		addQuad(rawOut, new Vector3f(0, 0, 0), new Vector3f(0, 0, 1),
 				new Vector3f(0, components.height, 1), new Vector3f(0, components.height, 0),
-				EnumFacing.WEST, WHITE, PANEL_TEXTURE, new float[]{0, vMax, 16, 0}, null);
+				EnumFacing.WEST, WHITE, PANEL_TEXTURE, new float[]{0, vMax, 16, 0}, null, false);
 		addQuad(rawOut, new Vector3f(1, 0, 0), new Vector3f(1, components.height, 0),
 				new Vector3f(1, components.height, 1), new Vector3f(1, 0, 1),
-				EnumFacing.EAST, WHITE, PANEL_TEXTURE, new float[]{16, vMax, 0, 0}, null);
+				EnumFacing.EAST, WHITE, PANEL_TEXTURE, new float[]{16, vMax, 0, 0}, null, false);
 		addQuad(rawOut, new Vector3f(1, 0, 0), new Vector3f(0, 0, 0),
 				new Vector3f(0, components.height, 0), new Vector3f(1, components.height, 0),
-				EnumFacing.NORTH, WHITE, PANEL_TEXTURE, new float[]{0, vMax, 16, 0}, null);
+				EnumFacing.NORTH, WHITE, PANEL_TEXTURE, new float[]{0, vMax, 16, 0}, null, false);
 		addQuad(rawOut, new Vector3f(0, 0, 1), new Vector3f(1, 0, 1),
 				new Vector3f(1, components.height, 1), new Vector3f(0, components.height, 1),
-				EnumFacing.SOUTH, WHITE, PANEL_TEXTURE, new float[]{0, vMax, 16, 0}, null);
+				EnumFacing.SOUTH, WHITE, PANEL_TEXTURE, new float[]{0, vMax, 16, 0}, null, false);
 		for (RawQuad bq : rawOut) {
 			ret.add(bakeQuad(bq, baseTrans, baseNorm, bq.facing != EnumFacing.EAST && bq.facing != EnumFacing.UP));//flip south and west
 		}
@@ -159,52 +159,63 @@ public final class PanelUtils {
 	private static final float[] WHITE = {1, 1, 1, 1};
 
 	public static void addTexturedBox(Vector3f min, Vector3f size, List<RawQuad> out, float[] uvs, TextureAtlasSprite tex) {
-		addBox(WHITE, WHITE, WHITE, min, size, out, true, uvs, tex, null);
+		addBox(WHITE, WHITE, WHITE, min, size, out, true, uvs, tex, null, false);
 	}
 
 	public static void addColoredBox(float[] colorTop, float[] colorSides, float[] colorBottom, Vector3f min, Vector3f size, List<RawQuad> out, boolean doBottom) {
-		addBox(colorTop, colorSides, colorBottom, min, size, out, doBottom, UV_FULL, ModelLoader.White.INSTANCE, null);
+		addBox(colorTop, colorSides, colorBottom, min, size, out, doBottom, UV_FULL, ModelLoader.White.INSTANCE, null, false);
 	}
 
 	public static void addColoredBox(float[] colorTop, float[] colorSides, float[] colorBottom, Vector3f min, Vector3f size, List<RawQuad> out, boolean doBottom, @Nullable Matrix4 mat) {
-		addBox(colorTop, colorSides, colorBottom, min, size, out, doBottom, UV_FULL, ModelLoader.White.INSTANCE, mat);
+		addBox(colorTop, colorSides, colorBottom, min, size, out, doBottom, UV_FULL, ModelLoader.White.INSTANCE, mat, false);
+	}
+
+	public static void addColoredBox(float[] colorTop, float[] colorSides, float[] colorBottom, Vector3f min, Vector3f size, List<RawQuad> out, boolean doBottom, @Nullable Matrix4 mat, boolean inside) {
+		addBox(colorTop, colorSides, colorBottom, min, size, out, doBottom, UV_FULL, ModelLoader.White.INSTANCE, mat, inside);
 	}
 
 	public static void addBox(float[] colorTop, float[] colorSides, float[] colorBottom, Vector3f min, Vector3f size, List<RawQuad> out, boolean doBottom, float[] uvs, TextureAtlasSprite tex,
-			@Nullable Matrix4 mat) {
+			@Nullable Matrix4 mat, boolean inside) {
 		addQuad(out, new Vector3f(min.x, min.y + size.y, min.z), new Vector3f(min.x, min.y + size.y, min.z + size.z),
 				new Vector3f(min.x + size.x, min.y + size.y, min.z + size.z), new Vector3f(min.x + size.x, min.y + size.y, min.z),
-				EnumFacing.UP, colorTop, tex, uvs, mat);
+				EnumFacing.UP, colorTop, tex, uvs, mat, inside);
 		if (doBottom) {
 			addQuad(out, new Vector3f(min.x, min.y, min.z), new Vector3f(min.x + size.x, min.y, min.z),
 					new Vector3f(min.x + size.x, min.y, min.z + size.z), new Vector3f(min.x, min.y, min.z + size.z),
-					EnumFacing.UP, colorBottom, tex, uvs, mat);
+					EnumFacing.UP, colorBottom, tex, uvs, mat, inside);
 		}
 		addQuad(out, new Vector3f(min.x, min.y, min.z), new Vector3f(min.x, min.y, min.z + size.z),
 				new Vector3f(min.x, min.y + size.y, min.z + size.z), new Vector3f(min.x, min.y + size.y, min.z),
-				EnumFacing.WEST, colorSides, tex, uvs, mat);
+				EnumFacing.WEST, colorSides, tex, uvs, mat, inside);
 		addQuad(out, new Vector3f(min.x + size.x, min.y, min.z), new Vector3f(min.x + size.x, min.y + size.y, min.z),
 				new Vector3f(min.x + size.x, min.y + size.y, min.z + size.z), new Vector3f(min.x + size.x, min.y, min.z + size.z),
-				EnumFacing.EAST, colorSides, tex, uvs, mat);
+				EnumFacing.EAST, colorSides, tex, uvs, mat, inside);
 		addQuad(out, new Vector3f(min.x, min.y, min.z), new Vector3f(min.x, min.y + size.y, min.z),
 				new Vector3f(min.x + size.x, min.y + size.y, min.z), new Vector3f(min.x + size.x, min.y, min.z),
-				EnumFacing.NORTH, colorSides, tex, uvs, mat);
+				EnumFacing.NORTH, colorSides, tex, uvs, mat, inside);
 		addQuad(out, new Vector3f(min.x, min.y, min.z + size.z), new Vector3f(min.x + size.x, min.y, min.z + size.z),
 				new Vector3f(min.x + size.x, min.y + size.y, min.z + size.z), new Vector3f(min.x, min.y + size.y, min.z + size.z),
-				EnumFacing.SOUTH, colorSides, tex, uvs, mat);
+				EnumFacing.SOUTH, colorSides, tex, uvs, mat, inside);
 	}
 
 	public static void addColoredQuad(List<RawQuad> out, Vector3f v0, Vector3f v1, Vector3f v2, Vector3f v3, EnumFacing dir, float[] color) {
-		addQuad(out, v0, v1, v2, v3, dir, color, Minecraft.getMinecraft().getTextureMapBlocks().getTextureExtry(ModelLoader.White.LOCATION.toString()), UV_FULL, null);
+		addQuad(out, v0, v1, v2, v3, dir, color, Minecraft.getMinecraft().getTextureMapBlocks().getTextureExtry(ModelLoader.White.LOCATION.toString()), UV_FULL, null, false);
 	}
 
 	public static void addColoredQuad(List<RawQuad> out, Vector3f v0, Vector3f v1, Vector3f v2, Vector3f v3, EnumFacing dir, float[] color, @Nullable Matrix4 mat) {
-		addQuad(out, v0, v1, v2, v3, dir, color, Minecraft.getMinecraft().getTextureMapBlocks().getTextureExtry(ModelLoader.White.LOCATION.toString()), UV_FULL, mat);
+		addQuad(out, v0, v1, v2, v3, dir, color, Minecraft.getMinecraft().getTextureMapBlocks().getTextureExtry(ModelLoader.White.LOCATION.toString()), UV_FULL, mat, false);
 	}
 
-	public static void addQuad(List<RawQuad> out, Vector3f v0, Vector3f v1, Vector3f v2, Vector3f v3, EnumFacing dir, float[] color, TextureAtlasSprite tex, float[] uvs, @Nullable Matrix4 mat) {
+	public static void addQuad(List<RawQuad> out, Vector3f v0, Vector3f v1, Vector3f v2, Vector3f v3, EnumFacing dir, float[] color, TextureAtlasSprite tex, float[] uvs, @Nullable Matrix4 mat, boolean bidirectional) {
 		Vec3i dirV = dir.getDirectionVec();
 		RawQuad quad = new RawQuad(v0, v1, v2, v3, dir, tex,
+				color, new Vector3f(dirV.getX(), dirV.getY(), dirV.getZ()), uvs);
+		if (mat!=null) {
+			quad = quad.apply(mat);
+		}
+		out.add(quad);
+		dirV = dir.getOpposite().getDirectionVec();
+		quad = new RawQuad(v3, v2, v1, v0, dir, tex,
 				color, new Vector3f(dirV.getX(), dirV.getY(), dirV.getZ()), uvs);
 		if (mat!=null) {
 			quad = quad.apply(mat);
@@ -240,6 +251,9 @@ public final class PanelUtils {
 
 			break;
 		case 4://variac
+			addCommonInfo(data, list, false, true);
+			break;
+		case 5://Toggle switch
 			addCommonInfo(data, list, false, true);
 			break;
 		}

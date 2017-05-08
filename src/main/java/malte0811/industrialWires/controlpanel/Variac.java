@@ -26,6 +26,7 @@ import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagCompound;
@@ -130,7 +131,7 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
-	public boolean interactWith(Vec3d hitRelative, TileEntityPanel tile) {
+	public boolean interactWith(Vec3d hitRelative, TileEntityPanel tile, EntityPlayerMP player) {
 		double xRel = hitRelative.xCoord - SIZE / 2;
 		double yRel = -(hitRelative.zCoord - SIZE / 2);
 		double angle = 1.5 * Math.PI - Math.atan2(yRel, xRel);

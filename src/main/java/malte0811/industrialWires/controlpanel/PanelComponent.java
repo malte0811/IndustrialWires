@@ -26,6 +26,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
@@ -63,6 +64,8 @@ public abstract class PanelComponent {
 		baseCreaters.put("indicator_light", IndicatorLight::new);
 		baseCreaters.put("slider", Slider::new);
 		baseCreaters.put("variac", Variac::new);
+		baseCreaters.put("toggle_switch", ToggleSwitch::new);
+		baseCreaters.put("toggle_switch_covered", CoveredToggleSwitch::new);
 	}
 	protected abstract void writeCustomNBT(NBTTagCompound nbt, boolean toItem);
 	protected abstract void readCustomNBT(NBTTagCompound nbt);
@@ -75,7 +78,7 @@ public abstract class PanelComponent {
 	@Nonnull
 	public abstract AxisAlignedBB getBlockRelativeAABB();
 
-	public abstract boolean interactWith(Vec3d hitRelative, TileEntityPanel tile);
+	public abstract boolean interactWith(Vec3d hitRelative, TileEntityPanel tile, EntityPlayerMP player);
 
 	public abstract void update(TileEntityPanel tile);
 
