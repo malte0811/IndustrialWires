@@ -27,15 +27,13 @@ import blusunrize.immersiveengineering.common.blocks.stone.BlockTypes_StoneDecor
 import ic2.api.item.IC2Items;
 import malte0811.industrialWires.blocks.BlockJacobsLadder;
 import malte0811.industrialWires.blocks.TileEntityJacobsLadder;
-import malte0811.industrialWires.blocks.controlpanel.BlockPanel;
-import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
-import malte0811.industrialWires.blocks.controlpanel.TileEntityPanelCreator;
-import malte0811.industrialWires.blocks.controlpanel.TileEntityRSPanelConn;
+import malte0811.industrialWires.blocks.controlpanel.*;
 import malte0811.industrialWires.blocks.converter.BlockMechanicalConverter;
 import malte0811.industrialWires.blocks.converter.TileEntityIEMotor;
 import malte0811.industrialWires.blocks.converter.TileEntityMechICtoIE;
 import malte0811.industrialWires.blocks.converter.TileEntityMechIEtoIC;
 import malte0811.industrialWires.blocks.wire.*;
+import malte0811.industrialWires.controlpanel.PanelUtils;
 import malte0811.industrialWires.crafting.RecipeCoilLength;
 import malte0811.industrialWires.items.ItemIC2Coil;
 import malte0811.industrialWires.items.ItemPanelComponent;
@@ -61,6 +59,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.oredict.RecipeSorter;
 import net.minecraftforge.oredict.RecipeSorter.Category;
 import net.minecraftforge.oredict.ShapedOreRecipe;
+import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -170,6 +169,33 @@ public class IndustrialWires {
 				's', "ingotSteel", 't', new ItemStack(IEContent.blockConnectors, 1, BlockTypes_Connector.TRANSFORMER.ordinal())));
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(jacobsLadder, 1, 2), "c c", "hhh", "sts", 'c', "blockCopper", 'h', Blocks.HARDENED_CLAY,
 				's', "ingotSteel", 't', new ItemStack(IEContent.blockConnectors, 1, BlockTypes_Connector.TRANSFORMER_HV.ordinal())));
+		// CONTROL PANELS
+		ItemStack drillHeadIron = new ItemStack(IEContent.itemDrillhead, 1, 1);
+		ItemStack motor = IC2Items.getItem("crafting", "electric_motor");
+		ItemStack advAlloy = IC2Items.getItem("crafting", "alloy");
+		ItemStack coil = IC2Items.getItem("crafting", "coil");
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(panel, 1, BlockTypes_Panel.CREATOR.ordinal()),
+				"rmr", "rdr", "rar", 'r', "stickSteel", 'm', motor, 'd', drillHeadIron, 'a', advAlloy));
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(panel, 8, BlockTypes_Panel.DUMMY.ordinal()),
+				" r ", "rmr", " r ", 'r', "dustRedstone", 'm', PanelUtils.getPanelBase()));
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(panel, 1, BlockTypes_Panel.RS_WIRE.ordinal()),
+				"c", "d", 'd', new ItemStack(panel, 1, BlockTypes_Panel.DUMMY.ordinal()), 'c',
+				new ItemStack(IEContent.blockConnectors, 1, BlockTypes_Connector.CONNECTOR_REDSTONE.ordinal())));
+		//	PANEL COMPONENTS
+		GameRegistry.addRecipe(new ShapelessOreRecipe(new ItemStack(panelComponent, 1, 0),
+				"dustGlowstone", Blocks.STONE_BUTTON, "wireCopper"));
+		GameRegistry.addRecipe(new ShapelessOreRecipe(new ItemStack(panelComponent, 4, 1),
+				"paper", "plateIron"));
+		GameRegistry.addRecipe(new ShapelessOreRecipe(new ItemStack(panelComponent, 1, 2),
+				"dustGlowstone", "dustRedstone", "wireCopper"));
+		GameRegistry.addRecipe(new ShapelessOreRecipe(new ItemStack(panelComponent, 1, 3),
+				Blocks.STONE_BUTTON, new ItemStack(IEContent.itemWireCoil, 1, 2), "wireCopper"));
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(panelComponent, 1, 4),
+				"r", "g", "c", 'r', "itemRubber", 'g', "ingotHOPGraphite", 'c', coil));
+		GameRegistry.addRecipe(new ShapelessOreRecipe(new ItemStack(panelComponent, 1, 5),
+				"stickIron", Blocks.LEVER, "wireCopper"));
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(panelComponent, 1, 6),
+				"aaa", "asa", 'a', "plateAluminum", 's', new ItemStack(panelComponent, 2, 5)));
 
 		packetHandler.registerMessage(MessageTileSyncIW.HandlerClient.class, MessageTileSyncIW.class, 0, Side.CLIENT);
 		packetHandler.registerMessage(MessagePanelInteract.HandlerServer.class, MessagePanelInteract.class, 1, Side.SERVER);

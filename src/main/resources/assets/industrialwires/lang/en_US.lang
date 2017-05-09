@@ -104,16 +104,16 @@ ie.manual.entry.industrialWires.panel_creator1=position on the panel. This usual
 ie.manual.entry.industrialWires.panel_creator2=labeled R removes all components from the GUI panel area and places them in your inventory. Finally the last button (S) changes between being able to place components anywhere on the panel to only being able to place them on a 16x16 grid.
 
 ie.manual.entry.industrialWires.redstone.name=Redstone Connections
-ie.manual.entry.industrialWires.redstone.subtext=AKA blood vessels
-ie.manual.entry.industrialWires.redstone0=A panel network can contain any amount of §lRedstone Wire Controllers§r. Each controller should be assigned a different ID in its GUI. Each component that interacts with redstone signals has two settings in its GUI: A redstone channel color and a controller ID. To get the redstone signals out of and
-ie.manual.entry.industrialWires.redstone1=into the controller it needs to be connected to redstone connectors from Immersive Engineering.
+ie.manual.entry.industrialWires.redstone.subtext=Could also be blood vessels
+ie.manual.entry.industrialWires.redstone0=A panel network can contain any amount of §lRedstone Wire Controllers§r. Each controller should be assigned a different ID in its GUI. Each component that interacts with redstone signals has two settings in its GUI: A redstone channel color and a controller ID. To get the redstone signals out of and into the controller it needs to be connected to redstone
+ie.manual.entry.industrialWires.redstone1=connectors from Immersive Engineering.
 
 ie.manual.entry.industrialWires.components.name=Panel Components
-ie.manual.entry.industrialWires.components.subtext=
+ie.manual.entry.industrialWires.components.subtext=More than just two
 ie.manual.entry.industrialWires.button=A simple button that activates a redstone signal when pressed. Its color can be changed. The button either stays on until clicked again (latching) or tuns off after half a second (non-latching).
 ie.manual.entry.industrialWires.label=A text that can be placed on the control panel, for example to indicate the purpose of some other component. The color and obviously the text can be edited.
 ie.manual.entry.industrialWires.indicator_light=A small indicator that brightens as the input redstone signal is increased. The color can be changed.
 ie.manual.entry.industrialWires.slider=A sliding switch that can set an output redstone signal to any desired signal strength. It can be either vertically or horizontally aligned and can have any length between one eighth of a block and one block. The color of the sliding knob can be changed.
-ie.manual.entry.industrialWires.toggle_switch=A switch to turn a signal on or off. The covered version includes a cover to prevent accidental activation: When clicked for the first time the cover will open, the signal will be turned on by clicking once again. Another click will close the cover and turn off the output signal. If the cover was
-ie.manual.entry.industrialWires.toggle_switch1=opened by accident it can be closed by shift-right-clicking the switch. The color of the cover can be configured.
+ie.manual.entry.industrialWires.toggle_switch=A switch to turn a signal on or off. The covered version includes a cover to prevent accidental activation: When clicked for the first time the cover will open, the signal will be turned on by clicking once again. Another click will close the cover and turn off the output signal. If the cover was opened by accident it can be closed by shift-right-clicking
+ie.manual.entry.industrialWires.toggle_switch1=the switch. The color of the cover can be configured.
 ie.manual.entry.industrialWires.variac=A Variac® is a variable autotransformer. The output signal of the transformer increases as the knob is turned to the right. The signal strenght can only be increased by one unit per click.
