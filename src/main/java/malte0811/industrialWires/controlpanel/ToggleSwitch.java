@@ -115,11 +115,10 @@ public class ToggleSwitch extends PanelComponent implements IConfigurableCompone
 	}
 
 	@Override
-	public boolean interactWith(Vec3d hitRel, TileEntityPanel tile, EntityPlayerMP player) {
+	public void interactWith(Vec3d hitRel, TileEntityPanel tile, EntityPlayerMP player) {
 		setOut(!active, tile);
 		tile.markDirty();
 		tile.triggerRenderUpdate();
-		return true;
 	}
 
 	@Override

@@ -22,13 +22,15 @@ import malte0811.industrialWires.blocks.controlpanel.TileEntityRSPanelConn;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 
+import javax.annotation.Nonnull;
+
 public class ContainerRSPanelConn extends Container {
-	final TileEntityRSPanelConn te;
+	private final TileEntityRSPanelConn te;
 	public ContainerRSPanelConn(TileEntityRSPanelConn tile) {
 		te = tile;
 	}
 	@Override
-	public boolean canInteractWith(EntityPlayer playerIn) {
+	public boolean canInteractWith(@Nonnull EntityPlayer playerIn) {
 		return playerIn.getDistanceSq(te.getPos())<64;
 	}
 }

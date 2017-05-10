@@ -2,7 +2,7 @@
 	"forge_marker": 1,
 	"defaults": {
 		"transform": "forge:default-block",
-		"model": "industrialwires:iwSixSides",
+      "model": "industrialwires:iw_six_sides",
 		"textures": {
 			
 		},

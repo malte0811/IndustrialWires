@@ -30,6 +30,8 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 
+import javax.annotation.Nonnull;
+
 public class TileEntityMechICtoIE extends TileEntityIWBase implements IDirectionalTile, ITickable {
 	EnumFacing dir = EnumFacing.DOWN;
 	int kinBuffer = 0;
@@ -39,14 +41,14 @@ public class TileEntityMechICtoIE extends TileEntityIWBase implements IDirection
 	BlockPos from;
 	@Override
 	public void update() {
-		if (!worldObj.isRemote) {
+		if (!world.isRemote) {
 			if (to==null) {
 				to = pos.offset(dir);
 			}
 			if (from==null) {
 				from = pos.offset(dir, -1);
 			}
-			TileEntity teFrom = worldObj.getTileEntity(from);
+			TileEntity teFrom = world.getTileEntity(from);
 			if (teFrom instanceof IKineticSource) {
 				int sourceMax = ((IKineticSource) teFrom).maxrequestkineticenergyTick(dir);
 				int draw = Math.min(kinBufMax-kinBuffer, sourceMax);
@@ -54,7 +56,7 @@ public class TileEntityMechICtoIE extends TileEntityIWBase implements IDirection
 					kinBuffer += ((IKineticSource) teFrom).requestkineticenergy(dir, draw)*MechConversion.kinToRotEfficiency;
 				}
 			}
-			TileEntity teTo = worldObj.getTileEntity(to);
+			TileEntity teTo = world.getTileEntity(to);
 			if (kinBuffer>0&&teTo instanceof IRotationAcceptor) {
 				double out = Math.min(maxInsert, ConversionUtil.rotPerKin()*kinBuffer);
 				((IRotationAcceptor) teTo).inputRotation(out, dir);
@@ -77,12 +79,13 @@ public class TileEntityMechICtoIE extends TileEntityIWBase implements IDirection
 		from = null;
 	}
 	// Directional
+	@Nonnull
 	@Override
 	public EnumFacing getFacing() {
 		return dir;
 	}
 	@Override
-	public void setFacing(EnumFacing facing) {
+	public void setFacing(@Nonnull EnumFacing facing) {
 		dir = facing;
 		to = null;
 		from = null;
@@ -93,15 +96,15 @@ public class TileEntityMechICtoIE extends TileEntityIWBase implements IDirection
 		return 1;
 	}
 	@Override
-	public boolean mirrorFacingOnPlacement(EntityLivingBase placer) {
+	public boolean mirrorFacingOnPlacement(@Nonnull EntityLivingBase placer) {
 		return false;
 	}
 	@Override
-	public boolean canHammerRotate(EnumFacing side, float hitX, float hitY, float hitZ, EntityLivingBase entity) {
+	public boolean canHammerRotate(@Nonnull EnumFacing side, float hitX, float hitY, float hitZ, @Nonnull EntityLivingBase entity) {
 		return true;
 	}
 	@Override
-	public boolean canRotate(EnumFacing axis) {
+	public boolean canRotate(@Nonnull EnumFacing axis) {
 		return true;
 	}
 }

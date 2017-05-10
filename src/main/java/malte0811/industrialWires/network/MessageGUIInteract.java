@@ -57,12 +57,12 @@ public class MessageGUIInteract implements IMessage {
 	public static class HandlerServer implements IMessageHandler<MessageGUIInteract, IMessage> {
 		@Override
 		public IMessage onMessage(MessageGUIInteract message, MessageContext ctx) {
-			ctx.getServerHandler().playerEntity.getServerWorld().addScheduledTask(()->handle(message, ctx.getServerHandler().playerEntity));
+			ctx.getServerHandler().player.getServerWorld().addScheduledTask(() -> handle(message, ctx.getServerHandler().player));
 			return null;
 		}
 		private void handle(MessageGUIInteract msg, EntityPlayerMP player) {
 			if (player.getDistanceSqToCenter(msg.pos)<100) {//closer than 10 blocks
-				TileEntity te = player.worldObj.getTileEntity(msg.pos);
+				TileEntity te = player.world.getTileEntity(msg.pos);
 				if (te instanceof INetGUI) {
 					((INetGUI) te).onChange(msg.data, player);
 					te.markDirty();

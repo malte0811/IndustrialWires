@@ -21,5 +21,5 @@ public interface IIC2Connector {
 	/**
 	 * @return leftover energy.
 	 */
-	public double insertEnergy(double eu, boolean simulate);
+	double insertEnergy(double eu, boolean simulate);
 }

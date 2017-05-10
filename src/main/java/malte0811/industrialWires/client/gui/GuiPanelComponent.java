@@ -62,7 +62,7 @@ public class GuiPanelComponent extends GuiContainer {
 			IConfigurableComponent.StringConfig[] strings = confComp.getStringOptions();
 			stringTexts.clear();
 			for (IConfigurableComponent.StringConfig sc : strings) {
-				GuiTextField toAdd = new GuiTextField(0, mc.fontRendererObj, componentLeft + sc.x, componentTop + sc.y, 58, 12);
+				GuiTextField toAdd = new GuiTextField(0, mc.fontRenderer, componentLeft + sc.x, componentTop + sc.y, 58, 12);
 				toAdd.setText(sc.value);
 				stringTexts.add(toAdd);
 			}
@@ -208,14 +208,14 @@ public class GuiPanelComponent extends GuiContainer {
 			GuiChannelPicker pick = rsChannelChoosers.get(i);
 			String tooltip = confComp.fomatConfigDescription(IConfigurableComponent.ConfigType.RS_CHANNEL, i);
 			if (tooltip!=null&&pick.isHovered(mouseX, mouseY)) {
-				ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRendererObj);
+				ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRenderer);
 			}
 		}
 		for (int i = 0;i<boolButtons.size();i++) {
 			GuiButtonCheckbox box = boolButtons.get(i);
 			String tooltip = confComp.fomatConfigDescription(IConfigurableComponent.ConfigType.BOOL, i);
 			if (tooltip!=null&&box.isMouseOver()) {
-				ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRendererObj);
+				ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRenderer);
 			}
 		}
 		for (int i = 0;i<stringTexts.size();i++) {
@@ -223,21 +223,21 @@ public class GuiPanelComponent extends GuiContainer {
 			String tooltip = confComp.fomatConfigDescription(IConfigurableComponent.ConfigType.STRING, i);
 			if (tooltip!=null&&mouseX>=field.xPosition&&mouseX<field.xPosition+field.width&&
 					mouseY>=field.yPosition&&mouseY<field.yPosition+field.height) {
-				ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRendererObj);
+				ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRenderer);
 			}
 		}
 		for (int i = 0;i<intChoosers.size();i++) {
 			GuiIntChooser choose = intChoosers.get(i);
 			String tooltip = confComp.fomatConfigDescription(IConfigurableComponent.ConfigType.INT, i);
 			if (tooltip!=null&&choose.isMouseOver(mouseX, mouseY)) {
-				ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRendererObj);
+				ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRenderer);
 			}
 		}
 		for (int i = 0;i<floatSliders.size();i++) {
 			GuiSliderIE choose = floatSliders.get(i);
 			String tooltip = confComp.fomatConfigDescription(IConfigurableComponent.ConfigType.FLOAT, i);
 			if (tooltip!=null&&choose.isMouseOver()) {
-				ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRendererObj);
+				ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRenderer);
 			}
 		}
 	}

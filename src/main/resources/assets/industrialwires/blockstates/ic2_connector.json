@@ -12,9 +12,9 @@
 	"variants": {
 		"inventory,type=tin_conn": [
 			{
-				"model": "immersiveengineering:connector/connectorLV.obj",
+				"model": "immersiveengineering:connector/connector_lv.obj",
 				"textures": {
-					"#immersiveengineering:blocks/connector_connectorLV": "industrialwires:blocks/ic2_connTin"
+					"#immersiveengineering:blocks/connector_connector_lv": "industrialwires:blocks/ic2_conn_tin"
 				},
 				"transform": {
 					"scale": [ 0.5, 0.5, 0.5 ],
@@ -29,9 +29,9 @@
 		],
 		"inventory,type=tin_relay": [
 			{
-				"model": "immersiveengineering:connector/connectorLV.obj",
+				"model": "immersiveengineering:connector/connector_lv.obj",
 				"textures": {
-					"#immersiveengineering:blocks/connector_connectorLV": "industrialwires:blocks/ic2_relayTin"
+					"#immersiveengineering:blocks/connector_connector_lv": "industrialwires:blocks/ic2_relay_tin"
 				},
 				"transform": {
 					"scale": [ 0.5, 0.5, 0.5 ],
@@ -46,9 +46,9 @@
 		],
 		"inventory,type=copper_conn": [
 			{
-				"model": "immersiveengineering:connector/connectorLV.obj",
+				"model": "immersiveengineering:connector/connector_lv.obj",
 				"textures": {
-					"#immersiveengineering:blocks/connector_connectorLV": "industrialwires:blocks/ic2_connCopper"
+					"#immersiveengineering:blocks/connector_connector_lv": "industrialwires:blocks/ic2_conn_copper"
 				},
 				"transform": {
 					"scale": [ 0.5, 0.5, 0.5 ],
@@ -63,9 +63,9 @@
 		],
 		"inventory,type=copper_relay": [
 			{
-				"model": "immersiveengineering:connector/connectorLV.obj",
+				"model": "immersiveengineering:connector/connector_lv.obj",
 				"textures": {
-					"#immersiveengineering:blocks/connector_connectorLV": "industrialwires:blocks/ic2_relayCopper"
+					"#immersiveengineering:blocks/connector_connector_lv": "industrialwires:blocks/ic2_relay_copper"
 				},
 				"transform": {
 					"scale": [ 0.5, 0.5, 0.5 ],
@@ -80,9 +80,9 @@
 		],
 		"inventory,type=gold_conn": [
 			{
-				"model": "immersiveengineering:connector/connectorMV.obj",
+				"model": "immersiveengineering:connector/connector_mv.obj",
 				"textures": {
-					"#immersiveengineering:blocks/connector_connectorMV": "industrialwires:blocks/ic2_connGold"
+					"#immersiveengineering:blocks/connector_connector_mv": "industrialwires:blocks/ic2_conn_gold"
 				},
 				"transform": {
 					"scale": [ 0.5, 0.5, 0.5 ],
@@ -97,9 +97,9 @@
 		],
 		"inventory,type=gold_relay": [
 			{
-				"model": "immersiveengineering:connector/connectorMV.obj",
+				"model": "immersiveengineering:connector/connector_mv.obj",
 				"textures": {
-					"#immersiveengineering:blocks/connector_connectorMV": "industrialwires:blocks/ic2_relayGold"
+					"#immersiveengineering:blocks/connector_connector_mv": "industrialwires:blocks/ic2_relay_gold"
 				},
 				"transform": {
 					"scale": [ 0.5, 0.5, 0.5 ],
@@ -114,9 +114,9 @@
 		],
 		"inventory,type=hv_conn": [
 			{
-				"model": "immersiveengineering:connector/connectorHV.obj",
+				"model": "immersiveengineering:connector/connector_hv.obj",
 				"textures": {
-					"#immersiveengineering:blocks/connector_connectorHV": "industrialwires:blocks/ic2_connHV"
+					"#immersiveengineering:blocks/connector_connector_hv": "industrialwires:blocks/ic2_conn_hv"
 				},
 				"transform": {
 					"scale": [ 0.5, 0.5, 0.5 ],
@@ -131,7 +131,7 @@
 		],
 		"inventory,type=hv_relay": [
 			{
-				"model": "immersiveengineering:connector/relayHV.obj",
+				"model": "immersiveengineering:connector/relay_hv.obj",
 				"transform": {
 					"scale": [ 0.5, 0.5, 0.5 ],
 					"firstperson_righthand": { "translation": [ 0, 0.25, 0.125 ]},
@@ -145,9 +145,9 @@
 		],
 		"inventory,type=glass_conn": [
 			{
-				"model": "immersiveengineering:connector/connectorHV.obj",
+				"model": "immersiveengineering:connector/connector_hv.obj",
 				"textures": {
-					"#immersiveengineering:blocks/connector_connectorHV": "industrialwires:blocks/ic2_connGlass"
+					"#immersiveengineering:blocks/connector_connector_hv": "industrialwires:blocks/ic2_conn_glass"
 				},
 				"transform": {
 					"scale": [ 0.5, 0.5, 0.5 ],
@@ -162,9 +162,9 @@
 		],
 		"inventory,type=glass_relay": [
 			{
-				"model": "immersiveengineering:connector/relayHV.obj",
+				"model": "immersiveengineering:connector/relay_hv.obj",
 				"textures": {
-					"#immersiveengineering:blocks/connector_relayHV": "industrialwires:blocks/ic2_relayGlass"
+					"#immersiveengineering:blocks/connector_relay_hv": "industrialwires:blocks/ic2_relay_glass"
 				},
 				"transform": {
 					"scale": [ 0.5, 0.5, 0.5 ],

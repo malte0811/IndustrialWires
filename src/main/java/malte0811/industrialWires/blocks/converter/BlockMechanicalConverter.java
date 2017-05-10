@@ -31,11 +31,13 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 
-import java.util.List;
+import javax.annotation.Nonnull;
 
 public class BlockMechanicalConverter extends BlockIWBase implements IMetaEnum {
 	private static PropertyEnum<MechanicalBlockType> type = PropertyEnum.create("type", MechanicalBlockType.class);
@@ -44,7 +46,7 @@ public class BlockMechanicalConverter extends BlockIWBase implements IMetaEnum {
 	}
 
 	@Override
-	public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list) {
+	public void getSubBlocks(@Nonnull Item itemIn, CreativeTabs tab, NonNullList<ItemStack> list) {
 		for (int i = 0;i<3;i++) {
 			list.add(new ItemStack(itemIn, 1, i));
 		}
@@ -55,6 +57,7 @@ public class BlockMechanicalConverter extends BlockIWBase implements IMetaEnum {
 		return new IProperty[]{type, IEProperties.FACING_ALL};
 	}
 
+	@Nonnull
 	@Override
 	public IBlockState getStateFromMeta(int meta) {
 		return getDefaultState().withProperty(type, MechanicalBlockType.values[meta]);
@@ -66,7 +69,7 @@ public class BlockMechanicalConverter extends BlockIWBase implements IMetaEnum {
 	}
 
 	@Override
-	public TileEntity createTileEntity(World world, IBlockState state) {
+	public TileEntity createTileEntity(@Nonnull World world, @Nonnull IBlockState state) {
 		switch (state.getValue(type)) {
 		case IE_MOTOR:
 			return new TileEntityIEMotor();
@@ -88,18 +91,22 @@ public class BlockMechanicalConverter extends BlockIWBase implements IMetaEnum {
 		return state.getValue(type).ordinal();
 	}
 	@Override
-	public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY,
-			float hitZ, int meta, EntityLivingBase placer, ItemStack stack) {
-		IBlockState base = super.getStateForPlacement(world, pos, facing, hitX, hitY, hitZ, meta, placer, stack);
+	@Nonnull
+	public IBlockState getStateForPlacement(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull EnumFacing facing, float hitX, float hitY,
+											float hitZ, int meta, @Nonnull EntityLivingBase placer, EnumHand h) {
+		IBlockState base = super.getStateForPlacement(world, pos, facing, hitX, hitY, hitZ, meta, placer, h);
 		return base.withProperty(type, MechanicalBlockType.values[meta]);
 	}
+
 	@Override
 	public int damageDropped(IBlockState state) {
 		return state.getValue(type).ordinal();
 	}
+
+	@Nonnull
 	@Override
-	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos,
-			EntityPlayer player) {
+	public ItemStack getPickBlock(@Nonnull IBlockState state, RayTraceResult target, @Nonnull World world, @Nonnull BlockPos pos,
+								  EntityPlayer player) {
 		return new ItemStack(this, 1, damageDropped(state));
 	}
 	@Override

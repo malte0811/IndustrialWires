@@ -48,13 +48,11 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 minecraft {
-    version = "12.18.3.2234"
+    version = "13.20.0.2282"
     runDir = "run"
 
     replace '${version}', project.version
-    mappings = "snapshot_20160701"
-    //"snapshot_20160518" 1.9
-    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
+    mappings = "snapshot_20170323"
 }
 
 repositories {
@@ -69,8 +67,8 @@ repositories {
 }
 
 dependencies {
-    deobfCompile "net.industrial-craft:industrialcraft-2:2.6.+"
-    deobfCompile "blusunrize:ImmersiveEngineering:0.10-+:deobf"
+    deobfCompile "net.industrial-craft:industrialcraft-2:2.7.+:dev"
+    deobfCompile "blusunrize:ImmersiveEngineering:0.11-+:deobf"
 }
 
 jar {

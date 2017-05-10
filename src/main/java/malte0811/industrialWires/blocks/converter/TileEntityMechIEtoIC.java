@@ -27,6 +27,8 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 
+import javax.annotation.Nonnull;
+
 public class TileEntityMechIEtoIC extends TileEntityIWBase implements IDirectionalTile, IRotationAcceptor, IKineticSource {
 	EnumFacing dir = EnumFacing.DOWN;
 	double rotBuffer = 0;
@@ -45,12 +47,13 @@ public class TileEntityMechIEtoIC extends TileEntityIWBase implements IDirection
 		rotBuffer = in.getDouble(BUFFER_TAG);
 	}
 	// Directional
+	@Nonnull
 	@Override
 	public EnumFacing getFacing() {
 		return dir;
 	}
 	@Override
-	public void setFacing(EnumFacing facing) {
+	public void setFacing(@Nonnull EnumFacing facing) {
 		dir = facing;
 		markDirty();
 	}
@@ -59,11 +62,11 @@ public class TileEntityMechIEtoIC extends TileEntityIWBase implements IDirection
 		return 1;
 	}
 	@Override
-	public boolean mirrorFacingOnPlacement(EntityLivingBase placer) {
+	public boolean mirrorFacingOnPlacement(@Nonnull EntityLivingBase placer) {
 		return false;
 	}
 	@Override
-	public boolean canHammerRotate(EnumFacing side, float hitX, float hitY, float hitZ, EntityLivingBase entity) {
+	public boolean canHammerRotate(@Nonnull EnumFacing side, float hitX, float hitY, float hitZ, @Nonnull EntityLivingBase entity) {
 		return true;
 	}
 	//IC2 kinetic
@@ -91,13 +94,13 @@ public class TileEntityMechIEtoIC extends TileEntityIWBase implements IDirection
 	
 	//IE rotation
 	@Override
-	public void inputRotation(double rotation, EnumFacing side) {
+	public void inputRotation(double rotation, @Nonnull EnumFacing side) {
 		if (side==dir) {
 			rotBuffer = Math.min(rotBufMax, rotBuffer+rotation);
 		}
 	}
 	@Override
-	public boolean canRotate(EnumFacing axis) {
+	public boolean canRotate(@Nonnull EnumFacing axis) {
 		return true;
 	}
 }

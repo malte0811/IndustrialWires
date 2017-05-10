@@ -34,6 +34,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
 
+import javax.annotation.Nonnull;
+
 public class TileEntityIEMotor extends TileEntityIWBase implements ITickable, IFluxReceiver, IDirectionalTile {
 	public final double bufferMax = 2*MechConversion.maxIfToMech*ConversionUtil.rotPerIf();
 
@@ -43,7 +45,7 @@ public class TileEntityIEMotor extends TileEntityIWBase implements ITickable, IF
 	private BlockPos receiver;
 	@Override
 	public void update() {
-		if (!worldObj.isRemote) {
+		if (!world.isRemote) {
 			if (receiver==null) {
 				receiver = pos.offset(dir);
 			}
@@ -54,7 +56,7 @@ public class TileEntityIEMotor extends TileEntityIWBase implements ITickable, IF
 				rotBuffer += extracted*ConversionUtil.rotPerIf()*MechConversion.ifMotorEfficiency;
 				dirty = true;
 			}
-			TileEntity te = worldObj.getTileEntity(receiver);
+			TileEntity te = world.getTileEntity(receiver);
 			if (te instanceof IRotationAcceptor) {
 				((IRotationAcceptor)te).inputRotation(rotBuffer, dir);
 				rotBuffer = 0;
@@ -106,12 +108,13 @@ public class TileEntityIEMotor extends TileEntityIWBase implements ITickable, IF
 	}
 
 	// Directional
+	@Nonnull
 	@Override
 	public EnumFacing getFacing() {
 		return dir;
 	}
 	@Override
-	public void setFacing(EnumFacing facing) {
+	public void setFacing(@Nonnull EnumFacing facing) {
 		dir = facing;
 		receiver = null;
 		markDirty();
@@ -121,15 +124,15 @@ public class TileEntityIEMotor extends TileEntityIWBase implements ITickable, IF
 		return 1;
 	}
 	@Override
-	public boolean mirrorFacingOnPlacement(EntityLivingBase placer) {
+	public boolean mirrorFacingOnPlacement(@Nonnull EntityLivingBase placer) {
 		return false;
 	}
 	@Override
-	public boolean canHammerRotate(EnumFacing side, float hitX, float hitY, float hitZ, EntityLivingBase entity) {
+	public boolean canHammerRotate(@Nonnull EnumFacing side, float hitX, float hitY, float hitZ, @Nonnull EntityLivingBase entity) {
 		return true;
 	}
 	@Override
-	public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
+	public boolean hasCapability(@Nonnull Capability<?> capability, EnumFacing facing) {
 		if (capability==CapabilityEnergy.ENERGY&&canConnectEnergy(facing)) {
 			return true;
 		}
@@ -137,7 +140,7 @@ public class TileEntityIEMotor extends TileEntityIWBase implements ITickable, IF
 	}
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+	public <T> T getCapability(@Nonnull Capability<T> capability, EnumFacing facing) {
 		if (capability==CapabilityEnergy.ENERGY&&canConnectEnergy(facing)) {
 			return (T) new EnergyAdapter(this, facing);
 		}
@@ -145,7 +148,7 @@ public class TileEntityIEMotor extends TileEntityIWBase implements ITickable, IF
 	}
 
 	@Override
-	public boolean canRotate(EnumFacing axis) {
+	public boolean canRotate(@Nonnull EnumFacing axis) {
 		return true;
 	}
 }

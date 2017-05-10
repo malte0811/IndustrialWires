@@ -17,16 +17,6 @@
  */
 package malte0811.industrialWires.blocks.wire;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import malte0811.industrialWires.blocks.IBlockBoundsIW;
-import net.minecraft.util.math.AxisAlignedBB;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-
 import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.api.TargetingInfo;
 import blusunrize.immersiveengineering.api.energy.wires.IImmersiveConnectable;
@@ -35,7 +25,6 @@ import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler.Abst
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler.Connection;
 import blusunrize.immersiveengineering.api.energy.wires.TileEntityImmersiveConnectable;
 import blusunrize.immersiveengineering.api.energy.wires.WireType;
-import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IBlockBounds;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDirectionalTile;
 import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
@@ -44,13 +33,23 @@ import ic2.api.energy.tile.IEnergyEmitter;
 import ic2.api.energy.tile.IEnergySink;
 import ic2.api.energy.tile.IEnergySource;
 import malte0811.industrialWires.IIC2Connector;
+import malte0811.industrialWires.blocks.IBlockBoundsIW;
 import malte0811.industrialWires.wires.IC2Wiretype;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.common.MinecraftForge;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+
+import javax.annotation.Nonnull;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable implements IEnergySource, IEnergySink, IDirectionalTile, ITickable, IIC2Connector, IBlockBoundsIW {
 	EnumFacing f = EnumFacing.NORTH;
@@ -71,20 +70,20 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	@Override
 	public void update() {
 		if (first) {
-			if (!worldObj.isRemote)
+			if (!world.isRemote)
 				MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
 			first = false;
 		}
-		if (!worldObj.isRemote&&inBuffer>.1)
+		if (!world.isRemote && inBuffer > .1)
 			transferPower();
 	}
 	public void transferPower() {
-		Set<AbstractConnection> conns = new HashSet<>(ImmersiveNetHandler.INSTANCE.getIndirectEnergyConnections(pos, worldObj));
+		Set<AbstractConnection> conns = new HashSet<>(ImmersiveNetHandler.INSTANCE.getIndirectEnergyConnections(pos, world));
 		Map<AbstractConnection, Pair<IIC2Connector, Double>> maxOutputs = new HashMap<>();
 		double outputMax = Math.min(inBuffer, maxToNet);
 		double sum = 0;
 		for (AbstractConnection c:conns) {
-			IImmersiveConnectable iic = ApiUtils.toIIC(c.end, worldObj);
+			IImmersiveConnectable iic = ApiUtils.toIIC(c.end, world);
 			if (iic instanceof IIC2Connector) {
 				double tmp = inBuffer-((IIC2Connector)iic).insertEnergy(outputMax, true);
 				if (tmp>.00000001) {
@@ -97,7 +96,7 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 			return;
 		}
 		final double oldInBuf = outputMax;
-		HashMap<Connection, Integer> transferedPerConn = ImmersiveNetHandler.INSTANCE.getTransferedRates(worldObj.provider.getDimension());
+		HashMap<Connection, Integer> transferedPerConn = ImmersiveNetHandler.INSTANCE.getTransferedRates(world.provider.getDimension());
 		for (AbstractConnection c:maxOutputs.keySet()) {
 			Pair<IIC2Connector, Double> p = maxOutputs.get(c);
 			double out = oldInBuf*p.getRight()/sum;
@@ -109,11 +108,11 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 			double energyAtConn = inserted+loss;
 			for(Connection sub : c.subConnections)
 			{
-				int transferredPerCon = transferedPerConn.containsKey(sub)?transferedPerConn.get(sub):0;
+				int transferredPerCon = transferedPerConn.getOrDefault(sub, 0);
 				energyAtConn-=sub.cableType.getLossRatio()*sub.length;
-				ImmersiveNetHandler.INSTANCE.getTransferedRates(worldObj.provider.getDimension()).put(sub,(int)(transferredPerCon+energyAtConn));
-				IImmersiveConnectable subStart = ApiUtils.toIIC(sub.start,worldObj);
-				IImmersiveConnectable subEnd = ApiUtils.toIIC(sub.end,worldObj);
+				ImmersiveNetHandler.INSTANCE.getTransferedRates(world.provider.getDimension()).put(sub, (int) (transferredPerCon + energyAtConn));
+				IImmersiveConnectable subStart = ApiUtils.toIIC(sub.start, world);
+				IImmersiveConnectable subEnd = ApiUtils.toIIC(sub.end, world);
 				if(subStart!=null && passedConnectors.add(subStart))
 					subStart.onEnergyPassthrough((int)(inserted-inserted*intermediaryLoss));
 				if(subEnd!=null && passedConnectors.add(subEnd))
@@ -147,7 +146,7 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	}
 	@Override
 	public void invalidate() {
-		if (!worldObj.isRemote&&!first)
+		if (!world.isRemote && !first)
 			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
 		first = true;
 		super.invalidate();
@@ -155,7 +154,7 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	@Override
 	public void onChunkUnload() {
 		super.onChunkUnload();
-		if (!worldObj.isRemote&&!first)
+		if (!world.isRemote && !first)
 			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
 		first = true;
 	}
@@ -277,13 +276,14 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 		nbt.setDouble("maxToMachine", maxToMachine);
 	}
 
+	@Nonnull
 	@Override
 	public EnumFacing getFacing() {
 		return f;
 	}
 
 	@Override
-	public void setFacing(EnumFacing facing) {
+	public void setFacing(@Nonnull EnumFacing facing) {
 		f = facing;
 	}
 
@@ -293,12 +293,12 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	}
 
 	@Override
-	public boolean mirrorFacingOnPlacement(EntityLivingBase placer) {
+	public boolean mirrorFacingOnPlacement(@Nonnull EntityLivingBase placer) {
 		return true;
 	}
 
 	@Override
-	public boolean canHammerRotate(EnumFacing side, float hitX, float hitY, float hitZ, EntityLivingBase entity) {
+	public boolean canHammerRotate(@Nonnull EnumFacing side, float hitX, float hitY, float hitZ, @Nonnull EntityLivingBase entity) {
 		return false;
 	}
 
@@ -332,7 +332,7 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	 */
 	@Override
 	public int hashCode() {
-		int ret = worldObj.provider.getDimension();
+		int ret = world.provider.getDimension();
 		ret = 31*ret+pos.hashCode();
 		return ret;
 	}
@@ -351,13 +351,13 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 		if (!te.pos.equals(pos)) {
 			return false;
 		}
-		if (te.worldObj.provider.getDimension()!=worldObj.provider.getDimension()) {
+		if (te.world.provider.getDimension() != world.provider.getDimension()) {
 			return false;
 		}
 		return true;
 	}
 	@Override
-	public boolean canRotate(EnumFacing axis) {
+	public boolean canRotate(@Nonnull EnumFacing axis) {
 		return false;
 	}
 }

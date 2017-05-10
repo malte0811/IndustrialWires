@@ -17,7 +17,7 @@ public class GuiIntChooser extends Gui {
 		xPos = x;
 		yPos = y;
 		max = (int) Math.pow(10, digits)-1;
-		xPlus = x+mc.fontRendererObj.getCharWidth('0')*(digits+(allowNegative?1:0))+mc.fontRendererObj.getCharWidth('-')+2;
+		xPlus = x + mc.fontRenderer.getCharWidth('0') * (digits + (allowNegative ? 1 : 0)) + mc.fontRenderer.getCharWidth('-') + 2;
 		format = "%"+digits+"s";
 	}
 	public void drawChooser() {
@@ -26,19 +26,19 @@ public class GuiIntChooser extends Gui {
 		if (value>=0&&allowNegative) {
 			val = "+"+val;
 		}
-		mc.fontRendererObj.drawStringWithShadow(val, xPos+mc.fontRendererObj.getCharWidth('-')+1, yPos, color);
-		mc.fontRendererObj.drawStringWithShadow("-", xPos, yPos, color);
-		mc.fontRendererObj.drawStringWithShadow("+", xPlus, yPos, color);
+		mc.fontRenderer.drawStringWithShadow(val, xPos + mc.fontRenderer.getCharWidth('-') + 1, yPos, color);
+		mc.fontRenderer.drawStringWithShadow("-", xPos, yPos, color);
+		mc.fontRenderer.drawStringWithShadow("+", xPlus, yPos, color);
 	}
 
 	public void click(int x, int y) {
-		int height = mc.fontRendererObj.FONT_HEIGHT;
+		int height = mc.fontRenderer.FONT_HEIGHT;
 		if (y >= yPos && y < yPos + height) {
-			if (x >= xPlus && x < xPlus + mc.fontRendererObj.getCharWidth('+')) {
+			if (x >= xPlus && x < xPlus + mc.fontRenderer.getCharWidth('+')) {
 				if (value < max) {
 					value++;
 				}
-			} else if (x >= xPos && x <= xPos + mc.fontRendererObj.getCharWidth('-')) {
+			} else if (x >= xPos && x <= xPos + mc.fontRenderer.getCharWidth('-')) {
 				if (value > (allowNegative ? -value : 0)) {
 					value--;
 				}
@@ -51,6 +51,6 @@ public class GuiIntChooser extends Gui {
 	}
 
 	public boolean isMouseOver(int mX, int mY) {
-		return mX>=xPos&&mX< xPlus +mc.fontRendererObj.getCharWidth('V')&&mY>=yPos&&mY<yPos+mc.fontRendererObj.FONT_HEIGHT;
+		return mX >= xPos && mX < xPlus + mc.fontRenderer.getCharWidth('V') && mY >= yPos && mY < yPos + mc.fontRenderer.FONT_HEIGHT;
 	}
 }

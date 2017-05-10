@@ -18,10 +18,7 @@
 
 package malte0811.industrialWires.blocks.controlpanel;
 
-import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.common.util.IELogger;
-import blusunrize.immersiveengineering.common.util.Utils;
-import blusunrize.immersiveengineering.common.util.inventory.IIEInventory;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.IBlockBoundsIW;
 import malte0811.industrialWires.blocks.INetGUI;
@@ -37,27 +34,36 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.AxisAlignedBB;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInventory, INetGUI, IBlockBoundsIW {
+//TODO I no longer implement IEInventory!
+public class TileEntityPanelCreator extends TileEntityIWBase implements INetGUI, IBlockBoundsIW {
 	public List<PanelComponent> components = new ArrayList<>();
 	public float height = 0.5F;
-	public ItemStack[] inv = new ItemStack[1];
+	@Nonnull
+	public ItemStack inv = ItemStack.EMPTY;
 
 	@Override
 	public void readNBT(NBTTagCompound nbt, boolean updatePacket) {
 		NBTTagList l = nbt.getTagList("components", 10);
 		PanelUtils.readListFromNBT(l, components);
 		height = nbt.getFloat("height");
-		inv = Utils.readInventory(nbt.getTagList("inventory", 10), inv.length);
+		NBTTagCompound invTag;
+		if (nbt.hasKey("inventory", 9)) {
+			invTag = nbt.getTagList("inventory", 10).getCompoundTagAt(0);
+		} else {
+			invTag = nbt.getCompoundTag("inventory");
+		}
+		inv = new ItemStack(invTag);
 	}
 
 	@Override
 	public void writeNBT(NBTTagCompound nbt, boolean updatePacket) {
 		writeToItemNBT(nbt, false);
-		nbt.setTag("inventory", Utils.writeInventory(inv));
+		nbt.setTag("inventory", inv.serializeNBT());
 	}
 
 	public void writeToItemNBT(NBTTagCompound nbt, boolean toItem) {
@@ -72,29 +78,6 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInven
 	}
 
 	@Override
-	public ItemStack[] getInventory() {
-		return inv;
-	}
-
-	@Override
-	public boolean isStackValid(int slot, ItemStack stack) {
-		if (slot == 0) {
-			return ApiUtils.compareToOreName(stack, "plateIron");
-		}
-		return true;
-	}
-
-	@Override
-	public int getSlotLimit(int slot) {
-		return slot == 0 ? 1 : 64;
-	}
-
-	@Override
-	public void doGraphicalUpdates(int slot) {
-
-	}
-
-	@Override
 	public void onChange(NBTTagCompound nbt, EntityPlayer p) {
 		int type = nbt.getInteger("type");
 		switch (MessageType.values()[type]) {
@@ -106,10 +89,10 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInven
 				pc.setY(nbt.getFloat("y"));
 				pc.setPanelHeight(height);
 				components.add(pc);
-				if (curr != null) {
-					curr.stackSize--;
-					if (curr.stackSize <= 0) {
-						p.inventory.setItemStack(null);
+				if (!curr.isEmpty()) {
+					curr.shrink(1);
+					if (curr.getCount() <= 0) {
+						p.inventory.setItemStack(ItemStack.EMPTY);
 					}
 					p.inventory.markDirty();
 				}
@@ -119,7 +102,7 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInven
 			break;
 		case REMOVE:
 			int id = nbt.getInteger("id");
-			if (id >= 0 && id < components.size() && p.inventory.getItemStack() == null) {
+			if (id >= 0 && id < components.size() && !p.inventory.getItemStack().isEmpty()) {
 				PanelComponent removed = components.get(id);
 				ItemStack remItem = ItemPanelComponent.stackFromComponent(removed);
 				p.inventory.setItemStack(remItem);
@@ -128,12 +111,12 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInven
 			}
 			break;
 		case CREATE_PANEL:
-			if (ItemStack.areItemStacksEqual(PanelUtils.getPanelBase(), inv[0])) {
+			if (ItemStack.areItemStacksEqual(PanelUtils.getPanelBase(), inv)) {
 				NBTTagCompound panelNBT = new NBTTagCompound();
 				writeToItemNBT(panelNBT, true);
 				ItemStack panel = new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.TOP.ordinal());
 				panel.setTagCompound(panelNBT);
-				inv[0] = panel;
+				inv = panel;
 				components.clear();
 			}
 			break;
@@ -142,7 +125,7 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInven
 			while (it.hasNext()) {
 				PanelComponent next = it.next();
 				ItemStack nextStack = ItemPanelComponent.stackFromComponent(next);
-				if (nextStack != null) {
+				if (!nextStack.isEmpty()) {
 					if (p.inventory.addItemStackToInventory(nextStack)) {
 						it.remove();
 					}
@@ -152,18 +135,18 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements IIEInven
 			}
 			break;
 		case DISASSEMBLE:
-			if (components.size() == 0 && inv[0] != null && inv[0].getItem() == PanelUtils.PANEL_ITEM) {
+			if (components.size() == 0 && inv.getItem() == PanelUtils.PANEL_ITEM) {
 				TileEntityPanel te = new TileEntityPanel();
-				te.readFromItemNBT(inv[0].getTagCompound());
+				te.readFromItemNBT(inv.getTagCompound());
 				components = new ArrayList<>(te.getComponents());
 				height = te.getComponents().height;
-				inv[0] = null;
+				inv = ItemStack.EMPTY;
 			}
 			break;
 		}
 		markDirty();
-		IBlockState state = worldObj.getBlockState(pos);
-		worldObj.notifyBlockUpdate(pos, state, state, 3);
+		IBlockState state = world.getBlockState(pos);
+		world.notifyBlockUpdate(pos, state, state, 3);
 	}
 
 	private static final AxisAlignedBB aabb = new AxisAlignedBB(0, 0,0, 1, 14/16D, 1);

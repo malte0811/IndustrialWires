@@ -1,13 +1,13 @@
-tile.industrialwires.ic2Connector.tin_conn.name=Tin Wire Connector
-tile.industrialwires.ic2Connector.tin_relay.name=Tin Wire Relay
-tile.industrialwires.ic2Connector.copper_conn.name=Copper Wire Connector
-tile.industrialwires.ic2Connector.copper_relay.name=Copper Wire Relay
-tile.industrialwires.ic2Connector.gold_conn.name=Gold Wire Connector
-tile.industrialwires.ic2Connector.gold_relay.name=Gold Wire Relay
-tile.industrialwires.ic2Connector.hv_conn.name=IC2 HV Wire Connector
-tile.industrialwires.ic2Connector.hv_relay.name=IC2 HV Wire Relay
-tile.industrialwires.ic2Connector.glass_conn.name=Glass Fiber Wire Connector
-tile.industrialwires.ic2Connector.glass_relay.name=Glass Fiber Wire Relay
+tile.industrialwires.ic2_connector.tin_conn.name=Tin Wire Connector
+tile.industrialwires.ic2_connector.tin_relay.name=Tin Wire Relay
+tile.industrialwires.ic2_connector.copper_conn.name=Copper Wire Connector
+tile.industrialwires.ic2_connector.copper_relay.name=Copper Wire Relay
+tile.industrialwires.ic2_connector.gold_conn.name=Gold Wire Connector
+tile.industrialwires.ic2_connector.gold_relay.name=Gold Wire Relay
+tile.industrialwires.ic2_connector.hv_conn.name=IC2 HV Wire Connector
+tile.industrialwires.ic2_connector.hv_relay.name=IC2 HV Wire Relay
+tile.industrialwires.ic2_connector.glass_conn.name=Glass Fiber Wire Connector
+tile.industrialwires.ic2_connector.glass_relay.name=Glass Fiber Wire Relay
 
 tile.industrialwires.mechanical_converter.ie_motor.name=Rotational Motor
 tile.industrialwires.mechanical_converter.ie_to_ic2.name=Converter: Rotational To Kinetic
@@ -68,52 +68,52 @@ death.attack.industrialwires.jacobs_ladder=%1$s was electrocuted by a Jacob's La
  
 itemGroup.industrialwires=Industrial Wires
 
-ie.manual.category.industrialWires.name=Industrial Wires
+ie.manual.category.industrialwires.name=Industrial Wires
 ie.manual.category.control_panels.name=Control Panels
 
-ie.manual.entry.industrialWires.wires.name=Industrial Wires
-ie.manual.entry.industrialWires.wires.subtext=No complex impedance!
-ie.manual.entry.industrialWires.wires0=Wires from the IndustrialWires company allow you to transfer energy like you can with cables from the IndustrialCraft2 company.<br>You use them exactly as you would use wires from Immersive Engineering. Each wire transfers as much EU as the corresponding cable would, so
-ie.manual.entry.industrialWires.wires1=attaching a connector to a power source that would destroy the cable will destroy the connector.<br>The wire coils for the IC2 cable are different from the Immersive Engineering wire coils in that longer connections use up more wire: The coils are crafted by placing any combination of uninsulated IC2 cables and the corresponding wire coils in a crafting grid. The next page shows some examples of valid recipes and their outputs. The uninsulated
-ie.manual.entry.industrialWires.wires2=tin cables can be replaced by uninsulated copper, gold or HV cables or by glass fiber cable to craft the other coils.
+ie.manual.entry.industrialwires.wires.name=Industrial Wires
+ie.manual.entry.industrialwires.wires.subtext=No complex impedance!
+ie.manual.entry.industrialwires.wires0=Wires from the IndustrialWires company allow you to transfer energy like you can with cables from the IndustrialCraft2 company.<br>You use them exactly as you would use wires from Immersive Engineering. Each wire transfers as much EU as the corresponding cable would, so
+ie.manual.entry.industrialwires.wires1=attaching a connector to a power source that would destroy the cable will destroy the connector.<br>The wire coils for the IC2 cable are different from the Immersive Engineering wire coils in that longer connections use up more wire: The coils are crafted by placing any combination of uninsulated IC2 cables and the corresponding wire coils in a crafting grid. The next page shows some examples of valid recipes and their outputs. The uninsulated
+ie.manual.entry.industrialwires.wires2=tin cables can be replaced by uninsulated copper, gold or HV cables or by glass fiber cable to craft the other coils.
 
-ie.manual.entry.industrialWires.mechConv.name=Mechanical Converters
-ie.manual.entry.industrialWires.mechConv.subtext=I made rotational energy for this!
-ie.manual.entry.industrialWires.mechConv0=Both the IC2 and IE company produce products that run on kinetic energy of some sort. The new converters from IndustrialWires allow you to convert between these two forms of energy!<br>To use the "Converter: Rotational To Kinetic" attach a source of IE rotational energy
-ie.manual.entry.industrialWires.mechConv1=like a waterwheel or a motor (see page 3) to the side marked with a gear and a consumer of IC2 kinetic energy to the opposite side. The "Converter: Kinetic To Rotational" is used in a similar way (Rotational and kinetic energy have to be swapped).<br>Unfortunately some energy is
-ie.manual.entry.industrialWires.mechConv2=lost with each conversion.<br>As a little extra the "Mechanical converter" product series also contains a Rotational Motor: It consumes IF to produce IE rotational energy. As with the converters this is not a lossless process.
+ie.manual.entry.industrialwires.mechConv.name=Mechanical Converters
+ie.manual.entry.industrialwires.mechConv.subtext=I made rotational energy for this!
+ie.manual.entry.industrialwires.mechConv0=Both the IC2 and IE company produce products that run on kinetic energy of some sort. The new converters from IndustrialWires allow you to convert between these two forms of energy!<br>To use the "Converter: Rotational To Kinetic" attach a source of IE rotational energy
+ie.manual.entry.industrialwires.mechConv1=like a waterwheel or a motor (see page 3) to the side marked with a gear and a consumer of IC2 kinetic energy to the opposite side. The "Converter: Kinetic To Rotational" is used in a similar way (Rotational and kinetic energy have to be swapped).<br>Unfortunately some energy is
+ie.manual.entry.industrialwires.mechConv2=lost with each conversion.<br>As a little extra the "Mechanical converter" product series also contains a Rotational Motor: It consumes IF to produce IE rotational energy. As with the converters this is not a lossless process.
 
-ie.manual.entry.industrialWires.jacobs.name=Jacob's Ladders
-ie.manual.entry.industrialWires.jacobs.subtext=Probably contain PCB's!
-ie.manual.entry.industrialWires.jacobs0=By applying a high voltage between 2 electrodes forming a "V" one can create an arc travelling upwards. They don't serve a particular purpose apart from being a nice-looking waste of power. Power can be supplied using either Flux or EU. The energy usage varies with the size of the ladder.
-ie.manual.entry.industrialWires.jacobs1=These are the required power values in EU: <config;dA;iwJacobsUsage>. Due to the voltages involved touching the ladder while active is not a good idea. Applying salt to the electrodes will cause the arc to be colored orange for a short time due to the sodium contained in the salt.
+ie.manual.entry.industrialwires.jacobs.name=Jacob's Ladders
+ie.manual.entry.industrialwires.jacobs.subtext=Probably contain PCB's!
+ie.manual.entry.industrialwires.jacobs0=By applying a high voltage between 2 electrodes forming a "V" one can create an arc travelling upwards. They don't serve a particular purpose apart from being a nice-looking waste of power. Power can be supplied using either Flux or EU. The energy usage varies with the size of the ladder.
+ie.manual.entry.industrialwires.jacobs1=These are the required power values in EU: <config;dA;iwJacobsUsage>. Due to the voltages involved touching the ladder while active is not a good idea. Applying salt to the electrodes will cause the arc to be colored orange for a short time due to the sodium contained in the salt.
 
 
 
-ie.manual.entry.industrialWires.intro.name=Introduction
-ie.manual.entry.industrialWires.intro.subtext=
-ie.manual.entry.industrialWires.intro0=Control Panels allow you to monitor and control a large amount of redstone signals using only a few blocks. Those signals can currently be connected using redstone wires and connectors.<br>Buttons, switches, indicator lights and other things that can be placed on a control panel are called §l(Panel) Components§r<br>To create a control panel you will need a Panel Creator, the individual components and a basic machine casing as the enclosure of the panel. Each
-ie.manual.entry.industrialWires.intro1=component is described in the entry "Panel Components". Right-clicking with a panel component opens up a GUI in which the properties of the component, like the redstone channel and ID or the color, can be configured.
-ie.manual.entry.industrialWires.intro2=A §l(panel) network§r is formed by panel blocks connected to each other, directly or through other panel blocks. Panel blocks include the control panel itself, the panel connector and the Redstone Wire Controller. If multiple components in one network are configured to modify the same
-ie.manual.entry.industrialWires.intro3=redstone signal, the resulting behavior is undefined (but won't crash the game). Having multiple components accepting the same signal on a network is valid though.
+ie.manual.entry.industrialwires.intro.name=Introduction
+ie.manual.entry.industrialwires.intro.subtext=
+ie.manual.entry.industrialwires.intro0=Control Panels allow you to monitor and control a large amount of redstone signals using only a few blocks. Those signals can currently be connected using redstone wires and connectors.<br>Buttons, switches, indicator lights and other things that can be placed on a control panel are called §l(Panel) Components§r<br>To create a control panel you will need a Panel Creator, the individual components and a basic machine casing as the enclosure of the panel. Each
+ie.manual.entry.industrialwires.intro1=component is described in the entry "Panel Components". Right-clicking with a panel component opens up a GUI in which the properties of the component, like the redstone channel and ID or the color, can be configured.
+ie.manual.entry.industrialwires.intro2=A §l(panel) network§r is formed by panel blocks connected to each other, directly or through other panel blocks. Panel blocks include the control panel itself, the panel connector and the Redstone Wire Controller. If multiple components in one network are configured to modify the same
+ie.manual.entry.industrialwires.intro3=redstone signal, the resulting behavior is undefined (but won't crash the game). Having multiple components accepting the same signal on a network is valid though.
 
-ie.manual.entry.industrialWires.panel_creator.name=Panel Creator
-ie.manual.entry.industrialWires.panel_creator.subtext=
-ie.manual.entry.industrialWires.panel_creator0=The GUI of the panel creator consists of two major sections: The controls on the left and the panel on the right. Components can be placed on the panel by "placing" the items in the corresponding point in the GUI. If the component is surrounded by a red area, it can not be placed in that
-ie.manual.entry.industrialWires.panel_creator1=position on the panel. This usually means that it is either overlapping with an other component or isn't completely on the panel. The top button on the left (D) disassembles an existing control panel when it is placed in the slot beneath the button: The components of that panel are placed in the GUI, allowing them to be repositioned. The machine casing is lost in this process. The next button (C) turns a machine casing in the slot into a control panel with the components as positioned in the right of the GUI. The button
-ie.manual.entry.industrialWires.panel_creator2=labeled R removes all components from the GUI panel area and places them in your inventory. Finally the last button (S) changes between being able to place components anywhere on the panel to only being able to place them on a 16x16 grid.
+ie.manual.entry.industrialwires.panel_creator.name=Panel Creator
+ie.manual.entry.industrialwires.panel_creator.subtext=
+ie.manual.entry.industrialwires.panel_creator0=The GUI of the panel creator consists of two major sections: The controls on the left and the panel on the right. Components can be placed on the panel by "placing" the items in the corresponding point in the GUI. If the component is surrounded by a red area, it can not be placed in that
+ie.manual.entry.industrialwires.panel_creator1=position on the panel. This usually means that it is either overlapping with an other component or isn't completely on the panel. The top button on the left (D) disassembles an existing control panel when it is placed in the slot beneath the button: The components of that panel are placed in the GUI, allowing them to be repositioned. The machine casing is lost in this process. The next button (C) turns a machine casing in the slot into a control panel with the components as positioned in the right of the GUI. The button
+ie.manual.entry.industrialwires.panel_creator2=labeled R removes all components from the GUI panel area and places them in your inventory. Finally the last button (S) changes between being able to place components anywhere on the panel to only being able to place them on a 16x16 grid.
 
-ie.manual.entry.industrialWires.redstone.name=Redstone Connections
-ie.manual.entry.industrialWires.redstone.subtext=Could also be blood vessels
-ie.manual.entry.industrialWires.redstone0=A panel network can contain any amount of §lRedstone Wire Controllers§r. Each controller should be assigned a different ID in its GUI. Each component that interacts with redstone signals has two settings in its GUI: A redstone channel color and a controller ID. To get the redstone signals out of and into the controller it needs to be connected to redstone
-ie.manual.entry.industrialWires.redstone1=connectors from Immersive Engineering.
+ie.manual.entry.industrialwires.redstone.name=Redstone Connections
+ie.manual.entry.industrialwires.redstone.subtext=Could also be blood vessels
+ie.manual.entry.industrialwires.redstone0=A panel network can contain any amount of §lRedstone Wire Controllers§r. Each controller should be assigned a different ID in its GUI. Each component that interacts with redstone signals has two settings in its GUI: A redstone channel color and a controller ID. To get the redstone signals out of and into the controller it needs to be connected to redstone
+ie.manual.entry.industrialwires.redstone1=connectors from Immersive Engineering.
 
-ie.manual.entry.industrialWires.components.name=Panel Components
-ie.manual.entry.industrialWires.components.subtext=More than just two
-ie.manual.entry.industrialWires.button=A simple button that activates a redstone signal when pressed. Its color can be changed. The button either stays on until clicked again (latching) or tuns off after half a second (non-latching).
-ie.manual.entry.industrialWires.label=A text that can be placed on the control panel, for example to indicate the purpose of some other component. The color and obviously the text can be edited.
-ie.manual.entry.industrialWires.indicator_light=A small indicator that brightens as the input redstone signal is increased. The color can be changed.
-ie.manual.entry.industrialWires.slider=A sliding switch that can set an output redstone signal to any desired signal strength. It can be either vertically or horizontally aligned and can have any length between one eighth of a block and one block. The color of the sliding knob can be changed.
-ie.manual.entry.industrialWires.toggle_switch=A switch to turn a signal on or off. The covered version includes a cover to prevent accidental activation: When clicked for the first time the cover will open, the signal will be turned on by clicking once again. Another click will close the cover and turn off the output signal. If the cover was opened by accident it can be closed by shift-right-clicking
-ie.manual.entry.industrialWires.toggle_switch1=the switch. The color of the cover can be configured.
-ie.manual.entry.industrialWires.variac=A Variac® is a variable autotransformer. The output signal of the transformer increases as the knob is turned to the right. The signal strenght can only be increased by one unit per click.
+ie.manual.entry.industrialwires.components.name=Panel Components
+ie.manual.entry.industrialwires.components.subtext=More than just two
+ie.manual.entry.industrialwires.button=A simple button that activates a redstone signal when pressed. Its color can be changed. The button either stays on until clicked again (latching) or tuns off after half a second (non-latching).
+ie.manual.entry.industrialwires.label=A text that can be placed on the control panel, for example to indicate the purpose of some other component. The color and obviously the text can be edited.
+ie.manual.entry.industrialwires.indicator_light=A small indicator that brightens as the input redstone signal is increased. The color can be changed.
+ie.manual.entry.industrialwires.slider=A sliding switch that can set an output redstone signal to any desired signal strength. It can be either vertically or horizontally aligned and can have any length between one eighth of a block and one block. The color of the sliding knob can be changed.
+ie.manual.entry.industrialwires.toggle_switch=A switch to turn a signal on or off. The covered version includes a cover to prevent accidental activation: When clicked for the first time the cover will open, the signal will be turned on by clicking once again. Another click will close the cover and turn off the output signal. If the cover was opened by accident it can be closed by shift-right-clicking
+ie.manual.entry.industrialwires.toggle_switch1=the switch. The color of the cover can be configured.
+ie.manual.entry.industrialwires.variac=A Variac® is a variable autotransformer. The output signal of the transformer increases as the knob is turned to the right. The signal strenght can only be increased by one unit per click.

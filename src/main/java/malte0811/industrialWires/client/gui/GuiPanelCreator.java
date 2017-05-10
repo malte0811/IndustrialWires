@@ -81,7 +81,7 @@ public class GuiPanelCreator extends GuiContainer {
 		String tooltip = null;
 		if (buttonList.get(0).isMouseOver()) {
 			tooltip = I18n.format(IndustrialWires.MODID+".desc.create_panel");
-			ClientUtils.drawHoveringText(ImmutableList.of("Create a new panel"), mouseX, mouseY, mc.fontRendererObj);
+			ClientUtils.drawHoveringText(ImmutableList.of("Create a new panel"), mouseX, mouseY, mc.fontRenderer);
 		} else if (buttonList.get(1).isMouseOver()) {
 			tooltip = I18n.format(IndustrialWires.MODID+".desc.remove_all");
 		} else if (buttonList.get(2).isMouseOver()) {
@@ -94,7 +94,7 @@ public class GuiPanelCreator extends GuiContainer {
 			tooltip = I18n.format(IndustrialWires.MODID+".desc.disassemble");
 		}
 		if (tooltip!=null) {
-			ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRendererObj);
+			ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRenderer);
 		}
 	}
 
@@ -144,16 +144,16 @@ public class GuiPanelCreator extends GuiContainer {
 					nbt.setInteger("type", MessageType.ADD.ordinal());
 					IndustrialWires.packetHandler.sendToServer(new MessageGUIInteract(container.tile, nbt));
 					components.add(curr.copyOf());
-					ItemStack currStack = mc.thePlayer.inventory.getItemStack();
-					if (currStack != null) {
-						currStack.stackSize--;
-						if (currStack.stackSize <= 0) {
-							mc.thePlayer.inventory.setItemStack(null);
+					ItemStack currStack = mc.player.inventory.getItemStack();
+					if (!currStack.isEmpty()) {
+						currStack.shrink(1);
+						if (currStack.getCount() <= 0) {
+							mc.player.inventory.setItemStack(ItemStack.EMPTY);
 
 						}
 					}
 				}
-			} else if (mc.thePlayer.inventory.getItemStack()==null) {
+			} else if (mc.player.inventory.getItemStack().isEmpty()) {
 				float xRelFloat = xRel/(float) panelSize;
 				float yRelFloat = yRel/(float) panelSize;
  				for (int i = 0;i<components.size();i++) {
@@ -162,7 +162,7 @@ public class GuiPanelCreator extends GuiContainer {
 					if (aabb.minX<=xRelFloat&&aabb.maxX>xRelFloat&&aabb.minZ<=yRelFloat&&aabb.maxZ>yRelFloat) {
 						PanelComponent removed = components.get(i);
 						ItemStack remItem = ItemPanelComponent.stackFromComponent(removed);
-						mc.thePlayer.inventory.setItemStack(remItem);
+						mc.player.inventory.setItemStack(remItem);
 						NBTTagCompound nbt = new NBTTagCompound();
 						nbt.setInteger("type", MessageType.REMOVE.ordinal());
 						nbt.setInteger("id", i);
@@ -204,11 +204,12 @@ public class GuiPanelCreator extends GuiContainer {
 			IndustrialWires.packetHandler.sendToServer(new MessageGUIInteract(container.tile, nbt));
 		}
 	}
-	private ItemStack lastFloating;
+
+	private ItemStack lastFloating = ItemStack.EMPTY;
 	private PanelComponent lastFloatingPC;
 	private PanelComponent getFloatingPC() {
-		ItemStack floating = mc.thePlayer.inventory.getItemStack();
-		if (floating==null||floating.getItem()!=IndustrialWires.panelComponent) {
+		ItemStack floating = mc.player.inventory.getItemStack();
+		if (floating.isEmpty() || floating.getItem() != IndustrialWires.panelComponent) {
 			return null;
 		}
 		if (ItemStack.areItemStacksEqual(floating, lastFloating)) {

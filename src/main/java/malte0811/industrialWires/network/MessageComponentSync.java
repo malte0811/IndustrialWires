@@ -63,12 +63,12 @@ public class MessageComponentSync implements IMessage {
 	public static class HandlerServer implements IMessageHandler<MessageComponentSync, IMessage> {
 		@Override
 		public IMessage onMessage(MessageComponentSync message, MessageContext ctx) {
-			ctx.getServerHandler().playerEntity.getServerWorld().addScheduledTask(()->handle(message, ctx.getServerHandler().playerEntity));
+			ctx.getServerHandler().player.getServerWorld().addScheduledTask(() -> handle(message, ctx.getServerHandler().player));
 			return null;
 		}
 		private void handle(MessageComponentSync msg, EntityPlayerMP player) {
 			ItemStack held = player.getHeldItem(msg.hand);
-			if (held!=null&&held.getItem()== IndustrialWires.panelComponent) {
+			if (!held.isEmpty() && held.getItem() == IndustrialWires.panelComponent) {
 				PanelComponent old = ItemPanelComponent.componentFromStack(held);
 				if (old instanceof IConfigurableComponent) {
 					NBTTagList changes = msg.data.getTagList("data", 10);
@@ -82,7 +82,7 @@ public class MessageComponentSync implements IMessage {
 							x.printStackTrace();
 						}
 					}
-					ItemStack newCmp = ApiUtils.copyStackWithAmount(ItemPanelComponent.stackFromComponent(old), held.stackSize);
+					ItemStack newCmp = ApiUtils.copyStackWithAmount(ItemPanelComponent.stackFromComponent(old), held.getCount());
 					player.setHeldItem(msg.hand, newCmp);
 				}
 			}

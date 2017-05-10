@@ -25,16 +25,14 @@ import net.minecraftforge.energy.IEnergyStorage;
 
 public class EnergyAdapter implements IEnergyStorage {
 	/**
-	 * 3 different copies of the same thing, the TE this adapter is mirroring.
+	 * 2 different copies of the same thing, the TE this adapter is mirroring.
 	 * rec and prov are null if the TE does not implement them
 	 */
-	IFluxConnection tile;
-	IFluxReceiver rec;
-	IFluxProvider prov;
-	
-	EnumFacing dir;
+	private IFluxReceiver rec;
+	private IFluxProvider prov;
+
+	private EnumFacing dir;
 	public EnergyAdapter(IFluxConnection te, EnumFacing f) {
-		tile = te;
 		dir = f;
 		if (te instanceof IFluxReceiver) {
 			rec = (IFluxReceiver) te;

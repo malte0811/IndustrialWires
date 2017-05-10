@@ -60,7 +60,7 @@ public class CoveredToggleSwitch extends ToggleSwitch {
 	}
 
 	@Override
-	public boolean interactWith(Vec3d hitRel, TileEntityPanel tile, EntityPlayerMP player) {
+	public void interactWith(Vec3d hitRel, TileEntityPanel tile, EntityPlayerMP player) {
 		if (player.isSneaking()&&state==SwitchState.OPEN) {
 			state = SwitchState.CLOSED;
 		} else {
@@ -69,7 +69,6 @@ public class CoveredToggleSwitch extends ToggleSwitch {
 		setOut(state.active, tile);
 		tile.markDirty();
 		tile.triggerRenderUpdate();
-		return true;
 	}
 
 	@Override

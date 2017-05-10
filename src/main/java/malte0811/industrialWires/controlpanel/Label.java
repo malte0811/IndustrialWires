@@ -95,8 +95,7 @@ public class Label extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
-	public boolean interactWith(Vec3d hitRelative, TileEntityPanel tile, EntityPlayerMP player) {
-		return false;
+	public void interactWith(Vec3d hitRelative, TileEntityPanel tile, EntityPlayerMP player) {
 	}
 
 	@Override
@@ -127,10 +126,10 @@ public class Label extends PanelComponent implements IConfigurableComponent {
 		int left = (int) (gui.getX0()+getX()*gui.panelSize);
 		int top = (int) (gui.getY0()+getY()*gui.panelSize);
 		GlStateManager.pushMatrix();
-		float scale = gui.mc.fontRendererObj.FONT_HEIGHT*gui.panelSize/(16F*9F*9F);
+		float scale = gui.mc.fontRenderer.FONT_HEIGHT * gui.panelSize / (16F * 9F * 9F);
 		GlStateManager.translate(left, top, 0);
 		GlStateManager.scale(scale, scale, scale);
-		gui.mc.fontRendererObj.drawString(text, 0, 0, 0xff000000|color);
+		gui.mc.fontRenderer.drawString(text, 0, 0, 0xff000000 | color);
 		GlStateManager.popMatrix();
 	}
 

@@ -1,0 +1,6 @@
+{
+	"parent":"item/generated",
+	"textures": {
+      "layer0": "industrialwires:items/ic2_wire_copper"
+	}
+}

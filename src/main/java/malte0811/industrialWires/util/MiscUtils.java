@@ -22,10 +22,6 @@ import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.api.energy.wires.IImmersiveConnectable;
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler;
 import com.google.common.collect.ImmutableSet;
-import malte0811.industrialWires.IndustrialWires;
-import malte0811.industrialWires.blocks.controlpanel.BlockPanel;
-import malte0811.industrialWires.blocks.controlpanel.BlockTypes_Panel;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -70,23 +66,6 @@ public final class MiscUtils {
 			ret.add(c);
 		}
 
-		return ret;
-	}
-	public static List<BlockPos> discoverPanelParts(World w, BlockPos here) {
-		BiPredicate<BlockPos, Integer> isValid = (pos, count)->{
-			if (here.distanceSq(pos)>25||count>100||!w.isBlockLoaded(pos)) {
-				return false;
-			}
-			IBlockState state = w.getBlockState(pos);
-			return state.getBlock() == IndustrialWires.panel && state.getValue(BlockPanel.type) != BlockTypes_Panel.CREATOR;
-		};
-		List<BlockPos> all = discoverLocal(w, here, isValid);
-		List<BlockPos> ret = new ArrayList<>();
-		for (BlockPos pos:all) {
-			if (w.getBlockState(pos).getValue(BlockPanel.type)!= BlockTypes_Panel.DUMMY) {
-				ret.add(pos);
-			}
-		}
 		return ret;
 	}
 	public static List<BlockPos> discoverLocal(World w, BlockPos here, BiPredicate<BlockPos, Integer> isValid) {

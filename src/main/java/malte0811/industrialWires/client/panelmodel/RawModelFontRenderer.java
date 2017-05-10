@@ -30,6 +30,8 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.util.vector.Vector3f;
 
+import javax.annotation.Nonnull;
+
 public class RawModelFontRenderer extends FontRenderer {
 	float[] colorA = new float[4];
 	private ImmutableList.Builder<RawQuad> builder = ImmutableList.builder();
@@ -100,7 +102,7 @@ public class RawModelFontRenderer extends FontRenderer {
 	}
 
 	@Override
-	protected void bindTexture(ResourceLocation location) {
+	protected void bindTexture(@Nonnull ResourceLocation location) {
 		//NO-OP
 	}
 }

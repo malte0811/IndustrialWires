@@ -32,6 +32,7 @@ import net.minecraftforge.client.model.IModel;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.common.model.IModelState;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,7 +43,7 @@ public class PanelModelLoader implements ICustomModelLoader {
 	public static final String RESOURCE_LOCATION = "smartmodel/panel";
 
 	@Override
-	public void onResourceManagerReload(IResourceManager resourceManager) {
+	public void onResourceManagerReload(@Nonnull IResourceManager resourceManager) {
 		PanelModel.modelCache.invalidateAll();
 		PanelUtils.PANEL_TEXTURE = null;
 	}

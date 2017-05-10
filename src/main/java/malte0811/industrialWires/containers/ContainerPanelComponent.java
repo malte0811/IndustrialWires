@@ -24,14 +24,16 @@ import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 
+import javax.annotation.Nonnull;
+
 public class ContainerPanelComponent extends Container {
 	public EnumHand hand;
 	public ContainerPanelComponent(EnumHand h) {
 		hand = h;
 	}
 	@Override
-	public boolean canInteractWith(EntityPlayer playerIn) {
+	public boolean canInteractWith(@Nonnull EntityPlayer playerIn) {
 		ItemStack held = playerIn.getHeldItem(hand);
-		return held!=null&&held.getItem()== IndustrialWires.panelComponent;
+		return !held.isEmpty() && held.getItem() == IndustrialWires.panelComponent;
 	}
 }

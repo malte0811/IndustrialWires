@@ -35,6 +35,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
@@ -43,7 +44,7 @@ import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 
-import java.util.List;
+import javax.annotation.Nonnull;
 
 public class BlockPanel extends BlockIWBase implements IMetaEnum {
 	public static final PropertyEnum<BlockTypes_Panel> type = PropertyEnum.create("type", BlockTypes_Panel.class);
@@ -65,7 +66,7 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 	}
 
 	@Override
-	public TileEntity createTileEntity(World world, IBlockState state) {
+	public TileEntity createTileEntity(@Nonnull World world, @Nonnull IBlockState state) {
 		switch(state.getValue(type)) {
 		case TOP:
 			return new TileEntityPanel();
@@ -88,6 +89,7 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 		return new IProperty[]{IEProperties.FACING_ALL, type};
 	}
 
+	@Nonnull
 	@Override
 	protected BlockStateContainer createBlockState() {
 		BlockStateContainer base = super.createBlockState();
@@ -96,8 +98,9 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 		});
 	}
 
+	@Nonnull
 	@Override
-	public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
+	public IBlockState getActualState(@Nonnull IBlockState state, IBlockAccess worldIn, BlockPos pos) {
 		state = super.getActualState(state, worldIn, pos);
 		TileEntity te = worldIn.getTileEntity(pos);
 		if (te instanceof TileEntityPanel) {
@@ -109,8 +112,9 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 		return state;
 	}
 
+	@Nonnull
 	@Override
-	public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
+	public IBlockState getExtendedState(@Nonnull IBlockState state, IBlockAccess world, BlockPos pos) {
 		state = super.getExtendedState(state, world, pos);
 		if (state instanceof IExtendedBlockState) {
 			TileEntity te = world.getTileEntity(pos);
@@ -137,7 +141,7 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 	}
 
 	@Override
-	public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list) {
+	public void getSubBlocks(@Nonnull Item itemIn, CreativeTabs tab, NonNullList<ItemStack> list) {
 		list.add(new ItemStack(itemIn, 1, 0));
 		list.add(new ItemStack(itemIn, 1, 1));
 		list.add(new ItemStack(itemIn, 1, 2));
@@ -159,14 +163,15 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 	public boolean isOpaqueCube(IBlockState state) {
 		return false;
 	}
-	@Override
-	public boolean isVisuallyOpaque() {
-		return false;
-	}
 
+	/*	@Override TODO do I not need this any more?
+		public boolean isVisuallyOpaque() {
+			return false;
+		}
+	*/
 	@Override
-	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
-		if (!super.onBlockActivated(world, pos, state, player, hand, heldItem, side, hitX, hitY, hitZ)&&hand==EnumHand.MAIN_HAND) {
+	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) {
+		if (!super.onBlockActivated(world, pos, state, player, hand, side, hitX, hitY, hitZ) && hand == EnumHand.MAIN_HAND) {
 			TileEntity te = world.getTileEntity(pos);
 			if (te instanceof TileEntityRSPanelConn){
 				if (!world.isRemote) {
@@ -186,7 +191,8 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 	}
 
 	@Override
-	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
+	@Nonnull
+	public ItemStack getPickBlock(@Nonnull IBlockState state, RayTraceResult target, @Nonnull World world, @Nonnull BlockPos pos, EntityPlayer player) {
 		if (state.getValue(type)==BlockTypes_Panel.TOP) {
 			TileEntity te = world.getTileEntity(pos);
 			if (te instanceof TileEntityPanel) {

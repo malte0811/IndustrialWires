@@ -53,6 +53,8 @@ public class PanelModel implements IBakedModel {
 		IEApi.renderCacheClearers.add(modelCache::invalidateAll);
 		IEApi.renderCacheClearers.add(PanelItemOverride.ITEM_MODEL_CACHE::invalidateAll);
 	}
+
+	@Nonnull
 	@Override
 	public List<BakedQuad> getQuads(@Nullable IBlockState state, @Nullable EnumFacing side, long rand) {
 		if (side!=null) {
@@ -68,7 +70,7 @@ public class PanelModel implements IBakedModel {
 				m = new AssembledBakedModel(cl);
 				modelCache.put(cl.copyOf(), m);
 			}
-			return m.getQuads(state, side, rand);
+			return m.getQuads(state, null, rand);
 		}
 		return ImmutableList.of();
 	}
@@ -88,16 +90,19 @@ public class PanelModel implements IBakedModel {
 		return false;
 	}
 
+	@Nonnull
 	@Override
 	public TextureAtlasSprite getParticleTexture() {
 		return PanelUtils.PANEL_TEXTURE;
 	}
 
+	@Nonnull
 	@Override
 	public ItemCameraTransforms getItemCameraTransforms() {
 		return ItemCameraTransforms.DEFAULT;
 	}
 
+	@Nonnull
 	@Override
 	public ItemOverrideList getOverrides() {
 		return INSTANCE;
@@ -113,6 +118,7 @@ public class PanelModel implements IBakedModel {
 			components = comp;
 		}
 
+		@Nonnull
 		@Override
 		public List<BakedQuad> getQuads(@Nullable IBlockState state, @Nullable EnumFacing side, long rand) {
 			if (quadsDefault == null) {
@@ -137,6 +143,7 @@ public class PanelModel implements IBakedModel {
 			return false;
 		}
 
+		@Nonnull
 		@Override
 		public TextureAtlasSprite getParticleTexture() {
 			return PanelUtils.PANEL_TEXTURE;
@@ -150,11 +157,14 @@ public class PanelModel implements IBakedModel {
 				new ItemTransformVec3f(new Vector3f(30, 45, 0), new Vector3f(0, .125F, 0), new Vector3f(.6F, .6F, .6F)),//GUI
 				new ItemTransformVec3f(new Vector3f(), new Vector3f(0, .1F, 0), new Vector3f(.25F, .25F, .25F)),//Ground
 				new ItemTransformVec3f(new Vector3f(0, 180, 45), new Vector3f(0, 0, -.1875F), new Vector3f(.5F, .5F, .5F)));//Fixed;
+
+		@Nonnull
 		@Override
 		public ItemCameraTransforms getItemCameraTransforms() {//TODO very much cache this!
 			return transform;
 		}
 
+		@Nonnull
 		@Override
 		public ItemOverrideList getOverrides() {
 			return INSTANCE;

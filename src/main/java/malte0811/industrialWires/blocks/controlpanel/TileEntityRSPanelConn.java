@@ -29,7 +29,7 @@ import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
 import malte0811.industrialWires.blocks.IBlockBoundsIW;
 import malte0811.industrialWires.blocks.INetGUI;
 import malte0811.industrialWires.controlpanel.PanelComponent;
-import malte0811.industrialWires.util.MiscUtils;
+import malte0811.industrialWires.controlpanel.PanelUtils;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -68,14 +68,14 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 
 	@Override
 	public void update() {
-		if(hasWorldObj() && !worldObj.isRemote) {
+		if (hasWorld() && !world.isRemote) {
 			if (!loaded) {
 				loaded = true;
 				// completely reload the network
 				network.removeFromNetwork(null);
-				List<BlockPos> parts = MiscUtils.discoverPanelParts(worldObj, pos);
+				List<BlockPos> parts = PanelUtils.discoverPanelParts(world, pos);
 				for (BlockPos bp:parts) {
-					TileEntity te = worldObj.getTileEntity(bp);
+					TileEntity te = world.getTileEntity(bp);
 					if (te instanceof TileEntityPanel) {
 						registerPanel(((TileEntityPanel) te));
 					}
@@ -202,9 +202,9 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 		hasConn = false;
 		network.removeFromNetwork(this);
 		this.markDirty();
-		if(worldObj != null) {
-			IBlockState state = worldObj.getBlockState(pos);
-			worldObj.notifyBlockUpdate(pos, state,state, 3);
+		if (world != null) {
+			IBlockState state = world.getBlockState(pos);
+			world.notifyBlockUpdate(pos, state, state, 3);
 		}
 	}
 
@@ -240,10 +240,10 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 	@Override
 	public void onChange(NBTTagCompound nbt, EntityPlayer p) {
 		if (nbt.hasKey("rsId")) {
-			List<BlockPos> parts = MiscUtils.discoverPanelParts(worldObj, pos);
+			List<BlockPos> parts = PanelUtils.discoverPanelParts(world, pos);
 			List<TileEntityPanel> tes = new ArrayList<>(parts.size());
 			for (BlockPos bp:parts) {
-				TileEntity te = worldObj.getTileEntity(bp);
+				TileEntity te = world.getTileEntity(bp);
 				if (te instanceof TileEntityPanel) {
 					tes.add((TileEntityPanel) te);
 					unregisterPanel((TileEntityPanel) te, true);
@@ -255,28 +255,29 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 				registerPanel(panel);
 			}
 			network.updateValues();
-			IBlockState state = worldObj.getBlockState(pos);
-			worldObj.notifyBlockUpdate(pos, state, state, 3);
-			worldObj.addBlockEvent(pos, state.getBlock(), 255, 0);
+			IBlockState state = world.getBlockState(pos);
+			world.notifyBlockUpdate(pos, state, state, 3);
+			world.addBlockEvent(pos, state.getBlock(), 255, 0);
 		}
 	}
 
 	@Override
 	public World getConnectorWorld() {
-		return worldObj;
+		return world;
 	}
 
 	public int getRsId() {
 		return id;
 	}
 
+	@Nonnull
 	@Override
 	public EnumFacing getFacing() {
 		return facing;
 	}
 
 	@Override
-	public void setFacing(EnumFacing facing) {
+	public void setFacing(@Nonnull EnumFacing facing) {
 		this.facing = facing;
 	}
 
@@ -286,17 +287,17 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 	}
 
 	@Override
-	public boolean mirrorFacingOnPlacement(EntityLivingBase placer) {
+	public boolean mirrorFacingOnPlacement(@Nonnull EntityLivingBase placer) {
 		return true;
 	}
 
 	@Override
-	public boolean canHammerRotate(EnumFacing side, float hitX, float hitY, float hitZ, EntityLivingBase entity) {
+	public boolean canHammerRotate(@Nonnull EnumFacing side, float hitX, float hitY, float hitZ, @Nonnull EntityLivingBase entity) {
 		return false;
 	}
 
 	@Override
-	public boolean canRotate(EnumFacing axis) {
+	public boolean canRotate(@Nonnull EnumFacing axis) {
 		return false;
 	}
 

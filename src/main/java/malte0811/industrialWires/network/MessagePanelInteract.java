@@ -30,13 +30,11 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class MessagePanelInteract implements IMessage {
 	private BlockPos pos;
-	//private int dimension;
 	private int pcId;
 	private Vec3d hitRelative;
 
 	public MessagePanelInteract(TileEntityPanel tile, int id, Vec3d hit) {
 		pos = tile.getPos();
-		//dimension = tile.getWorld().provider.getDimension();
 		pcId = id;
 		hitRelative = hit;
 	}
@@ -46,7 +44,6 @@ public class MessagePanelInteract implements IMessage {
 	@Override
 	public void fromBytes(ByteBuf buf) {
 		this.pos = new BlockPos(buf.readInt(), buf.readInt(), buf.readInt());
-		//dimension = buf.readInt();
 		pcId = buf.readInt();
 		hitRelative = new Vec3d(buf.readDouble(), buf.readDouble(), buf.readDouble());
 	}
@@ -56,7 +53,6 @@ public class MessagePanelInteract implements IMessage {
 		buf.writeInt(this.pos.getX());
 		buf.writeInt(this.pos.getY());
 		buf.writeInt(this.pos.getZ());
-		//buf.writeInt(dimension);
 		buf.writeInt(pcId);
 		buf.writeDouble(hitRelative.xCoord).writeDouble(hitRelative.yCoord).writeDouble(hitRelative.zCoord);
 	}
@@ -64,12 +60,12 @@ public class MessagePanelInteract implements IMessage {
 	public static class HandlerServer implements IMessageHandler<MessagePanelInteract, IMessage> {
 		@Override
 		public IMessage onMessage(MessagePanelInteract message, MessageContext ctx) {
-			ctx.getServerHandler().playerEntity.getServerWorld().addScheduledTask(()->handle(message, ctx.getServerHandler().playerEntity));
+			ctx.getServerHandler().player.getServerWorld().addScheduledTask(() -> handle(message, ctx.getServerHandler().player));
 			return null;
 		}
 		private void handle(MessagePanelInteract msg, EntityPlayerMP player) {
 			if (player.getDistanceSqToCenter(msg.pos)<100) {//closer than 10 blocks
-				TileEntity te = player.worldObj.getTileEntity(msg.pos);
+				TileEntity te = player.world.getTileEntity(msg.pos);
 				if (te instanceof TileEntityPanel) {
 					((TileEntityPanel) te).interactServer(msg.hitRelative, msg.pcId, player);
 				}

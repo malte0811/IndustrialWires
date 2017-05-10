@@ -21,7 +21,6 @@ import blusunrize.immersiveengineering.api.IEProperties;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.BlockIWBase;
 import malte0811.industrialWires.blocks.IMetaEnum;
-import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
@@ -33,26 +32,28 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 
+import javax.annotation.Nonnull;
 import java.util.Arrays;
-import java.util.List;
 
 public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 	private static PropertyEnum<BlockTypes_IC2_Connector> type = PropertyEnum.create("type", BlockTypes_IC2_Connector.class);
 	public BlockIC2Connector() {
-		super(Material.IRON, "ic2Connector");
+		super(Material.IRON, "ic2_connector");
 		setHardness(3.0F);
 		setResistance(15.0F);
 		lightOpacity = 0;
 		this.setCreativeTab(IndustrialWires.creativeTab);
 	}
+
 	@Override
-	public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn) {
+	public void onNeighborChange(IBlockAccess world, BlockPos pos, BlockPos posNeighbor) {
 		TileEntity te = world.getTileEntity(pos);
 		if(te instanceof TileEntityIC2ConnectorTin) {
 			TileEntityIC2ConnectorTin connector = (TileEntityIC2ConnectorTin) te;
@@ -64,12 +65,13 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 	}
 
 	@Override
-	public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list) {
+	public void getSubBlocks(@Nonnull Item itemIn, CreativeTabs tab, NonNullList<ItemStack> list) {
 		for (int i = 0;i<type.getAllowedValues().size();i++) {
 			list.add(new ItemStack(itemIn, 1, i));
 		}
 	}
 
+	@Nonnull
 	@Override
 	protected BlockStateContainer createBlockState() {
 		BlockStateContainer base = super.createBlockState();
@@ -84,8 +86,9 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 		return new IProperty[]{type, IEProperties.FACING_ALL};
 	}
 
+	@Nonnull
 	@Override
-	public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
+	public IBlockState getActualState(@Nonnull IBlockState state, IBlockAccess worldIn, BlockPos pos) {
 		state = super.getActualState(state, worldIn, pos);
 		TileEntity te = worldIn.getTileEntity(pos);
 		if (te instanceof TileEntityIC2ConnectorTin) {
@@ -94,13 +97,14 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 		return state;
 	}
 
+	@Nonnull
 	@Override
 	public IBlockState getStateFromMeta(int meta) {
 		return super.getStateFromMeta(meta).withProperty(type, BlockTypes_IC2_Connector.values()[meta]);
 	}
 
 	@Override
-	public boolean isSideSolid(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side) {
+	public boolean isSideSolid(IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos, EnumFacing side) {
 		return false;
 	}
 
@@ -110,7 +114,7 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 	}
 
 	@Override
-	public TileEntity createTileEntity(World world, IBlockState state) {
+	public TileEntity createTileEntity(@Nonnull World world, @Nonnull IBlockState state) {
 		switch (state.getValue(type)) {
 		case TIN_CONN:
 			return new TileEntityIC2ConnectorTin(false);
@@ -136,7 +140,7 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 		return null;
 	}
 	@Override
-	public boolean canRenderInLayer(BlockRenderLayer layer) {
+	public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer) {
 		return layer==BlockRenderLayer.TRANSLUCENT||layer==BlockRenderLayer.SOLID;
 	}
 	@Override
@@ -155,10 +159,11 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 	public boolean isOpaqueCube(IBlockState state) {
 		return false;
 	}
-	@Override
+
+	/*@Override
 	public boolean isVisuallyOpaque() {
 		return false;
-	}
+	}*/
 	@Override
 	public Object[] getValues() {
 		return BlockTypes_IC2_Connector.values();

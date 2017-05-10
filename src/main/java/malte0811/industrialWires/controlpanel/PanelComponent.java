@@ -78,7 +78,7 @@ public abstract class PanelComponent {
 	@Nonnull
 	public abstract AxisAlignedBB getBlockRelativeAABB();
 
-	public abstract boolean interactWith(Vec3d hitRelative, TileEntityPanel tile, EntityPlayerMP player);
+	public abstract void interactWith(Vec3d hitRelative, TileEntityPanel tile, EntityPlayerMP player);
 
 	public abstract void update(TileEntityPanel tile);
 
@@ -149,7 +149,8 @@ public abstract class PanelComponent {
 		double px = te.getPos().getX()-TileEntityRendererDispatcher.staticPlayerX;
 		double py = te.getPos().getY()-TileEntityRendererDispatcher.staticPlayerY;
 		double pz = te.getPos().getZ()-TileEntityRendererDispatcher.staticPlayerZ;
-		RenderGlobal.func_189697_a(te.apply(te.getComponents().getPanelTopTransform(), getBlockRelativeAABB()).expandXyz(0.002).offset(px, py, pz), 0.0F, 0.0F, 0.0F, 0.4F);
+		RenderGlobal.drawSelectionBoundingBox(te.apply(te.getComponents().getPanelTopTransform(), getBlockRelativeAABB()).expandXyz(0.002).offset(px, py, pz),
+				0.0F, 0.0F, 0.0F, 0.4F);
 		GlStateManager.depthMask(true);
 		GlStateManager.enableTexture2D();
 		GlStateManager.disableBlend();

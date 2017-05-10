@@ -45,11 +45,11 @@ import org.apache.commons.lang3.tuple.Pair;
 public class ClientEventHandler {
 	@SubscribeEvent
 	public void renderOverlayPost(RenderGameOverlayEvent.Post e) {
-		if(ClientUtils.mc().thePlayer!=null && e.getType() == RenderGameOverlayEvent.ElementType.TEXT) {
-			EntityPlayer player = ClientUtils.mc().thePlayer;
+		if (ClientUtils.mc().player != null && e.getType() == RenderGameOverlayEvent.ElementType.TEXT) {
+			EntityPlayer player = ClientUtils.mc().player;
 
 			for(EnumHand hand : EnumHand.values()) {
-				if(player.getHeldItem(hand)!=null) {
+				if (!player.getHeldItem(hand).isEmpty()) {
 					ItemStack equipped = player.getHeldItem(hand);
 					if(OreDictionary.itemMatches(new ItemStack(IndustrialWires.coil, 1, OreDictionary.WILDCARD_VALUE), equipped, false)) {
 						IC2Wiretype type = IC2Wiretype.IC2_TYPES[equipped.getItemDamage()];
@@ -62,7 +62,7 @@ public class ClientEventHandler {
 								s = I18n.format(Lib.DESC_INFO+"attachedTo", link[1],link[2],link[3]);
 								RayTraceResult focussedBlock = ClientUtils.mc().objectMouseOver;
 								double distSquared;
-								if (focussedBlock!=null&&focussedBlock.getBlockPos()!=null) {
+								if (focussedBlock != null && focussedBlock.typeOfHit == RayTraceResult.Type.BLOCK) {
 									distSquared = focussedBlock.getBlockPos().distanceSq(link[1],link[2],link[3]);
 								} else {
 									distSquared = player.getDistanceSq(link[1],link[2],link[3]);
@@ -83,10 +83,10 @@ public class ClientEventHandler {
 	@SubscribeEvent
 	public void renderBoundingBoxes(DrawBlockHighlightEvent event) {
 		if (!event.isCanceled() && event.getSubID() == 0 && event.getTarget().typeOfHit == RayTraceResult.Type.BLOCK) {
-			TileEntity tile = event.getPlayer().worldObj.getTileEntity(event.getTarget().getBlockPos());
+			TileEntity tile = event.getPlayer().world.getTileEntity(event.getTarget().getBlockPos());
 			if (tile instanceof TileEntityPanel) {
 				TileEntityPanel panel = (TileEntityPanel) tile;
-				Pair<PanelComponent, RayTraceResult> pc = panel.getSelectedComponent(Minecraft.getMinecraft().thePlayer, event.getTarget().hitVec, true);
+				Pair<PanelComponent, RayTraceResult> pc = panel.getSelectedComponent(Minecraft.getMinecraft().player, event.getTarget().hitVec, true);
 				if (pc != null) {
 					pc.getLeft().renderBox(panel);
 					event.setCanceled(true);

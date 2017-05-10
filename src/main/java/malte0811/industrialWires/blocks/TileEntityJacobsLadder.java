@@ -50,6 +50,7 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickable, IHasDummyBlocksIW, ISyncReceiver, IEnergySink, IBlockBoundsIW, IDirectionalTile {
@@ -96,7 +97,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 		if (isDummy()) {
 			return;
 		}
-		if (!worldObj.isRemote) {
+		if (!world.isRemote) {
 			if (!addedToIC2Net) {
 				MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
 				addedToIC2Net = true;
@@ -106,16 +107,16 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 					double y = j * (size.height + size.extraHeight) / (double) (size.movementPoints - 1) + size.innerPointOffset;
 					double width = widthFromHeight(y);
 					for (int i = 0; i < size.arcPoints - 2; i++) {
-						double z = size.zMax * 2 * (worldObj.rand.nextDouble() - .5);
+						double z = size.zMax * 2 * (world.rand.nextDouble() - .5);
 						double xMin = width * i / (double) (size.arcPoints - 2) - width / 2 + size.bottomDistance / 2;
 						double xDiff = width / (double) (size.arcPoints - 2);
-						double x = worldObj.rand.nextDouble() * xDiff + xMin;
+						double x = world.rand.nextDouble() * xDiff + xMin;
 						controlControls[i][j] = new Vec3d(x, y, z);
 					}
 				}
 				t = 0;
 				timeTillActive = size.delay;
-				tStep = 1D / (int) (.875 * size.tickToTop + worldObj.rand.nextInt(size.tickToTop / 4));
+				tStep = 1D / (int) (.875 * size.tickToTop + world.rand.nextInt(size.tickToTop / 4));
 				IndustrialWires.packetHandler.sendToAll(new MessageTileSyncIW(this, writeArcStarter()));
 			} else if (timeTillActive == 0 && t < 1) {
 				double extracted = energy.extractEU(consumtionEU, false);
@@ -192,7 +193,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 	}
 
 	@Override
-	public void readCustomNBT(NBTTagCompound nbt, boolean descPacket) {
+	public void readCustomNBT(@Nonnull NBTTagCompound nbt, boolean descPacket) {
 		LadderSize oldSize = size;
 		size = LadderSize.values()[nbt.getInteger("size")];
 		if (size != oldSize) {
@@ -205,7 +206,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 	}
 
 	@Override
-	public void writeCustomNBT(NBTTagCompound nbt, boolean descPacket) {
+	public void writeCustomNBT(@Nonnull NBTTagCompound nbt, boolean descPacket) {
 		nbt.setInteger("size", size.ordinal());
 		nbt.setInteger("dummy", dummy);
 		energy.writeToNbt(nbt, "energy");
@@ -275,8 +276,8 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 	public void placeDummies(IBlockState state) {
 		for (int i = 1; i <= size.dummyCount; i++) {
 			BlockPos pos2 = pos.offset(EnumFacing.UP, i);
-			worldObj.setBlockState(pos2, state);
-			TileEntity te = worldObj.getTileEntity(pos2);
+			world.setBlockState(pos2, state);
+			TileEntity te = world.getTileEntity(pos2);
 			if (te instanceof TileEntityJacobsLadder) {
 				((TileEntityJacobsLadder) te).size = size;
 				((TileEntityJacobsLadder) te).dummy = i;
@@ -288,8 +289,8 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 	@Override
 	public void breakDummies() {
 		for (int i = 0; i <= size.dummyCount; i++) {
-			if (i != dummy && worldObj.getTileEntity(pos.offset(EnumFacing.UP, i - dummy)) instanceof TileEntityJacobsLadder) {
-				worldObj.setBlockToAir(pos.offset(EnumFacing.UP, i - dummy));
+			if (i != dummy && world.getTileEntity(pos.offset(EnumFacing.UP, i - dummy)) instanceof TileEntityJacobsLadder) {
+				world.setBlockToAir(pos.offset(EnumFacing.UP, i - dummy));
 			}
 		}
 	}
@@ -309,15 +310,15 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 
 	public boolean isActive() {
 		if (isDummy()) {
-			TileEntity master = worldObj.getTileEntity(pos.down(dummy));
+			TileEntity master = world.getTileEntity(pos.down(dummy));
 			return master instanceof TileEntityJacobsLadder&&((TileEntityJacobsLadder) master).isActive();
 		}
 		return timeTillActive == 0 && t < 1;
 	}
 
 	public void onEntityTouch(Entity e) {
-		if (isDummy() && !worldObj.isRemote) {
-			TileEntity master = worldObj.getTileEntity(pos.down(dummy));
+		if (isDummy() && !world.isRemote) {
+			TileEntity master = world.getTileEntity(pos.down(dummy));
 			if (master instanceof TileEntityJacobsLadder && ((TileEntityJacobsLadder) master).isActive()) {
 				hurtEntity(e);
 			}
@@ -328,17 +329,18 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 		e.attackEntityFrom(new DamageSource("industrialwires.jacobs_ladder"), IWConfig.HVStuff.jacobsBaseDmg * (size.ordinal() + 1));
 	}
 
-	public boolean onActivated(EntityPlayer playerIn, EnumHand hand, ItemStack heldItem) {
-		TileEntity masterTE = dummy == 0 ? this : worldObj.getTileEntity(pos.down(dummy));
+	public boolean onActivated(EntityPlayer player, EnumHand hand) {
+		ItemStack heldItem = player.getHeldItem(hand);
+		TileEntity masterTE = dummy == 0 ? this : world.getTileEntity(pos.down(dummy));
 		if (masterTE instanceof TileEntityJacobsLadder) {
 			TileEntityJacobsLadder master = (TileEntityJacobsLadder) masterTE;
 			if (master.isActive()) {
-				if (!worldObj.isRemote) {
-					hurtEntity(playerIn);
+				if (!world.isRemote) {
+					hurtEntity(player);
 				}
 				return true;
-			} else if (heldItem != null && ApiUtils.compareToOreName(heldItem, "itemSalt")) {
-				return master.salt(playerIn, hand, heldItem);
+			} else if (!heldItem.isEmpty() && ApiUtils.compareToOreName(heldItem, "itemSalt")) {
+				return master.salt(player, hand, heldItem);
 			}
 		}
 		return false;
@@ -346,12 +348,12 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 
 	private boolean salt(EntityPlayer player, EnumHand hand, ItemStack held) {
 		if (salt < 3) {
-			if (!worldObj.isRemote) {
+			if (!world.isRemote) {
 				salt++;
 				if (!player.isCreative()) {
-					held.stackSize--;
-					if (held.stackSize <= 0) {
-						player.setHeldItem(hand, null);
+					held.shrink(1);
+					if (held.getCount() <= 0) {
+						player.setHeldItem(hand, ItemStack.EMPTY);
 					}
 				}
 				NBTTagCompound update = new NBTTagCompound();
@@ -368,7 +370,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 		if (isActive()) {
 			return false;
 		}
-		if (!worldObj.isRemote) {
+		if (!world.isRemote) {
 			EnumFacing targetDir = facing.rotateAround(EnumFacing.Axis.Y);
 			for (int i = -dummy;i<size.dummyCount-dummy+1;i++) {
 				BlockPos currPos = pos.up(i);
@@ -380,7 +382,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 					IBlockState state = world.getBlockState(currPos).getActualState(world, currPos);
 					world.notifyBlockUpdate(currPos,state,state,3);
 					world.addBlockEvent(currPos, state.getBlock(), 255, 0);
-					world.notifyBlockOfStateChange(currPos, state.getBlock());
+					world.notifyNeighborsOfStateChange(currPos, state.getBlock(), true);
 				}
 			}
 		}
@@ -410,13 +412,13 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 	}
 
 	@Override
-	public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing from) {
+	public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing from) {
 		return !isDummy() && from == facing && capability == CapabilityEnergy.ENERGY;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing) {
+	public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing) {
 		if (hasCapability(capability, facing)) {
 			if (capability == CapabilityEnergy.ENERGY) {
 				return (T) new EnergyCap();
@@ -427,7 +429,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 
 	@Override
 	public void onChunkUnload() {
-		if (!worldObj.isRemote && addedToIC2Net)
+		if (!world.isRemote && addedToIC2Net)
 			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
 		addedToIC2Net = false;
 		super.onChunkUnload();
@@ -435,9 +437,9 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 
 	@Override
 	public void invalidate() {
-		if (!worldObj.isRemote && addedToIC2Net) {
+		if (!world.isRemote && addedToIC2Net) {
 			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
-		} else if (worldObj.isRemote) {
+		} else if (world.isRemote) {
 			//stop sound
 			IndustrialWires.proxy.playJacobsLadderSound(this, -1, soundPos);
 		}
@@ -445,6 +447,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 		super.invalidate();
 	}
 
+	@Nonnull
 	@Override
 	public AxisAlignedBB getRenderBoundingBox() {
 		return new AxisAlignedBB(pos, pos.add(1, 2, 1));
@@ -472,13 +475,14 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 		}
 	}
 
+	@Nonnull
 	@Override
 	public EnumFacing getFacing() {
 		return facing;
 	}
 
 	@Override
-	public void setFacing(EnumFacing facing) {
+	public void setFacing(@Nonnull EnumFacing facing) {
 		this.facing = facing;
 	}
 
@@ -488,17 +492,17 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 	}
 
 	@Override
-	public boolean mirrorFacingOnPlacement(EntityLivingBase placer) {
+	public boolean mirrorFacingOnPlacement(@Nonnull EntityLivingBase placer) {
 		return true;
 	}
 
 	@Override
-	public boolean canHammerRotate(EnumFacing side, float hitX, float hitY, float hitZ, EntityLivingBase entity) {
+	public boolean canHammerRotate(@Nonnull EnumFacing side, float hitX, float hitY, float hitZ, @Nonnull EntityLivingBase entity) {
 		return false;
 	}
 
 	@Override
-	public boolean canRotate(EnumFacing axis) {
+	public boolean canRotate(@Nonnull EnumFacing axis) {
 		return false;
 	}
 

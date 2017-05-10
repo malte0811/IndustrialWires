@@ -44,8 +44,8 @@ import malte0811.industrialWires.network.MessageTileSyncIW;
 import malte0811.industrialWires.wires.IC2Wiretype;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -64,7 +64,7 @@ import net.minecraftforge.oredict.ShapelessOreRecipe;
 import java.util.ArrayList;
 import java.util.List;
 
-@Mod(modid = IndustrialWires.MODID, version = IndustrialWires.VERSION, dependencies="required-after:immersiveengineering@[0.10-58,);required-after:IC2")
+@Mod(modid = IndustrialWires.MODID, version = IndustrialWires.VERSION, dependencies = "required-after:immersiveengineering@[0.10-58,);required-after:ic2")
 public class IndustrialWires {
 	public static final String MODID = "industrialwires";
 	public static final String VERSION = "${version}";
@@ -80,10 +80,7 @@ public class IndustrialWires {
 	public static CreativeTabs creativeTab = new CreativeTabs(MODID) {
 
 		@Override
-		public Item getTabIconItem() {
-			return null;
-		}
-		public ItemStack getIconItemStack() {
+		public ItemStack getTabIconItem() {
 			return new ItemStack(coil, 1, 2);
 		}
 	};
@@ -100,12 +97,11 @@ public class IndustrialWires {
 		coil = new ItemIC2Coil();
 		panelComponent = new ItemPanelComponent();
 		panel = new BlockPanel();
-		//TODO change to MODID+ when changing to a new MC version
-		GameRegistry.registerTileEntity(TileEntityIC2ConnectorTin.class, "ic2ConnectorTin");
-		GameRegistry.registerTileEntity(TileEntityIC2ConnectorCopper.class, "ic2ConnectorCopper");
-		GameRegistry.registerTileEntity(TileEntityIC2ConnectorGold.class, "ic2ConnectorGold");
-		GameRegistry.registerTileEntity(TileEntityIC2ConnectorHV.class, "ic2ConnectorHV");
-		GameRegistry.registerTileEntity(TileEntityIC2ConnectorGlass.class, "ic2ConnectorGlass");
+		GameRegistry.registerTileEntity(TileEntityIC2ConnectorTin.class, MODID + "ic2ConnectorTin");
+		GameRegistry.registerTileEntity(TileEntityIC2ConnectorCopper.class, MODID + "ic2ConnectorCopper");
+		GameRegistry.registerTileEntity(TileEntityIC2ConnectorGold.class, MODID + "ic2ConnectorGold");
+		GameRegistry.registerTileEntity(TileEntityIC2ConnectorHV.class, MODID + "ic2ConnectorHV");
+		GameRegistry.registerTileEntity(TileEntityIC2ConnectorGlass.class, MODID + "ic2ConnectorGlass");
 		GameRegistry.registerTileEntity(TileEntityJacobsLadder.class, MODID+":jacobsLadder");
 		GameRegistry.registerTileEntity(TileEntityPanel.class, MODID+":control_panel");
 		GameRegistry.registerTileEntity(TileEntityRSPanelConn.class, MODID+":control_panel_rs");
@@ -210,19 +206,19 @@ public class IndustrialWires {
 	}
 	private class CoilLengthAdapter implements IRecipeAdapter<RecipeCoilLength> {
 		@Override
-		public RecipeQuery[] getQueriedInputs(RecipeCoilLength recipe, ItemStack[] in) {
+		public RecipeQuery[] getQueriedInputs(RecipeCoilLength recipe, NonNullList<ItemStack> in) {
 			List<RecipeQuery> ret = new ArrayList<>();
-			for (int i = 0;i<in.length-1;i++) {
+			for (int i = 0; i < in.size() - 1; i++) {
 				boolean added = false;
-				for (int j = 0;j<ret.size();j++) {
-					if (ItemStack.areItemStacksEqual((ItemStack)ret.get(j).query, in[i])) {
-						ret.get(j).querySize++;
+				for (RecipeQuery aRet : ret) {
+					if (ItemStack.areItemStacksEqual((ItemStack) aRet.query, in.get(i))) {
+						aRet.querySize++;
 						added = true;
 						break;
 					}
 				}
 				if (!added) {
-					ret.add(new RecipeQuery(in[i], 1));
+					ret.add(new RecipeQuery(in.get(i), 1));
 				}
 			}
 			return ret.toArray(new RecipeQuery[ret.size()]);

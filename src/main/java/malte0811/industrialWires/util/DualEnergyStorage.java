@@ -21,10 +21,10 @@ package malte0811.industrialWires.util;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class DualEnergyStorage {
-	double storedEU;
-	double maxEU;
-	double maxOutEU;
-	double maxInEU;
+	private double storedEU;
+	private double maxEU;
+	private double maxOutEU;
+	private double maxInEU;
 
 	public DualEnergyStorage(double maxEU, double maxInEU, double maxOutEU) {
 		this(0, maxEU, maxInEU, maxOutEU);

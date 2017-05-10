@@ -22,13 +22,16 @@ import malte0811.industrialWires.items.ItemIC2Coil;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
+
+import javax.annotation.Nonnull;
 
 public class RecipeCoilLength implements IRecipe {
 	public final ItemStack coil;
 	public final ItemStack cable;
-	final int maxLength;
+	private final int maxLength;
 	public RecipeCoilLength(int meta) {
 		coil = new ItemStack(IndustrialWires.coil, 1, meta);
 		cable = ItemIC2Coil.getUninsulatedCable(coil);
@@ -36,13 +39,14 @@ public class RecipeCoilLength implements IRecipe {
 	}
 
 	@Override
-	public boolean matches(InventoryCrafting inv, World worldIn) {
+	public boolean matches(@Nonnull InventoryCrafting inv, @Nonnull World worldIn) {
 		int l = getLength(inv);
 		return l>0;
 	}
 
+	@Nonnull
 	@Override
-	public ItemStack getCraftingResult(InventoryCrafting inv) {
+	public ItemStack getCraftingResult(@Nonnull InventoryCrafting inv) {
 		ItemStack ret = new ItemStack(IndustrialWires.coil, 1, coil.getItemDamage());
 		ItemIC2Coil.setLength(ret, Math.min(maxLength, getLength(inv)));
 		return ret;
@@ -53,22 +57,25 @@ public class RecipeCoilLength implements IRecipe {
 		return 0;
 	}
 
+	@Nonnull
 	@Override
 	public ItemStack getRecipeOutput() {
-		return null;
+		return ItemStack.EMPTY;
 	}
 
+	@Nonnull
 	@Override
-	public ItemStack[] getRemainingItems(InventoryCrafting inv) {
-		ItemStack[] ret = new ItemStack[inv.getSizeInventory()];
+	public NonNullList<ItemStack> getRemainingItems(@Nonnull InventoryCrafting inv) {
+		NonNullList<ItemStack> ret = NonNullList.withSize(inv.getSizeInventory(), ItemStack.EMPTY);
 		int length = Math.min(getLength(inv), maxLength);
-		for (int i = 0;i<ret.length&&length>0;i++) {
+		for (int i = 0; i < ret.size() && length > 0; i++) {
 			ItemStack curr = inv.getStackInSlot(i);
 			if (OreDictionary.itemMatches(curr, coil, false)) {
 				length-=ItemIC2Coil.getLength(curr);
 				if (length<0) {
-					ret[i] = new ItemStack(IndustrialWires.coil, 1);
-					ItemIC2Coil.setLength(ret[i], -length);
+					ItemStack currStack = new ItemStack(IndustrialWires.coil, 1);
+					ret.set(i, currStack);
+					ItemIC2Coil.setLength(currStack, -length);
 				}
 			} else if (OreDictionary.itemMatches(curr, cable, false)) {
 				length--;
@@ -84,7 +91,7 @@ public class RecipeCoilLength implements IRecipe {
 				cableLength+=ItemIC2Coil.getLength(curr);
 			} else if (OreDictionary.itemMatches(curr, cable, false)) {
 				cableLength++;
-			} else if (curr!=null) {
+			} else if (!curr.isEmpty()) {
 				return -1;
 			}
 		}

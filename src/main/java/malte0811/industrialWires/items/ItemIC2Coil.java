@@ -17,10 +17,6 @@
  */
 package malte0811.industrialWires.items;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import blusunrize.immersiveengineering.ImmersiveEngineering;
 import blusunrize.immersiveengineering.api.Lib;
 import blusunrize.immersiveengineering.api.TargetingInfo;
@@ -48,30 +44,38 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+
+import javax.annotation.Nonnull;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class ItemIC2Coil extends Item implements IWireCoil{
 	public final static String[] subNames = {"tin", "copper", "gold", "hv", "glass"};
 	public final static String lengthKey = "wireLength";
 
 	public ItemIC2Coil() {
-		setUnlocalizedName(IndustrialWires.MODID+".ic2wireCoil");
+		setUnlocalizedName(IndustrialWires.MODID + ".ic2_wire_coil");
 		setHasSubtypes(true);
 		this.setCreativeTab(IndustrialWires.creativeTab);
 		setMaxStackSize(64);
 		ImmersiveEngineering.registerByFullName(this, IndustrialWires.MODID+":"+"ic2WireCoil");
 	}
 	@Override
-	public void getSubItems(Item itemIn, CreativeTabs tab, List<ItemStack> subItems) {
+	public void getSubItems(@Nonnull Item itemIn, CreativeTabs tab, NonNullList<ItemStack> subItems) {
 		for (int i = 0;i<subNames.length;i++) {
 			ItemStack tmp = new ItemStack(this, 1, i);
 			setLength(tmp, getMaxWireLength(tmp));
 			subItems.add(tmp);
 		}
 	}
+
+	@Nonnull
 	@Override
 	public String getUnlocalizedName(ItemStack stack) {
 		return this.getUnlocalizedName()+"."+subNames[stack.getMetadata()];
@@ -86,17 +90,19 @@ public class ItemIC2Coil extends Item implements IWireCoil{
 		list.add(I18n.format(IndustrialWires.MODID+".desc.recipe"));
 		if(stack.getTagCompound()!=null && stack.getTagCompound().hasKey("linkingPos")) {
 			int[] link = stack.getTagCompound().getIntArray("linkingPos");
-			if(link!=null&&link.length>3) {
+			if (link.length > 3) {
 				list.add(I18n.format(Lib.DESC_INFO+"attachedToDim", link[1],link[2],link[3],link[0]));
 			}
 		}
 	}
 	//mostly copied from IE
+	@Nonnull
 	@Override
-	public EnumActionResult onItemUseFirst(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, EnumHand hand) {
-		if(!world.isRemote) {
-			if (stack.stackSize>1) {
-				player.addChatMessage(new TextComponentTranslation(IndustrialWires.MODID+".chat.stackSize"));
+	public EnumActionResult onItemUseFirst(EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, EnumHand hand) {
+		ItemStack stack = player.getHeldItem(hand);
+		if (!world.isRemote && !stack.isEmpty()) {
+			if (stack.getCount() > 1) {
+				player.sendMessage(new TextComponentTranslation(IndustrialWires.MODID + ".chat.stackSize"));
 				return EnumActionResult.FAIL;
 			}
 			TileEntity tileEntity = world.getTileEntity(pos);
@@ -110,7 +116,7 @@ public class ItemIC2Coil extends Item implements IWireCoil{
 				}
 
 				if( !((IImmersiveConnectable)tileEntity).canConnectCable(wire, target)) {
-					player.addChatMessage(new TextComponentTranslation(Lib.CHAT_WARN+"wrongCable"));
+					player.sendMessage(new TextComponentTranslation(Lib.CHAT_WARN + "wrongCable"));
 					return EnumActionResult.FAIL;
 				}
 
@@ -124,13 +130,13 @@ public class ItemIC2Coil extends Item implements IWireCoil{
 					TileEntity tileEntityLinkingPos = world.getTileEntity(linkPos);
 					int distanceSq = (int) Math.ceil( linkPos.distanceSq(masterPos) );
 					if(array[0]!=world.provider.getDimension()) {
-						player.addChatMessage(new TextComponentTranslation(Lib.CHAT_WARN+"wrongDimension"));
+						player.sendMessage(new TextComponentTranslation(Lib.CHAT_WARN + "wrongDimension"));
 					} else if(linkPos.equals(masterPos)) {
-						player.addChatMessage(new TextComponentTranslation(Lib.CHAT_WARN+"sameConnection"));
+						player.sendMessage(new TextComponentTranslation(Lib.CHAT_WARN + "sameConnection"));
 					} else if( distanceSq > (type.getMaxLength()*type.getMaxLength())) {
-						player.addChatMessage(new TextComponentTranslation(Lib.CHAT_WARN+"tooFar"));
+						player.sendMessage(new TextComponentTranslation(Lib.CHAT_WARN + "tooFar"));
 					} else if(!(tileEntityLinkingPos instanceof IImmersiveConnectable)||!((IImmersiveConnectable) tileEntityLinkingPos).canConnectCable(type, TargetingInfo.readFromNBT(stack.getTagCompound()))) {
-						player.addChatMessage(new TextComponentTranslation(Lib.CHAT_WARN+"invalidPoint"));
+						player.sendMessage(new TextComponentTranslation(Lib.CHAT_WARN + "invalidPoint"));
 					} else {
 						IImmersiveConnectable nodeHere = (IImmersiveConnectable)tileEntity;
 						IImmersiveConnectable nodeLink = (IImmersiveConnectable)tileEntityLinkingPos;
@@ -144,7 +150,7 @@ public class ItemIC2Coil extends Item implements IWireCoil{
 							}
 						}
 						if(connectionExists) {
-							player.addChatMessage(new TextComponentTranslation(Lib.CHAT_WARN+"connectionExists"));
+							player.sendMessage(new TextComponentTranslation(Lib.CHAT_WARN + "connectionExists"));
 						} else {
 							Vec3d rtOff0 = nodeHere.getRaytraceOffset(nodeLink).addVector(masterPos.getX(), masterPos.getY(), masterPos.getZ());
 							Vec3d rtOff1 = nodeLink.getRaytraceOffset(nodeHere).addVector(linkPos.getX(), linkPos.getY(), linkPos.getZ());
@@ -168,7 +174,7 @@ public class ItemIC2Coil extends Item implements IWireCoil{
 										if (length<lengthOnStack) {
 											setLength(stack, lengthOnStack-length);
 										} else {
-											player.setHeldItem(hand, null);
+											player.setHeldItem(hand, ItemStack.EMPTY);
 										}
 									}
 									((TileEntity)nodeHere).markDirty();
@@ -180,10 +186,10 @@ public class ItemIC2Coil extends Item implements IWireCoil{
 									state = world.getBlockState(linkPos);
 									world.notifyBlockUpdate(linkPos, state,state, 3);
 								} else {
-									player.addChatMessage(new TextComponentTranslation(IndustrialWires.MODID+".chat.tooLong"));
+									player.sendMessage(new TextComponentTranslation(IndustrialWires.MODID + ".chat.tooLong"));
 								}
 							} else {
-								player.addChatMessage(new TextComponentTranslation(Lib.CHAT_WARN+"cantSee"));
+								player.sendMessage(new TextComponentTranslation(Lib.CHAT_WARN + "cantSee"));
 							}
 						}
 					}

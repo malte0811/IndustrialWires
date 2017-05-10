@@ -107,8 +107,7 @@ public class IndicatorLight extends PanelComponent implements IConfigurableCompo
 	}
 
 	@Override
-	public boolean interactWith(Vec3d hitRelative, TileEntityPanel tile, EntityPlayerMP player) {
-		return false;
+	public void interactWith(Vec3d hitRelative, TileEntityPanel tile, EntityPlayerMP player) {
 	}
 
 	@Override

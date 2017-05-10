@@ -31,7 +31,6 @@ import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -45,9 +44,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
-import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 
 public abstract class BlockIWBase extends Block {
@@ -62,6 +60,7 @@ public abstract class BlockIWBase extends Block {
 		setCreativeTab(IndustrialWires.creativeTab);
 	}
 
+	@Nonnull
 	@Override
 	protected BlockStateContainer createBlockState() {
 		if (properties==null) {
@@ -75,8 +74,9 @@ public abstract class BlockIWBase extends Block {
 		return new BlockStateContainer(this, props);
 	}
 
+	@Nonnull
 	@Override
-	public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
+	public IBlockState getActualState(@Nonnull IBlockState state, IBlockAccess worldIn, BlockPos pos) {
 		state = super.getActualState(state, worldIn, pos);
 		TileEntity tile = worldIn.getTileEntity(pos);
 		if (tile instanceof IHasDummyBlocksIW) {
@@ -92,8 +92,9 @@ public abstract class BlockIWBase extends Block {
 		return state;
 	}
 
+	@Nonnull
 	@Override
-	public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
+	public IBlockState getExtendedState(@Nonnull IBlockState state, IBlockAccess world, BlockPos pos) {
 		state = super.getExtendedState(state, world, pos);
 		if (state instanceof IExtendedBlockState) {
 			TileEntity te = world.getTileEntity(pos);
@@ -110,7 +111,7 @@ public abstract class BlockIWBase extends Block {
 	}
 
 	@Override
-	public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
+	public void breakBlock(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
 		TileEntity te = worldIn.getTileEntity(pos);
 		if (te instanceof IHasDummyBlocksIW) {
 			((IHasDummyBlocksIW) te).breakDummies();
@@ -123,20 +124,7 @@ public abstract class BlockIWBase extends Block {
 		worldIn.removeTileEntity(pos);
 	}
 
-	@Nullable
-	@Override
-	public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, World worldIn, BlockPos pos) {
-		return getBoundingBox(blockState, worldIn, pos);
-	}
-
-	@Override
-	public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn) {
-		AxisAlignedBB axisalignedbb = getBoundingBox(state, worldIn, pos).offset(pos);
-		if (entityBox.intersectsWith(axisalignedbb)) {
-			collidingBoxes.add(axisalignedbb);
-		}
-	}
-
+	@Nonnull
 	@Override
 	public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
 		TileEntity te = source.getTileEntity(pos);
@@ -152,8 +140,9 @@ public abstract class BlockIWBase extends Block {
 	//mostly copied from IE
 	@Override
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player,
-									EnumHand hand, ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
+									EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) {
 		TileEntity te = world.getTileEntity(pos);
+		ItemStack heldItem = player.getHeldItem(hand);
 		if(te instanceof IEBlockInterfaces.IDirectionalTile && Utils.isHammer(heldItem) && !world.isRemote) {
 			IEBlockInterfaces.IDirectionalTile directionalTe = (IEBlockInterfaces.IDirectionalTile) te;
 			if (directionalTe.canHammerRotate(side, hitX, hitY, hitZ, player)) {
@@ -196,10 +185,10 @@ public abstract class BlockIWBase extends Block {
 	}
 
 	@Override
-	public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, @Nullable ItemStack stack) {
+	public void harvestBlock(@Nonnull World worldIn, EntityPlayer player, @Nonnull BlockPos pos, @Nonnull IBlockState state, TileEntity te, ItemStack stack) {
 		if (te instanceof IEBlockInterfaces.ITileDrop) {
 			ItemStack drop = ((IEBlockInterfaces.ITileDrop) te).getTileDrop(player, state);
-			if (drop!=null) {
+			if (!drop.isEmpty()) {
 				spawnAsEntity(worldIn, pos, drop);
 				return;
 			}
@@ -208,7 +197,7 @@ public abstract class BlockIWBase extends Block {
 	}
 
 	@Override
-	public boolean rotateBlock(World world, BlockPos pos, EnumFacing axis) {
+	public boolean rotateBlock(World world, @Nonnull BlockPos pos, @Nonnull EnumFacing axis) {
 		return false;
 	}
 

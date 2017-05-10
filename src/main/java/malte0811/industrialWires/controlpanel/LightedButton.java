@@ -109,9 +109,9 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 	}
 
 	@Override
-	public boolean interactWith(Vec3d hitRel, TileEntityPanel tile, EntityPlayerMP player) {
+	public void interactWith(Vec3d hitRel, TileEntityPanel tile, EntityPlayerMP player) {
 		if (!latching&&active) {
-			return false;
+			return;
 		}
 		setOut(!active, tile);
 		if (!latching) {
@@ -119,7 +119,6 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 		}
 		tile.markDirty();
 		tile.triggerRenderUpdate();
-		return true;
 	}
 
 	@Override

@@ -27,7 +27,6 @@ import malte0811.industrialWires.blocks.IBlockBoundsIW;
 import malte0811.industrialWires.blocks.TileEntityIWBase;
 import malte0811.industrialWires.controlpanel.*;
 import malte0811.industrialWires.network.MessagePanelInteract;
-import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
@@ -48,6 +47,7 @@ import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.List;
@@ -78,11 +78,6 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 			components.add(lbl);
 			components.add(btn);
 		}
-		Slider slid = new Slider(.5F, 0x00ff00, true, 1, (byte) 1);
-		slid.setX(.4F);
-		slid.setY(.25F);
-		slid.setPanelHeight(components.height);
-		//components.add(slid);
 	}
 
 	@Override
@@ -90,11 +85,11 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		for (PanelComponent pc : components) {
 			pc.update(this);
 		}
-		if (!worldObj.isRemote) {
+		if (!world.isRemote) {
 			if (firstTick) {
-				List<BlockPos> parts = MiscUtils.discoverPanelParts(worldObj, pos);
+				List<BlockPos> parts = PanelUtils.discoverPanelParts(world, pos);
 				for (BlockPos bp : parts) {
-					TileEntity te = worldObj.getTileEntity(bp);
+					TileEntity te = world.getTileEntity(bp);
 					if (te instanceof TileEntityRSPanelConn&&!rsPorts.contains(te)) {
 						((TileEntityRSPanelConn) te).registerPanel(this);
 					}
@@ -119,7 +114,8 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 	}
 
 	@Override
-	public ItemStack getTileDrop(EntityPlayer player, IBlockState state) {
+	@Nonnull
+	public ItemStack getTileDrop(@Nonnull EntityPlayer player, @Nonnull IBlockState state) {
 		NBTTagCompound ret = new NBTTagCompound();
 		writeToItemNBT(ret, true);
 		ItemStack retStack = new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.TOP.ordinal());
@@ -128,8 +124,8 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 	}
 
 	@Override
-	public void readOnPlacement(@Nullable EntityLivingBase placer, ItemStack stack) {
-		if (stack.hasTagCompound()) {
+	public void readOnPlacement(@Nullable EntityLivingBase placer, @Nonnull ItemStack stack) {
+		if (!stack.isEmpty() && stack.hasTagCompound()) {
 			readFromItemNBT(stack.getTagCompound());
 		}
 	}
@@ -154,13 +150,14 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		nbt.setFloat("height", components.height);
 	}
 
+	@Nonnull
 	@Override
 	public EnumFacing getFacing() {
 		return components.facing;
 	}
 
 	@Override
-	public void setFacing(EnumFacing facing) {
+	public void setFacing(@Nonnull EnumFacing facing) {
 		this.components.facing = facing;
 	}
 
@@ -169,8 +166,9 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		return 0;
 	}
 
+	@Nonnull
 	@Override
-	public EnumFacing getFacingForPlacement(EntityLivingBase placer, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ) {
+	public EnumFacing getFacingForPlacement(@Nonnull EntityLivingBase placer, @Nonnull BlockPos pos, @Nonnull EnumFacing side, float hitX, float hitY, float hitZ) {
 		switch (side) {
 		case UP:
 			components.top = EnumFacing.UP;
@@ -189,17 +187,17 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 	}
 
 	@Override
-	public boolean mirrorFacingOnPlacement(EntityLivingBase placer) {
+	public boolean mirrorFacingOnPlacement(@Nonnull EntityLivingBase placer) {
 		return false;
 	}
 
 	@Override
-	public boolean canHammerRotate(EnumFacing side, float hitX, float hitY, float hitZ, EntityLivingBase entity) {
+	public boolean canHammerRotate(@Nonnull EnumFacing side, float hitX, float hitY, float hitZ, @Nonnull EntityLivingBase entity) {
 		return false;
 	}
 
 	@Override
-	public boolean canRotate(EnumFacing axis) {
+	public boolean canRotate(@Nonnull EnumFacing axis) {
 		return false;
 	}
 
@@ -230,7 +228,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		Matrix4 mat = components.getPanelTopTransform();
 		PanelComponent retPc = null;
 		RayTraceResult retRay = null;
-		Vec3d playerPos = Minecraft.getMinecraft().thePlayer.getPositionVector().addVector(-pos.getX(), player.getEyeHeight() - pos.getY(), -pos.getZ());
+		Vec3d playerPos = Minecraft.getMinecraft().player.getPositionVector().addVector(-pos.getX(), player.getEyeHeight() - pos.getY(), -pos.getZ());
 		for (PanelComponent pc : components) {
 			AxisAlignedBB box = pc.getBlockRelativeAABB();
 			if (box.maxY>box.minY) {
@@ -257,8 +255,8 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 	}
 
 	@Override
-	public boolean interact(EnumFacing side, EntityPlayer player, EnumHand hand, ItemStack heldItem, float hitX, float hitY, float hitZ) {
-		if (worldObj.isRemote) {
+	public boolean interact(@Nonnull EnumFacing side, @Nonnull EntityPlayer player, @Nonnull EnumHand hand, @Nonnull ItemStack heldItem, float hitX, float hitY, float hitZ) {
+		if (world.isRemote) {
 			Pair<PanelComponent, RayTraceResult> pc = getSelectedComponent(player, new Vec3d(hitX, hitY, hitZ), false);
 			if (pc != null) {
 				Matrix4 inv = components.getPanelTopTransform();
@@ -279,9 +277,9 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 	}
 
 	public void triggerRenderUpdate() {
-		IBlockState state = worldObj.getBlockState(pos);
-		worldObj.notifyBlockUpdate(pos, state, state, 3);
-		worldObj.addBlockEvent(pos, state.getBlock(), 255, 0);
+		IBlockState state = world.getBlockState(pos);
+		world.notifyBlockUpdate(pos, state, state, 3);
+		world.addBlockEvent(pos, state.getBlock(), 255, 0);
 	}
 
 	public void registerRS(TileEntityRSPanelConn te) {

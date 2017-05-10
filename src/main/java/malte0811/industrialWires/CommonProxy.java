@@ -60,7 +60,7 @@ public class CommonProxy implements IGuiHandler {
 		} else if (ID == 1) {//ITEM GUI
 			EnumHand h = z == 1 ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
 			ItemStack held = player.getHeldItem(h);
-			if (held != null && held.getItem() == IndustrialWires.panelComponent) {
+			if (!held.isEmpty() && held.getItem() == IndustrialWires.panelComponent) {
 				return new ContainerPanelComponent(h);
 			}
 		}

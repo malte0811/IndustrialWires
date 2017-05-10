@@ -34,13 +34,13 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.AxisDirection;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-import javax.annotation.Nullable;
-import java.util.List;
+import javax.annotation.Nonnull;
 
 public class BlockJacobsLadder extends BlockIWBase implements IMetaEnum, IPlacementCheck {
 	private static PropertyEnum<LadderSize> size_property = PropertyEnum.create("size", LadderSize.class);
@@ -49,8 +49,9 @@ public class BlockJacobsLadder extends BlockIWBase implements IMetaEnum, IPlacem
 		super(Material.IRON, "jacobs_ladder");
 	}
 
+	@Nonnull
 	@Override
-	public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
+	public IBlockState getActualState(@Nonnull IBlockState state, IBlockAccess worldIn, BlockPos pos) {
 		state = super.getActualState(state, worldIn, pos);
 		TileEntity tile = worldIn.getTileEntity(pos);
 		if (tile instanceof TileEntityJacobsLadder) {
@@ -71,13 +72,14 @@ public class BlockJacobsLadder extends BlockIWBase implements IMetaEnum, IPlacem
 		return state.getValue(size_property).ordinal();
 	}
 
+	@Nonnull
 	@Override
 	public IBlockState getStateFromMeta(int meta) {
 		return super.getStateFromMeta(meta).withProperty(size_property, LadderSize.values()[meta]);
 	}
 
 	@Override
-	public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list) {
+	public void getSubBlocks(@Nonnull Item itemIn, CreativeTabs tab, NonNullList<ItemStack> list) {
 		for (int i = 0; i < LadderSize.values().length; i++) {
 			list.add(new ItemStack(this, 1, i));
 		}
@@ -94,7 +96,7 @@ public class BlockJacobsLadder extends BlockIWBase implements IMetaEnum, IPlacem
 	}
 
 	@Override
-	public TileEntity createTileEntity(World world, IBlockState state) {
+	public TileEntity createTileEntity(@Nonnull World world, @Nonnull IBlockState state) {
 		return new TileEntityJacobsLadder(state.getValue(size_property));
 	}
 
@@ -118,8 +120,10 @@ public class BlockJacobsLadder extends BlockIWBase implements IMetaEnum, IPlacem
 		return false;
 	}
 
+	@Nonnull
 	@Override
-	public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer, ItemStack stack) {
+	public IBlockState getStateForPlacement(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull EnumFacing facing,
+											float hitX, float hitY, float hitZ, int meta, @Nonnull EntityLivingBase placer, EnumHand hand) {
 		EnumFacing f = facing.getOpposite();
 		if (facing.getAxis() == EnumFacing.Axis.Y) {
 			double dX = hitX - .5;
@@ -130,11 +134,12 @@ public class BlockJacobsLadder extends BlockIWBase implements IMetaEnum, IPlacem
 				f = EnumFacing.getFacingFromAxis(dZ > 0 ? AxisDirection.POSITIVE : AxisDirection.NEGATIVE, EnumFacing.Axis.Z);
 			}
 		}
-		return super.getStateForPlacement(world, pos, facing, hitX, hitY, hitZ, meta, placer, stack).withProperty(IEProperties.FACING_HORIZONTAL, f);
+		return super.getStateForPlacement(world, pos, facing, hitX, hitY, hitZ, meta, placer, hand).withProperty(IEProperties.FACING_HORIZONTAL, f);
 	}
 
+	@Nonnull
 	@Override
-	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
+	public ItemStack getPickBlock(@Nonnull IBlockState state, RayTraceResult target, @Nonnull World world, @Nonnull BlockPos pos, EntityPlayer player) {
 		return new ItemStack(this, 1, getMetaFromState(state));
 	}
 
@@ -148,12 +153,12 @@ public class BlockJacobsLadder extends BlockIWBase implements IMetaEnum, IPlacem
 	}
 
 	@Override
-	public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, @Nullable ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
+	public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) {
 		TileEntity te = worldIn.getTileEntity(pos);
 		if (te instanceof TileEntityJacobsLadder) {
-			return ((TileEntityJacobsLadder) te).onActivated(playerIn, hand, heldItem);
+			return ((TileEntityJacobsLadder) te).onActivated(playerIn, hand);
 		}
-		return super.onBlockActivated(worldIn, pos, state, playerIn, hand, heldItem, side, hitX, hitY, hitZ);
+		return super.onBlockActivated(worldIn, pos, state, playerIn, hand, side, hitX, hitY, hitZ);
 	}
 
 	@Override
@@ -168,7 +173,7 @@ public class BlockJacobsLadder extends BlockIWBase implements IMetaEnum, IPlacem
 	}
 
 	@Override
-	public boolean rotateBlock(World world, BlockPos pos, EnumFacing axis) {
+	public boolean rotateBlock(World world, @Nonnull BlockPos pos, @Nonnull EnumFacing axis) {
 		TileEntity te = world.getTileEntity(pos);
 		return te instanceof TileEntityJacobsLadder && ((TileEntityJacobsLadder) te).rotate(world, pos, axis);
 	}
