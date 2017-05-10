@@ -160,7 +160,7 @@ public class PanelModel implements IBakedModel {
 
 		@Nonnull
 		@Override
-		public ItemCameraTransforms getItemCameraTransforms() {//TODO very much cache this!
+		public ItemCameraTransforms getItemCameraTransforms() {
 			return transform;
 		}
 

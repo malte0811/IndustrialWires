@@ -33,6 +33,8 @@ item.industrialwires.panel_component.label.name=Label
 item.industrialwires.panel_component.indicator_light.name=Indicator Light
 item.industrialwires.panel_component.slider.name=Slider
 item.industrialwires.panel_component.variac.name=Variac®
+item.industrialwires.panel_component.toggle_switch.name=Toggle Switch
+item.industrialwires.panel_component.toggle_switch_covered.name=Covered Toggle Switch
 
 
 industrialwires.desc.wireLength=Wire length: %1s block(s)
