@@ -151,7 +151,7 @@ public class PanelModel implements IBakedModel {
 				new ItemTransformVec3f(new Vector3f(), new Vector3f(0, .1F, 0), new Vector3f(.25F, .25F, .25F)),//Ground
 				new ItemTransformVec3f(new Vector3f(0, 180, 45), new Vector3f(0, 0, -.1875F), new Vector3f(.5F, .5F, .5F)));//Fixed;
 		@Override
-		public ItemCameraTransforms getItemCameraTransforms() {//TODO very much cache this!
+		public ItemCameraTransforms getItemCameraTransforms() {
 			return transform;
 		}
 

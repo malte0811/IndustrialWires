@@ -322,7 +322,7 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 				aabb = new AxisAlignedBB(0, 0, 0, h, 1, 1);
 				break;
 			case EAST:
-				aabb = new AxisAlignedBB(1-h, 0, 0, 0, 1, 1);
+				aabb = new AxisAlignedBB(1-h, 0, 0, 1, 1, 1);
 				break;
 			}
 		}
