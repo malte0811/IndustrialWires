@@ -50,7 +50,7 @@ public class PanelModelLoader implements ICustomModelLoader {
 
 	@Override
 	public boolean accepts(ResourceLocation modelLocation) {
-		return modelLocation.getResourcePath().contains(RESOURCE_BASE+RESOURCE_LOCATION);
+		return modelLocation.getResourcePath().contains(RESOURCE_BASE + RESOURCE_LOCATION);
 	}
 
 	@Override
@@ -58,7 +58,7 @@ public class PanelModelLoader implements ICustomModelLoader {
 		String resourcePath = modelLocation.getResourcePath();
 		int pos = resourcePath.indexOf(RESOURCE_LOCATION);
 		if (pos >= 0) {
-				return new PanelModelBase();
+			return new PanelModelBase();
 		}
 		return ModelLoaderRegistry.getMissingModel();
 	}
@@ -83,7 +83,7 @@ public class PanelModelLoader implements ICustomModelLoader {
 		}
 
 		@Override
-		public IBakedModel bake(IModelState state, VertexFormat format,	Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter) {
+		public IBakedModel bake(IModelState state, VertexFormat format, Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter) {
 			try {
 				return new PanelModel();
 			} catch (Exception e) {

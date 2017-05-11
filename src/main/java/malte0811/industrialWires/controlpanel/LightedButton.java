@@ -47,9 +47,11 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 	public int rsOutputChannel;
 	private int ticksTillOff;
 	private Set<BiConsumer<Integer, Byte>> rsOut = new HashSet<>();
+
 	public LightedButton() {
 		super("lighted_button");
 	}
+
 	public LightedButton(int color, boolean active, boolean latching, int rsOutputId, int rsOutputChannel) {
 		this();
 		this.color = color;
@@ -80,12 +82,18 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 		rsOutputChannel = nbt.getInteger(RS_CHANNEL);
 		rsOutputId = nbt.getInteger(RS_ID);
 	}
+
 	private final static float size = .0625F;
+
 	@Override
 	public List<RawQuad> getQuads() {
 		float[] color = PanelUtils.getFloatColor(active, this.color);
 		List<RawQuad> ret = new ArrayList<>(5);
-		PanelUtils.addColoredBox(color, GRAY, null, new Vector3f(0, 0, 0), new Vector3f(size, size/2, size), ret, false);
+		PanelUtils.addColoredBox(color, GRAY, null, new Vector3f(0, 0, 0), new Vector3f(size, size / 2, size), ret, false);
+		if (active) {
+			ret.get(0).light = 0xff0ff;
+		}
+
 		return ret;
 	}
 
@@ -102,15 +110,15 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 	@Nonnull
 	@Override
 	public AxisAlignedBB getBlockRelativeAABB() {
-		if (aabb==null) {
-			aabb = new AxisAlignedBB(x, 0, y, x+size, getHeight(), y+size);
+		if (aabb == null) {
+			aabb = new AxisAlignedBB(x, 0, y, x + size, getHeight(), y + size);
 		}
 		return aabb;
 	}
 
 	@Override
 	public void interactWith(Vec3d hitRel, TileEntityPanel tile, EntityPlayerMP player) {
-		if (!latching&&active) {
+		if (!latching && active) {
 			return;
 		}
 		setOut(!active, tile);
@@ -123,10 +131,10 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 
 	@Override
 	public void update(TileEntityPanel tile) {
-		if (!latching&&ticksTillOff>0) {
+		if (!latching && ticksTillOff > 0) {
 			ticksTillOff--;
 			tile.markDirty();
-			if (ticksTillOff==0) {
+			if (ticksTillOff == 0) {
 				setOut(false, tile);
 			}
 		}
@@ -134,27 +142,27 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 
 	@Override
 	public void registerRSOutput(int id, @Nonnull BiConsumer<Integer, Byte> out) {
-		if (id==rsOutputId) {
+		if (id == rsOutputId) {
 			rsOut.add(out);
-			out.accept(rsOutputChannel, (byte) (active?15:0));
+			out.accept(rsOutputChannel, (byte) (active ? 15 : 0));
 		}
 	}
 
 	@Override
 	public void unregisterRSOutput(int id, @Nonnull BiConsumer<Integer, Byte> out) {
-		if (id==rsOutputId) {
+		if (id == rsOutputId) {
 			rsOut.remove(out);
 		}
 	}
 
 	@Override
 	public float getHeight() {
-		return size/2;
+		return size / 2;
 	}
 
 	@Override
 	public void renderInGUI(GuiPanelCreator gui) {
-		renderInGUIDefault(gui, 0xff000000|color);
+		renderInGUIDefault(gui, 0xff000000 | color);
 	}
 
 	@Override
@@ -166,8 +174,8 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 		active = on;
 		tile.markDirty();
 		tile.triggerRenderUpdate();
-		for (BiConsumer<Integer, Byte> rs:rsOut) {
-			rs.accept(rsOutputChannel, (byte)(active?15:0));
+		for (BiConsumer<Integer, Byte> rs : rsOut) {
+			rs.accept(rsOutputChannel, (byte) (active ? 15 : 0));
 		}
 	}
 
@@ -196,61 +204,61 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 	@Override
 	public void applyConfigOption(ConfigType type, int id, NBTBase value) {
 		switch (type) {
-			case BOOL:
-				if (id==0) {
-					latching = ((NBTTagByte)value).getByte()!=0;
-				}
-				break;
-			case RS_CHANNEL:
-				if (id==0) {
-					rsOutputChannel = ((NBTTagByte)value).getByte();
-				}
-				break;
-			case INT:
-				if (id==0) {
-					rsOutputId = ((NBTTagInt)value).getInt();
-				}
-				break;
-			case FLOAT:
-				color = PanelUtils.setColor(color, id, value);
-				break;
+		case BOOL:
+			if (id == 0) {
+				latching = ((NBTTagByte) value).getByte() != 0;
+			}
+			break;
+		case RS_CHANNEL:
+			if (id == 0) {
+				rsOutputChannel = ((NBTTagByte) value).getByte();
+			}
+			break;
+		case INT:
+			if (id == 0) {
+				rsOutputId = ((NBTTagInt) value).getInt();
+			}
+			break;
+		case FLOAT:
+			color = PanelUtils.setColor(color, id, value);
+			break;
 		}
 	}
 
 	@Override
 	public String fomatConfigName(ConfigType type, int id) {
 		switch (type) {
-			case BOOL:
-				return I18n.format(IndustrialWires.MODID+".desc.latching");
-			case RS_CHANNEL:
-			case INT:
-				return null;
-			case FLOAT:
-				return I18n.format(IndustrialWires.MODID+".desc."+(id==0?"red":(id==1?"green":"blue")));
-			default:
-				return "INVALID";
+		case BOOL:
+			return I18n.format(IndustrialWires.MODID + ".desc.latching");
+		case RS_CHANNEL:
+		case INT:
+			return null;
+		case FLOAT:
+			return I18n.format(IndustrialWires.MODID + ".desc." + (id == 0 ? "red" : (id == 1 ? "green" : "blue")));
+		default:
+			return "INVALID";
 		}
 	}
 
 	@Override
 	public String fomatConfigDescription(ConfigType type, int id) {
 		switch (type) {
-			case BOOL:
-				return I18n.format(IndustrialWires.MODID+".desc.latching_info");
-			case RS_CHANNEL:
-				return I18n.format(IndustrialWires.MODID+".desc.rschannel_info");
-			case INT:
-				return I18n.format(IndustrialWires.MODID+".desc.rsid_info");
-			case FLOAT:
-				return null;
-			default:
-				return "INVALID?";
+		case BOOL:
+			return I18n.format(IndustrialWires.MODID + ".desc.latching_info");
+		case RS_CHANNEL:
+			return I18n.format(IndustrialWires.MODID + ".desc.rschannel_info");
+		case INT:
+			return I18n.format(IndustrialWires.MODID + ".desc.rsid_info");
+		case FLOAT:
+			return null;
+		default:
+			return "INVALID?";
 		}
 	}
 
 	@Override
 	public RSChannelConfig[] getRSChannelOptions() {
-		return new RSChannelConfig[]{new RSChannelConfig("channel", 0, 0, (byte)rsOutputChannel)};
+		return new RSChannelConfig[]{new RSChannelConfig("channel", 0, 0, (byte) rsOutputChannel)};
 	}
 
 	@Override
@@ -270,8 +278,8 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 		int yOffset = 10;
 		return new FloatConfig[]{
 				new FloatConfig("red", x, yOffset, color[0], 60),
-				new FloatConfig("green", x, yOffset+20, color[1], 60),
-				new FloatConfig("blue", x, yOffset+40, color[2], 60)
+				new FloatConfig("green", x, yOffset + 20, color[1], 60),
+				new FloatConfig("blue", x, yOffset + 40, color[2], 60)
 		};
 	}
 

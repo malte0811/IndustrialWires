@@ -38,7 +38,8 @@ public class MessageGUIInteract implements IMessage {
 		this.data = data;
 	}
 
-	public MessageGUIInteract() {}
+	public MessageGUIInteract() {
+	}
 
 	@Override
 	public void fromBytes(ByteBuf buf) {
@@ -60,8 +61,9 @@ public class MessageGUIInteract implements IMessage {
 			ctx.getServerHandler().player.getServerWorld().addScheduledTask(() -> handle(message, ctx.getServerHandler().player));
 			return null;
 		}
+
 		private void handle(MessageGUIInteract msg, EntityPlayerMP player) {
-			if (player.getDistanceSqToCenter(msg.pos)<100) {//closer than 10 blocks
+			if (player.getDistanceSqToCenter(msg.pos) < 100) {//closer than 10 blocks
 				TileEntity te = player.world.getTileEntity(msg.pos);
 				if (te instanceof INetGUI) {
 					((INetGUI) te).onChange(msg.data, player);

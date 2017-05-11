@@ -26,11 +26,13 @@ import javax.annotation.Nonnull;
 
 public class ContainerRSPanelConn extends Container {
 	private final TileEntityRSPanelConn te;
+
 	public ContainerRSPanelConn(TileEntityRSPanelConn tile) {
 		te = tile;
 	}
+
 	@Override
 	public boolean canInteractWith(@Nonnull EntityPlayer playerIn) {
-		return playerIn.getDistanceSq(te.getPos())<64;
+		return playerIn.getDistanceSq(te.getPos()) < 64;
 	}
 }

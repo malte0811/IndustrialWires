@@ -47,6 +47,7 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 	private byte rsChannel;
 	private int rsId;
 	private Set<BiConsumer<Integer, Byte>> outputs = new HashSet<>();
+
 	public Slider(float length, int color, boolean horizontal, int rsId, byte rsChannel) {
 		this();
 		this.color = color;
@@ -55,9 +56,11 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 		this.rsChannel = rsChannel;
 		this.rsId = rsId;
 	}
+
 	public Slider() {
 		super("slider");
 	}
+
 	@Override
 	protected void writeCustomNBT(NBTTagCompound nbt, boolean toItem) {
 		nbt.setInteger(COLOR, color);
@@ -84,23 +87,26 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 	public List<RawQuad> getQuads() {
 		List<RawQuad> ret = new ArrayList<>();
 		final float yOff = .001F;
-		float xSize = horizontal?length:WIDTH;
-		float ySize = horizontal?WIDTH:length;
+		float xSize = horizontal ? length : WIDTH;
+		float ySize = horizontal ? WIDTH : length;
 		PanelUtils.addColoredQuad(ret, new Vector3f(0, yOff, 0), new Vector3f(0, yOff, ySize), new Vector3f(xSize, yOff, ySize), new Vector3f(xSize, yOff, 0),
 				EnumFacing.UP, GRAY);
 		float[] color = new float[4];
 		color[3] = 1;
-		for (int i = 0;i<3;i++) {
-			color[i] = ((this.color>>(8*(2-i)))&255)/255F*(.5F+out/30F);
+		for (int i = 0; i < 3; i++) {
+			color[i] = ((this.color >> (8 * (2 - i))) & 255) / 255F * (.5F + out / 30F);
 		}
 		float val;
 		if (horizontal) {
-			val = (out/15F)*(length-.0625F);
+			val = (out / 15F) * (length - .0625F);
 		} else {
-			val = (1-out/15F)*(length-.0625F);
+			val = (1 - out / 15F) * (length - .0625F);
 		}
-		PanelUtils.addColoredBox(color, GRAY, null, new Vector3f(horizontal?val:0, 0, horizontal?0:val),
+		PanelUtils.addColoredBox(color, GRAY, null, new Vector3f(horizontal ? val : 0, 0, horizontal ? 0 : val),
 				new Vector3f(.0625F, getHeight(), .0625F), ret, false);
+		if (out>0) {
+			ret.get(1).light = 0xff0ff;
+		}
 		return ret;
 	}
 
@@ -118,19 +124,19 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 	@Nonnull
 	@Override
 	public AxisAlignedBB getBlockRelativeAABB() {
-		if (aabb==null) {
-			aabb = new AxisAlignedBB(x, 0, y, x+(horizontal?length:WIDTH), getHeight(), y+(horizontal?WIDTH:length));
+		if (aabb == null) {
+			aabb = new AxisAlignedBB(x, 0, y, x + (horizontal ? length : WIDTH), getHeight(), y + (horizontal ? WIDTH : length));
 		}
 		return aabb;
 	}
 
 	@Override
 	public void interactWith(Vec3d hitRelative, TileEntityPanel tile, EntityPlayerMP player) {
-		double pos = horizontal?hitRelative.xCoord:(length-hitRelative.zCoord);
-		byte newLevel = (byte)(Math.min(pos*16/length, 15));
-		if (newLevel!=out) {
-			for (BiConsumer<Integer, Byte> output:outputs) {
-				output.accept((int)rsChannel, newLevel);
+		double pos = horizontal ? hitRelative.xCoord : (length - hitRelative.zCoord);
+		byte newLevel = (byte) (Math.min(pos * 16 / length, 15));
+		if (newLevel != out) {
+			for (BiConsumer<Integer, Byte> output : outputs) {
+				output.accept((int) rsChannel, newLevel);
 			}
 			out = newLevel;
 			tile.markDirty();
@@ -140,15 +146,15 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 
 	@Override
 	public void registerRSOutput(int id, @Nonnull BiConsumer<Integer, Byte> out) {
-		if (id==rsId) {
+		if (id == rsId) {
 			outputs.add(out);
-			out.accept((int)rsChannel, this.out);
+			out.accept((int) rsChannel, this.out);
 		}
 	}
 
 	@Override
 	public void unregisterRSOutput(int id, @Nonnull BiConsumer<Integer, Byte> out) {
-		if (id==rsId) {
+		if (id == rsId) {
 			outputs.remove(out);
 		}
 	}
@@ -160,25 +166,25 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 
 	@Override
 	public float getHeight() {
-		return .0625F/2;
+		return .0625F / 2;
 	}
 
 	@Override
 	public void renderInGUI(GuiPanelCreator gui) {
 		renderInGUIDefault(gui, GRAY_INT);
-		double middleX = (getX()+(horizontal?length:.0625)/2);
-		double middleY = (getY()+(horizontal?.0625:length)/2);
-		int left = gui.getX0()+(int) ((middleX-.0625/2)*gui.panelSize);
-		int right = gui.getX0()+(int) ((middleX+.0625/2)*gui.panelSize);
-		int top = gui.getY0()+(int) ((middleY-.0625/2)*gui.panelSize);
-		int bottom = gui.getY0()+(int) ((middleY+.0625/2)*gui.panelSize);
-		Gui.drawRect(left, top, right, bottom, 0xff000000|color);
+		double middleX = (getX() + (horizontal ? length : .0625) / 2);
+		double middleY = (getY() + (horizontal ? .0625 : length) / 2);
+		int left = gui.getX0() + (int) ((middleX - .0625 / 2) * gui.panelSize);
+		int right = gui.getX0() + (int) ((middleX + .0625 / 2) * gui.panelSize);
+		int top = gui.getY0() + (int) ((middleY - .0625 / 2) * gui.panelSize);
+		int bottom = gui.getY0() + (int) ((middleY + .0625 / 2) * gui.panelSize);
+		Gui.drawRect(left, top, right, bottom, 0xff000000 | color);
 	}
 
 	@Override
 	public void invalidate(TileEntityPanel te) {
-		for (BiConsumer<Integer, Byte> out:outputs) {
-			out.accept((int)rsChannel, (byte) 0);
+		for (BiConsumer<Integer, Byte> out : outputs) {
+			out.accept((int) rsChannel, (byte) 0);
 		}
 	}
 
@@ -214,19 +220,19 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 	public void applyConfigOption(ConfigType type, int id, NBTBase value) {
 		switch (type) {
 		case BOOL:
-			horizontal = ((NBTTagByte)value).getByte()!=0;
+			horizontal = ((NBTTagByte) value).getByte() != 0;
 			break;
 		case RS_CHANNEL:
-			rsChannel = ((NBTTagByte)value).getByte();
+			rsChannel = ((NBTTagByte) value).getByte();
 			break;
 		case INT:
-			rsId = ((NBTTagInt)value).getInt();
+			rsId = ((NBTTagInt) value).getInt();
 			break;
 		case FLOAT:
-			if (id<3) {
+			if (id < 3) {
 				color = PanelUtils.setColor(color, id, value);
 			} else {
-				length = scaleToRangePercent(((NBTTagFloat)value).getFloat(), .125F, 1);
+				length = scaleToRangePercent(((NBTTagFloat) value).getFloat(), .125F, 1);
 			}
 			break;
 		}
@@ -240,12 +246,12 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 	public String fomatConfigName(ConfigType type, int id) {
 		switch (type) {
 		case BOOL:
-			return I18n.format(IndustrialWires.MODID+".tooltip.horizontal");
+			return I18n.format(IndustrialWires.MODID + ".tooltip.horizontal");
 		case RS_CHANNEL:
 		case INT:
 			return null;
 		case FLOAT:
-			return I18n.format(IndustrialWires.MODID+".desc."+(id==0?"red":(id==1?"green":id==2?"blue":"length")));
+			return I18n.format(IndustrialWires.MODID + ".desc." + (id == 0 ? "red" : (id == 1 ? "green" : id == 2 ? "blue" : "length")));
 		default:
 			return "INVALID";
 		}
@@ -257,9 +263,9 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 		case BOOL:
 			return null;
 		case RS_CHANNEL:
-			return I18n.format(IndustrialWires.MODID+".desc.rschannel_info");
+			return I18n.format(IndustrialWires.MODID + ".desc.rschannel_info");
 		case INT:
-			return I18n.format(IndustrialWires.MODID+".desc.rsid_info");
+			return I18n.format(IndustrialWires.MODID + ".desc.rsid_info");
 		case FLOAT:
 			return null;
 		default:
@@ -269,21 +275,21 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 
 	@Override
 	public RSChannelConfig[] getRSChannelOptions() {
-		return new RSChannelConfig[] {
+		return new RSChannelConfig[]{
 				new RSChannelConfig("channel", 0, 0, rsChannel)
 		};
 	}
 
 	@Override
 	public IntConfig[] getIntegerOptions() {
-		return new IntConfig[] {
+		return new IntConfig[]{
 				new IntConfig("rsId", 0, 50, rsId, 2, false)
 		};
 	}
 
 	@Override
 	public BoolConfig[] getBooleanOptions() {
-		return new BoolConfig[] {
+		return new BoolConfig[]{
 				new BoolConfig("horizontal", 0, 70, horizontal)
 		};
 	}
@@ -294,10 +300,10 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 		int x = 70;
 		int yOffset = 10;
 		return new FloatConfig[]{
-				new FloatConfig("red", x, yOffset+20, color[0], 60),
-				new FloatConfig("green", x, yOffset+40, color[1], 60),
-				new FloatConfig("blue", x, yOffset+60, color[2], 60),
-				new FloatConfig("length", x, yOffset, (length-.125F)/(1-.125F), 60)
+				new FloatConfig("red", x, yOffset + 20, color[0], 60),
+				new FloatConfig("green", x, yOffset + 40, color[1], 60),
+				new FloatConfig("blue", x, yOffset + 60, color[2], 60),
+				new FloatConfig("length", x, yOffset, (length - .125F) / (1 - .125F), 60)
 		};
 	}
 

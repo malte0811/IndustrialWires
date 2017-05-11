@@ -11,20 +11,22 @@ public class GuiIntChooser extends Gui {
 	private int max;
 	private String format;
 	private Minecraft mc = Minecraft.getMinecraft();
+
 	public GuiIntChooser(int x, int y, boolean neg, int initialValue, int digits) {
 		allowNegative = neg;
 		value = initialValue;
 		xPos = x;
 		yPos = y;
-		max = (int) Math.pow(10, digits)-1;
+		max = (int) Math.pow(10, digits) - 1;
 		xPlus = x + mc.fontRenderer.getCharWidth('0') * (digits + (allowNegative ? 1 : 0)) + mc.fontRenderer.getCharWidth('-') + 2;
-		format = "%"+digits+"s";
+		format = "%" + digits + "s";
 	}
+
 	public void drawChooser() {
 		int color = 0xE0E0E0;
 		String val = String.format(format, Integer.toString(value)).replace(' ', '0');
-		if (value>=0&&allowNegative) {
-			val = "+"+val;
+		if (value >= 0 && allowNegative) {
+			val = "+" + val;
 		}
 		mc.fontRenderer.drawStringWithShadow(val, xPos + mc.fontRenderer.getCharWidth('-') + 1, yPos, color);
 		mc.fontRenderer.drawStringWithShadow("-", xPos, yPos, color);

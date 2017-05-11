@@ -33,16 +33,15 @@ import java.util.Set;
 import java.util.function.BiPredicate;
 
 public final class MiscUtils {
-	private MiscUtils() {}
-	public static Set<ImmersiveNetHandler.Connection> genConnBlockstate(Set<ImmersiveNetHandler.Connection> conns, World world)
-	{
+	private MiscUtils() {
+	}
+
+	public static Set<ImmersiveNetHandler.Connection> genConnBlockstate(Set<ImmersiveNetHandler.Connection> conns, World world) {
 		if (conns == null)
 			return ImmutableSet.of();
-		Set<ImmersiveNetHandler.Connection> ret = new HashSet<ImmersiveNetHandler.Connection>()
-		{
+		Set<ImmersiveNetHandler.Connection> ret = new HashSet<ImmersiveNetHandler.Connection>() {
 			@Override
-			public boolean equals(Object o)
-			{
+			public boolean equals(Object o) {
 				if (o == this)
 					return true;
 				if (!(o instanceof HashSet))
@@ -56,10 +55,9 @@ public final class MiscUtils {
 				return true;
 			}
 		};
-		for (ImmersiveNetHandler.Connection c : conns)
-		{
+		for (ImmersiveNetHandler.Connection c : conns) {
 			IImmersiveConnectable end = ApiUtils.toIIC(c.end, world, false);
-			if (end==null)
+			if (end == null)
 				continue;
 			// generate subvertices
 			c.getSubVertices(world);
@@ -68,6 +66,7 @@ public final class MiscUtils {
 
 		return ret;
 	}
+
 	public static List<BlockPos> discoverLocal(World w, BlockPos here, BiPredicate<BlockPos, Integer> isValid) {
 		List<BlockPos> ret = new ArrayList<>();
 		List<BlockPos> open = new ArrayList<>();
@@ -76,9 +75,9 @@ public final class MiscUtils {
 			BlockPos curr = open.get(0);
 			ret.add(curr);
 			open.remove(0);
-			for (EnumFacing f:EnumFacing.VALUES) {
+			for (EnumFacing f : EnumFacing.VALUES) {
 				BlockPos next = curr.offset(f);
-				if (!open.contains(next)&&!ret.contains(next)&&isValid.test(next, ret.size())) {
+				if (!open.contains(next) && !ret.contains(next) && isValid.test(next, ret.size())) {
 					open.add(next);
 				}
 			}

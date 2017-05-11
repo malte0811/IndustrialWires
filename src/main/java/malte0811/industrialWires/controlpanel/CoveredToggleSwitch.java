@@ -50,18 +50,18 @@ public class CoveredToggleSwitch extends ToggleSwitch {
 		Matrix4 rot = null;
 		if (state.open) {
 			rot = new Matrix4();
-			rot.rotate(-Math.PI*.4, 1, 0, 0);
+			rot.rotate(-Math.PI * .4, 1, 0, 0);
 		}
 		PanelUtils.addColoredBox(color, color, null, new Vector3f(0, 0, 0), new Vector3f(sizeX, getHeight(), sizeY), ret,
 				false, rot, true);
-		ret.remove(ret.size()-2);//remove front face
-		ret.remove(ret.size()-1);//remove front face
+		ret.remove(ret.size() - 2);//remove front face
+		ret.remove(ret.size() - 1);//remove front face
 		return ret;
 	}
 
 	@Override
 	public void interactWith(Vec3d hitRel, TileEntityPanel tile, EntityPlayerMP player) {
-		if (player.isSneaking()&&state==SwitchState.OPEN) {
+		if (player.isSneaking() && state == SwitchState.OPEN) {
 			state = SwitchState.CLOSED;
 		} else {
 			state = state.next();
@@ -73,7 +73,7 @@ public class CoveredToggleSwitch extends ToggleSwitch {
 
 	@Override
 	public void renderInGUI(GuiPanelCreator gui) {
-		super.renderInGUIDefault(gui, 0xff000000|this.color);
+		super.renderInGUIDefault(gui, 0xff000000 | this.color);
 		super.renderInGUI(gui);
 	}
 
@@ -104,6 +104,7 @@ public class CoveredToggleSwitch extends ToggleSwitch {
 		ret.state = state;
 		ret.rsOutputChannel = rsOutputChannel;
 		ret.rsOutputId = rsOutputId;
+		ret.active = active;
 		ret.setX(getX());
 		ret.setY(getY());
 		ret.setPanelHeight(panelHeight);
@@ -117,30 +118,30 @@ public class CoveredToggleSwitch extends ToggleSwitch {
 		int yOffset = 10;
 		return new FloatConfig[]{
 				new FloatConfig("red", x, yOffset, color[0], 60),
-				new FloatConfig("green", x, yOffset+20, color[1], 60),
-				new FloatConfig("blue", x, yOffset+40, color[2], 60)
+				new FloatConfig("green", x, yOffset + 20, color[1], 60),
+				new FloatConfig("blue", x, yOffset + 40, color[2], 60)
 		};
 	}
 
 	@Override
 	public void applyConfigOption(ConfigType type, int id, NBTBase value) {
 		super.applyConfigOption(type, id, value);
-		if (type==ConfigType.FLOAT) {
+		if (type == ConfigType.FLOAT) {
 			color = PanelUtils.setColor(color, id, value);
 		}
 	}
 
 	@Override
 	public String fomatConfigName(ConfigType type, int id) {
-		if (type==ConfigType.FLOAT) {
-			return I18n.format(IndustrialWires.MODID+".desc."+(id==0?"red":(id==1?"green":"blue")));
+		if (type == ConfigType.FLOAT) {
+			return I18n.format(IndustrialWires.MODID + ".desc." + (id == 0 ? "red" : (id == 1 ? "green" : "blue")));
 		}
 		return super.fomatConfigName(type, id);
 	}
 
 	@Override
 	public String fomatConfigDescription(ConfigType type, int id) {
-		if (type==ConfigType.FLOAT) {
+		if (type == ConfigType.FLOAT) {
 			return null;
 		}
 		return super.fomatConfigDescription(type, id);
@@ -159,7 +160,6 @@ public class CoveredToggleSwitch extends ToggleSwitch {
 
 		CoveredToggleSwitch that = (CoveredToggleSwitch) o;
 
-		if (active != that.active) return false;
 		if (rsOutputId != that.rsOutputId) return false;
 		if (rsOutputChannel != that.rsOutputChannel) return false;
 		if (color != that.color) return false;
@@ -183,12 +183,14 @@ public class CoveredToggleSwitch extends ToggleSwitch {
 		ACTIVE(true, true);
 		public boolean active;
 		public boolean open;
+
 		SwitchState(boolean active, boolean open) {
 			this.open = open;
 			this.active = active;
 		}
+
 		SwitchState next() {
-			return values()[(ordinal()+1)%values().length];
+			return values()[(ordinal() + 1) % values().length];
 		}
 	}
 }

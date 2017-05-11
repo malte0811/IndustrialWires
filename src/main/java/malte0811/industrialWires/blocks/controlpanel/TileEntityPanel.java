@@ -90,7 +90,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 				List<BlockPos> parts = PanelUtils.discoverPanelParts(world, pos);
 				for (BlockPos bp : parts) {
 					TileEntity te = world.getTileEntity(bp);
-					if (te instanceof TileEntityRSPanelConn&&!rsPorts.contains(te)) {
+					if (te instanceof TileEntityRSPanelConn && !rsPorts.contains(te)) {
 						((TileEntityRSPanelConn) te).registerPanel(this);
 					}
 				}
@@ -131,7 +131,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 	}
 
 	public void readFromItemNBT(@Nullable NBTTagCompound nbt) {
-		if (nbt!=null) {
+		if (nbt != null) {
 			NBTTagList l = nbt.getTagList("components", 10);
 			PanelUtils.readListFromNBT(l, components);
 			components.height = nbt.getFloat("height");
@@ -231,7 +231,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		Vec3d playerPos = Minecraft.getMinecraft().player.getPositionVector().addVector(-pos.getX(), player.getEyeHeight() - pos.getY(), -pos.getZ());
 		for (PanelComponent pc : components) {
 			AxisAlignedBB box = pc.getBlockRelativeAABB();
-			if (box.maxY>box.minY) {
+			if (box.maxY > box.minY) {
 				box = apply(mat, box.expandXyz(.002));
 				Vec3d hitVec = hitAbs ? hit.addVector(-pos.getX(), -pos.getY(), -pos.getZ()) : hit;
 				hitVec = hitVec.scale(2).subtract(playerPos);
@@ -295,7 +295,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 	@Override
 	public void onChunkUnload() {
 		super.onChunkUnload();
-		for (PanelComponent pc:components) {
+		for (PanelComponent pc : components) {
 			pc.invalidate(this);
 		}
 		for (TileEntityRSPanelConn rs : rsPorts) {
@@ -306,7 +306,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 	@Override
 	public void invalidate() {
 		super.invalidate();
-		for (PanelComponent pc:components) {
+		for (PanelComponent pc : components) {
 			pc.invalidate(this);
 		}
 		for (TileEntityRSPanelConn rs : rsPorts) {

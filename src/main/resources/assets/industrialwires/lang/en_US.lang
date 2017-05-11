@@ -22,11 +22,11 @@ tile.industrialwires.control_panel.rs_wire.name=Redstone Wire Controller
 tile.industrialwires.control_panel.dummy.name=Panel Connector
 tile.industrialwires.control_panel.creator.name=Control Panel Creator
 
-item.industrialwires.ic2wireCoil.tin.name=Tin Wire Coil
-item.industrialwires.ic2wireCoil.copper.name=Copper Wire Coil
-item.industrialwires.ic2wireCoil.gold.name=Gold Wire Coil
-item.industrialwires.ic2wireCoil.hv.name=IC2 HV Wire Coil
-item.industrialwires.ic2wireCoil.glass.name=Glass Fiber Wire Coil
+item.industrialwires.ic2_wire_coil.tin.name=Tin Wire Coil
+item.industrialwires.ic2_wire_coil.copper.name=Copper Wire Coil
+item.industrialwires.ic2_wire_coil.gold.name=Gold Wire Coil
+item.industrialwires.ic2_wire_coil.hv.name=IC2 HV Wire Coil
+item.industrialwires.ic2_wire_coil.glass.name=Glass Fiber Wire Coil
 
 item.industrialwires.panel_component.lighted_button.name=Lighted Button
 item.industrialwires.panel_component.label.name=Label
@@ -53,6 +53,7 @@ industrialwires.desc.red=Red
 industrialwires.desc.green=Green
 industrialwires.desc.blue=Blue
 industrialwires.desc.length=Length
+industrialwires.tooltip.rsChannel_info=The color of the channel to output the signal to
 
 industrialwires.tooltip.horizontal=Horizontal
 industrialwires.tooltip.vertical=Vertical
@@ -61,6 +62,11 @@ industrialwires.tooltip.text=Text: %1s
 industrialwires.tooltip.latching=Stays on indefinitely
 industrialwires.tooltip.instantaneous=Turns off after half a second
 industrialwires.tooltip.length=Length: %1s
+industrialwires.tooltip.power_tier=Power Tier: %s
+industrialwires.tooltip.eu_per_tick=%s EU/t
+industrialwires.tooltip.transfer_rate=Burns at %s EU/t
+industrialwires.tooltip.input_rate=%s EU/t per connector
+
 
 industrialwires.chat.tooLong=This coil does not contain enough wire for this connection
 industrialwires.chat.stackSize=Linking is only possible with a stack of size 1

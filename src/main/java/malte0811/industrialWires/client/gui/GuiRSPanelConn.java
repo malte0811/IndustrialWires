@@ -35,18 +35,20 @@ import java.io.IOException;
 public class GuiRSPanelConn extends GuiContainer {
 	private TileEntityRSPanelConn te;
 	private GuiIntChooser chooser;
+
 	public GuiRSPanelConn(TileEntityRSPanelConn tile) {
 		super(new ContainerRSPanelConn(tile));
 		te = tile;
 	}
+
 	@Override
 	public void initGui() {
 		super.initGui();
-		chooser = new GuiIntChooser((width-32)/2, (height-4)/2, false, te.getRsId(), 2);
+		chooser = new GuiIntChooser((width - 32) / 2, (height - 4) / 2, false, te.getRsId(), 2);
 		xSize = 64;
 		ySize = 64;
-		guiLeft = (width-xSize)/2;
-		guiTop = (height-ySize)/2;
+		guiLeft = (width - xSize) / 2;
+		guiTop = (height - ySize) / 2;
 	}
 
 	@Override
@@ -65,9 +67,10 @@ public class GuiRSPanelConn extends GuiContainer {
 	}
 
 	private ResourceLocation textureLoc = new ResourceLocation(IndustrialWires.MODID, "textures/gui/rs_wire_controller.png");
+
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
-		GlStateManager.color(1,1,1,1);
+		GlStateManager.color(1, 1, 1, 1);
 		mc.getTextureManager().bindTexture(textureLoc);
 		Gui.drawModalRectWithCustomSizedTexture(guiLeft, guiTop, 0, 0, xSize, ySize, 64, 64);
 	}
@@ -84,7 +87,7 @@ public class GuiRSPanelConn extends GuiContainer {
 	}
 
 	private void onChange() {
-		if (chooser.getValue()!=te.getRsId()) {
+		if (chooser.getValue() != te.getRsId()) {
 			NBTTagCompound nbt = new NBTTagCompound();
 			nbt.setInteger("rsId", chooser.getValue());
 			IndustrialWires.packetHandler.sendToServer(new MessageGUIInteract(te, nbt));

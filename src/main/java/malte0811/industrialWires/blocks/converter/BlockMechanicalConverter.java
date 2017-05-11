@@ -41,13 +41,14 @@ import javax.annotation.Nonnull;
 
 public class BlockMechanicalConverter extends BlockIWBase implements IMetaEnum {
 	private static PropertyEnum<MechanicalBlockType> type = PropertyEnum.create("type", MechanicalBlockType.class);
+
 	public BlockMechanicalConverter() {
 		super(Material.IRON, "mechanical_converter");
 	}
 
 	@Override
 	public void getSubBlocks(@Nonnull Item itemIn, CreativeTabs tab, NonNullList<ItemStack> list) {
-		for (int i = 0;i<3;i++) {
+		for (int i = 0; i < 3; i++) {
 			list.add(new ItemStack(itemIn, 1, i));
 		}
 	}
@@ -90,6 +91,7 @@ public class BlockMechanicalConverter extends BlockIWBase implements IMetaEnum {
 	public int getMetaFromState(IBlockState state) {
 		return state.getValue(type).ordinal();
 	}
+
 	@Override
 	@Nonnull
 	public IBlockState getStateForPlacement(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull EnumFacing facing, float hitX, float hitY,
@@ -109,11 +111,12 @@ public class BlockMechanicalConverter extends BlockIWBase implements IMetaEnum {
 								  EntityPlayer player) {
 		return new ItemStack(this, 1, damageDropped(state));
 	}
+
 	@Override
 	@SuppressWarnings("deprecation")
 	public boolean eventReceived(IBlockState state, World worldIn, BlockPos pos, int id, int param) {
 		boolean def = super.eventReceived(state, worldIn, pos, id, param);
-		if ((id&255)==255) {
+		if ((id & 255) == 255) {
 			IBlockState s = worldIn.getBlockState(pos);
 			worldIn.notifyBlockUpdate(pos, s, s, 3);
 			return true;

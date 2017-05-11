@@ -18,6 +18,7 @@
 
 package malte0811.industrialWires.containers;
 
+import blusunrize.immersiveengineering.api.ApiUtils;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanelCreator;
 import malte0811.industrialWires.controlpanel.PanelUtils;
 import net.minecraft.entity.player.EntityPlayer;
@@ -30,7 +31,6 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -38,6 +38,7 @@ import java.util.function.Supplier;
 public class ContainerPanelCreator extends Container {
 	public TileEntityPanelCreator tile;
 	private IInventory inv;
+
 	public ContainerPanelCreator(InventoryPlayer inventoryPlayer, TileEntityPanelCreator tile) {
 		int slotH = 150;
 		int slotX = 14;
@@ -50,21 +51,41 @@ public class ContainerPanelCreator extends Container {
 			}
 
 			@Override
-			public boolean isItemValid(@Nullable ItemStack stack) {
-				return  stack != null && (ItemStack.areItemStacksEqual(stack, PanelUtils.getPanelBase()) || stack.getItem() == PanelUtils.PANEL_ITEM);
+			public boolean isItemValid(ItemStack stack) {
+				return ItemStack.areItemStacksEqual(ApiUtils.copyStackWithAmount(stack, 1), PanelUtils.getPanelBase()) || stack.getItem() == PanelUtils.PANEL_ITEM;
 			}
 
 		});
 		for (int i = 0; i < 3; i++)
 			for (int j = 0; j < 9; j++)
-				addSlotToContainer(new Slot(inventoryPlayer, j+i*9+9, slotX+j*18, slotH+i*18));
+				addSlotToContainer(new Slot(inventoryPlayer, j + i * 9 + 9, slotX + j * 18, slotH + i * 18));
 		for (int i = 0; i < 9; i++)
-			addSlotToContainer(new Slot(inventoryPlayer, i, slotX+i*18, slotH+58));
+			addSlotToContainer(new Slot(inventoryPlayer, i, slotX + i * 18, slotH + 58));
 	}
 
 	@Override
 	public boolean canInteractWith(@Nonnull EntityPlayer player) {
 		return player.getDistanceSq(tile.getPos()) < 100;
+	}
+
+	@Nonnull
+	@Override
+	public ItemStack transferStackInSlot(EntityPlayer player, int index) {
+		Slot clicked = getSlot(index);
+		if (index == 0) {
+			boolean change = mergeItemStack(clicked.getStack(), 1, 37, false);
+			if (change) {
+				clicked.onSlotChanged();
+			}
+		} else {
+			ItemStack inSlot = clicked.getStack();
+			Slot slot0 = getSlot(0);
+			if (slot0.isItemValid(inSlot) && slot0.getStack().getCount() < slot0.getSlotStackLimit()) {
+				slot0.putStack(inSlot.splitStack(slot0.getSlotStackLimit()));
+				clicked.onSlotChanged();
+			}
+		}
+		return ItemStack.EMPTY;
 	}
 
 	public static class SingleSlotInventory implements IInventory {

@@ -59,11 +59,13 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 	private RedstoneWireNetwork network = new RedstoneWireNetwork().add(this);
 	private boolean hasConn = false;
 	private int id;
+
 	{
-		for (int i = 0;i<16;i++) {
+		for (int i = 0; i < 16; i++) {
 			oldInput[i] = -1;
 		}
 	}
+
 	private boolean loaded = false;
 
 	@Override
@@ -74,7 +76,7 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 				// completely reload the network
 				network.removeFromNetwork(null);
 				List<BlockPos> parts = PanelUtils.discoverPanelParts(world, pos);
-				for (BlockPos bp:parts) {
+				for (BlockPos bp : parts) {
 					TileEntity te = world.getTileEntity(bp);
 					if (te instanceof TileEntityPanel) {
 						registerPanel(((TileEntityPanel) te));
@@ -87,6 +89,7 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 			}
 		}
 	}
+
 	@Override
 	public void writeCustomNBT(NBTTagCompound out, boolean updatePacket) {
 		super.writeCustomNBT(out, updatePacket);
@@ -106,8 +109,8 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 		aabb = null;
 	}
 
-	private BiConsumer<Integer, Byte> rsOut = (channel, value)->{
-		if (value!=out[channel]) {
+	private BiConsumer<Integer, Byte> rsOut = (channel, value) -> {
+		if (value != out[channel]) {
 			dirty = true;
 			out[channel] = value;
 		}
@@ -115,9 +118,9 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 
 	public void registerPanel(TileEntityPanel panel) {
 		PropertyComponents.PanelRenderProperties p = panel.getComponents();
-		for (PanelComponent pc:p) {
+		for (PanelComponent pc : p) {
 			Consumer<byte[]> listener = pc.getRSInputHandler(id, panel);
-			if (listener!=null) {
+			if (listener != null) {
 				changeListeners.add(listener);
 			}
 			pc.registerRSOutput(id, rsOut);
@@ -128,9 +131,9 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 
 	public void unregisterPanel(TileEntityPanel panel, boolean remove) {
 		PropertyComponents.PanelRenderProperties p = panel.getComponents();
-		for (PanelComponent pc:p) {
+		for (PanelComponent pc : p) {
 			Consumer<byte[]> listener = pc.getRSInputHandler(id, panel);
-			if (listener!=null) {
+			if (listener != null) {
 				changeListeners.remove(listener);
 			}
 			pc.unregisterRSOutput(id, rsOut);
@@ -156,7 +159,7 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 	public void onChange() {
 		if (!Arrays.equals(oldInput, network.channelValues)) {
 			oldInput = Arrays.copyOf(network.channelValues, 16);
-			for (Consumer<byte[]> c:changeListeners) {
+			for (Consumer<byte[]> c : changeListeners) {
 				c.accept(oldInput);
 			}
 		}
@@ -164,7 +167,7 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 
 	@Override
 	public void updateInput(byte[] currIn) {
-		for (int i = 0;i<16;i++) {
+		for (int i = 0; i < 16; i++) {
 			currIn[i] = (byte) Math.max(currIn[i], out[i]);
 		}
 	}
@@ -176,13 +179,13 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 
 	@Override
 	public boolean canConnectCable(WireType wire, TargetingInfo targetingInfo) {
-		return wire==WireType.REDSTONE&&!hasConn;
+		return wire == WireType.REDSTONE && !hasConn;
 	}
 
 	@Override
 	public void connectCable(WireType wireType, TargetingInfo targetingInfo, IImmersiveConnectable other) {
 		hasConn = true;
-		if (other instanceof IRedstoneConnector&&((IRedstoneConnector) other).getNetwork()!=network) {
+		if (other instanceof IRedstoneConnector && ((IRedstoneConnector) other).getNetwork() != network) {
 			network.mergeNetwork(((IRedstoneConnector) other).getNetwork());
 		}
 	}
@@ -224,7 +227,7 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 	@Override
 	public void onChunkUnload() {
 		super.onChunkUnload();
-		for (TileEntityPanel panel:connectedPanels) {
+		for (TileEntityPanel panel : connectedPanels) {
 			unregisterPanel(panel, false);
 		}
 	}
@@ -232,7 +235,7 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 	@Override
 	public void invalidate() {
 		super.invalidate();
-		for (TileEntityPanel panel:connectedPanels) {
+		for (TileEntityPanel panel : connectedPanels) {
 			unregisterPanel(panel, false);
 		}
 	}
@@ -242,7 +245,7 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 		if (nbt.hasKey("rsId")) {
 			List<BlockPos> parts = PanelUtils.discoverPanelParts(world, pos);
 			List<TileEntityPanel> tes = new ArrayList<>(parts.size());
-			for (BlockPos bp:parts) {
+			for (BlockPos bp : parts) {
 				TileEntity te = world.getTileEntity(bp);
 				if (te instanceof TileEntityPanel) {
 					tes.add((TileEntityPanel) te);
@@ -251,7 +254,7 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 			}
 			id = nbt.getInteger("rsId");
 			out = new byte[16];
-			for (TileEntityPanel panel:tes) {
+			for (TileEntityPanel panel : tes) {
 				registerPanel(panel);
 			}
 			network.updateValues();
@@ -302,28 +305,29 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 	}
 
 	private AxisAlignedBB aabb;
+
 	@Override
 	public AxisAlignedBB getBoundingBox() {
-		if (aabb==null) {
+		if (aabb == null) {
 			double h = 9 / 16D;
 			switch (facing) {
 			case DOWN:
 				aabb = new AxisAlignedBB(0, 0, 0, 1, h, 1);
 				break;
 			case UP:
-				aabb = new AxisAlignedBB(0, 1-h, 0, 1, 1, 1);
+				aabb = new AxisAlignedBB(0, 1 - h, 0, 1, 1, 1);
 				break;
 			case NORTH:
 				aabb = new AxisAlignedBB(0, 0, 0, 1, 1, h);
 				break;
 			case SOUTH:
-				aabb = new AxisAlignedBB(0, 0, 1-h, 1, 1, 1);
+				aabb = new AxisAlignedBB(0, 0, 1 - h, 1, 1, 1);
 				break;
 			case WEST:
 				aabb = new AxisAlignedBB(0, 0, 0, h, 1, 1);
 				break;
 			case EAST:
-				aabb = new AxisAlignedBB(1-h, 0, 0, 1, 1, 1);
+				aabb = new AxisAlignedBB(1 - h, 0, 0, 1, 1, 1);
 				break;
 			}
 		}

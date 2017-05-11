@@ -29,6 +29,7 @@ public class DualEnergyStorage {
 	public DualEnergyStorage(double maxEU, double maxInEU, double maxOutEU) {
 		this(0, maxEU, maxInEU, maxOutEU);
 	}
+
 	public DualEnergyStorage(double storedEU, double maxEU, double maxInEU, double maxOutEU) {
 		this.maxEU = maxEU;
 		this.maxInEU = maxInEU;
@@ -103,15 +104,16 @@ public class DualEnergyStorage {
 	}
 
 	public void writeToNbt(NBTTagCompound nbtOuter, String key) {
-		NBTTagCompound nbt = key==null?nbtOuter:new NBTTagCompound();
+		NBTTagCompound nbt = key == null ? nbtOuter : new NBTTagCompound();
 		nbt.setDouble("stored", storedEU);
 		nbt.setDouble("maxStored", maxEU);
 		nbt.setDouble("maxIn", maxInEU);
 		nbt.setDouble("maxOut", maxOutEU);
-		if (key!=null) {
+		if (key != null) {
 			nbtOuter.setTag(key, nbt);
 		}
 	}
+
 	public static DualEnergyStorage readFromNBT(NBTTagCompound nbt) {
 		return new DualEnergyStorage(nbt.getDouble("stored"), nbt.getDouble("maxStored"), nbt.getDouble("maxIn"), nbt.getDouble("maxOut"));
 	}

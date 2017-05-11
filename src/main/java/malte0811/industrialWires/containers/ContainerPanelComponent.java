@@ -28,9 +28,11 @@ import javax.annotation.Nonnull;
 
 public class ContainerPanelComponent extends Container {
 	public EnumHand hand;
+
 	public ContainerPanelComponent(EnumHand h) {
 		hand = h;
 	}
+
 	@Override
 	public boolean canInteractWith(@Nonnull EntityPlayer playerIn) {
 		ItemStack held = playerIn.getHeldItem(hand);

@@ -39,7 +39,8 @@ public class MessagePanelInteract implements IMessage {
 		hitRelative = hit;
 	}
 
-	public MessagePanelInteract() {}
+	public MessagePanelInteract() {
+	}
 
 	@Override
 	public void fromBytes(ByteBuf buf) {
@@ -63,8 +64,9 @@ public class MessagePanelInteract implements IMessage {
 			ctx.getServerHandler().player.getServerWorld().addScheduledTask(() -> handle(message, ctx.getServerHandler().player));
 			return null;
 		}
+
 		private void handle(MessagePanelInteract msg, EntityPlayerMP player) {
-			if (player.getDistanceSqToCenter(msg.pos)<100) {//closer than 10 blocks
+			if (player.getDistanceSqToCenter(msg.pos) < 100) {//closer than 10 blocks
 				TileEntity te = player.world.getTileEntity(msg.pos);
 				if (te instanceof TileEntityPanel) {
 					((TileEntityPanel) te).interactServer(msg.hitRelative, msg.pcId, player);

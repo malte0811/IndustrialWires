@@ -32,10 +32,11 @@ import javax.annotation.Nonnull;
 
 public class ItemBlockIW extends ItemBlock {
 	private final Object[] values;
+
 	public ItemBlockIW(Block b) {
 		super(b);
 		if (b instanceof IMetaEnum) {
-			values = ((IMetaEnum)b).getValues();
+			values = ((IMetaEnum) b).getValues();
 		} else {
 			values = null;
 		}
@@ -46,12 +47,13 @@ public class ItemBlockIW extends ItemBlock {
 	@Override
 	public String getUnlocalizedName(ItemStack stack) {
 		int meta = stack.getMetadata();
-		if (values!=null) {
+		if (values != null) {
 			return block.getUnlocalizedName() + "." + values[meta].toString().toLowerCase();
 		} else {
 			return block.getUnlocalizedName();
 		}
 	}
+
 	@Override
 	public int getMetadata(int damage) {
 		return damage;
@@ -60,7 +62,7 @@ public class ItemBlockIW extends ItemBlock {
 	@Override
 	public boolean placeBlockAt(@Nonnull ItemStack stack, @Nonnull EntityPlayer player, World world, @Nonnull BlockPos pos,
 								EnumFacing side, float hitX, float hitY, float hitZ, @Nonnull IBlockState newState) {
-		if (block instanceof IPlacementCheck&&!((IPlacementCheck) block).canPlaceBlockAt(world, pos, stack)) {
+		if (block instanceof IPlacementCheck && !((IPlacementCheck) block).canPlaceBlockAt(world, pos, stack)) {
 			return false;
 		}
 		boolean ret = super.placeBlockAt(stack, player, world, pos, side, hitX, hitY, hitZ, newState);

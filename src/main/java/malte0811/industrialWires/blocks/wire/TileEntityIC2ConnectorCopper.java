@@ -26,15 +26,17 @@ public class TileEntityIC2ConnectorCopper extends TileEntityIC2ConnectorTin {
 		super(rel);
 	}
 
-	public TileEntityIC2ConnectorCopper() {}
-	
+	public TileEntityIC2ConnectorCopper() {
+	}
+
 	{
 		tier = 2;
-		maxStored = IC2Wiretype.IC2_TYPES[1].getTransferRate()/8;
+		maxStored = IC2Wiretype.IC2_TYPES[1].getTransferRate() / 8;
 	}
+
 	@Override
 	public boolean canConnect(WireType t) {
-		return t==IC2Wiretype.IC2_TYPES[1];
+		return t == IC2Wiretype.IC2_TYPES[1];
 	}
 
 }

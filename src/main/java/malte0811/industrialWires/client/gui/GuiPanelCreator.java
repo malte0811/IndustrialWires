@@ -55,22 +55,22 @@ public class GuiPanelCreator extends GuiContainer {
 
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
-		GlStateManager.color(1,1,1,1);
+		GlStateManager.color(1, 1, 1, 1);
 		mc.getTextureManager().bindTexture(textureLoc);
-		this.drawTexturedModalRect(guiLeft,guiTop, 0, 0, xSize, ySize);
+		this.drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
 		int x0 = getX0();
 		int y0 = getY0();
 		int xRel = mouseX - x0;
 		int yRel = mouseY - y0;
 		if (snapToGrid) {
-			xRel = (int) Math.floor(xRel*16/panelSize)*panelSize/16;
-			yRel = (int) Math.floor(yRel*16/panelSize)*panelSize/16;
+			xRel = (int) Math.floor(xRel * 16 / panelSize) * panelSize / 16;
+			yRel = (int) Math.floor(yRel * 16 / panelSize) * panelSize / 16;
 		}
 		for (PanelComponent pc : container.tile.components) {
 			drawPanelComponent(pc, -1, -1);
 		}
 		PanelComponent curr = getFloatingPC();
-		if (curr!=null && 0 <= xRel && xRel <= panelSize && 0 <= yRel && yRel <= panelSize) {
+		if (curr != null && 0 <= xRel && xRel <= panelSize && 0 <= yRel && yRel <= panelSize) {
 			drawPanelComponent(curr, xRel, yRel);
 		}
 	}
@@ -80,20 +80,20 @@ public class GuiPanelCreator extends GuiContainer {
 		super.drawScreen(mouseX, mouseY, partialTicks);
 		String tooltip = null;
 		if (buttonList.get(0).isMouseOver()) {
-			tooltip = I18n.format(IndustrialWires.MODID+".desc.create_panel");
+			tooltip = I18n.format(IndustrialWires.MODID + ".desc.create_panel");
 			ClientUtils.drawHoveringText(ImmutableList.of("Create a new panel"), mouseX, mouseY, mc.fontRenderer);
 		} else if (buttonList.get(1).isMouseOver()) {
-			tooltip = I18n.format(IndustrialWires.MODID+".desc.remove_all");
+			tooltip = I18n.format(IndustrialWires.MODID + ".desc.remove_all");
 		} else if (buttonList.get(2).isMouseOver()) {
 			if (snapToGrid) {
-				tooltip = I18n.format(IndustrialWires.MODID+".desc.disable_snap");
+				tooltip = I18n.format(IndustrialWires.MODID + ".desc.disable_snap");
 			} else {
-				tooltip = I18n.format(IndustrialWires.MODID+".desc.enable_snap");
+				tooltip = I18n.format(IndustrialWires.MODID + ".desc.enable_snap");
 			}
 		} else if (buttonList.get(3).isMouseOver()) {
-			tooltip = I18n.format(IndustrialWires.MODID+".desc.disassemble");
+			tooltip = I18n.format(IndustrialWires.MODID + ".desc.disassemble");
 		}
-		if (tooltip!=null) {
+		if (tooltip != null) {
 			ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRenderer);
 		}
 	}
@@ -105,10 +105,10 @@ public class GuiPanelCreator extends GuiContainer {
 		}
 		if (!pc.isValidPos(container.tile.components)) {
 			AxisAlignedBB aabb = pc.getBlockRelativeAABB();
-			int left = (int) (getX0()+aabb.minX*panelSize)-1;
-			int top = (int) (getY0()+aabb.minZ*panelSize)-1;
-			int right = (int) (getX0()+aabb.maxX*panelSize)+1;
-			int bottom = (int) (getY0()+aabb.maxZ*panelSize)+1;
+			int left = (int) (getX0() + aabb.minX * panelSize) - 1;
+			int top = (int) (getY0() + aabb.minZ * panelSize) - 1;
+			int right = (int) (getX0() + aabb.maxX * panelSize) + 1;
+			int bottom = (int) (getY0() + aabb.maxZ * panelSize) + 1;
 			Gui.drawRect(left, top, right, bottom, 0xffff0000);
 		}
 		pc.renderInGUI(this);
@@ -119,11 +119,11 @@ public class GuiPanelCreator extends GuiContainer {
 	public void initGui() {
 		super.initGui();
 		buttonList.clear();
-		int buttonTop = guiTop+62;
-		buttonList.add(new GuiButton(0, guiLeft+2, buttonTop, 20, 20, "C"));
-		buttonList.add(new GuiButton(1, guiLeft+2, buttonTop+22, 20, 20, "R"));
-		buttonList.add(new GuiButton(2, guiLeft+2, buttonTop+44, 20, 20, "S"));
-		buttonList.add(new GuiButton(3, guiLeft+2, buttonTop-54, 20, 20, "D"));
+		int buttonTop = guiTop + 62;
+		buttonList.add(new GuiButton(0, guiLeft + 2, buttonTop, 20, 20, "C"));
+		buttonList.add(new GuiButton(1, guiLeft + 2, buttonTop + 22, 20, 20, "R"));
+		buttonList.add(new GuiButton(2, guiLeft + 2, buttonTop + 44, 20, 20, "S"));
+		buttonList.add(new GuiButton(3, guiLeft + 2, buttonTop - 54, 20, 20, "D"));
 	}
 
 	@Override
@@ -154,12 +154,12 @@ public class GuiPanelCreator extends GuiContainer {
 					}
 				}
 			} else if (mc.player.inventory.getItemStack().isEmpty()) {
-				float xRelFloat = xRel/(float) panelSize;
-				float yRelFloat = yRel/(float) panelSize;
- 				for (int i = 0;i<components.size();i++) {
+				float xRelFloat = xRel / (float) panelSize;
+				float yRelFloat = yRel / (float) panelSize;
+				for (int i = 0; i < components.size(); i++) {
 					PanelComponent pc = components.get(i);
 					AxisAlignedBB aabb = pc.getBlockRelativeAABB();
-					if (aabb.minX<=xRelFloat&&aabb.maxX>xRelFloat&&aabb.minZ<=yRelFloat&&aabb.maxZ>yRelFloat) {
+					if (aabb.minX <= xRelFloat && aabb.maxX > xRelFloat && aabb.minZ <= yRelFloat && aabb.maxZ > yRelFloat) {
 						PanelComponent removed = components.get(i);
 						ItemStack remItem = ItemPanelComponent.stackFromComponent(removed);
 						mc.player.inventory.setItemStack(remItem);
@@ -175,11 +175,11 @@ public class GuiPanelCreator extends GuiContainer {
 	}
 
 	public int getX0() {
-		return 30+guiLeft;
+		return 30 + guiLeft;
 	}
 
 	public int getY0() {
-		return 6+guiTop;
+		return 6 + guiTop;
 	}
 
 	@Override
@@ -207,6 +207,7 @@ public class GuiPanelCreator extends GuiContainer {
 
 	private ItemStack lastFloating = ItemStack.EMPTY;
 	private PanelComponent lastFloatingPC;
+
 	private PanelComponent getFloatingPC() {
 		ItemStack floating = mc.player.inventory.getItemStack();
 		if (floating.isEmpty() || floating.getItem() != IndustrialWires.panelComponent) {

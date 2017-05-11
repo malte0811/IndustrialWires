@@ -32,16 +32,24 @@ public class RawQuad {
 	public final float[] colorA;
 	public final Vector3f normal;
 	public final float[] uvs;
+	public int light;
+
 	public RawQuad(Vector3f v0, Vector3f v1, Vector3f v2, Vector3f v3,
 				   EnumFacing facing, TextureAtlasSprite tex, float[] colorA,
 				   Vector3f normal, float[] uvs) {
+		this(v0, v1, v2, v3, facing, tex, colorA, normal, uvs, -1);
+	}
+
+	public RawQuad(Vector3f v0, Vector3f v1, Vector3f v2, Vector3f v3,
+				   EnumFacing facing, TextureAtlasSprite tex, float[] colorA,
+				   Vector3f normal, float[] uvs, int light) {
 		vertices[0] = v0;
 		vertices[1] = v1;
 		vertices[2] = v2;
 		vertices[3] = v3;
 		this.facing = facing;
 		this.tex = tex;
-		if (colorA.length==3) {
+		if (colorA.length == 3) {
 			this.colorA = Arrays.copyOf(colorA, 4);
 			this.colorA[3] = 1;
 		} else {
@@ -49,7 +57,9 @@ public class RawQuad {
 		}
 		this.normal = normal;
 		this.uvs = uvs;
+		this.light = light;
 	}
+
 	public RawQuad apply(Matrix4 mat) {
 		Matrix4 matNormal = mat.copy().transpose();
 		matNormal.invert();

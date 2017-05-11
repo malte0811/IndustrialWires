@@ -48,30 +48,30 @@ public class ClientEventHandler {
 		if (ClientUtils.mc().player != null && e.getType() == RenderGameOverlayEvent.ElementType.TEXT) {
 			EntityPlayer player = ClientUtils.mc().player;
 
-			for(EnumHand hand : EnumHand.values()) {
+			for (EnumHand hand : EnumHand.values()) {
 				if (!player.getHeldItem(hand).isEmpty()) {
 					ItemStack equipped = player.getHeldItem(hand);
-					if(OreDictionary.itemMatches(new ItemStack(IndustrialWires.coil, 1, OreDictionary.WILDCARD_VALUE), equipped, false)) {
+					if (OreDictionary.itemMatches(new ItemStack(IndustrialWires.coil, 1, OreDictionary.WILDCARD_VALUE), equipped, false)) {
 						IC2Wiretype type = IC2Wiretype.IC2_TYPES[equipped.getItemDamage()];
 						int color = type.getColour(null);
-						String s = I18n.format(IndustrialWires.MODID+".desc.wireLength", ItemIC2Coil.getLength(equipped));
-						ClientUtils.font().drawString(s, e.getResolution().getScaledWidth()/2 - ClientUtils.font().getStringWidth(s)/2, e.getResolution().getScaledHeight()-GuiIngameForge.left_height-40, color, true);
-						if(ItemNBTHelper.hasKey(equipped, "linkingPos")) {
+						String s = I18n.format(IndustrialWires.MODID + ".desc.wireLength", ItemIC2Coil.getLength(equipped));
+						ClientUtils.font().drawString(s, e.getResolution().getScaledWidth() / 2 - ClientUtils.font().getStringWidth(s) / 2, e.getResolution().getScaledHeight() - GuiIngameForge.left_height - 40, color, true);
+						if (ItemNBTHelper.hasKey(equipped, "linkingPos")) {
 							int[] link = ItemNBTHelper.getIntArray(equipped, "linkingPos");
-							if(link!=null&&link.length>3) {
-								s = I18n.format(Lib.DESC_INFO+"attachedTo", link[1],link[2],link[3]);
+							if (link != null && link.length > 3) {
+								s = I18n.format(Lib.DESC_INFO + "attachedTo", link[1], link[2], link[3]);
 								RayTraceResult focussedBlock = ClientUtils.mc().objectMouseOver;
 								double distSquared;
 								if (focussedBlock != null && focussedBlock.typeOfHit == RayTraceResult.Type.BLOCK) {
-									distSquared = focussedBlock.getBlockPos().distanceSq(link[1],link[2],link[3]);
+									distSquared = focussedBlock.getBlockPos().distanceSq(link[1], link[2], link[3]);
 								} else {
-									distSquared = player.getDistanceSq(link[1],link[2],link[3]);
+									distSquared = player.getDistanceSq(link[1], link[2], link[3]);
 								}
 								int length = Math.min(ItemIC2Coil.getLength(equipped), type.getMaxLength());
-								if (length*length<distSquared) {
+								if (length * length < distSquared) {
 									color = 0xdd3333;
 								}
-								ClientUtils.font().drawString(s, e.getResolution().getScaledWidth()/2 - ClientUtils.font().getStringWidth(s)/2, e.getResolution().getScaledHeight()-GuiIngameForge.left_height-20, color, true);
+								ClientUtils.font().drawString(s, e.getResolution().getScaledWidth() / 2 - ClientUtils.font().getStringWidth(s) / 2, e.getResolution().getScaledHeight() - GuiIngameForge.left_height - 20, color, true);
 							}
 						}
 					}
@@ -94,8 +94,9 @@ public class ClientEventHandler {
 			}
 		}
 	}
+
 	@SubscribeEvent
 	public void bakeModel(ModelBakeEvent event) {
-		event.getModelRegistry().putObject(new ModelResourceLocation(IndustrialWires.MODID+":control_panel", "inventory,type=top"), new PanelModel());
+		event.getModelRegistry().putObject(new ModelResourceLocation(IndustrialWires.MODID + ":control_panel", "inventory,type=top"), new PanelModel());
 	}
 }

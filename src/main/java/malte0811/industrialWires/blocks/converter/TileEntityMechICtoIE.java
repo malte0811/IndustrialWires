@@ -35,32 +35,33 @@ import javax.annotation.Nonnull;
 public class TileEntityMechICtoIE extends TileEntityIWBase implements IDirectionalTile, ITickable {
 	EnumFacing dir = EnumFacing.DOWN;
 	int kinBuffer = 0;
-	private final int kinBufMax = 2*MechConversion.maxKinToRot;
-	private final double maxInsert = ConversionUtil.rotPerKin()*MechConversion.maxKinToRot;
+	private final int kinBufMax = 2 * MechConversion.maxKinToRot;
+	private final double maxInsert = ConversionUtil.rotPerKin() * MechConversion.maxKinToRot;
 	BlockPos to;
 	BlockPos from;
+
 	@Override
 	public void update() {
 		if (!world.isRemote) {
-			if (to==null) {
+			if (to == null) {
 				to = pos.offset(dir);
 			}
-			if (from==null) {
+			if (from == null) {
 				from = pos.offset(dir, -1);
 			}
 			TileEntity teFrom = world.getTileEntity(from);
 			if (teFrom instanceof IKineticSource) {
 				int sourceMax = ((IKineticSource) teFrom).maxrequestkineticenergyTick(dir);
-				int draw = Math.min(kinBufMax-kinBuffer, sourceMax);
-				if (draw>0) {
-					kinBuffer += ((IKineticSource) teFrom).requestkineticenergy(dir, draw)*MechConversion.kinToRotEfficiency;
+				int draw = Math.min(kinBufMax - kinBuffer, sourceMax);
+				if (draw > 0) {
+					kinBuffer += ((IKineticSource) teFrom).requestkineticenergy(dir, draw) * MechConversion.kinToRotEfficiency;
 				}
 			}
 			TileEntity teTo = world.getTileEntity(to);
-			if (kinBuffer>0&&teTo instanceof IRotationAcceptor) {
-				double out = Math.min(maxInsert, ConversionUtil.rotPerKin()*kinBuffer);
+			if (kinBuffer > 0 && teTo instanceof IRotationAcceptor) {
+				double out = Math.min(maxInsert, ConversionUtil.rotPerKin() * kinBuffer);
 				((IRotationAcceptor) teTo).inputRotation(out, dir);
-				kinBuffer -= out*ConversionUtil.kinPerRot();
+				kinBuffer -= out * ConversionUtil.kinPerRot();
 			}
 		}
 	}
@@ -78,12 +79,14 @@ public class TileEntityMechICtoIE extends TileEntityIWBase implements IDirection
 		to = null;
 		from = null;
 	}
+
 	// Directional
 	@Nonnull
 	@Override
 	public EnumFacing getFacing() {
 		return dir;
 	}
+
 	@Override
 	public void setFacing(@Nonnull EnumFacing facing) {
 		dir = facing;
@@ -91,18 +94,22 @@ public class TileEntityMechICtoIE extends TileEntityIWBase implements IDirection
 		from = null;
 		markDirty();
 	}
+
 	@Override
 	public int getFacingLimitation() {
 		return 1;
 	}
+
 	@Override
 	public boolean mirrorFacingOnPlacement(@Nonnull EntityLivingBase placer) {
 		return false;
 	}
+
 	@Override
 	public boolean canHammerRotate(@Nonnull EnumFacing side, float hitX, float hitY, float hitZ, @Nonnull EntityLivingBase entity) {
 		return true;
 	}
+
 	@Override
 	public boolean canRotate(@Nonnull EnumFacing axis) {
 		return true;

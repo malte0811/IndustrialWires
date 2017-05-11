@@ -41,7 +41,8 @@ public class MessageTileSyncIW implements IMessage {
 		this.nbt = nbt;
 	}
 
-	public MessageTileSyncIW() {}
+	public MessageTileSyncIW() {
+	}
 
 	@Override
 	public void fromBytes(ByteBuf buf) {

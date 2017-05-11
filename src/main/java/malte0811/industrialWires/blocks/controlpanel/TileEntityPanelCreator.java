@@ -39,7 +39,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-//TODO I no longer implement IEInventory!
 public class TileEntityPanelCreator extends TileEntityIWBase implements INetGUI, IBlockBoundsIW {
 	public List<PanelComponent> components = new ArrayList<>();
 	public float height = 0.5F;
@@ -102,7 +101,7 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements INetGUI,
 			break;
 		case REMOVE:
 			int id = nbt.getInteger("id");
-			if (id >= 0 && id < components.size() && !p.inventory.getItemStack().isEmpty()) {
+			if (id >= 0 && id < components.size() && p.inventory.getItemStack().isEmpty()) {
 				PanelComponent removed = components.get(id);
 				ItemStack remItem = ItemPanelComponent.stackFromComponent(removed);
 				p.inventory.setItemStack(remItem);
@@ -149,7 +148,8 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements INetGUI,
 		world.notifyBlockUpdate(pos, state, state, 3);
 	}
 
-	private static final AxisAlignedBB aabb = new AxisAlignedBB(0, 0,0, 1, 14/16D, 1);
+	private static final AxisAlignedBB aabb = new AxisAlignedBB(0, 0, 0, 1, 14 / 16D, 1);
+
 	@Override
 	public AxisAlignedBB getBoundingBox() {
 		return aabb;

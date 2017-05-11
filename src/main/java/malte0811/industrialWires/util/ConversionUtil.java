@@ -21,29 +21,38 @@ import blusunrize.immersiveengineering.common.Config;
 import malte0811.industrialWires.IWConfig.MechConversion;
 
 public class ConversionUtil {
-	private ConversionUtil() {}
-	public static double rotPerIf() {
-		return 1/Config.IEConfig.Machines.dynamo_output;
+	private ConversionUtil() {
 	}
+
+	public static double rotPerIf() {
+		return 1 / Config.IEConfig.Machines.dynamo_output;
+	}
+
 	public static double ifPerRot() {
 		return Config.IEConfig.Machines.dynamo_output;
 	}
+
 	public static double euPerIfIdeal() {
 		return MechConversion.euPerIf;
 	}
+
 	public static double ifPerEuIdeal() {
-		return 1/MechConversion.euPerIf;
+		return 1 / MechConversion.euPerIf;
 	}
+
 	public static double euPerKin() {
-		return 1/euPerKin();
+		return 1 / euPerKin();
 	}
+
 	public static double kinPerEu() {
 		return MechConversion.kinPerEu;
 	}
+
 	public static double kinPerRot() {
-		return kinPerEu()*euPerIfIdeal()*ifPerRot();
+		return kinPerEu() * euPerIfIdeal() * ifPerRot();
 	}
+
 	public static double rotPerKin() {
-		return 1/kinPerRot();
+		return 1 / kinPerRot();
 	}
 }

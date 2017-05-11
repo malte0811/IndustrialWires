@@ -36,6 +36,7 @@ public abstract class TileEntityIWBase extends TileEntity {
 		writeNBT(nbt, true);
 		return nbt;
 	}
+
 	@Override
 	public SPacketUpdateTileEntity getUpdatePacket() {
 		return new SPacketUpdateTileEntity(pos, getBlockMetadata(), getUpdateTag());
@@ -47,18 +48,21 @@ public abstract class TileEntityIWBase extends TileEntity {
 		writeNBT(compound, false);
 		return super.writeToNBT(compound);
 	}
-	
+
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
 		readNBT(compound, false);
 		super.readFromNBT(compound);
-		
+
 	}
+
 	@Override
 	public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
 		super.onDataPacket(net, pkt);
 		readNBT(pkt.getNbtCompound(), true);
 	}
+
 	public abstract void writeNBT(NBTTagCompound out, boolean updatePacket);
+
 	public abstract void readNBT(NBTTagCompound in, boolean updatePacket);
 }

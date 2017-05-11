@@ -27,6 +27,7 @@ import java.util.ArrayList;
 
 public class PropertyComponents implements IUnlistedProperty<PropertyComponents.PanelRenderProperties> {
 	public static PropertyComponents INSTANCE = new PropertyComponents();
+
 	@Override
 	public String getName() {
 		return "components";
@@ -34,7 +35,7 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 
 	@Override
 	public boolean isValid(PanelRenderProperties value) {
-		return value!=null;
+		return value != null;
 	}
 
 	@Override
@@ -51,26 +52,31 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 		public EnumFacing facing = EnumFacing.NORTH;
 		public float height = .5F;
 		public EnumFacing top = EnumFacing.UP;
+
 		public PanelRenderProperties() {
 			super();
 		}
+
 		public PanelRenderProperties(int length) {
 			super(length);
 		}
+
 		@Override
 		public String toString() {
 			StringBuilder ret = new StringBuilder("[");
-			for (int i = 0;i<size();i++) {
+			for (int i = 0; i < size(); i++) {
 				ret.append(get(i));
-				if (i<size()-1) {
+				if (i < size() - 1) {
 					ret.append(", ");
 				}
 			}
-			return ret+"]";
+			return ret + "]";
 		}
+
 		public Matrix4 getPanelTopTransform() {
 			return getPanelBaseTransform().translate(0, height, 0);
 		}
+
 		public Matrix4 getPanelBaseTransform() {
 			Matrix4 ret = new Matrix4();
 			ret.translate(.5, .5, .5);
@@ -84,7 +90,7 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 			case SOUTH:
 			case WEST:
 			case EAST:
-				ret.rotate(Math.PI/2, 1, 0, 0);
+				ret.rotate(Math.PI / 2, 1, 0, 0);
 				ret.rotate(top.getHorizontalAngle() * Math.PI / 180, 0, 0, 1);
 				break;
 			}
@@ -94,18 +100,18 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 
 		public float getMaxHeight() {
 			float ret = 0;
-			for (PanelComponent pc:this) {
+			for (PanelComponent pc : this) {
 				float hHere = pc.getHeight();
-				if (hHere>ret) {
+				if (hHere > ret) {
 					ret = hHere;
 				}
 			}
-			return ret+height;
+			return ret + height;
 		}
 
 		public PanelRenderProperties copyOf() {
 			PanelRenderProperties ret = new PanelRenderProperties(size());
-			for (PanelComponent pc:this) {
+			for (PanelComponent pc : this) {
 				ret.add(pc.copyOf());
 			}
 			ret.facing = facing;
