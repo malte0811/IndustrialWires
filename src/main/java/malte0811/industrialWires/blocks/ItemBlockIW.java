@@ -28,12 +28,15 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import javax.annotation.Nonnull;
+
 public class ItemBlockIW extends ItemBlock {
 	private final Object[] values;
+
 	public ItemBlockIW(Block b) {
 		super(b);
 		if (b instanceof IMetaEnum) {
-			values = ((IMetaEnum)b).getValues();
+			values = ((IMetaEnum) b).getValues();
 		} else {
 			values = null;
 		}
@@ -42,19 +45,20 @@ public class ItemBlockIW extends ItemBlock {
 	@Override
 	public String getUnlocalizedName(ItemStack stack) {
 		int meta = stack.getMetadata();
-		if (values!=null) {
+		if (values != null) {
 			return block.getUnlocalizedName() + "." + values[meta].toString().toLowerCase();
 		} else {
 			return block.getUnlocalizedName();
 		}
 	}
+
 	@Override
 	public int getMetadata(int damage) {
 		return damage;
 	}
 
 	@Override
-	public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState) {
+	public boolean placeBlockAt(@Nonnull ItemStack stack, @Nonnull EntityPlayer player, World world, @Nonnull BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, @Nonnull IBlockState newState) {
 		if (block instanceof IPlacementCheck&&!((IPlacementCheck) block).canPlaceBlockAt(world, pos, stack)) {
 			return false;
 		}

@@ -103,7 +103,7 @@ public class ItemPanelComponent extends Item {
 		outer.setTag("data", inner);
 		int meta = getMetaFromPC(inner.getString("type"));
 		removeIrrelevantTags(inner);
-		if (meta>=0) {
+		if (meta >= 0) {
 			ItemStack ret = new ItemStack(IndustrialWires.panelComponent, 1, meta);
 			ret.setTagCompound(outer);
 			return ret;
@@ -119,7 +119,7 @@ public class ItemPanelComponent extends Item {
 	}
 
 	private static int getMetaFromPC(String pc) {
-		for (int i = 0;i<types.length;i++) {
+		for (int i = 0; i < types.length; i++) {
 			if (pc.equals(types[i])) {
 				return i;
 			}

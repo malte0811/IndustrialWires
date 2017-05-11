@@ -182,7 +182,7 @@ public class ClientProxy extends CommonProxy {
 		}
 
 		ClientUtils.mc().getItemColors().registerItemColorHandler((stack, pass) -> {
-			if (pass==1) {
+			if (pass == 1) {
 				PanelComponent pc = ItemPanelComponent.componentFromStack(stack);
 				if (pc != null) {
 					return 0xff000000 | pc.getColor();
@@ -245,6 +245,7 @@ public class ClientProxy extends CommonProxy {
 	private static ResourceLocation jacobsStart = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_start");//~470 ms ~=9 ticks
 	private static ResourceLocation jacobsMiddle = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_middle");
 	private static ResourceLocation jacobsEnd = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_end");//~210 ms ~= 4 ticks
+
 	@Override
 	public void playJacobsLadderSound(TileEntityJacobsLadder te, int phase, Vec3d soundPos) {
 		if (playingSounds.containsKey(te.getPos())) {
@@ -265,14 +266,14 @@ public class ClientProxy extends CommonProxy {
 		default:
 			return;
 		}
-		PositionedSoundRecord sound = new PositionedSoundRecord(event, SoundCategory.BLOCKS, te.size.soundVolume, 1, false, 0, ISound.AttenuationType.LINEAR, (float)soundPos.xCoord, (float)soundPos.yCoord, (float) soundPos.zCoord);
+		PositionedSoundRecord sound = new PositionedSoundRecord(event, SoundCategory.BLOCKS, te.size.soundVolume, 1, false, 0, ISound.AttenuationType.LINEAR, (float) soundPos.xCoord, (float) soundPos.yCoord, (float) soundPos.zCoord);
 		ClientUtils.mc().getSoundHandler().playSound(sound);
 		playingSounds.put(te.getPos(), sound);
 	}
 
 	@Override
 	public Gui getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-		if (ID==0) {
+		if (ID == 0) {
 			TileEntity te = world.getTileEntity(new BlockPos(x, y, z));
 			if (te instanceof TileEntityRSPanelConn) {
 				return new GuiRSPanelConn((TileEntityRSPanelConn) te);
@@ -280,7 +281,7 @@ public class ClientProxy extends CommonProxy {
 			if (te instanceof TileEntityPanelCreator) {
 				return new GuiPanelCreator(player.inventory, (TileEntityPanelCreator) te);
 			}
-		} else if (ID==1) {
+		} else if (ID == 1) {
 			EnumHand h = z == 1 ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
 			ItemStack held = player.getHeldItem(h);
 			if (held != null && held.getItem() == IndustrialWires.panelComponent) {

@@ -25,14 +25,16 @@ public class TileEntityIC2ConnectorGlass extends TileEntityIC2ConnectorHV {
 		super(rel);
 	}
 
-	public TileEntityIC2ConnectorGlass() {} 
+	public TileEntityIC2ConnectorGlass() {
+	}
 
 	{
 		tier = 5;
-		maxStored = IC2Wiretype.IC2_TYPES[4].getTransferRate()/8;
+		maxStored = IC2Wiretype.IC2_TYPES[4].getTransferRate() / 8;
 	}
+
 	@Override
 	public boolean canConnect(WireType t) {
-		return t==IC2Wiretype.IC2_TYPES[4];
+		return t == IC2Wiretype.IC2_TYPES[4];
 	}
 }

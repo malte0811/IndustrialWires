@@ -53,9 +53,9 @@ public class GuiPanelComponent extends GuiContainer {
 			confComp = (IConfigurableComponent) component;
 			IConfigurableComponent.BoolConfig[] bools = confComp.getBooleanOptions();
 			boolButtons.clear();
-			int componentLeft = this.guiLeft+5;
-			int componentTop = this.guiTop+5;
-			for (int i = 0;i<bools.length;i++) {
+			int componentLeft = this.guiLeft + 5;
+			int componentTop = this.guiTop + 5;
+			for (int i = 0; i < bools.length; i++) {
 				IConfigurableComponent.BoolConfig bc = bools[i];
 				boolButtons.add(new GuiButtonCheckbox(0, componentLeft + bc.x, componentTop + bc.y, confComp.fomatConfigName(IConfigurableComponent.ConfigType.BOOL, i), bc.value));
 			}
@@ -78,22 +78,23 @@ public class GuiPanelComponent extends GuiContainer {
 			intChoosers.clear();
 			IConfigurableComponent.IntConfig[] is = confComp.getIntegerOptions();
 			for (IConfigurableComponent.IntConfig ic : is) {
-				intChoosers.add(new GuiIntChooser(componentLeft+ic.x, componentTop+ic.y, ic.allowNegative, ic.value, ic.digits));
+				intChoosers.add(new GuiIntChooser(componentLeft + ic.x, componentTop + ic.y, ic.allowNegative, ic.value, ic.digits));
 			}
 			floatSliders.clear();
 			IConfigurableComponent.FloatConfig[] fs = confComp.getFloatOptions();
-			for (int i = 0;i<fs.length;i++) {
+			for (int i = 0; i < fs.length; i++) {
 				IConfigurableComponent.FloatConfig fc = fs[i];
-				floatSliders.add(new GuiSliderIE(0, componentLeft+fc.x, componentTop+fc.y, fc.width,
+				floatSliders.add(new GuiSliderIE(0, componentLeft + fc.x, componentTop + fc.y, fc.width,
 						confComp.fomatConfigName(IConfigurableComponent.ConfigType.FLOAT, i), fc.value));
 			}
 		}
 	}
 
 	private ResourceLocation textureLoc = new ResourceLocation(IndustrialWires.MODID, "textures/gui/panel_component.png");
+
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
-		GlStateManager.color(1,1,1,1);
+		GlStateManager.color(1, 1, 1, 1);
 		mc.getTextureManager().bindTexture(textureLoc);
 		Gui.drawModalRectWithCustomSizedTexture(guiLeft, guiTop, 0, 0, xSize, ySize, 150, 150);
 	}
@@ -108,7 +109,7 @@ public class GuiPanelComponent extends GuiContainer {
 	@Override
 	protected void keyTyped(char typedChar, int keyCode) throws IOException {
 		boolean superCall = true;
-		for (int i = 0;i<stringTexts.size();i++) {
+		for (int i = 0; i < stringTexts.size(); i++) {
 			GuiTextField field = stringTexts.get(i);
 			if (field.isFocused() && keyCode == 28) {
 				sync(i, field.getText());
@@ -125,7 +126,7 @@ public class GuiPanelComponent extends GuiContainer {
 	@Override
 	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
 		super.mouseClicked(mouseX, mouseY, mouseButton);
-		for (int i = 0;i<rsChannelChoosers.size();i++) {
+		for (int i = 0; i < rsChannelChoosers.size(); i++) {
 			GuiChannelPicker picker = rsChannelChoosers.get(i);
 			int old = picker.getSelected();
 			boolean stopNow = picker.click(mouseX, mouseY);
@@ -136,35 +137,35 @@ public class GuiPanelComponent extends GuiContainer {
 				return;
 			}
 		}
-		for (int i = 0;i<stringTexts.size();i++) {
+		for (int i = 0; i < stringTexts.size(); i++) {
 			GuiTextField field = stringTexts.get(i);
 			boolean focus = field.isFocused();
 			field.mouseClicked(mouseX, mouseY, mouseButton);
-			if (focus&&!field.isFocused()) {
+			if (focus && !field.isFocused()) {
 				sync(i, field.getText());
 			}
 		}
-		for (int i = 0;i<boolButtons.size();i++) {
+		for (int i = 0; i < boolButtons.size(); i++) {
 			GuiButtonCheckbox box = boolButtons.get(i);
 			boolean on = box.state;
 			box.mousePressed(mc, mouseX, mouseY);
-			if (on!=box.state) {
+			if (on != box.state) {
 				sync(i, box.state);
 			}
 		}
-		for (int i = 0;i<intChoosers.size();i++) {
+		for (int i = 0; i < intChoosers.size(); i++) {
 			GuiIntChooser chooser = intChoosers.get(i);
 			int oldV = chooser.getValue();
 			chooser.click(mouseX, mouseY);
-			if (oldV!=chooser.getValue()) {
+			if (oldV != chooser.getValue()) {
 				sync(i, chooser.getValue());
 			}
 		}
-		for (int i = 0;i<floatSliders.size();i++) {
+		for (int i = 0; i < floatSliders.size(); i++) {
 			GuiSliderIE slider = floatSliders.get(i);
 			double oldV = slider.getValue();
 			slider.mousePressed(mc, mouseX, mouseY);
-			if (oldV!=slider.getValue()) {
+			if (oldV != slider.getValue()) {
 				sync(i, (float) slider.getValue());
 			}
 		}
@@ -173,11 +174,11 @@ public class GuiPanelComponent extends GuiContainer {
 	@Override
 	protected void mouseReleased(int mouseX, int mouseY, int state) {
 		super.mouseReleased(mouseX, mouseY, state);
-		for (int i = 0;i<floatSliders.size();i++) {
+		for (int i = 0; i < floatSliders.size(); i++) {
 			GuiSliderIE slider = floatSliders.get(i);
 			double oldV = slider.getValue();
 			slider.mouseReleased(mouseX, mouseY);
-			if (oldV!=slider.getValue()) {
+			if (oldV != slider.getValue()) {
 				sync(i, (float) slider.getValue());
 			}
 		}
@@ -204,21 +205,21 @@ public class GuiPanelComponent extends GuiContainer {
 			choose.drawButton(mc, mouseX, mouseY);
 		}
 		//TOOLTIPS
-		for (int i = 0;i<rsChannelChoosers.size();i++) {
+		for (int i = 0; i < rsChannelChoosers.size(); i++) {
 			GuiChannelPicker pick = rsChannelChoosers.get(i);
 			String tooltip = confComp.fomatConfigDescription(IConfigurableComponent.ConfigType.RS_CHANNEL, i);
-			if (tooltip!=null&&pick.isHovered(mouseX, mouseY)) {
+			if (tooltip != null && pick.isHovered(mouseX, mouseY)) {
 				ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRendererObj);
 			}
 		}
-		for (int i = 0;i<boolButtons.size();i++) {
+		for (int i = 0; i < boolButtons.size(); i++) {
 			GuiButtonCheckbox box = boolButtons.get(i);
 			String tooltip = confComp.fomatConfigDescription(IConfigurableComponent.ConfigType.BOOL, i);
 			if (tooltip!=null&&box.isMouseOver()) {
 				ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRendererObj);
 			}
 		}
-		for (int i = 0;i<stringTexts.size();i++) {
+		for (int i = 0; i < stringTexts.size(); i++) {
 			GuiTextField field = stringTexts.get(i);
 			String tooltip = confComp.fomatConfigDescription(IConfigurableComponent.ConfigType.STRING, i);
 			if (tooltip!=null&&mouseX>=field.xPosition&&mouseX<field.xPosition+field.width&&
@@ -226,14 +227,14 @@ public class GuiPanelComponent extends GuiContainer {
 				ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRendererObj);
 			}
 		}
-		for (int i = 0;i<intChoosers.size();i++) {
+		for (int i = 0; i < intChoosers.size(); i++) {
 			GuiIntChooser choose = intChoosers.get(i);
 			String tooltip = confComp.fomatConfigDescription(IConfigurableComponent.ConfigType.INT, i);
 			if (tooltip!=null&&choose.isMouseOver(mouseX, mouseY)) {
 				ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRendererObj);
 			}
 		}
-		for (int i = 0;i<floatSliders.size();i++) {
+		for (int i = 0; i < floatSliders.size(); i++) {
 			GuiSliderIE choose = floatSliders.get(i);
 			String tooltip = confComp.fomatConfigDescription(IConfigurableComponent.ConfigType.FLOAT, i);
 			if (tooltip!=null&&choose.isMouseOver()) {
@@ -249,6 +250,7 @@ public class GuiPanelComponent extends GuiContainer {
 		update.setString(MessageComponentSync.VALUE, value);
 		syncSingle(update);
 	}
+
 	private void sync(int id, boolean value) {
 		NBTTagCompound update = new NBTTagCompound();
 		update.setInteger(MessageComponentSync.TYPE, IConfigurableComponent.ConfigType.BOOL.ordinal());
@@ -256,6 +258,7 @@ public class GuiPanelComponent extends GuiContainer {
 		update.setBoolean(MessageComponentSync.VALUE, value);
 		syncSingle(update);
 	}
+
 	private void sync(int id, byte value) {
 		NBTTagCompound update = new NBTTagCompound();
 		update.setInteger(MessageComponentSync.TYPE, IConfigurableComponent.ConfigType.RS_CHANNEL.ordinal());
@@ -263,6 +266,7 @@ public class GuiPanelComponent extends GuiContainer {
 		update.setByte(MessageComponentSync.VALUE, value);
 		syncSingle(update);
 	}
+
 	private void sync(int id, int value) {
 		NBTTagCompound update = new NBTTagCompound();
 		update.setInteger(MessageComponentSync.TYPE, IConfigurableComponent.ConfigType.INT.ordinal());
@@ -270,6 +274,7 @@ public class GuiPanelComponent extends GuiContainer {
 		update.setInteger(MessageComponentSync.VALUE, value);
 		syncSingle(update);
 	}
+
 	private void sync(int id, float value) {
 		NBTTagCompound update = new NBTTagCompound();
 		update.setInteger(MessageComponentSync.TYPE, IConfigurableComponent.ConfigType.FLOAT.ordinal());
@@ -277,37 +282,38 @@ public class GuiPanelComponent extends GuiContainer {
 		update.setFloat(MessageComponentSync.VALUE, value);
 		syncSingle(update);
 	}
+
 	private void syncAll() {
 		NBTTagList list = new NBTTagList();
-		for (int i = 0;i<stringTexts.size();i++) {
+		for (int i = 0; i < stringTexts.size(); i++) {
 			NBTTagCompound update = new NBTTagCompound();
 			update.setInteger(MessageComponentSync.TYPE, IConfigurableComponent.ConfigType.STRING.ordinal());
 			update.setInteger(MessageComponentSync.ID, i);
 			update.setString(MessageComponentSync.VALUE, stringTexts.get(i).getText());
 			list.appendTag(update);
 		}
-		for (int i = 0;i<boolButtons.size();i++) {
+		for (int i = 0; i < boolButtons.size(); i++) {
 			NBTTagCompound update = new NBTTagCompound();
 			update.setInteger(MessageComponentSync.TYPE, IConfigurableComponent.ConfigType.BOOL.ordinal());
 			update.setInteger(MessageComponentSync.ID, i);
 			update.setBoolean(MessageComponentSync.VALUE, boolButtons.get(i).state);
 			list.appendTag(update);
 		}
-		for (int i = 0;i<rsChannelChoosers.size();i++) {
+		for (int i = 0; i < rsChannelChoosers.size(); i++) {
 			NBTTagCompound update = new NBTTagCompound();
 			update.setInteger(MessageComponentSync.TYPE, IConfigurableComponent.ConfigType.RS_CHANNEL.ordinal());
 			update.setInteger(MessageComponentSync.ID, i);
 			update.setByte(MessageComponentSync.VALUE, rsChannelChoosers.get(i).getSelected());
 			list.appendTag(update);
 		}
-		for (int i = 0;i<intChoosers.size();i++) {
+		for (int i = 0; i < intChoosers.size(); i++) {
 			NBTTagCompound update = new NBTTagCompound();
 			update.setInteger(MessageComponentSync.TYPE, IConfigurableComponent.ConfigType.INT.ordinal());
 			update.setInteger(MessageComponentSync.ID, i);
 			update.setInteger(MessageComponentSync.VALUE, intChoosers.get(i).getValue());
 			list.appendTag(update);
 		}
-		for (int i = 0;i<floatSliders.size();i++) {
+		for (int i = 0; i < floatSliders.size(); i++) {
 			NBTTagCompound update = new NBTTagCompound();
 			update.setInteger(MessageComponentSync.TYPE, IConfigurableComponent.ConfigType.FLOAT.ordinal());
 			update.setInteger(MessageComponentSync.ID, i);
@@ -316,11 +322,13 @@ public class GuiPanelComponent extends GuiContainer {
 		}
 		sync(list);
 	}
+
 	private void syncSingle(NBTTagCompound nbt) {
 		NBTTagList list = new NBTTagList();
 		list.appendTag(nbt);
 		sync(list);
 	}
+
 	private void sync(NBTTagList list) {
 		NBTTagCompound nbt = new NBTTagCompound();
 		nbt.setTag("data", list);

@@ -25,23 +25,21 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.Vec3d;
-import net.minecraftforge.client.model.ModelLoader;
 import org.lwjgl.opengl.GL11;
 
 public class TileRenderJacobsLadder extends TileEntitySpecialRenderer<TileEntityJacobsLadder> {
 	@Override
 	public void renderTileEntityAt(TileEntityJacobsLadder tile, double x, double y, double z, float partialTicks, int destroyStage) {
 		super.renderTileEntityAt(tile, x, y, z, partialTicks, destroyStage);
-		if (!tile.isDummy()&&tile.timeTillActive==0&&tile.controls[0] != null) {
+		if (!tile.isDummy() && tile.timeTillActive == 0 && tile.controls[0] != null) {
 
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(x + .5, y + tile.size.heightOffset, z + .5);
 			GlStateManager.rotate(tile.facing.getHorizontalAngle(), 0, 1, 0);
-			GlStateManager.translate( - tile.size.bottomDistance / 2, 0, 0);
+			GlStateManager.translate(-tile.size.bottomDistance / 2, 0, 0);
 
 			GlStateManager.disableTexture2D();
 			GlStateManager.disableLighting();
@@ -89,47 +87,50 @@ public class TileRenderJacobsLadder extends TileEntitySpecialRenderer<TileEntity
 		Vec3d radZ = new Vec3d(0, 0, diameter / 2);
 		Tessellator tes = Tessellator.getInstance();
 		VertexBuffer vertBuffer = tes.getBuffer();
-		float[][] colors = new float[steps+1][];
+		float[][] colors = new float[steps + 1][];
 		vertBuffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 		Vec3d last = Beziers.getPoint(0, controls);
 		colors[0] = getColor(0, salt, size);
-		for (int i = 1;i<=steps;i++) {
-			double d = i/(double)steps;
+		for (int i = 1; i <= steps; i++) {
+			double d = i / (double) steps;
 			colors[i] = getColor(d, salt, size);
 			Vec3d pos = Beziers.getPoint(d, controls);
-			drawQuad(last, pos, radY, colors[i-1], colors[i], vertBuffer);
-			drawQuad(last, pos, radZ, colors[i-1], colors[i], vertBuffer);
+			drawQuad(last, pos, radY, colors[i - 1], colors[i], vertBuffer);
+			drawQuad(last, pos, radZ, colors[i - 1], colors[i], vertBuffer);
 			last = pos;
 		}
 		tes.draw();
 	}
-	private final float[] saltColor = {1, 190/255F, 50/255F};
+
+	private final float[] saltColor = {1, 190 / 255F, 50 / 255F};
 	private final float[] airColor = {1, .85F, 1};
+
 	private float[] getColor(double t, double salt, LadderSize size) {
 		salt = Math.min(salt, 1);
 		int factor = 20;
 		double smallMin = Math.exp(-.5);
-		double normalMin = Math.exp(-.25*factor);
-		double hugeMin = Math.exp(-.75*factor);
+		double normalMin = Math.exp(-.25 * factor);
+		double hugeMin = Math.exp(-.75 * factor);
 		double saltyness = 0;
-		double t2 = t-.5;
+		double t2 = t - .5;
 		switch (size) {
 		case SMALL:
-			saltyness = salt*(1-.9*(Math.exp(-Math.abs(t2))-smallMin));
+			saltyness = salt * (1 - .9 * (Math.exp(-Math.abs(t2)) - smallMin));
 			break;
 		case NORMAL:
-			saltyness = salt*(1-.9*(Math.exp(-factor*t2*t2)-normalMin));
+			saltyness = salt * (1 - .9 * (Math.exp(-factor * t2 * t2) - normalMin));
 			break;
 		case HUGE:
-			saltyness = salt*(1-.9*(Math.exp(-Math.abs(factor*t2*t2*t2))-hugeMin));
+			saltyness = salt * (1 - .9 * (Math.exp(-Math.abs(factor * t2 * t2 * t2)) - hugeMin));
 			break;
 		}
-		return interpolate(saltyness, saltColor, 1-saltyness, airColor);
+		return interpolate(saltyness, saltColor, 1 - saltyness, airColor);
 	}
+
 	private float[] interpolate(double a, float[] cA, double b, float[] cB) {
 		float[] ret = new float[cA.length];
-		for (int i = 0;i<ret.length;i++) {
-			ret[i] = (float) (a*cA[i]+b*cB[i]);
+		for (int i = 0; i < ret.length; i++) {
+			ret[i] = (float) (a * cA[i] + b * cB[i]);
 		}
 		return ret;
 	}
@@ -145,6 +146,7 @@ public class TileRenderJacobsLadder extends TileEntitySpecialRenderer<TileEntity
 		color(color0, vertexBuffer.pos(v0.xCoord - rad.xCoord, v0.yCoord - rad.yCoord, v0.zCoord - rad.zCoord)).endVertex();
 		color(color1, vertexBuffer.pos(v1.xCoord - rad.xCoord, v1.yCoord - rad.yCoord, v1.zCoord - rad.zCoord)).endVertex();
 	}
+
 	private VertexBuffer color(float[] color, VertexBuffer vb) {
 		vb.color(color[0], color[1], color[2], 1);
 		return vb;

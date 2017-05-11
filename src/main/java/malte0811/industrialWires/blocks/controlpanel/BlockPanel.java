@@ -43,10 +43,12 @@ import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 
 public class BlockPanel extends BlockIWBase implements IMetaEnum {
 	public static final PropertyEnum<BlockTypes_Panel> type = PropertyEnum.create("type", BlockTypes_Panel.class);
+
 	public BlockPanel() {
 		super(Material.IRON, "control_panel");
 		lightOpacity = 0;
@@ -56,17 +58,17 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 	public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer) {
 		switch (state.getValue(type)) {
 		case TOP:
-			return layer==BlockRenderLayer.CUTOUT;
+			return layer == BlockRenderLayer.CUTOUT;
 		case RS_WIRE:
-			return layer==BlockRenderLayer.TRANSLUCENT||layer==BlockRenderLayer.SOLID;
+			return layer == BlockRenderLayer.TRANSLUCENT || layer == BlockRenderLayer.SOLID;
 		default:
 			return super.canRenderInLayer(state, layer);
 		}
 	}
 
 	@Override
-	public TileEntity createTileEntity(World world, IBlockState state) {
-		switch(state.getValue(type)) {
+	public TileEntity createTileEntity(@Nonnull World world, @Nonnull IBlockState state) {
+		switch (state.getValue(type)) {
 		case TOP:
 			return new TileEntityPanel();
 		case RS_WIRE:
@@ -143,18 +145,22 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 		list.add(new ItemStack(itemIn, 1, 2));
 		list.add(new ItemStack(itemIn, 1, 3));
 	}
+
 	@Override
 	public boolean isFullBlock(IBlockState state) {
 		return false;
 	}
+
 	@Override
 	public boolean isFullCube(IBlockState state) {
 		return false;
 	}
+
 	@Override
 	public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos) {
 		return false;
 	}
+
 	@Override
 	public boolean isOpaqueCube(IBlockState state) {
 		return false;
@@ -168,7 +174,7 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
 		if (!super.onBlockActivated(world, pos, state, player, hand, heldItem, side, hitX, hitY, hitZ)&&hand==EnumHand.MAIN_HAND) {
 			TileEntity te = world.getTileEntity(pos);
-			if (te instanceof TileEntityRSPanelConn){
+			if (te instanceof TileEntityRSPanelConn) {
 				if (!world.isRemote) {
 					player.openGui(IndustrialWires.instance, 0, te.getWorld(), te.getPos().getX(), te.getPos().getY(), te.getPos().getZ());
 				}
@@ -182,12 +188,13 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 			}
 			return false;
 		}
-		return state.getValue(type)==BlockTypes_Panel.TOP;
+		return state.getValue(type) == BlockTypes_Panel.TOP;
 	}
 
 	@Override
-	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
-		if (state.getValue(type)==BlockTypes_Panel.TOP) {
+	@Nonnull
+	public ItemStack getPickBlock(@Nonnull IBlockState state, RayTraceResult target, @Nonnull World world, @Nonnull BlockPos pos, EntityPlayer player) {
+		if (state.getValue(type) == BlockTypes_Panel.TOP) {
 			TileEntity te = world.getTileEntity(pos);
 			if (te instanceof TileEntityPanel) {
 				return ((TileEntityPanel) te).getTileDrop(player, state);

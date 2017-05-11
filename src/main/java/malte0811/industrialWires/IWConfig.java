@@ -20,7 +20,7 @@ package malte0811.industrialWires;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.Config.Comment;
 
-@Config(modid=IndustrialWires.MODID)
+@Config(modid = IndustrialWires.MODID)
 public class IWConfig {
 	@Comment({"The maximum length of a single connection.", "Order: Tin, Copper, Gold, HV, Glass Fiber"})
 	public static int[] maxLengthPerConn = {16, 16, 16, 32, 32};
@@ -29,14 +29,15 @@ public class IWConfig {
 
 	@Comment({"Set this to false to completely disable any conversion between IF and EU (default: true)"})
 	public static boolean enableConversion = true;
-	
-	public static MechConversion mc = new MechConversion();
+
+	public static MechConversion mech;
+
 	public static class MechConversion {
 		@Comment({"The amount of EU that would be produced by an ideal converter from 1 IF (default: 0.25)"})
 		public static double euPerIf = .25;
 		@Comment({"The amount of IC2 kinetic energy that an ideal converter produces from 1 EU"})
 		public static double kinPerEu = 4;
-		
+
 		@Comment({"The maximum amount of IF that can be converted to rotational energy", "by one motor in one tick (default: 100)"})
 		public static int maxIfToMech = 100;
 		@Comment({"The efficiency of the IF motor. The default value of 0.9 means that 10% of the energy are lost in the conversion."})
@@ -46,16 +47,18 @@ public class IWConfig {
 		public static double maxRotToKin = 50;
 		@Comment({"The efficiency of the conversion from IE rotational energy to IC2 kinetic energy"})
 		public static double rotToKinEfficiency = .7;
-		
+
 		@Comment({"The maximum amount of IC2 kinetic energy that can be converted into IE rotational energy", "by one converter in one tick"})
 		public static int maxKinToRot = 2400;
 		@Comment({"The efficiency of the conversion from IC2 kinetic energy to IE rotational energy"})
 		public static double kinToRotEfficiency = .8;
 	}
-	public  static HVStuff hv = new HVStuff();
+
+	public static HVStuff hv;
+
 	public static class HVStuff {
-		@Comment({"The amount of Eu a Jacobs Ladder uses per tick, sorted by size of the ladder"})
-		public static double[] jacobsUsageEU = {10, 20, 50};
+		@Comment({"The amount of EU a Jacobs Ladder uses per tick, sorted by size of the ladder"})
+		public static double[] jacobsUsageEU = {20, 50, 100};
 		@Comment({"The damage dealt by a small Jacobs Ladder. Normal Ladders deal twice this damage, huge ones 3 times as much"})
 		public static float jacobsBaseDmg = 5;
 	}

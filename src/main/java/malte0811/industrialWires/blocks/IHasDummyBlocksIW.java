@@ -22,6 +22,8 @@ import net.minecraft.block.state.IBlockState;
 
 public interface IHasDummyBlocksIW {
 	void placeDummies(IBlockState state);
+
 	void breakDummies();
+
 	boolean isDummy();
 }

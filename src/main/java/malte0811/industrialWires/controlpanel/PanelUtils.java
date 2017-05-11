@@ -22,8 +22,12 @@ import blusunrize.immersiveengineering.api.Lib;
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import ic2.api.item.IC2Items;
 import malte0811.industrialWires.IndustrialWires;
+import malte0811.industrialWires.blocks.controlpanel.BlockPanel;
+import malte0811.industrialWires.blocks.controlpanel.BlockTypes_Panel;
 import malte0811.industrialWires.blocks.controlpanel.PropertyComponents.PanelRenderProperties;
 import malte0811.industrialWires.client.RawQuad;
+import malte0811.industrialWires.client.panelmodel.SmartLightingQuadIW;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -39,7 +43,9 @@ import net.minecraft.nbt.NBTTagFloat;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
+import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJModel;
 import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad;
@@ -51,8 +57,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiPredicate;
 
 import static malte0811.industrialWires.controlpanel.PanelComponent.*;
+import static malte0811.industrialWires.util.MiscUtils.discoverLocal;
 
 public final class PanelUtils {
 	public static TextureAtlasSprite PANEL_TEXTURE;
@@ -130,7 +138,11 @@ public final class PanelUtils {
 				raw.colorA);
 		putVertexData(format, builder, transform.apply(vertices[3]), faceNormal, uvs[flip ? 0 : 2], uvs[flip ? 3 : 1], raw.tex,
 				raw.colorA);
-		return builder.build();
+		BakedQuad ret = builder.build();
+		if (raw.light>0) {
+			ret = new SmartLightingQuadIW(ret, raw.light);
+		}
+		return ret;
 	}
 
 	//mostly copied from IE's ClientUtils, it has protected access there...
@@ -185,7 +197,7 @@ public final class PanelUtils {
 
 	@SideOnly(Side.CLIENT)
 	public static void addBox(float[] colorTop, float[] colorSides, float[] colorBottom, Vector3f min, Vector3f size, List<RawQuad> out, boolean doBottom, float[] uvs, TextureAtlasSprite tex,
-			@Nullable Matrix4 mat, boolean inside) {
+							  @Nullable Matrix4 mat, boolean inside) {
 		addQuad(out, new Vector3f(min.x, min.y + size.y, min.z), new Vector3f(min.x, min.y + size.y, min.z + size.z),
 				new Vector3f(min.x + size.x, min.y + size.y, min.z + size.z), new Vector3f(min.x + size.x, min.y + size.y, min.z),
 				EnumFacing.UP, colorTop, tex, uvs, mat, inside);
@@ -223,7 +235,7 @@ public final class PanelUtils {
 		Vec3i dirV = dir.getDirectionVec();
 		RawQuad quad = new RawQuad(v0, v1, v2, v3, dir, tex,
 				color, new Vector3f(dirV.getX(), dirV.getY(), dirV.getZ()), uvs);
-		if (mat!=null) {
+		if (mat != null) {
 			quad = quad.apply(mat);
 		}
 		out.add(quad);
@@ -311,6 +323,7 @@ public final class PanelUtils {
 	public static boolean intersectXZ(AxisAlignedBB aabb1, AxisAlignedBB aabb2) {
 		return aabb1.minX < aabb2.maxX && aabb1.maxX > aabb2.minX && aabb1.minZ < aabb2.maxZ && aabb1.maxZ > aabb2.minZ;
 	}
+
 	public static void readListFromNBT(NBTTagList list, @Nonnull List<PanelComponent> base) {
 		base.clear();
 		for (int i = 0; i < list.tagCount(); i++) {
@@ -322,9 +335,27 @@ public final class PanelUtils {
 	}
 
 	public static ItemStack getPanelBase() {
-		if (panelBase==null) {
+		if (panelBase == null) {
 			panelBase = IC2Items.getItem("resource", "machine");
 		}
 		return panelBase;
+	}
+
+	public static List<BlockPos> discoverPanelParts(World w, BlockPos here) {
+		BiPredicate<BlockPos, Integer> isValid = (pos, count) -> {
+			if (here.distanceSq(pos) > 25 || count > 100 || !w.isBlockLoaded(pos)) {
+				return false;
+			}
+			IBlockState state = w.getBlockState(pos);
+			return state.getBlock() == IndustrialWires.panel && state.getValue(BlockPanel.type) != BlockTypes_Panel.CREATOR;
+		};
+		List<BlockPos> all = discoverLocal(w, here, isValid);
+		List<BlockPos> ret = new ArrayList<>();
+		for (BlockPos pos : all) {
+			if (w.getBlockState(pos).getValue(BlockPanel.type) != BlockTypes_Panel.DUMMY) {
+				ret.add(pos);
+			}
+		}
+		return ret;
 	}
 }

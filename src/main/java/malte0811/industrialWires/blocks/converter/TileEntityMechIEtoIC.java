@@ -27,12 +27,14 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 
+import javax.annotation.Nonnull;
+
 public class TileEntityMechIEtoIC extends TileEntityIWBase implements IDirectionalTile, IRotationAcceptor, IKineticSource {
 	EnumFacing dir = EnumFacing.DOWN;
 	double rotBuffer = 0;
-	private final double rotBufMax = 2*MechConversion.maxRotToKin;
-	private final int maxOutput = (int)(ConversionUtil.kinPerRot()*MechConversion.maxRotToKin);
-	
+	private final double rotBufMax = 2 * MechConversion.maxRotToKin;
+	private final int maxOutput = (int) (ConversionUtil.kinPerRot() * MechConversion.maxRotToKin);
+
 	@Override
 	public void writeNBT(NBTTagCompound out, boolean updatePacket) {
 		out.setByte(DIR_TAG, (byte) dir.getIndex());
@@ -44,32 +46,38 @@ public class TileEntityMechIEtoIC extends TileEntityIWBase implements IDirection
 		dir = EnumFacing.VALUES[in.getByte(DIR_TAG)];
 		rotBuffer = in.getDouble(BUFFER_TAG);
 	}
+
 	// Directional
 	@Override
 	public EnumFacing getFacing() {
 		return dir;
 	}
+
 	@Override
 	public void setFacing(EnumFacing facing) {
 		dir = facing;
 		markDirty();
 	}
+
 	@Override
 	public int getFacingLimitation() {
 		return 1;
 	}
+
 	@Override
 	public boolean mirrorFacingOnPlacement(EntityLivingBase placer) {
 		return false;
 	}
+
 	@Override
 	public boolean canHammerRotate(EnumFacing side, float hitX, float hitY, float hitZ, EntityLivingBase entity) {
 		return true;
 	}
+
 	//IC2 kinetic
 	@Override
 	public int maxrequestkineticenergyTick(EnumFacing f) {
-		if (f==dir) {
+		if (f == dir) {
 			return maxOutput;
 		} else {
 			return 0;
@@ -78,24 +86,25 @@ public class TileEntityMechIEtoIC extends TileEntityIWBase implements IDirection
 
 	@Override
 	public int requestkineticenergy(EnumFacing f, int requested) {
-		if (f==dir) {
-			int stored = (int) (ConversionUtil.kinPerRot()*rotBuffer);
+		if (f == dir) {
+			int stored = (int) (ConversionUtil.kinPerRot() * rotBuffer);
 			int out = Math.min(maxOutput, stored);
 			out = Math.min(requested, out);
-			rotBuffer -= out*ConversionUtil.rotPerKin();
-			return (int)(out*MechConversion.rotToKinEfficiency);
+			rotBuffer -= out * ConversionUtil.rotPerKin();
+			return (int) (out * MechConversion.rotToKinEfficiency);
 		} else {
 			return 0;
 		}
 	}
-	
+
 	//IE rotation
 	@Override
-	public void inputRotation(double rotation, EnumFacing side) {
-		if (side==dir) {
-			rotBuffer = Math.min(rotBufMax, rotBuffer+rotation);
+	public void inputRotation(double rotation, @Nonnull EnumFacing side) {
+		if (side == dir) {
+			rotBuffer = Math.min(rotBufMax, rotBuffer + rotation);
 		}
 	}
+
 	@Override
 	public boolean canRotate(EnumFacing axis) {
 		return true;

@@ -30,6 +30,7 @@ public enum BlockTypes_IC2_Connector implements IBlockEnum {
 	HV_RELAY,
 	GLASS_CONN,
 	GLASS_RELAY;
+
 	@Override
 	public String getName() {
 		return toString().toLowerCase();

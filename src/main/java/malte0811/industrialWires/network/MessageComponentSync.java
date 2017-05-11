@@ -46,7 +46,8 @@ public class MessageComponentSync implements IMessage {
 		this.data = data;
 	}
 
-	public MessageComponentSync() {}
+	public MessageComponentSync() {
+	}
 
 	@Override
 	public void fromBytes(ByteBuf buf) {
@@ -66,6 +67,7 @@ public class MessageComponentSync implements IMessage {
 			ctx.getServerHandler().playerEntity.getServerWorld().addScheduledTask(()->handle(message, ctx.getServerHandler().playerEntity));
 			return null;
 		}
+
 		private void handle(MessageComponentSync msg, EntityPlayerMP player) {
 			ItemStack held = player.getHeldItem(msg.hand);
 			if (held!=null&&held.getItem()== IndustrialWires.panelComponent) {

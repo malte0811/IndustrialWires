@@ -34,13 +34,16 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
 
+import javax.annotation.Nonnull;
+
 public class TileEntityIEMotor extends TileEntityIWBase implements ITickable, IFluxReceiver, IDirectionalTile {
-	public final double bufferMax = 2*MechConversion.maxIfToMech*ConversionUtil.rotPerIf();
+	public final double bufferMax = 2 * MechConversion.maxIfToMech * ConversionUtil.rotPerIf();
 
 	private double rotBuffer = 0;
-	private FluxStorage energy = new FluxStorage(20*MechConversion.maxIfToMech, 2*MechConversion.maxIfToMech);
+	private FluxStorage energy = new FluxStorage(20 * MechConversion.maxIfToMech, 2 * MechConversion.maxIfToMech);
 	private EnumFacing dir = EnumFacing.DOWN;
 	private BlockPos receiver;
+
 	@Override
 	public void update() {
 		if (!worldObj.isRemote) {
@@ -49,14 +52,14 @@ public class TileEntityIEMotor extends TileEntityIWBase implements ITickable, IF
 			}
 			int max = MechConversion.maxIfToMech;
 			boolean dirty = false;
-			if (rotBuffer<bufferMax&&energy.extractEnergy(max, true)>0) {
+			if (rotBuffer < bufferMax && energy.extractEnergy(max, true) > 0) {
 				int extracted = energy.extractEnergy(max, false);
-				rotBuffer += extracted*ConversionUtil.rotPerIf()*MechConversion.ifMotorEfficiency;
+				rotBuffer += extracted * ConversionUtil.rotPerIf() * MechConversion.ifMotorEfficiency;
 				dirty = true;
 			}
 			TileEntity te = worldObj.getTileEntity(receiver);
 			if (te instanceof IRotationAcceptor) {
-				((IRotationAcceptor)te).inputRotation(rotBuffer, dir);
+				((IRotationAcceptor) te).inputRotation(rotBuffer, dir);
 				rotBuffer = 0;
 				dirty = true;
 			}
@@ -65,6 +68,7 @@ public class TileEntityIEMotor extends TileEntityIWBase implements ITickable, IF
 			}
 		}
 	}
+
 	@Override
 	public void readNBT(NBTTagCompound in, boolean updatePacket) {
 		dir = EnumFacing.VALUES[in.getByte(DIR_TAG)];
@@ -72,6 +76,7 @@ public class TileEntityIEMotor extends TileEntityIWBase implements ITickable, IF
 		receiver = null;
 		rotBuffer = in.getDouble(BUFFER_TAG);
 	}
+
 	@Override
 	public void writeNBT(NBTTagCompound out, boolean updatePacket) {
 		out.setByte(DIR_TAG, (byte) dir.getIndex());
@@ -84,8 +89,9 @@ public class TileEntityIEMotor extends TileEntityIWBase implements ITickable, IF
 	// Flux energy
 	@Override
 	public boolean canConnectEnergy(EnumFacing from) {
-		return from==dir.getOpposite()||from==null;
+		return from == dir.getOpposite() || from == null;
 	}
+
 	@Override
 	public int receiveEnergy(EnumFacing from, int energyIn, boolean simulate) {
 		if (canConnectEnergy(from)) {
@@ -96,10 +102,12 @@ public class TileEntityIEMotor extends TileEntityIWBase implements ITickable, IF
 			return 0;
 		}
 	}
+
 	@Override
 	public int getEnergyStored(EnumFacing from) {
 		return energy.getEnergyStored();
 	}
+
 	@Override
 	public int getMaxEnergyStored(EnumFacing from) {
 		return energy.getMaxEnergyStored();
@@ -110,35 +118,42 @@ public class TileEntityIEMotor extends TileEntityIWBase implements ITickable, IF
 	public EnumFacing getFacing() {
 		return dir;
 	}
+
 	@Override
 	public void setFacing(EnumFacing facing) {
 		dir = facing;
 		receiver = null;
 		markDirty();
 	}
+
 	@Override
 	public int getFacingLimitation() {
 		return 1;
 	}
+
 	@Override
 	public boolean mirrorFacingOnPlacement(EntityLivingBase placer) {
 		return false;
 	}
+
 	@Override
 	public boolean canHammerRotate(EnumFacing side, float hitX, float hitY, float hitZ, EntityLivingBase entity) {
 		return true;
 	}
+
 	@Override
-	public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
-		if (capability==CapabilityEnergy.ENERGY&&canConnectEnergy(facing)) {
+	public boolean hasCapability(@Nonnull Capability<?> capability, @Nonnull EnumFacing facing) {
+		if (capability == CapabilityEnergy.ENERGY && canConnectEnergy(facing)) {
 			return true;
 		}
 		return super.hasCapability(capability, facing);
 	}
+
+	@Nonnull
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
-		if (capability==CapabilityEnergy.ENERGY&&canConnectEnergy(facing)) {
+	public <T> T getCapability(@Nonnull Capability<T> capability, @Nonnull EnumFacing facing) {
+		if (capability == CapabilityEnergy.ENERGY && canConnectEnergy(facing)) {
 			return (T) new EnergyAdapter(this, facing);
 		}
 		return super.getCapability(capability, facing);

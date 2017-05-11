@@ -28,7 +28,8 @@ import net.minecraftforge.oredict.OreDictionary;
 public class RecipeCoilLength implements IRecipe {
 	public final ItemStack coil;
 	public final ItemStack cable;
-	final int maxLength;
+	private final int maxLength;
+
 	public RecipeCoilLength(int meta) {
 		coil = new ItemStack(IndustrialWires.coil, 1, meta);
 		cable = ItemIC2Coil.getUninsulatedCable(coil);
@@ -38,7 +39,7 @@ public class RecipeCoilLength implements IRecipe {
 	@Override
 	public boolean matches(InventoryCrafting inv, World worldIn) {
 		int l = getLength(inv);
-		return l>0;
+		return l > 0;
 	}
 
 	@Override
@@ -76,12 +77,13 @@ public class RecipeCoilLength implements IRecipe {
 		}
 		return ret;
 	}
+
 	private int getLength(InventoryCrafting inv) {
 		int cableLength = 0;
-		for (int i = 0;i<inv.getSizeInventory();i++) {
+		for (int i = 0; i < inv.getSizeInventory(); i++) {
 			ItemStack curr = inv.getStackInSlot(i);
 			if (OreDictionary.itemMatches(curr, coil, false)) {
-				cableLength+=ItemIC2Coil.getLength(curr);
+				cableLength += ItemIC2Coil.getLength(curr);
 			} else if (OreDictionary.itemMatches(curr, cable, false)) {
 				cableLength++;
 			} else if (curr!=null) {

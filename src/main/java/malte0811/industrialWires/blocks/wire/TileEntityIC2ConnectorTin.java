@@ -60,12 +60,16 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	//IE net to IC2 net buffer
 	private double outBuffer = 0;
 	private double maxToMachine = 0;
-	protected double maxStored = IC2Wiretype.IC2_TYPES[0].getTransferRate()/8;
+	protected double maxStored = IC2Wiretype.IC2_TYPES[0].getTransferRate() / 8;
 	int tier = 1;
+
 	public TileEntityIC2ConnectorTin(boolean rel) {
 		relay = rel;
 	}
-	public TileEntityIC2ConnectorTin() {}
+
+	public TileEntityIC2ConnectorTin() {
+	}
+
 	@Override
 	public void update() {
 		if (first) {
@@ -76,32 +80,33 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 		if (!worldObj.isRemote&&inBuffer>.1)
 			transferPower();
 	}
+
 	public void transferPower() {
 		Set<AbstractConnection> conns = new HashSet<>(ImmersiveNetHandler.INSTANCE.getIndirectEnergyConnections(pos, worldObj));
 		Map<AbstractConnection, Pair<IIC2Connector, Double>> maxOutputs = new HashMap<>();
 		double outputMax = Math.min(inBuffer, maxToNet);
 		double sum = 0;
-		for (AbstractConnection c:conns) {
+		for (AbstractConnection c : conns) {
 			IImmersiveConnectable iic = ApiUtils.toIIC(c.end, worldObj);
 			if (iic instanceof IIC2Connector) {
-				double tmp = outputMax-((IIC2Connector)iic).insertEnergy(outputMax, true);
-				if (tmp>.00000001) {
-					maxOutputs.put(c, new ImmutablePair<>((IIC2Connector)iic, tmp));
-					sum+=tmp;
+				double tmp = inBuffer - ((IIC2Connector) iic).insertEnergy(outputMax, true);
+				if (tmp > .00000001) {
+					maxOutputs.put(c, new ImmutablePair<>((IIC2Connector) iic, tmp));
+					sum += tmp;
 				}
 			}
 		}
-		if (sum<.0001) {
+		if (sum < .0001) {
 			return;
 		}
 		final double oldInBuf = outputMax;
 		HashMap<Connection, Integer> transferedPerConn = ImmersiveNetHandler.INSTANCE.getTransferedRates(worldObj.provider.getDimension());
 		for (AbstractConnection c:maxOutputs.keySet()) {
 			Pair<IIC2Connector, Double> p = maxOutputs.get(c);
-			double out = oldInBuf*p.getRight()/sum;
+			double out = oldInBuf * p.getRight() / sum;
 			double loss = getAverageLossRate(c);
-			double inserted = out-p.getLeft().insertEnergy(out-loss, false);
-			inBuffer-=inserted;
+			double inserted = out - p.getLeft().insertEnergy(out - loss, false);
+			inBuffer -= inserted;
 			float intermediaryLoss = 0;
 			HashSet<IImmersiveConnectable> passedConnectors = new HashSet<>();
 			double energyAtConn = inserted+loss;
@@ -119,30 +124,33 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 			}
 		}
 	}
+
 	public double getAverageLossRate(AbstractConnection conn) {
 		double f = 0;
-		for(Connection c : conn.subConnections) {
-			f += c.length*c.cableType.getLossRatio();
+		for (Connection c : conn.subConnections) {
+			f += c.length * c.cableType.getLossRatio();
 		}
 		return f;
 	}
+
 	//Input through the net
 	@Override
 	public double insertEnergy(double eu, boolean simulate) {
-		final double insert = Math.min(maxStored-outBuffer, eu);
-		if (insert>0) {
-			if (outBuffer<maxToMachine) {
+		final double insert = Math.min(maxStored - outBuffer, eu);
+		if (insert > 0) {
+			if (outBuffer < maxToMachine) {
 				maxToMachine = outBuffer;
 			}
-			if (eu>maxToMachine) {
+			if (eu > maxToMachine) {
 				maxToMachine = eu;
 			}
 		}
 		if (!simulate) {
-			outBuffer+=insert;
+			outBuffer += insert;
 		}
-		return eu-insert;
+		return eu - insert;
 	}
+
 	@Override
 	public void invalidate() {
 		if (!worldObj.isRemote&&!first)
@@ -150,6 +158,7 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 		first = true;
 		super.invalidate();
 	}
+
 	@Override
 	public void onChunkUnload() {
 		super.onChunkUnload();
@@ -161,28 +170,33 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	@Override
 	public Vec3d getRaytraceOffset(IImmersiveConnectable link) {
 		EnumFacing side = f.getOpposite();
-		return new Vec3d(.5+side.getFrontOffsetX()*.0625, .5+side.getFrontOffsetY()*.0625, .5+side.getFrontOffsetZ()*.0625);
+		return new Vec3d(.5 + side.getFrontOffsetX() * .0625, .5 + side.getFrontOffsetY() * .0625, .5 + side.getFrontOffsetZ() * .0625);
 	}
+
 	@Override
 	public Vec3d getConnectionOffset(Connection con) {
 		EnumFacing side = f.getOpposite();
-		double conRadius = con.cableType.getRenderDiameter()/2;
-		return new Vec3d(.5-conRadius*side.getFrontOffsetX(), .5-conRadius*side.getFrontOffsetY(), .5-conRadius*side.getFrontOffsetZ());
+		double conRadius = con.cableType.getRenderDiameter() / 2;
+		return new Vec3d(.5 - conRadius * side.getFrontOffsetX(), .5 - conRadius * side.getFrontOffsetY(), .5 - conRadius * side.getFrontOffsetZ());
 	}
+
 	@Override
 	public boolean canConnect() {
 		return true;
 	}
+
 	@Override
 	public boolean isEnergyOutput() {
 		return !relay;
 	}
+
 	@Override
 	public boolean canConnectCable(WireType cableType, TargetingInfo target) {
-		return (limitType==null||(this.isRelay() && limitType==cableType))&&canConnect(cableType);
+		return (limitType == null || (this.isRelay() && limitType == cableType)) && canConnect(cableType);
 	}
+
 	public boolean canConnect(WireType t) {
-		return t==IC2Wiretype.IC2_TYPES[0];
+		return t == IC2Wiretype.IC2_TYPES[0];
 	}
 
 	@Override
@@ -192,18 +206,18 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 
 	@Override
 	public boolean emitsEnergyTo(IEnergyAcceptor receiver, EnumFacing side) {
-		return !relay&&side==f;
+		return !relay && side == f;
 	}
 
 	@Override
 	public boolean acceptsEnergyFrom(IEnergyEmitter emitter, EnumFacing side) {
-		return !relay&&side==f;
+		return !relay && side == f;
 	}
 
 	@Override
 	public double getDemandedEnergy() {
-		double ret = maxStored-inBuffer;
-		if (ret<.1)
+		double ret = maxStored + .5 - inBuffer;
+		if (ret < .1)
 			ret = 0;
 		return ret;
 	}
@@ -215,12 +229,12 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 
 	@Override
 	public double injectEnergy(EnumFacing directionFrom, double amount, double voltage) {
-		if (inBuffer<maxStored) {
-			if (inBuffer<maxToNet) {
+		if (inBuffer < maxStored) {
+			if (inBuffer < maxToNet) {
 				maxToNet = inBuffer;
 			}
 			inBuffer += amount;
-			if (amount>maxToNet) {
+			if (amount > maxToNet) {
 				maxToNet = amount;
 			}
 			markDirty();
@@ -302,26 +316,26 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 
 	@Override
 	public AxisAlignedBB getBoundingBox() {
-		float length = this instanceof TileEntityIC2ConnectorHV?(relay?.875f:.75f): this instanceof TileEntityIC2ConnectorGold?.5625f: .5f;
+		float length = this instanceof TileEntityIC2ConnectorHV ? (relay ? .875f : .75f) : this instanceof TileEntityIC2ConnectorGold ? .5625f : .5f;
 		float wMin = .3125f;
 		float wMax = .6875f;
-		switch(f.getOpposite() )
-		{
+		switch (f.getOpposite()) {
 		case UP:
-			return new AxisAlignedBB(wMin,0,wMin,  wMax,length,wMax);
+			return new AxisAlignedBB(wMin, 0, wMin, wMax, length, wMax);
 		case DOWN:
-			return new AxisAlignedBB(wMin,1-length,wMin,  wMax,1,wMax);
+			return new AxisAlignedBB(wMin, 1 - length, wMin, wMax, 1, wMax);
 		case SOUTH:
-			return new AxisAlignedBB(wMin,wMin,0,  wMax,wMax,length);
+			return new AxisAlignedBB(wMin, wMin, 0, wMax, wMax, length);
 		case NORTH:
-			return new AxisAlignedBB(wMin,wMin,1-length,  wMax,wMax,1);
+			return new AxisAlignedBB(wMin, wMin, 1 - length, wMax, wMax, 1);
 		case EAST:
-			return new AxisAlignedBB(0,wMin,wMin,  length,wMax,wMax);
+			return new AxisAlignedBB(0, wMin, wMin, length, wMax, wMax);
 		case WEST:
-			return new AxisAlignedBB(1-length,wMin,wMin,  1,wMax,wMax);
+			return new AxisAlignedBB(1 - length, wMin, wMin, 1, wMax, wMax);
 		}
-		return new AxisAlignedBB(0,0,0,1,1,1);
+		return new AxisAlignedBB(0, 0, 0, 1, 1, 1);
 	}
+
 	/*
 	 * regarding equals+hashCode
 	 * TE's are considered equal if they have the same pos+dimension id
@@ -334,15 +348,16 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 		ret = 31*ret+pos.hashCode();
 		return ret;
 	}
+
 	@Override
 	public boolean equals(Object obj) {
-		if (obj==this) {
+		if (obj == this) {
 			return true;
 		}
 		if (!(obj instanceof TileEntityIC2ConnectorTin)) {
 			return false;
 		}
-		if (obj.getClass()!=getClass()) {
+		if (obj.getClass() != getClass()) {
 			return false;
 		}
 		TileEntityIC2ConnectorTin te = (TileEntityIC2ConnectorTin) obj;
@@ -354,6 +369,7 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 		}
 		return true;
 	}
+
 	@Override
 	public boolean canRotate(EnumFacing axis) {
 		return false;

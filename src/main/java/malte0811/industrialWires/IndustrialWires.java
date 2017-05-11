@@ -87,7 +87,7 @@ public class IndustrialWires {
 			return new ItemStack(coil, 1, 2);
 		}
 	};
-	@SidedProxy(clientSide="malte0811.industrialWires.client.ClientProxy", serverSide="malte0811.industrialWires.CommonProxy")
+	@SidedProxy(clientSide = "malte0811.industrialWires.client.ClientProxy", serverSide = "malte0811.industrialWires.CommonProxy")
 	public static CommonProxy proxy;
 
 	@EventHandler
@@ -100,7 +100,6 @@ public class IndustrialWires {
 		coil = new ItemIC2Coil();
 		panelComponent = new ItemPanelComponent();
 		panel = new BlockPanel();
-		//TODO change to MODID+ when changing to a new MC version
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorTin.class, "ic2ConnectorTin");
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorCopper.class, "ic2ConnectorCopper");
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorGold.class, "ic2ConnectorGold");
@@ -115,7 +114,7 @@ public class IndustrialWires {
 			GameRegistry.registerTileEntity(TileEntityMechICtoIE.class, MODID+":mechIcToIe");
 			GameRegistry.registerTileEntity(TileEntityMechIEtoIC.class, MODID+":mechIeToIc");
 		}
-		if (IC2Wiretype.IC2_TYPES==null) {
+		if (IC2Wiretype.IC2_TYPES == null) {
 			throw new IllegalStateException("No IC2 wires registered");
 		}
 		proxy.preInit();
@@ -129,7 +128,7 @@ public class IndustrialWires {
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(ic2conn, 4, 2), " c ", "rcr", "rcr", 'c', "ingotCopper", 'r', "itemRubber"));
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(ic2conn, 4, 4), " g ", "rgr", "rgr", 'g', "ingotGold", 'r', "itemRubber"));
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(ic2conn, 4, 6), " i ", "rir", "rir", 'i', "ingotIron", 'r', "itemRubber"));
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(ic2conn, 4, 8), " c ", "rcr", "rcr",'c', glassCable, 'r', "itemRubber"));
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(ic2conn, 4, 8), " c ", "rcr", "rcr", 'c', glassCable, 'r', "itemRubber"));
 		//RELAYS
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(ic2conn, 4, 1), " t ", "rtr", 't', "ingotTin", 'r', "itemRubber"));
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(ic2conn, 4, 3), " c ", "rcr", 'c', "ingotCopper", 'r', "itemRubber"));
@@ -138,12 +137,12 @@ public class IndustrialWires {
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(ic2conn, 2, 9), " c ", "grg", "grg", 'r', "itemRubber", 'c', glassCable, 'g', new ItemStack(IEContent.blockStoneDecoration, 1, BlockTypes_StoneDecoration.INSULATING_GLASS.getMeta())));
 		//WIRES
 		RecipeSorter.register("industrialwires:coilLength", RecipeCoilLength.class, Category.SHAPELESS, "after:forge:shapelessore");
-		for (int i = 0;i<IC2Wiretype.IC2_TYPES.length;i++) {
+		for (int i = 0; i < IC2Wiretype.IC2_TYPES.length; i++) {
 			GameRegistry.addRecipe(new RecipeCoilLength(i));
 		}
 		AssemblerHandler.registerRecipeAdapter(RecipeCoilLength.class, new CoilLengthAdapter());
 		// MECH CONVERTERS
-		if (mechConv!=null) {
+		if (mechConv != null) {
 			ItemStack shaftIron = IC2Items.getItem("crafting", "iron_shaft");
 			ItemStack shaftSteel = IC2Items.getItem("crafting", "steel_shaft");
 			ItemStack ironMechComponent = new ItemStack(IEContent.itemMaterial, 1, 8);
@@ -204,10 +203,12 @@ public class IndustrialWires {
 
 		NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
 	}
+
 	@EventHandler
-	public void postInit(FMLPostInitializationEvent	 e) {
+	public void postInit(FMLPostInitializationEvent e) {
 		proxy.postInit();
 	}
+
 	private class CoilLengthAdapter implements IRecipeAdapter<RecipeCoilLength> {
 		@Override
 		public RecipeQuery[] getQueriedInputs(RecipeCoilLength recipe, ItemStack[] in) {
@@ -227,6 +228,7 @@ public class IndustrialWires {
 			}
 			return ret.toArray(new RecipeQuery[ret.size()]);
 		}
+
 		@Override
 		public RecipeQuery[] getQueriedInputs(RecipeCoilLength arg0) {
 			return new RecipeQuery[0];

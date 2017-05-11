@@ -35,17 +35,19 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 
 public class BlockMechanicalConverter extends BlockIWBase implements IMetaEnum {
 	private static PropertyEnum<MechanicalBlockType> type = PropertyEnum.create("type", MechanicalBlockType.class);
+
 	public BlockMechanicalConverter() {
 		super(Material.IRON, "mechanical_converter");
 	}
 
 	@Override
-	public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list) {
-		for (int i = 0;i<3;i++) {
+	public void getSubBlocks(@Nonnull Item itemIn, CreativeTabs tab, List<ItemStack> list) {
+		for (int i = 0; i < 3; i++) {
 			list.add(new ItemStack(itemIn, 1, i));
 		}
 	}
@@ -87,6 +89,7 @@ public class BlockMechanicalConverter extends BlockIWBase implements IMetaEnum {
 	public int getMetaFromState(IBlockState state) {
 		return state.getValue(type).ordinal();
 	}
+
 	@Override
 	public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY,
 			float hitZ, int meta, EntityLivingBase placer, ItemStack stack) {
@@ -102,11 +105,12 @@ public class BlockMechanicalConverter extends BlockIWBase implements IMetaEnum {
 			EntityPlayer player) {
 		return new ItemStack(this, 1, damageDropped(state));
 	}
+
 	@Override
 	@SuppressWarnings("deprecation")
 	public boolean eventReceived(IBlockState state, World worldIn, BlockPos pos, int id, int param) {
 		boolean def = super.eventReceived(state, worldIn, pos, id, param);
-		if ((id&255)==255) {
+		if ((id & 255) == 255) {
 			IBlockState s = worldIn.getBlockState(pos);
 			worldIn.notifyBlockUpdate(pos, s, s, 3);
 			return true;

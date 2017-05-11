@@ -21,13 +21,16 @@ import blusunrize.immersiveengineering.api.IEProperties;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.BlockIWBase;
 import malte0811.industrialWires.blocks.IMetaEnum;
+import malte0811.industrialWires.wires.IC2Wiretype;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -39,11 +42,13 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 
+import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.List;
 
 public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 	private static PropertyEnum<BlockTypes_IC2_Connector> type = PropertyEnum.create("type", BlockTypes_IC2_Connector.class);
+
 	public BlockIC2Connector() {
 		super(Material.IRON, "ic2Connector");
 		setHardness(3.0F);
@@ -54,9 +59,9 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 	@Override
 	public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn) {
 		TileEntity te = world.getTileEntity(pos);
-		if(te instanceof TileEntityIC2ConnectorTin) {
+		if (te instanceof TileEntityIC2ConnectorTin) {
 			TileEntityIC2ConnectorTin connector = (TileEntityIC2ConnectorTin) te;
-			if(world.isAirBlock(pos.offset(connector.f))) {
+			if (world.isAirBlock(pos.offset(connector.f))) {
 				this.dropBlockAsItem(connector.getWorld(), pos, world.getBlockState(pos), 0);
 				connector.getWorld().setBlockToAir(pos);
 			}
@@ -64,7 +69,7 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 	}
 
 	@Override
-	public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list) {
+	public void getSubBlocks(@Nonnull Item itemIn, CreativeTabs tab, List<ItemStack> list) {
 		for (int i = 0;i<type.getAllowedValues().size();i++) {
 			list.add(new ItemStack(itemIn, 1, i));
 		}
@@ -74,8 +79,8 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 	protected BlockStateContainer createBlockState() {
 		BlockStateContainer base = super.createBlockState();
 		IUnlistedProperty<?>[] unlisted = (base instanceof ExtendedBlockState) ? ((ExtendedBlockState) base).getUnlistedProperties().toArray(new IUnlistedProperty[0]) : new IUnlistedProperty[0];
-		unlisted = Arrays.copyOf(unlisted, unlisted.length+1);
-		unlisted[unlisted.length-1] = IEProperties.CONNECTIONS;
+		unlisted = Arrays.copyOf(unlisted, unlisted.length + 1);
+		unlisted[unlisted.length - 1] = IEProperties.CONNECTIONS;
 		return new ExtendedBlockState(this, base.getProperties().toArray(new IProperty[0]), unlisted);
 	}
 
@@ -135,22 +140,37 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 		}
 		return null;
 	}
+
 	@Override
-	public boolean canRenderInLayer(BlockRenderLayer layer) {
-		return layer==BlockRenderLayer.TRANSLUCENT||layer==BlockRenderLayer.SOLID;
+	public void addInformation(ItemStack stack, EntityPlayer player, List<String> tooltip, boolean advanced) {
+		super.addInformation(stack, player, tooltip, advanced);
+		if (stack!=null && stack.getMetadata() % 2 == 0) {
+			int type = stack.getMetadata() / 2;
+			tooltip.add(I18n.format(IndustrialWires.MODID + ".tooltip.power_tier", type + 1));
+			tooltip.add(I18n.format(IndustrialWires.MODID + ".tooltip.eu_per_tick", IC2Wiretype.IC2_TYPES[type].getTransferRate() / 8));
+		}
 	}
+
+	@Override
+	public boolean canRenderInLayer(IBlockState state, @Nonnull BlockRenderLayer layer) {
+		return layer == BlockRenderLayer.TRANSLUCENT || layer == BlockRenderLayer.SOLID;
+	}
+
 	@Override
 	public boolean isFullBlock(IBlockState state) {
 		return false;
 	}
+
 	@Override
 	public boolean isFullCube(IBlockState state) {
 		return false;
 	}
+
 	@Override
 	public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos) {
 		return false;
 	}
+
 	@Override
 	public boolean isOpaqueCube(IBlockState state) {
 		return false;

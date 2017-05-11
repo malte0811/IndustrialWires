@@ -40,7 +40,7 @@ public class RawModelFontRenderer extends FontRenderer {
 
 	public RawModelFontRenderer(GameSettings settings, ResourceLocation font, TextureManager manager, boolean isUnicode, float scale) {
 		super(settings, font, manager, isUnicode);
-		this.scale = scale/(9*16);
+		this.scale = scale / (9 * 16);
 		onResourceManagerReload(null);
 	}
 
@@ -50,22 +50,23 @@ public class RawModelFontRenderer extends FontRenderer {
 		float y = (pos / 16);
 		float w = charWidth[pos] - 1.01f;
 		float h = FONT_HEIGHT - 1.01f;
-		float wt = w  / 128f*16;
-		float ht = h  / 128f*16;
+		float wt = w / 128f * 16;
+		float ht = h / 128f * 16;
 		float h0 = .01F;
 		Vector3f v0 = new Vector3f(posX, h0, posY);
 		v0.scale(scale);
-		Vector3f v1 = new Vector3f(posX, h0, posY+h);
+		Vector3f v1 = new Vector3f(posX, h0, posY + h);
 		v1.scale(scale);
-		Vector3f v2 = new Vector3f(posX+w, h0, posY+h);
+		Vector3f v2 = new Vector3f(posX + w, h0, posY + h);
 		v2.scale(scale);
-		Vector3f v3 = new Vector3f(posX+w, h0, posY);
+		Vector3f v3 = new Vector3f(posX + w, h0, posY);
 		v3.scale(scale);
 		builder.add(new RawQuad(v0, v1, v2, v3,
-				EnumFacing.UP, sprite, new float[]{1, 0, 0, 1}, new Vector3f(0, 1, 0),
-				new float[]{x, y, x+wt, y+ht}));
+				EnumFacing.UP, sprite, colorA, new Vector3f(0, 1, 0),
+				new float[]{x, y, x + wt, y + ht}));
 		return charWidth[pos];
 	}
+
 	@Override
 	public void onResourceManagerReload(IResourceManager resourceManager) {
 		super.onResourceManagerReload(resourceManager);

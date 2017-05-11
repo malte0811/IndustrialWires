@@ -131,7 +131,7 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
-	public boolean interactWith(Vec3d hitRelative, TileEntityPanel tile, EntityPlayerMP player) {
+	public void interactWith(Vec3d hitRelative, TileEntityPanel tile, EntityPlayerMP player) {
 		double xRel = hitRelative.xCoord - SIZE / 2;
 		double yRel = -(hitRelative.zCoord - SIZE / 2);
 		double angle = 1.5 * Math.PI - Math.atan2(yRel, xRel);
@@ -143,7 +143,7 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 		angle -= .5 * Math.PI / 17;
 		angle /= 2 * Math.PI;
 		if (angle < 0 || angle >= 16 / 17D) {
-			return true;
+			return;
 		}
 		byte newLevel = (byte) (angle * 17);
 		if (newLevel > out) {
@@ -159,9 +159,7 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 			out = newLevel;
 			tile.markDirty();
 			tile.triggerRenderUpdate();
-			return true;
 		}
-		return false;
 	}
 
 	@Override

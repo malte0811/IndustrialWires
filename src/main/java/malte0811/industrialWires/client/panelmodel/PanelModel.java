@@ -49,13 +49,14 @@ public class PanelModel implements IBakedModel {
 			.maximumSize(100)
 			.expireAfterAccess(60, TimeUnit.SECONDS)
 			.build();
+
 	static {
 		IEApi.renderCacheClearers.add(modelCache::invalidateAll);
 		IEApi.renderCacheClearers.add(PanelItemOverride.ITEM_MODEL_CACHE::invalidateAll);
 	}
 	@Override
 	public List<BakedQuad> getQuads(@Nullable IBlockState state, @Nullable EnumFacing side, long rand) {
-		if (side!=null) {
+		if (side != null) {
 			return ImmutableList.of();
 		}
 		if (state instanceof IExtendedBlockState) {
@@ -169,6 +170,7 @@ public class PanelModel implements IBakedModel {
 				.maximumSize(100)
 				.expireAfterAccess(60, TimeUnit.SECONDS)
 				.build();
+
 		public PanelItemOverride() {
 			super(ImmutableList.of());
 		}
@@ -178,7 +180,7 @@ public class PanelModel implements IBakedModel {
 		public IBakedModel handleItemState(@Nonnull IBakedModel originalModel, ItemStack stack, World world, EntityLivingBase entity) {
 			if (stack != null && stack.getItem() == PanelUtils.PANEL_ITEM && stack.getMetadata() == BlockTypes_Panel.TOP.ordinal()) {
 				try {
-					return ITEM_MODEL_CACHE.get(stack, ()-> {
+					return ITEM_MODEL_CACHE.get(stack, () -> {
 						TileEntityPanel te = new TileEntityPanel();
 						te.readFromItemNBT(stack.getTagCompound());
 						return new AssembledBakedModel(te.getComponents());

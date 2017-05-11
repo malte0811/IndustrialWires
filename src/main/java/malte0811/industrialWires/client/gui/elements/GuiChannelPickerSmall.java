@@ -27,6 +27,7 @@ import javax.annotation.Nonnull;
 public class GuiChannelPickerSmall extends GuiChannelPicker {
 	private boolean open = false;
 	private int offSize, onSize;
+
 	public GuiChannelPickerSmall(int id, int x, int y, int offSize, int onSize, byte selectedChannel) {
 		super(id, x, y, offSize, selectedChannel);
 		selected = selectedChannel;
@@ -45,14 +46,14 @@ public class GuiChannelPickerSmall extends GuiChannelPicker {
 		} else {
 			EnumDyeColor color = EnumDyeColor.byMetadata(selected);
 			int colorVal = color.getMapColor().colorValue | 0xff000000;
-			drawRect(xPosition, yPosition, xPosition+width, yPosition+height, colorVal);
+			drawRect(xPosition, yPosition, xPosition + width, yPosition + height, colorVal);
 		}
 	}
 
 	@Override
 	public boolean click(int x, int y) {
 		if (!open) {
-			if (xPosition<=x&&xPosition+width>=x&&yPosition<=y&&yPosition+height>=y) {
+			if (xPosition <= x && xPosition + width >= x && yPosition <= y && yPosition + height >= y) {
 				open = true;
 				width = onSize;
 				height = onSize;
@@ -61,7 +62,7 @@ public class GuiChannelPickerSmall extends GuiChannelPicker {
 			return false;
 		} else {
 			boolean ret = false;
-			if (xPosition<=x&&xPosition+width>=x&&yPosition<=y&&yPosition+height>=y) {
+			if (xPosition <= x && xPosition + width >= x && yPosition <= y && yPosition + height >= y) {
 				select();
 				ret = true;
 			}

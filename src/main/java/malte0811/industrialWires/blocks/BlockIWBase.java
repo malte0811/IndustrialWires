@@ -52,19 +52,20 @@ import java.util.Set;
 
 public abstract class BlockIWBase extends Block {
 	private IProperty[] properties;
+
 	public BlockIWBase(Material mat, String name) {
 		super(mat);
 		setHardness(3.0F);
 		setResistance(15.0F);
 		GameRegistry.register(this, new ResourceLocation(IndustrialWires.MODID, name));
 		GameRegistry.register(new ItemBlockIW(this), new ResourceLocation(IndustrialWires.MODID, name));
-		setUnlocalizedName(IndustrialWires.MODID+"."+name);
+		setUnlocalizedName(IndustrialWires.MODID + "." + name);
 		setCreativeTab(IndustrialWires.creativeTab);
 	}
 
 	@Override
 	protected BlockStateContainer createBlockState() {
-		if (properties==null) {
+		if (properties == null) {
 			properties = getProperties();
 		}
 		BlockStateContainer cont = super.createBlockState();
@@ -82,8 +83,8 @@ public abstract class BlockIWBase extends Block {
 		if (tile instanceof IHasDummyBlocksIW) {
 			state = applyProperty(state, IEProperties.MULTIBLOCKSLAVE, ((IHasDummyBlocksIW) tile).isDummy());
 		}
-		if (tile instanceof IEBlockInterfaces.IDirectionalTile&&((IEBlockInterfaces.IDirectionalTile) tile).getFacingLimitation()>=0) {
-			if (((IEBlockInterfaces.IDirectionalTile) tile).getFacingLimitation()==2) {
+		if (tile instanceof IEBlockInterfaces.IDirectionalTile && ((IEBlockInterfaces.IDirectionalTile) tile).getFacingLimitation() >= 0) {
+			if (((IEBlockInterfaces.IDirectionalTile) tile).getFacingLimitation() == 2) {
 				state = state.withProperty(IEProperties.FACING_HORIZONTAL, ((IEBlockInterfaces.IDirectionalTile) tile).getFacing());
 			} else {
 				state = state.withProperty(IEProperties.FACING_ALL, ((IEBlockInterfaces.IDirectionalTile) tile).getFacing());
@@ -105,7 +106,7 @@ public abstract class BlockIWBase extends Block {
 		return state;
 	}
 
-	protected  <V extends Comparable<V>> IBlockState applyProperty(IBlockState in, IProperty<V> prop, V val) {
+	protected <V extends Comparable<V>> IBlockState applyProperty(IBlockState in, IProperty<V> prop, V val) {
 		return in.withProperty(prop, val);
 	}
 
@@ -115,9 +116,9 @@ public abstract class BlockIWBase extends Block {
 		if (te instanceof IHasDummyBlocksIW) {
 			((IHasDummyBlocksIW) te).breakDummies();
 		}
-		if(te instanceof IImmersiveConnectable) {
-			if(!worldIn.isRemote||!Minecraft.getMinecraft().isSingleplayer())
-				ImmersiveNetHandler.INSTANCE.clearAllConnectionsFor(Utils.toCC(te), worldIn, !worldIn.isRemote&&worldIn.getGameRules().getBoolean("doTileDrops"));
+		if (te instanceof IImmersiveConnectable) {
+			if (!worldIn.isRemote || !Minecraft.getMinecraft().isSingleplayer())
+				ImmersiveNetHandler.INSTANCE.clearAllConnectionsFor(Utils.toCC(te), worldIn, !worldIn.isRemote && worldIn.getGameRules().getBoolean("doTileDrops"));
 		}
 		super.breakBlock(worldIn, pos, state);
 		worldIn.removeTileEntity(pos);
@@ -142,7 +143,7 @@ public abstract class BlockIWBase extends Block {
 		TileEntity te = source.getTileEntity(pos);
 		if (te instanceof IBlockBoundsIW) {
 			AxisAlignedBB ret = ((IBlockBoundsIW) te).getBoundingBox();
-			if (ret!=null) {
+			if (ret != null) {
 				return ret;
 			}
 		}
@@ -154,24 +155,24 @@ public abstract class BlockIWBase extends Block {
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player,
 									EnumHand hand, ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
 		TileEntity te = world.getTileEntity(pos);
-		if(te instanceof IEBlockInterfaces.IDirectionalTile && Utils.isHammer(heldItem) && !world.isRemote) {
+		if (te instanceof IEBlockInterfaces.IDirectionalTile && Utils.isHammer(heldItem) && !world.isRemote) {
 			IEBlockInterfaces.IDirectionalTile directionalTe = (IEBlockInterfaces.IDirectionalTile) te;
 			if (directionalTe.canHammerRotate(side, hitX, hitY, hitZ, player)) {
 				EnumFacing f = directionalTe.getFacing();
 				final EnumFacing original = f;
 				int limit = directionalTe.getFacingLimitation();
 
-				if(limit==0) {
+				if (limit == 0) {
 					f = EnumFacing.VALUES[(f.ordinal() + 1) % EnumFacing.VALUES.length];
-				} else if(limit==1) {
-					f = player.isSneaking()?f.rotateAround(side.getAxis()).getOpposite():f.rotateAround(side.getAxis());
-				} else if(limit == 2 || limit == 5) {
-					f = player.isSneaking()?f.rotateYCCW():f.rotateY();
+				} else if (limit == 1) {
+					f = player.isSneaking() ? f.rotateAround(side.getAxis()).getOpposite() : f.rotateAround(side.getAxis());
+				} else if (limit == 2 || limit == 5) {
+					f = player.isSneaking() ? f.rotateYCCW() : f.rotateY();
 				}
-				if (f!=original) {
+				if (f != original) {
 					directionalTe.setFacing(f);
 					te.markDirty();
-					world.notifyBlockUpdate(pos,state,state,3);
+					world.notifyBlockUpdate(pos, state, state, 3);
 					world.addBlockEvent(pos, this, 255, 0);
 				}
 				return true;
@@ -187,7 +188,7 @@ public abstract class BlockIWBase extends Block {
 	@Override
 	public boolean eventReceived(IBlockState state, World worldIn, BlockPos pos, int id, int param) {
 		boolean def = super.eventReceived(state, worldIn, pos, id, param);
-		if ((id&255)==255) {
+		if ((id & 255) == 255) {
 			IBlockState s = worldIn.getBlockState(pos);
 			worldIn.notifyBlockUpdate(pos, s, s, 3);
 			return true;
@@ -216,5 +217,6 @@ public abstract class BlockIWBase extends Block {
 	public int damageDropped(IBlockState state) {
 		return getMetaFromState(state);
 	}
+
 	protected abstract IProperty[] getProperties();
 }

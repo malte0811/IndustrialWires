@@ -47,12 +47,15 @@ public class ToggleSwitch extends PanelComponent implements IConfigurableCompone
 	public int rsOutputId;
 	public byte rsOutputChannel;
 	private Set<BiConsumer<Integer, Byte>> rsOut = new HashSet<>();
+
 	public ToggleSwitch() {
 		super("toggle_switch");
 	}
+
 	public ToggleSwitch(String name) {
 		super(name);
 	}
+
 	public ToggleSwitch(boolean active, int rsOutputId, byte rsOutputChannel) {
 		this();
 		this.active = active;
@@ -75,22 +78,24 @@ public class ToggleSwitch extends PanelComponent implements IConfigurableCompone
 		rsOutputChannel = nbt.getByte(RS_CHANNEL);
 		rsOutputId = nbt.getInteger(RS_ID);
 	}
+
 	protected float sizeX = .0625F;
-	protected float sizeY = 1.5F*sizeX;
-	protected float rodRadius = sizeX*.25F;
-	protected float rodLength = 3/32F;
+	protected float sizeY = 1.5F * sizeX;
+	protected float rodRadius = sizeX * .25F;
+	protected float rodLength = 3 / 32F;
 	protected float yOffset = .0001F;
+
 	@Override
 	public List<RawQuad> getQuads() {
 		List<RawQuad> ret = new ArrayList<>();
-		PanelUtils.addColoredQuad(ret, new Vector3f(sizeX, yOffset, (sizeY-sizeX)/2),
-				new Vector3f(0, yOffset, (sizeY-sizeX)/2),
-				new Vector3f(0, yOffset, (sizeY+sizeX)/2),
-				new Vector3f(sizeX, yOffset, (sizeY+sizeX)/2), EnumFacing.UP, GRAY);
+		PanelUtils.addColoredQuad(ret, new Vector3f(sizeX, yOffset, (sizeY - sizeX) / 2),
+				new Vector3f(0, yOffset, (sizeY - sizeX) / 2),
+				new Vector3f(0, yOffset, (sizeY + sizeX) / 2),
+				new Vector3f(sizeX, yOffset, (sizeY + sizeX) / 2), EnumFacing.UP, GRAY);
 		Matrix4 rot = new Matrix4();
-		rot.translate((sizeX)/2, -.01F, sizeY/2);
-		rot.rotate(Math.PI*1/16*(active?-1:1), 1, 0, 0);
-		PanelUtils.addColoredBox(GRAY, GRAY, null, new Vector3f(-rodRadius, 0, -rodRadius), new Vector3f(2*rodRadius, rodLength, 2*rodRadius), ret,
+		rot.translate((sizeX) / 2, -.01F, sizeY / 2);
+		rot.rotate(Math.PI * 1 / 16 * (active ? -1 : 1), 1, 0, 0);
+		PanelUtils.addColoredBox(GRAY, GRAY, null, new Vector3f(-rodRadius, 0, -rodRadius), new Vector3f(2 * rodRadius, rodLength, 2 * rodRadius), ret,
 				false, rot);
 		return ret;
 	}
@@ -108,18 +113,17 @@ public class ToggleSwitch extends PanelComponent implements IConfigurableCompone
 	@Nonnull
 	@Override
 	public AxisAlignedBB getBlockRelativeAABB() {
-		if (aabb==null) {
-			aabb = new AxisAlignedBB(x, 0, y, x+sizeX, getHeight(), y +sizeY);
+		if (aabb == null) {
+			aabb = new AxisAlignedBB(x, 0, y, x + sizeX, getHeight(), y + sizeY);
 		}
 		return aabb;
 	}
 
 	@Override
-	public boolean interactWith(Vec3d hitRel, TileEntityPanel tile, EntityPlayerMP player) {
+	public void interactWith(Vec3d hitRel, TileEntityPanel tile, EntityPlayerMP player) {
 		setOut(!active, tile);
 		tile.markDirty();
 		tile.triggerRenderUpdate();
-		return true;
 	}
 
 	@Override
@@ -129,39 +133,39 @@ public class ToggleSwitch extends PanelComponent implements IConfigurableCompone
 
 	@Override
 	public void registerRSOutput(int id, @Nonnull BiConsumer<Integer, Byte> out) {
-		if (id==rsOutputId) {
+		if (id == rsOutputId) {
 			rsOut.add(out);
-			out.accept((int) rsOutputChannel, (byte) (active?15:0));
+			out.accept((int) rsOutputChannel, (byte) (active ? 15 : 0));
 		}
 	}
 
 	@Override
 	public void unregisterRSOutput(int id, @Nonnull BiConsumer<Integer, Byte> out) {
-		if (id==rsOutputId) {
+		if (id == rsOutputId) {
 			rsOut.remove(out);
 		}
 	}
 
 	@Override
 	public float getHeight() {
-		return .0625F*3/2;
+		return .0625F * 3 / 2;
 	}
 
 	@Override
 	public void renderInGUI(GuiPanelCreator gui) {
 		AxisAlignedBB aabb = getBlockRelativeAABB();
-		double zOffset = (aabb.maxZ-aabb.minZ-sizeX)/2;
-		int left = (int) (gui.getX0()+aabb.minX*gui.panelSize);
-		int top = (int) Math.ceil(gui.getY0()+(aabb.minZ+zOffset)*gui.panelSize);
-		int right = (int) (gui.getX0()+aabb.maxX*gui.panelSize);
-		int bottom = (int) Math.floor(gui.getY0()+(aabb.maxZ-zOffset)*gui.panelSize);
+		double zOffset = (aabb.maxZ - aabb.minZ - sizeX) / 2;
+		int left = (int) (gui.getX0() + aabb.minX * gui.panelSize);
+		int top = (int) Math.ceil(gui.getY0() + (aabb.minZ + zOffset) * gui.panelSize);
+		int right = (int) (gui.getX0() + aabb.maxX * gui.panelSize);
+		int bottom = (int) Math.floor(gui.getY0() + (aabb.maxZ - zOffset) * gui.panelSize);
 		Gui.drawRect(left, top, right, bottom, GRAY_INT);
-		double xOffset = (aabb.maxX-aabb.minX-rodRadius)/2;
-		left = (int) (gui.getX0()+(aabb.minX+xOffset)*gui.panelSize);
-		top = (int) Math.floor(gui.getY0()+(aabb.minZ+aabb.maxZ)/2*gui.panelSize);
-		right = (int) (gui.getX0()+(aabb.maxX-xOffset)*gui.panelSize);
-		bottom = (int) Math.ceil(gui.getY0()+aabb.maxZ*gui.panelSize);
-		Gui.drawRect(left, top, right, bottom, GRAY_INT+0x101010);
+		double xOffset = (aabb.maxX - aabb.minX - rodRadius) / 2;
+		left = (int) (gui.getX0() + (aabb.minX + xOffset) * gui.panelSize);
+		top = (int) Math.floor(gui.getY0() + (aabb.minZ + aabb.maxZ) / 2 * gui.panelSize);
+		right = (int) (gui.getX0() + (aabb.maxX - xOffset) * gui.panelSize);
+		bottom = (int) Math.ceil(gui.getY0() + aabb.maxZ * gui.panelSize);
+		Gui.drawRect(left, top, right, bottom, GRAY_INT + 0x101010);
 
 	}
 
@@ -174,8 +178,8 @@ public class ToggleSwitch extends PanelComponent implements IConfigurableCompone
 		active = on;
 		tile.markDirty();
 		tile.triggerRenderUpdate();
-		for (BiConsumer<Integer, Byte> rs:rsOut) {
-			rs.accept((int)rsOutputChannel, (byte)(active?15:0));
+		for (BiConsumer<Integer, Byte> rs : rsOut) {
+			rs.accept((int) rsOutputChannel, (byte) (active ? 15 : 0));
 		}
 	}
 
@@ -204,49 +208,49 @@ public class ToggleSwitch extends PanelComponent implements IConfigurableCompone
 	@Override
 	public void applyConfigOption(ConfigType type, int id, NBTBase value) {
 		switch (type) {
-			case RS_CHANNEL:
-				if (id==0) {
-					rsOutputChannel = ((NBTTagByte)value).getByte();
-				}
-				break;
-			case INT:
-				if (id==0) {
-					rsOutputId = ((NBTTagInt)value).getInt();
-				}
-				break;
+		case RS_CHANNEL:
+			if (id == 0) {
+				rsOutputChannel = ((NBTTagByte) value).getByte();
+			}
+			break;
+		case INT:
+			if (id == 0) {
+				rsOutputId = ((NBTTagInt) value).getInt();
+			}
+			break;
 		}
 	}
 
 	@Override
 	public String fomatConfigName(ConfigType type, int id) {
 		switch (type) {
-			case RS_CHANNEL:
-			case INT:
-				return null;
-			case FLOAT:
-				return I18n.format(IndustrialWires.MODID+".desc."+(id==0?"red":(id==1?"green":"blue")));
-			default:
-				return "INVALID";
+		case RS_CHANNEL:
+		case INT:
+			return null;
+		case FLOAT:
+			return I18n.format(IndustrialWires.MODID + ".desc." + (id == 0 ? "red" : (id == 1 ? "green" : "blue")));
+		default:
+			return "INVALID";
 		}
 	}
 
 	@Override
 	public String fomatConfigDescription(ConfigType type, int id) {
 		switch (type) {
-			case RS_CHANNEL:
-				return I18n.format(IndustrialWires.MODID+".desc.rschannel_info");
-			case INT:
-				return I18n.format(IndustrialWires.MODID+".desc.rsid_info");
-			case FLOAT:
-				return null;
-			default:
-				return "INVALID?";
+		case RS_CHANNEL:
+			return I18n.format(IndustrialWires.MODID + ".desc.rschannel_info");
+		case INT:
+			return I18n.format(IndustrialWires.MODID + ".desc.rsid_info");
+		case FLOAT:
+			return null;
+		default:
+			return "INVALID?";
 		}
 	}
 
 	@Override
 	public RSChannelConfig[] getRSChannelOptions() {
-		return new RSChannelConfig[]{new RSChannelConfig("channel", 0, 0, (byte)rsOutputChannel)};
+		return new RSChannelConfig[]{new RSChannelConfig("channel", 0, 0, (byte) rsOutputChannel)};
 	}
 
 	@Override

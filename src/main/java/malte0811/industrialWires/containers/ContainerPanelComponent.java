@@ -26,9 +26,11 @@ import net.minecraft.util.EnumHand;
 
 public class ContainerPanelComponent extends Container {
 	public EnumHand hand;
+
 	public ContainerPanelComponent(EnumHand h) {
 		hand = h;
 	}
+
 	@Override
 	public boolean canInteractWith(EntityPlayer playerIn) {
 		ItemStack held = playerIn.getHeldItem(hand);

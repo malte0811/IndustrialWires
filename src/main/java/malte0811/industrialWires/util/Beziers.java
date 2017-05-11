@@ -21,27 +21,31 @@ package malte0811.industrialWires.util;
 import net.minecraft.util.math.Vec3d;
 
 public final class Beziers {
-	private Beziers() {}
+	private Beziers() {
+	}
+
 	public static Vec3d getPoint(double t, Vec3d[] controls) {
-		if (t==0) {
+		if (t == 0) {
 			return controls[0];
-		} else if (t==1) {
-			return controls[controls.length-1];
+		} else if (t == 1) {
+			return controls[controls.length - 1];
 		}
 		Vec3d ret = new Vec3d(0, 0, 0);
-		int n = controls.length-1;
-		for (int i = 0;i<=n;i++) {
-			double coeff = binomialCoeff(n, i)*Math.pow(t, i)*Math.pow(1-t, n-i);
-			ret = ret.addVector(coeff*controls[i].xCoord, coeff*controls[i].yCoord, coeff*controls[i].zCoord);
+		int n = controls.length - 1;
+		for (int i = 0; i <= n; i++) {
+			double coeff = binomialCoeff(n, i) * Math.pow(t, i) * Math.pow(1 - t, n - i);
+			ret = ret.addVector(coeff * controls[i].xCoord, coeff * controls[i].yCoord, coeff * controls[i].zCoord);
 		}
 		return ret;
 	}
+
 	public static int binomialCoeff(int n, int k) {
-		return factorial(n-k+1, n)/factorial(2, k);
+		return factorial(n - k + 1, n) / factorial(2, k);
 	}
+
 	public static int factorial(int start, int end) {
 		int ret = 1;
-		for (int i = start;i<=end;i++) {
+		for (int i = start; i <= end; i++) {
 			ret *= i;
 		}
 		return ret;

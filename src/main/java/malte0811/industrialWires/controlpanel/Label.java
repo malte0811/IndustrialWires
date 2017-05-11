@@ -49,6 +49,7 @@ public class Label extends PanelComponent implements IConfigurableComponent {
 		this.text = text;
 		this.color = color;
 	}
+
 	public Label() {
 		super("label");
 	}
@@ -68,7 +69,7 @@ public class Label extends PanelComponent implements IConfigurableComponent {
 	@Override
 	public List<RawQuad> getQuads() {
 		RawModelFontRenderer render = fontRenderer();
-		render.drawString(text, 0, 0, 0xff000000|color);
+		render.drawString(text, 0, 0, 0xff000000 | color);
 		return render.build();
 	}
 
@@ -95,8 +96,8 @@ public class Label extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
-	public boolean interactWith(Vec3d hitRelative, TileEntityPanel tile, EntityPlayerMP player) {
-		return false;
+	public void interactWith(Vec3d hitRelative, TileEntityPanel tile, EntityPlayerMP player) {
+
 	}
 
 	@Override
@@ -115,17 +116,17 @@ public class Label extends PanelComponent implements IConfigurableComponent {
 	}
 
 	private RawModelFontRenderer fontRenderer() {
-		if (renderer==null) {
+		if (renderer == null) {
 			renderer = new RawModelFontRenderer(Minecraft.getMinecraft().gameSettings, font, Minecraft.getMinecraft().getTextureManager(),
-					false,  1);
+					false, 1);
 		}
 		return renderer;
 	}
 
 	@Override
 	public void renderInGUI(GuiPanelCreator gui) {
-		int left = (int) (gui.getX0()+getX()*gui.panelSize);
-		int top = (int) (gui.getY0()+getY()*gui.panelSize);
+		int left = (int) (gui.getX0() + getX() * gui.panelSize);
+		int top = (int) (gui.getY0() + getY() * gui.panelSize);
 		GlStateManager.pushMatrix();
 		float scale = gui.mc.fontRendererObj.FONT_HEIGHT*gui.panelSize/(16F*9F*9F);
 		GlStateManager.translate(left, top, 0);
@@ -138,7 +139,7 @@ public class Label extends PanelComponent implements IConfigurableComponent {
 	public void applyConfigOption(ConfigType type, int id, NBTBase value) {
 		switch (type) {
 		case STRING:
-			text = ((NBTTagString)value).getString();
+			text = ((NBTTagString) value).getString();
 			break;
 		case FLOAT:
 			color = PanelUtils.setColor(color, id, value);
@@ -151,7 +152,7 @@ public class Label extends PanelComponent implements IConfigurableComponent {
 	public String fomatConfigName(ConfigType type, int id) {
 		switch (type) {
 		case FLOAT:
-			return I18n.format(IndustrialWires.MODID+".desc."+(id==0?"red":(id==1?"green":"blue")));
+			return I18n.format(IndustrialWires.MODID + ".desc." + (id == 0 ? "red" : (id == 1 ? "green" : "blue")));
 		default:
 			return null;
 		}
@@ -162,7 +163,7 @@ public class Label extends PanelComponent implements IConfigurableComponent {
 	public String fomatConfigDescription(ConfigType type, int id) {
 		switch (type) {
 		case STRING:
-			return I18n.format(IndustrialWires.MODID+".desc.label_text");
+			return I18n.format(IndustrialWires.MODID + ".desc.label_text");
 		default:
 			return null;
 		}

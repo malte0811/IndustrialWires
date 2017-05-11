@@ -44,9 +44,11 @@ public class IndicatorLight extends PanelComponent implements IConfigurableCompo
 	private byte rsInputChannel;
 	private int colorA = 0xff00;
 	private byte rsInput;
+
 	public IndicatorLight() {
 		super("indicator_light");
 	}
+
 	public IndicatorLight(int rsId, byte rsChannel, int color) {
 		this();
 		colorA = color;
@@ -74,15 +76,19 @@ public class IndicatorLight extends PanelComponent implements IConfigurableCompo
 
 	private static final float size = .0625F;
 	private static final float antiZOffset = .001F;
+
 	@Override
 	public List<RawQuad> getQuads() {
 		float[] color = new float[4];
 		color[3] = 1;
-		for (int i = 0;i<3;i++) {
-			color[i] = ((this.colorA>>(8*(2-i)))&255)/255F*(rsInput+15F)/30F;
+		for (int i = 0; i < 3; i++) {
+			color[i] = ((this.colorA >> (8 * (2 - i))) & 255) / 255F * (rsInput + 15F) / 30F;
 		}
 		List<RawQuad> ret = new ArrayList<>(1);
 		PanelUtils.addColoredQuad(ret, new Vector3f(), new Vector3f(0, antiZOffset, size), new Vector3f(size, antiZOffset, size), new Vector3f(size, antiZOffset, 0), EnumFacing.UP, color);
+		if (rsInput>0) {
+			ret.get(ret.size()-1).light = 0xff0ff;
+		}
 		return ret;
 	}
 
@@ -100,33 +106,35 @@ public class IndicatorLight extends PanelComponent implements IConfigurableCompo
 	@Nonnull
 	@Override
 	public AxisAlignedBB getBlockRelativeAABB() {
-		if (aabb==null) {
-			aabb = new AxisAlignedBB(x, 0, y, x+size, 0, y+size);
+		if (aabb == null) {
+			aabb = new AxisAlignedBB(x, 0, y, x + size, 0, y + size);
 		}
 		return aabb;
 	}
 
 	@Override
-	public boolean interactWith(Vec3d hitRelative, TileEntityPanel tile, EntityPlayerMP player) {
-		return false;
+	public void interactWith(Vec3d hitRelative, TileEntityPanel tile, EntityPlayerMP player) {
+
 	}
 
 	@Override
 	public void update(TileEntityPanel tile) {
 
 	}
+
 	private TileEntityPanel panel;
-	private Consumer<byte[]> handler = (input)->{
-		if (input[rsInputChannel]!=rsInput) {
+	private Consumer<byte[]> handler = (input) -> {
+		if (input[rsInputChannel] != rsInput) {
 			rsInput = input[rsInputChannel];
 			panel.markDirty();
 			panel.triggerRenderUpdate();
 		}
 	};
+
 	@Nullable
 	@Override
 	public Consumer<byte[]> getRSInputHandler(int id, TileEntityPanel panel) {
-		if (id==rsInputId) {
+		if (id == rsInputId) {
 			this.panel = panel;
 			return handler;
 		}
@@ -167,10 +175,10 @@ public class IndicatorLight extends PanelComponent implements IConfigurableCompo
 	public void applyConfigOption(ConfigType type, int id, NBTBase value) {
 		switch (type) {
 		case RS_CHANNEL:
-			rsInputChannel = ((NBTTagByte)value).getByte();
+			rsInputChannel = ((NBTTagByte) value).getByte();
 			break;
 		case INT:
-			rsInputId = ((NBTTagInt)value).getInt();
+			rsInputId = ((NBTTagInt) value).getInt();
 			break;
 		case FLOAT:
 			colorA = PanelUtils.setColor(colorA, id, value);
@@ -183,7 +191,7 @@ public class IndicatorLight extends PanelComponent implements IConfigurableCompo
 	public String fomatConfigName(ConfigType type, int id) {
 		switch (type) {
 		case FLOAT:
-			return I18n.format(IndustrialWires.MODID+".desc."+(id==0?"red":(id==1?"green":"blue")));
+			return I18n.format(IndustrialWires.MODID + ".desc." + (id == 0 ? "red" : (id == 1 ? "green" : "blue")));
 		case RS_CHANNEL:
 		case INT:
 		default:
@@ -198,9 +206,9 @@ public class IndicatorLight extends PanelComponent implements IConfigurableCompo
 		case FLOAT:
 			return null;
 		case RS_CHANNEL:
-			return I18n.format(IndustrialWires.MODID+".desc.rschannel_info");
+			return I18n.format(IndustrialWires.MODID + ".desc.rschannel_info");
 		case INT:
-			return I18n.format(IndustrialWires.MODID+".desc.rsid_info");
+			return I18n.format(IndustrialWires.MODID + ".desc.rsid_info");
 		default:
 			return null;
 		}
@@ -208,14 +216,14 @@ public class IndicatorLight extends PanelComponent implements IConfigurableCompo
 
 	@Override
 	public RSChannelConfig[] getRSChannelOptions() {
-		return new RSChannelConfig[] {
+		return new RSChannelConfig[]{
 				new RSChannelConfig("channel", 0, 0, rsInputChannel)
 		};
 	}
 
 	@Override
 	public IntConfig[] getIntegerOptions() {
-		return new IntConfig[] {
+		return new IntConfig[]{
 				new IntConfig("rsId", 0, 45, rsInputId, 2, false)
 		};
 	}
@@ -227,8 +235,8 @@ public class IndicatorLight extends PanelComponent implements IConfigurableCompo
 		int yOffset = 10;
 		return new FloatConfig[]{
 				new FloatConfig("red", x, yOffset, color[0], 60),
-				new FloatConfig("green", x, yOffset+20, color[1], 60),
-				new FloatConfig("blue", x, yOffset+40, color[2], 60)
+				new FloatConfig("green", x, yOffset + 20, color[1], 60),
+				new FloatConfig("blue", x, yOffset + 40, color[2], 60)
 		};
 	}
 

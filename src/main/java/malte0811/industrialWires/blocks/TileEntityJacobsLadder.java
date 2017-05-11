@@ -159,7 +159,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 		} else if (timeTillActive == 0 && t < 1) {
 			t += tStep;
 			if (salt > 0) {
-				salt -= 1D/(20*20);//20 seconds per item of salt
+				salt -= 1D / (20 * 20);//20 seconds per item of salt
 			} else if (salt < 0) {
 				salt = 0;
 			}
@@ -370,7 +370,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 		}
 		if (!worldObj.isRemote) {
 			EnumFacing targetDir = facing.rotateAround(EnumFacing.Axis.Y);
-			for (int i = -dummy;i<size.dummyCount-dummy+1;i++) {
+			for (int i = -dummy; i < size.dummyCount - dummy + 1; i++) {
 				BlockPos currPos = pos.up(i);
 				TileEntity te = world.getTileEntity(currPos);
 				if (te instanceof TileEntityJacobsLadder) {
@@ -378,7 +378,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 					teJacobs.facing = targetDir;
 					teJacobs.markDirty();
 					IBlockState state = world.getBlockState(currPos).getActualState(world, currPos);
-					world.notifyBlockUpdate(currPos,state,state,3);
+					world.notifyBlockUpdate(currPos, state, state, 3);
 					world.addBlockEvent(currPos, state.getBlock(), 255, 0);
 					world.notifyBlockOfStateChange(currPos, state.getBlock());
 				}
