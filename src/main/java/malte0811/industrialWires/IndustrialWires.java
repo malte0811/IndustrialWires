@@ -44,12 +44,14 @@ import malte0811.industrialWires.network.MessageTileSyncIW;
 import malte0811.industrialWires.wires.IC2Wiretype;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLMissingMappingsEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
@@ -204,6 +206,19 @@ public class IndustrialWires {
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent e) {
 		proxy.postInit();
+	}
+
+	@EventHandler
+	public void remap(FMLMissingMappingsEvent ev) {
+		for (FMLMissingMappingsEvent.MissingMapping miss : ev.get()) {
+			if (miss.resourceLocation.getResourcePath().equals("ic2connector")) {
+				if (miss.type== GameRegistry.Type.ITEM) {
+					miss.remap(Item.getItemFromBlock(IndustrialWires.ic2conn));
+				} else {
+					miss.remap(IndustrialWires.ic2conn);
+				}
+			}
+		}
 	}
 
 	private class CoilLengthAdapter implements IRecipeAdapter<RecipeCoilLength> {
