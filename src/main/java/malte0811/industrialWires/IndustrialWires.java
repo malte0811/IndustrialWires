@@ -195,6 +195,8 @@ public class IndustrialWires {
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(panelComponent, 1, 6),
 				"aaa", "asa", 'a', "plateAluminum", 's', new ItemStack(panelComponent, 2, 5)));
 
+		ExtraIC2Compat.addToolConmpat();
+
 		packetHandler.registerMessage(MessageTileSyncIW.HandlerClient.class, MessageTileSyncIW.class, 0, Side.CLIENT);
 		packetHandler.registerMessage(MessagePanelInteract.HandlerServer.class, MessagePanelInteract.class, 1, Side.SERVER);
 		packetHandler.registerMessage(MessageGUIInteract.HandlerServer.class, MessageGUIInteract.class, 2, Side.SERVER);
