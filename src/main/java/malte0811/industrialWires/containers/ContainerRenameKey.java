@@ -25,15 +25,15 @@ import net.minecraft.util.EnumHand;
 
 import javax.annotation.Nonnull;
 
-public class ContainerPanelComponent extends Container {
-	public EnumHand hand;
+public class ContainerRenameKey extends Container {
+	private final EnumHand hand;
 
-	public ContainerPanelComponent(EnumHand h) {
+	public ContainerRenameKey(EnumHand h) {
 		hand = h;
 	}
 
 	@Override
 	public boolean canInteractWith(@Nonnull EntityPlayer playerIn) {
-		return playerIn.getHeldItem(hand).getItem() == IndustrialWires.panelComponent;
+		return playerIn.getHeldItem(hand).getItem()== IndustrialWires.key;
 	}
 }

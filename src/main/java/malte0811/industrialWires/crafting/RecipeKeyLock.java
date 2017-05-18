@@ -18,85 +18,94 @@
 package malte0811.industrialWires.crafting;
 
 import malte0811.industrialWires.IndustrialWires;
-import malte0811.industrialWires.items.ItemIC2Coil;
+import malte0811.industrialWires.controlpanel.Lock;
+import malte0811.industrialWires.controlpanel.PanelComponent;
+import malte0811.industrialWires.items.ItemKey;
+import malte0811.industrialWires.items.ItemPanelComponent;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
-import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nonnull;
-
-public class RecipeCoilLength implements IRecipe {
-	public final ItemStack coil;
-	public final ItemStack cable;
-	private final int maxLength;
-
-	public RecipeCoilLength(int meta) {
-		coil = new ItemStack(IndustrialWires.coil, 1, meta);
-		cable = ItemIC2Coil.getUninsulatedCable(coil);
-		maxLength = ItemIC2Coil.getMaxWireLength(coil);
-	}
+//TODO JEI
+public class RecipeKeyLock implements IRecipe {
 
 	@Override
 	public boolean matches(@Nonnull InventoryCrafting inv, @Nonnull World worldIn) {
-		int l = getLength(inv);
-		return l > 0;
+		return getLockId(inv) != 0;
 	}
 
 	@Nonnull
 	@Override
 	public ItemStack getCraftingResult(@Nonnull InventoryCrafting inv) {
-		ItemStack ret = new ItemStack(IndustrialWires.coil, 1, coil.getItemDamage());
-		ItemIC2Coil.setLength(ret, Math.min(maxLength, getLength(inv)));
+		ItemStack ret = getKey(inv).copy();
+		ItemKey.setId(ret, getLockId(inv));
 		return ret;
 	}
 
 	@Override
 	public int getRecipeSize() {
-		return 1;
+		return 2;
 	}
 
 	@Nonnull
 	@Override
 	public ItemStack getRecipeOutput() {
-		return ItemStack.EMPTY;
+		return new ItemStack(IndustrialWires.key);
 	}
 
 	@Nonnull
 	@Override
 	public NonNullList<ItemStack> getRemainingItems(@Nonnull InventoryCrafting inv) {
 		NonNullList<ItemStack> ret = NonNullList.withSize(inv.getSizeInventory(), ItemStack.EMPTY);
-		int length = Math.min(getLength(inv), maxLength);
-		for (int i = 0; i < ret.size() && length > 0; i++) {
-			ItemStack curr = inv.getStackInSlot(i);
-			if (OreDictionary.itemMatches(curr, coil, false)) {
-				length -= ItemIC2Coil.getLength(curr);
-				if (length < 0) {
-					ItemStack currStack = new ItemStack(IndustrialWires.coil, 1);
-					ret.set(i, currStack);
-					ItemIC2Coil.setLength(currStack, -length);
-				}
-			} else if (OreDictionary.itemMatches(curr, cable, false)) {
-				length--;
+		for (int i = 0; i < ret.size(); i++) {
+			ItemStack here = inv.getStackInSlot(i);
+			if (here.getItem() == IndustrialWires.panelComponent) {
+				ret.set(i, here);
 			}
 		}
 		return ret;
 	}
 
-	private int getLength(InventoryCrafting inv) {
-		int cableLength = 0;
+	private int getLockId(@Nonnull InventoryCrafting inv) {
+		int id = 0;
+		boolean hasKey = false;
 		for (int i = 0; i < inv.getSizeInventory(); i++) {
-			ItemStack curr = inv.getStackInSlot(i);
-			if (OreDictionary.itemMatches(curr, coil, false)) {
-				cableLength += ItemIC2Coil.getLength(curr);
-			} else if (OreDictionary.itemMatches(curr, cable, false)) {
-				cableLength++;
-			} else if (!curr.isEmpty()) {
-				return -1;
+			ItemStack here = inv.getStackInSlot(i);
+			if (here.getItem() == IndustrialWires.key) {
+				if (hasKey || ItemKey.idForKey(here) != 0) {//too many keys or non-blanks
+					return 0;
+				}
+				hasKey = true;
+			} else if (here.getItem() == IndustrialWires.panelComponent) {
+				if (id != 0) {//too many locks/components
+					return 0;
+				}
+				PanelComponent pc = ItemPanelComponent.componentFromStack(here);
+				if (pc instanceof Lock) {
+					id = ((Lock) pc).getLockID();
+				} else {
+					return 0;
+				}
 			}
 		}
-		return cableLength;
+		if (!hasKey) {
+			return 0;
+		}
+		return id;
+	}
+
+	@Nonnull
+	//assumes that the recipe is valid
+	private ItemStack getKey(@Nonnull InventoryCrafting inv) {
+		for (int i = 0; i < inv.getSizeInventory(); i++) {
+			ItemStack here = inv.getStackInSlot(i);
+			if (here.getItem() == IndustrialWires.key) {
+				return here;
+			}
+		}
+		return ItemStack.EMPTY;
 	}
 }

@@ -16,24 +16,12 @@
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package malte0811.industrialWires.containers;
+package malte0811.industrialWires.items;
 
-import malte0811.industrialWires.IndustrialWires;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHand;
 
-import javax.annotation.Nonnull;
-
-public class ContainerPanelComponent extends Container {
-	public EnumHand hand;
-
-	public ContainerPanelComponent(EnumHand h) {
-		hand = h;
-	}
-
-	@Override
-	public boolean canInteractWith(@Nonnull EntityPlayer playerIn) {
-		return playerIn.getHeldItem(hand).getItem() == IndustrialWires.panelComponent;
-	}
+public interface INetGUIItem {
+	void onChange(NBTTagCompound nbt, EntityPlayer p, EnumHand hand);
 }

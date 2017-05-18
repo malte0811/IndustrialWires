@@ -17,7 +17,6 @@
  */
 package malte0811.industrialWires.items;
 
-import blusunrize.immersiveengineering.ImmersiveEngineering;
 import blusunrize.immersiveengineering.api.Lib;
 import blusunrize.immersiveengineering.api.TargetingInfo;
 import blusunrize.immersiveengineering.api.energy.wires.IImmersiveConnectable;
@@ -41,14 +40,12 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.NonNullList;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import javax.annotation.Nonnull;
 import java.util.HashSet;
@@ -64,7 +61,8 @@ public class ItemIC2Coil extends Item implements IWireCoil {
 		setHasSubtypes(true);
 		this.setCreativeTab(IndustrialWires.creativeTab);
 		setMaxStackSize(64);
-		ImmersiveEngineering.registerByFullName(this, IndustrialWires.MODID + ":" + "ic2WireCoil");
+		setRegistryName(new ResourceLocation(IndustrialWires.MODID, "ic2WireCoil"));
+		GameRegistry.register(this);
 	}
 
 	@Override

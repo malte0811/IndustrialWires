@@ -35,10 +35,12 @@ import malte0811.industrialWires.blocks.converter.TileEntityMechIEtoIC;
 import malte0811.industrialWires.blocks.wire.*;
 import malte0811.industrialWires.controlpanel.PanelUtils;
 import malte0811.industrialWires.crafting.RecipeCoilLength;
+import malte0811.industrialWires.crafting.RecipeKeyLock;
 import malte0811.industrialWires.items.ItemIC2Coil;
+import malte0811.industrialWires.items.ItemKey;
 import malte0811.industrialWires.items.ItemPanelComponent;
-import malte0811.industrialWires.network.MessageComponentSync;
 import malte0811.industrialWires.network.MessageGUIInteract;
+import malte0811.industrialWires.network.MessageItemSync;
 import malte0811.industrialWires.network.MessagePanelInteract;
 import malte0811.industrialWires.network.MessageTileSyncIW;
 import malte0811.industrialWires.wires.IC2Wiretype;
@@ -76,6 +78,7 @@ public class IndustrialWires {
 	public static BlockPanel panel;
 	public static ItemIC2Coil coil;
 	public static ItemPanelComponent panelComponent;
+	public static ItemKey key;
 	public static final SimpleNetworkWrapper packetHandler = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
 	@Mod.Instance(MODID)
 	public static IndustrialWires instance = new IndustrialWires();
@@ -96,9 +99,12 @@ public class IndustrialWires {
 		if (IWConfig.enableConversion)
 			mechConv = new BlockMechanicalConverter();
 		jacobsLadder = new BlockJacobsLadder();
+		panel = new BlockPanel();
+
 		coil = new ItemIC2Coil();
 		panelComponent = new ItemPanelComponent();
-		panel = new BlockPanel();
+		key = new ItemKey();
+
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorTin.class, MODID + "ic2ConnectorTin");
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorCopper.class, MODID + "ic2ConnectorCopper");
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorGold.class, MODID + "ic2ConnectorGold");
@@ -194,13 +200,15 @@ public class IndustrialWires {
 				"stickIron", Blocks.LEVER, "wireCopper"));
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(panelComponent, 1, 6),
 				"aaa", "asa", 'a', "plateAluminum", 's', new ItemStack(panelComponent, 2, 5)));
+		RecipeSorter.register("industrialwires:key_lock", RecipeKeyLock.class, Category.SHAPELESS, "after:forge:shapelessore");
+		GameRegistry.addRecipe(new RecipeKeyLock());
 
 		ExtraIC2Compat.addToolConmpat();
 
 		packetHandler.registerMessage(MessageTileSyncIW.HandlerClient.class, MessageTileSyncIW.class, 0, Side.CLIENT);
 		packetHandler.registerMessage(MessagePanelInteract.HandlerServer.class, MessagePanelInteract.class, 1, Side.SERVER);
 		packetHandler.registerMessage(MessageGUIInteract.HandlerServer.class, MessageGUIInteract.class, 2, Side.SERVER);
-		packetHandler.registerMessage(MessageComponentSync.HandlerServer.class, MessageComponentSync.class, 3, Side.SERVER);
+		packetHandler.registerMessage(MessageItemSync.HandlerServer.class, MessageItemSync.class, 3, Side.SERVER);
 
 		NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
 	}

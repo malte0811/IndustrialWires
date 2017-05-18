@@ -23,6 +23,7 @@ import malte0811.industrialWires.blocks.controlpanel.TileEntityRSPanelConn;
 import malte0811.industrialWires.containers.ContainerPanelComponent;
 import malte0811.industrialWires.containers.ContainerPanelCreator;
 import malte0811.industrialWires.containers.ContainerRSPanelConn;
+import malte0811.industrialWires.containers.ContainerRenameKey;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
@@ -60,8 +61,12 @@ public class CommonProxy implements IGuiHandler {
 		} else if (ID == 1) {//ITEM GUI
 			EnumHand h = z == 1 ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
 			ItemStack held = player.getHeldItem(h);
-			if (!held.isEmpty() && held.getItem() == IndustrialWires.panelComponent) {
-				return new ContainerPanelComponent(h);
+			if (!held.isEmpty()) {
+				if (held.getItem() == IndustrialWires.panelComponent) {
+					return new ContainerPanelComponent(h);
+				} else if (held.getItem() == IndustrialWires.key) {
+					return new ContainerRenameKey(h);
+				}
 			}
 		}
 		return null;
