@@ -37,6 +37,7 @@ import malte0811.industrialWires.blocks.controlpanel.TileEntityRSPanelConn;
 import malte0811.industrialWires.client.gui.GuiPanelComponent;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import malte0811.industrialWires.client.gui.GuiRSPanelConn;
+import malte0811.industrialWires.client.gui.GuiRenameKey;
 import malte0811.industrialWires.client.panelmodel.PanelModelLoader;
 import malte0811.industrialWires.client.render.TileRenderJacobsLadder;
 import malte0811.industrialWires.controlpanel.PanelComponent;
@@ -284,8 +285,12 @@ public class ClientProxy extends CommonProxy {
 		} else if (ID == 1) {
 			EnumHand h = z == 1 ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
 			ItemStack held = player.getHeldItem(h);
-			if (held != null && held.getItem() == IndustrialWires.panelComponent) {
-				return new GuiPanelComponent(h, ItemPanelComponent.componentFromStack(held));
+			if (held!=null) {
+				if (held.getItem() == IndustrialWires.panelComponent) {
+					return new GuiPanelComponent(h, ItemPanelComponent.componentFromStack(held));
+				} else if (held.getItem() == IndustrialWires.key) {
+					return new GuiRenameKey(h);
+				}
 			}
 		}
 		return null;

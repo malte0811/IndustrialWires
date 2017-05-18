@@ -18,8 +18,10 @@
 
 package malte0811.industrialWires.items;
 
+import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.client.ClientProxy;
 import malte0811.industrialWires.IndustrialWires;
+import malte0811.industrialWires.controlpanel.IConfigurableComponent;
 import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.controlpanel.PanelUtils;
 import net.minecraft.client.gui.FontRenderer;
@@ -30,6 +32,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
@@ -43,10 +46,13 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ItemPanelComponent extends Item {
+public class ItemPanelComponent extends Item implements INetGUIItem {
 	public static final String[] types = {
-			"lighted_button", "label", "indicator_light", "slider", "variac", "toggle_switch", "toggle_switch_covered"
+			"lighted_button", "label", "indicator_light", "slider", "variac", "toggle_switch", "toggle_switch_covered", "lock"
 	};
+	public static final String TYPE = "type";
+	public static final String ID = "cfgId";
+	public static final String VALUE = "value";
 
 	public ItemPanelComponent() {
 		setUnlocalizedName(IndustrialWires.MODID + ".panel_component");
@@ -153,5 +159,28 @@ public class ItemPanelComponent extends Item {
 			playerIn.openGui(IndustrialWires.MODID, 1, worldIn, 0, 0, hand==EnumHand.MAIN_HAND?1:0);
 		}
 		return new ActionResult<>(EnumActionResult.SUCCESS, itemStackIn);
+	}
+
+	@Override
+	public void onChange(NBTTagCompound data, EntityPlayer player, EnumHand hand) {
+		ItemStack held = player.getHeldItem(hand);
+		if (held!=null && held.getItem() == IndustrialWires.panelComponent) {
+			PanelComponent old = ItemPanelComponent.componentFromStack(held);
+			if (old instanceof IConfigurableComponent) {
+				NBTTagList changes = data.getTagList("data", 10);
+				IConfigurableComponent cmp = (IConfigurableComponent) old;
+				for (int i = 0; i < changes.tagCount(); i++) {
+					NBTTagCompound curr = changes.getCompoundTagAt(i);
+					IConfigurableComponent.ConfigType type = IConfigurableComponent.ConfigType.values()[curr.getInteger(TYPE)];
+					try {
+						cmp.applyConfigOption(type, curr.getInteger(ID), curr.getTag(VALUE));
+					} catch (Exception x) {
+						x.printStackTrace();
+					}
+				}
+				ItemStack newCmp = ApiUtils.copyStackWithAmount(ItemPanelComponent.stackFromComponent(old), held.stackSize);
+				player.setHeldItem(hand, newCmp);
+			}
+		}
 	}
 }

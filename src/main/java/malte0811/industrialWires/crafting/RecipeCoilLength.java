@@ -51,7 +51,7 @@ public class RecipeCoilLength implements IRecipe {
 
 	@Override
 	public int getRecipeSize() {
-		return 0;
+		return 1;
 	}
 
 	@Override

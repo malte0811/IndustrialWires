@@ -69,6 +69,7 @@ public abstract class PanelComponent {
 		baseCreaters.put("variac", Variac::new);
 		baseCreaters.put("toggle_switch", ToggleSwitch::new);
 		baseCreaters.put("toggle_switch_covered", CoveredToggleSwitch::new);
+		baseCreaters.put("lock", Lock::new);
 	}
 
 	protected abstract void writeCustomNBT(NBTTagCompound nbt, boolean toItem);
