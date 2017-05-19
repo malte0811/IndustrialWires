@@ -103,6 +103,9 @@ public abstract class PanelComponent {
 	public void unregisterRSOutput(int id, @Nonnull BiConsumer<Integer, Byte> out) {
 	}
 
+	public void dropItems(TileEntityPanel te) {
+	}
+
 	public void invalidate(TileEntityPanel te) {
 	}
 

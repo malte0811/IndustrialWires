@@ -226,14 +226,16 @@ public class ClientProxy extends CommonProxy {
 				new ManualPages.Crafting(m, "industrialWires.redstone0", new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.RS_WIRE.ordinal())),
 				new ManualPages.Text(m, "industrialWires.redstone1")
 		);
-		m.addEntry("industrialWires.components", "control_panels",
-				new ManualPages.Crafting(m, "industrialWires.button", new ItemStack(IndustrialWires.panelComponent, 1, 0)),
-				new ManualPages.Crafting(m, "industrialWires.label", new ItemStack(IndustrialWires.panelComponent, 1, 1)),
-				new ManualPages.Crafting(m, "industrialWires.indicator_light", new ItemStack(IndustrialWires.panelComponent, 1, 2)),
-				new ManualPages.Crafting(m, "industrialWires.slider", new ItemStack(IndustrialWires.panelComponent, 1, 3)),
-				new ManualPages.CraftingMulti(m, "industrialWires.toggle_switch", new ItemStack(IndustrialWires.panelComponent, 1, 5), new ItemStack(IndustrialWires.panelComponent, 1, 6)),
-				new ManualPages.Text(m, "industrialWires.toggle_switch1"),
-				new ManualPages.Crafting(m, "industrialWires.variac", new ItemStack(IndustrialWires.panelComponent, 1, 4))
+		m.addEntry("industrialwires.components", "control_panels",
+				new ManualPages.Text(m, "industrialwires.components.general"),
+				new ManualPages.Crafting(m, "industrialwires.button", new ItemStack(IndustrialWires.panelComponent, 1, 0)),
+				new ManualPages.Crafting(m, "industrialwires.label", new ItemStack(IndustrialWires.panelComponent, 1, 1)),
+				new ManualPages.Crafting(m, "industrialwires.indicator_light", new ItemStack(IndustrialWires.panelComponent, 1, 2)),
+				new ManualPages.Crafting(m, "industrialwires.slider", new ItemStack(IndustrialWires.panelComponent, 1, 3)),
+				new ManualPages.CraftingMulti(m, "industrialwires.toggle_switch", new ItemStack(IndustrialWires.panelComponent, 1, 5), new ItemStack(IndustrialWires.panelComponent, 1, 6)),
+				new ManualPages.Text(m, "industrialwires.toggle_switch1"),
+				new ManualPages.Crafting(m, "industrialwires.variac", new ItemStack(IndustrialWires.panelComponent, 1, 4)),
+				new ManualPages.CraftingMulti(m, "industrialwires.lock", new ItemStack(IndustrialWires.panelComponent, 1, 7), new ItemStack(IndustrialWires.key))
 		);
 	}
 

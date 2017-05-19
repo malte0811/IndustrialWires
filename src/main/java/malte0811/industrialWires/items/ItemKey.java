@@ -33,6 +33,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class ItemKey extends Item implements INetGUIItem {
 	private static final String lockId = "lockId";
@@ -51,7 +52,7 @@ public class ItemKey extends Item implements INetGUIItem {
 	public String getItemStackDisplayName(@Nonnull ItemStack stack) {
 		NBTTagCompound nbt = stack.getTagCompound();
 		if (nbt!=null&&nbt.hasKey("name")) {
-			return I18n.format("item."+IndustrialWires.MODID+".key_named.name")+nbt.getString("name");
+			return I18n.format("item."+IndustrialWires.MODID+".key_named.name")+" "+nbt.getString("name");
 		}
 		return super.getItemStackDisplayName(stack);
 	}
@@ -61,7 +62,7 @@ public class ItemKey extends Item implements INetGUIItem {
 	public String getUnlocalizedName(ItemStack stack) {
 		NBTTagCompound nbt = stack.getTagCompound();
 		if (nbt==null||!nbt.hasKey(lockId)) {
-			return I18n.format("item."+IndustrialWires.MODID+".key_raw.name");
+			return "item."+IndustrialWires.MODID+".key_raw";
 		}
 		return super.getUnlocalizedName(stack);
 	}
@@ -70,8 +71,8 @@ public class ItemKey extends Item implements INetGUIItem {
 		stack.setTagInfo(lockId, new NBTTagInt(lockID));
 	}
 
-	public static int idForKey(@Nonnull ItemStack held) {
-		if (held.getItem()!=IndustrialWires.key) {
+	public static int idForKey(@Nullable ItemStack held) {
+		if (held==null||held.getItem()!=IndustrialWires.key) {
 			return 0;
 		}
 		NBTTagCompound nbt = held.getTagCompound();
@@ -89,7 +90,7 @@ public class ItemKey extends Item implements INetGUIItem {
 	@Nonnull
 	@Override
 	public ActionResult<ItemStack> onItemRightClick(@Nonnull ItemStack stack, World worldIn, EntityPlayer playerIn, @Nonnull EnumHand hand) {
-		if (!worldIn.isRemote) {
+		if (!worldIn.isRemote&&idForKey(playerIn.getHeldItem(hand))!=0) {
 			playerIn.openGui(IndustrialWires.MODID, 1, worldIn, 0, 0, hand == EnumHand.MAIN_HAND ? 1 : 0);
 		}
 		return new ActionResult<>(EnumActionResult.SUCCESS, stack);

@@ -22,6 +22,7 @@ import blusunrize.immersiveengineering.api.IEProperties;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.BlockIWBase;
 import malte0811.industrialWires.blocks.IMetaEnum;
+import malte0811.industrialWires.controlpanel.PanelComponent;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
@@ -201,5 +202,15 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 			}
 		}
 		return super.getPickBlock(state, target, world, pos, player);
+	}
+
+	@Override
+	public void harvestBlock(@Nonnull World worldIn, EntityPlayer player, @Nonnull BlockPos pos, @Nonnull IBlockState state, TileEntity te, ItemStack stack) {
+		super.harvestBlock(worldIn, player, pos, state, te, stack);
+		if (te instanceof TileEntityPanel) {
+			for (PanelComponent pc:((TileEntityPanel) te).getComponents()) {
+				pc.dropItems((TileEntityPanel)te);
+			}
+		}
 	}
 }
