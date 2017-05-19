@@ -24,6 +24,8 @@ import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import malte0811.industrialWires.items.ItemKey;
+import net.minecraft.block.Block;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -42,7 +44,6 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.BiConsumer;
 
-//TODO drop key when broken
 public class Lock extends PanelComponent implements IConfigurableComponent {
 	private final static Random rand = new Random();
 	@Nullable
@@ -57,6 +58,9 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 
 	public Lock() {
 		super("lock");
+		while (lockID==0) {
+			lockID = rand.nextInt();
+		}
 	}
 
 	public Lock(boolean latching, int rsOutputId, int rsOutputChannel) {
@@ -64,9 +68,6 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 		this.latching = latching;
 		this.rsOutputChannel = rsOutputChannel;
 		this.rsOutputId = rsOutputId;
-		while (lockID==0) {
-			lockID = rand.nextInt();
-		}
 	}
 
 	@Override
@@ -106,9 +107,10 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 	private final static float yOffset = size / 2 + .0001F;
 	private final static float xOffset = (size - keyWidth) / 2;
 	private final static float[] DARK_GRAY = {.4F, .4F, .4F};
+	private final static int DARK_GRAY_INT = 0xFF686868;
 	private final static float zOffset = keyWidth / 2;
 	private final static float keyOffset = keyWidth;
-	private final static float zOffsetLowerKey = size / 3;
+	private final static float zOffsetLowerKey = size / 4;
 
 
 	@Override
@@ -125,15 +127,15 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 			}
 			addKey(ret, mat);
 		} else {
-			PanelUtils.addColoredQuad(ret, new Vector3f(xOffset + keyWidth, yOffset, zOffset), new Vector3f(xOffset, yOffset, zOffset),
-					new Vector3f(xOffset, yOffset, size - zOffset), new Vector3f(xOffset + keyWidth, yOffset, size - zOffset),
+			PanelUtils.addColoredQuad(ret, new Vector3f(xOffset + keyWidth, yOffset, zOffsetLowerKey), new Vector3f(xOffset, yOffset, zOffsetLowerKey),
+					new Vector3f(xOffset, yOffset, size - zOffsetLowerKey), new Vector3f(xOffset + keyWidth, yOffset, size - zOffsetLowerKey),
 					EnumFacing.UP, DARK_GRAY);
 		}
 		return ret;
 	}
 
 	private void addKey(List<RawQuad> out, Matrix4 mat) {
-		PanelUtils.addColoredBox(DARK_GRAY, DARK_GRAY, null, new Vector3f(xOffset, size / 2, zOffsetLowerKey), new Vector3f(keyWidth, keyOffset, size / 3), out, false, mat);
+		PanelUtils.addColoredBox(DARK_GRAY, DARK_GRAY, null, new Vector3f(xOffset, size / 2, zOffsetLowerKey), new Vector3f(keyWidth, keyOffset, size / 2), out, false, mat);
 		PanelUtils.addColoredBox(DARK_GRAY, DARK_GRAY, null, new Vector3f(xOffset, size / 2 + keyOffset, zOffset), new Vector3f(keyWidth, size, size - 2 * zOffset), out, false, mat);
 	}
 
@@ -233,8 +235,13 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 
 	@Override
 	public void renderInGUI(GuiPanelCreator gui) {
-		//TODO somethin more fancy?
 		renderInGUIDefault(gui, GRAY_INT);
+		AxisAlignedBB aabb = getBlockRelativeAABB();
+		int left = (int) (gui.getX0() + (aabb.minX+xOffset) * gui.panelSize);
+		int top = (int) (gui.getY0() + (aabb.minZ+zOffsetLowerKey) * gui.panelSize);
+		int right = (int) (gui.getX0() + (aabb.maxX-xOffset) * gui.panelSize);
+		int bottom = (int) (gui.getY0() + (aabb.maxZ-zOffsetLowerKey) * gui.panelSize);
+		Gui.drawRect(left, top, right, bottom, DARK_GRAY_INT);
 	}
 
 	@Override
@@ -247,6 +254,14 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 		tile.triggerRenderUpdate();
 		for (BiConsumer<Integer, Byte> rs : rsOut) {
 			rs.accept(rsOutputChannel, (byte) (turned ? 15 : 0));
+		}
+	}
+
+	@Override
+	public void dropItems(TileEntityPanel te) {
+		super.dropItems(te);
+		if (keyNBT!=null) {
+			Block.spawnAsEntity(te.getWorld(), te.getPos(), new ItemStack(keyNBT));
 		}
 	}
 
@@ -264,7 +279,6 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 		if (rsOutputChannel != lock.rsOutputChannel) return false;
 		if (ticksTillOff != lock.ticksTillOff) return false;
 		if (lockID != lock.lockID) return false;
-		if (true) return false;
 		return keyNBT != null ? keyNBT.equals(lock.keyNBT) : lock.keyNBT == null;
 	}
 

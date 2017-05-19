@@ -19,9 +19,7 @@ package malte0811.industrialWires.crafting;
 
 import blusunrize.immersiveengineering.api.ApiUtils;
 import malte0811.industrialWires.IndustrialWires;
-import malte0811.industrialWires.controlpanel.Lock;
 import malte0811.industrialWires.controlpanel.PanelComponent;
-import malte0811.industrialWires.items.ItemKey;
 import malte0811.industrialWires.items.ItemPanelComponent;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
@@ -30,20 +28,53 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-public class RecipeKeyLock implements IRecipe {
+public class RecipeComponentCopy implements IRecipe {
 
 	@Override
 	public boolean matches(@Nonnull InventoryCrafting inv, @Nonnull World worldIn) {
-		return getLockId(inv) != 0;
+		boolean found = false;
+		int foundX = -1;
+		int foundY = -1;
+		for (int x = 0; x < inv.getWidth(); x++) {
+			for (int y = 0; y < inv.getHeight(); y++) {
+				ItemStack here = inv.getStackInRowAndColumn(x, y);
+				PanelComponent pc1 = ItemPanelComponent.componentFromStack(here);
+				if (pc1!=null) {
+					if (x==foundX&&y==foundY) {
+						continue;
+					}
+					if (found) {
+						return false;
+					}
+					if (y+1<inv.getHeight()) {
+						ItemStack below = inv.getStackInRowAndColumn(x, y + 1);
+						PanelComponent pc2 = ItemPanelComponent.componentFromStack(below);
+						if (pc2 == null || pc2.getClass() != pc1.getClass()) {
+							return false;
+						}
+						found = true;
+						foundX = x;
+						foundY = y + 1;
+					} else {
+						return false;
+					}
+				}
+			}
+		}
+		return found;
 	}
 
 	@Nonnull
 	@Override
 	public ItemStack getCraftingResult(@Nonnull InventoryCrafting inv) {
-		ItemStack ret = getKey(inv).copy();
-		ItemKey.setId(ret, getLockId(inv));
-		return ret;
+		int[] pos = getTopComponent(inv);
+		if (pos != null) {
+			return ApiUtils.copyStackWithAmount(inv.getStackInRowAndColumn(pos[0], pos[1]), 2);
+		} else {
+			return ItemStack.EMPTY;
+		}
 	}
 
 	@Override
@@ -54,59 +85,25 @@ public class RecipeKeyLock implements IRecipe {
 	@Nonnull
 	@Override
 	public ItemStack getRecipeOutput() {
-		return new ItemStack(IndustrialWires.key);
+		return ItemStack.EMPTY;
 	}
 
 	@Nonnull
 	@Override
 	public NonNullList<ItemStack> getRemainingItems(@Nonnull InventoryCrafting inv) {
-		NonNullList<ItemStack> ret = NonNullList.withSize(inv.getSizeInventory(), ItemStack.EMPTY);
-		for (int i = 0; i < ret.size(); i++) {
-			ItemStack here = inv.getStackInSlot(i);
-			if (here.getItem() == IndustrialWires.panelComponent) {
-				ret.set(i, ApiUtils.copyStackWithAmount(here, 1));
-			}
-		}
-		return ret;
+		return NonNullList.withSize(inv.getSizeInventory(), ItemStack.EMPTY);
 	}
 
-	private int getLockId(@Nonnull InventoryCrafting inv) {
-		int id = 0;
-		boolean hasKey = false;
-		for (int i = 0; i < inv.getSizeInventory(); i++) {
-			ItemStack here = inv.getStackInSlot(i);
-			if (here.getItem() == IndustrialWires.key) {
-				if (hasKey || ItemKey.idForKey(here) != 0) {//too many keys or non-blanks
-					return 0;
-				}
-				hasKey = true;
-			} else if (here.getItem() == IndustrialWires.panelComponent) {
-				if (id != 0) {//too many locks/components
-					return 0;
-				}
-				PanelComponent pc = ItemPanelComponent.componentFromStack(here);
-				if (pc instanceof Lock) {
-					id = ((Lock) pc).getLockID();
-				} else {
-					return 0;
+	@Nullable
+	private int[] getTopComponent(@Nonnull InventoryCrafting inv) {
+		for (int x = 0; x < inv.getWidth(); x++) {
+			for (int y = 0; y < inv.getHeight() - 1; y++) {
+				ItemStack here = inv.getStackInRowAndColumn(x, y);
+				if (!here.isEmpty() && here.getItem() == IndustrialWires.panelComponent) {
+					return new int[]{x, y};
 				}
 			}
 		}
-		if (!hasKey) {
-			return 0;
-		}
-		return id;
-	}
-
-	@Nonnull
-	//assumes that the recipe is valid
-	private ItemStack getKey(@Nonnull InventoryCrafting inv) {
-		for (int i = 0; i < inv.getSizeInventory(); i++) {
-			ItemStack here = inv.getStackInSlot(i);
-			if (here.getItem() == IndustrialWires.key) {
-				return here;
-			}
-		}
-		return ItemStack.EMPTY;
+		return null;
 	}
 }

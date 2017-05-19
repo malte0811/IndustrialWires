@@ -286,6 +286,12 @@ public final class PanelUtils {
 		case 6://Covered toggle switch
 			addCommonInfo(data, list, true, true);
 			break;
+		case 7://Lock
+			addCommonInfo(data, list, false, true);
+			if (data.hasKey(LATCHING)) {
+				list.add(I18n.format(IndustrialWires.MODID + ".tooltip." + (data.getBoolean(LATCHING) ? "latching" : "instantaneous")));
+			}
+			break;
 		}
 	}
 

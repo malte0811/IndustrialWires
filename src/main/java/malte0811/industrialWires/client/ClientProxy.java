@@ -21,7 +21,6 @@ import blusunrize.immersiveengineering.api.ManualHelper;
 import blusunrize.immersiveengineering.client.ClientUtils;
 import blusunrize.immersiveengineering.client.models.smart.ConnLoader;
 import blusunrize.immersiveengineering.common.Config;
-import blusunrize.immersiveengineering.common.util.IELogger;
 import blusunrize.lib.manual.ManualInstance;
 import blusunrize.lib.manual.ManualPages;
 import blusunrize.lib.manual.ManualPages.PositionedItemStack;
@@ -132,7 +131,6 @@ public class ClientProxy extends CommonProxy {
 					String location = loc.toString();
 					String prop = "inventory,type=" + v[meta].toString().toLowerCase(Locale.US);
 					try {
-						IELogger.info(location + ", " + prop);
 						ModelLoader.setCustomModelResourceLocation(blockItem, meta, new ModelResourceLocation(location, prop));
 					} catch (NullPointerException npe) {
 						throw new RuntimeException(b + " lacks an item!", npe);
@@ -230,13 +228,15 @@ public class ClientProxy extends CommonProxy {
 				new ManualPages.Text(m, "industrialwires.redstone1")
 		);
 		m.addEntry("industrialwires.components", "control_panels",
+				new ManualPages.Text(m, "industrialwires.components.general"),
 				new ManualPages.Crafting(m, "industrialwires.button", new ItemStack(IndustrialWires.panelComponent, 1, 0)),
 				new ManualPages.Crafting(m, "industrialwires.label", new ItemStack(IndustrialWires.panelComponent, 1, 1)),
 				new ManualPages.Crafting(m, "industrialwires.indicator_light", new ItemStack(IndustrialWires.panelComponent, 1, 2)),
 				new ManualPages.Crafting(m, "industrialwires.slider", new ItemStack(IndustrialWires.panelComponent, 1, 3)),
 				new ManualPages.CraftingMulti(m, "industrialwires.toggle_switch", new ItemStack(IndustrialWires.panelComponent, 1, 5), new ItemStack(IndustrialWires.panelComponent, 1, 6)),
 				new ManualPages.Text(m, "industrialwires.toggle_switch1"),
-				new ManualPages.Crafting(m, "industrialwires.variac", new ItemStack(IndustrialWires.panelComponent, 1, 4))
+				new ManualPages.Crafting(m, "industrialwires.variac", new ItemStack(IndustrialWires.panelComponent, 1, 4)),
+				new ManualPages.CraftingMulti(m, "industrialwires.lock", new ItemStack(IndustrialWires.panelComponent, 1, 7), new ItemStack(IndustrialWires.key))
 		);
 	}
 

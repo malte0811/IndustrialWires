@@ -51,8 +51,8 @@ public class GuiRenameKey extends GuiContainer {
 		if (nbt!=null&&nbt.hasKey("name")) {
 			field.setText(nbt.getString("name"));
 		}
-		xSize = 64;
-		ySize = 64;
+		xSize = 68;
+		ySize = 22;
 		guiLeft = (width - xSize) / 2;
 		guiTop = (height - ySize) / 2;
 	}
@@ -66,13 +66,13 @@ public class GuiRenameKey extends GuiContainer {
 		RenderHelper.enableStandardItemLighting();
 	}
 
-	private ResourceLocation textureLoc = new ResourceLocation(IndustrialWires.MODID, "textures/gui/rs_wire_controller.png");
+	private ResourceLocation textureLoc = new ResourceLocation(IndustrialWires.MODID, "textures/gui/key_rename.png");
 
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
 		GlStateManager.color(1, 1, 1, 1);
 		mc.getTextureManager().bindTexture(textureLoc);
-		Gui.drawModalRectWithCustomSizedTexture(guiLeft, guiTop, 0, 0, xSize, ySize, 64, 64);
+		Gui.drawModalRectWithCustomSizedTexture(guiLeft, guiTop, 0, 0, xSize, ySize, 68, 22);
 	}
 
 	@Override

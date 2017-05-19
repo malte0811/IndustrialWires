@@ -51,7 +51,7 @@ public class ItemKey extends Item implements INetGUIItem {
 	public String getItemStackDisplayName(@Nonnull ItemStack stack) {
 		NBTTagCompound nbt = stack.getTagCompound();
 		if (nbt!=null&&nbt.hasKey("name")) {
-			return I18n.format("item."+IndustrialWires.MODID+".key_named.name")+nbt.getString("name");
+			return I18n.format("item."+IndustrialWires.MODID+".key_named.name")+" "+nbt.getString("name");
 		}
 		return super.getItemStackDisplayName(stack);
 	}
@@ -61,7 +61,7 @@ public class ItemKey extends Item implements INetGUIItem {
 	public String getUnlocalizedName(ItemStack stack) {
 		NBTTagCompound nbt = stack.getTagCompound();
 		if (nbt==null||!nbt.hasKey(lockId)) {
-			return I18n.format("item."+IndustrialWires.MODID+".key_raw.name");
+			return "item."+IndustrialWires.MODID+".key_raw";
 		}
 		return super.getUnlocalizedName(stack);
 	}
@@ -89,7 +89,7 @@ public class ItemKey extends Item implements INetGUIItem {
 	@Override
 	@Nonnull
 	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, @Nonnull EnumHand hand) {
-		if (!worldIn.isRemote) {
+		if (!worldIn.isRemote&&idForKey(playerIn.getHeldItem(hand))!=0) {
 			playerIn.openGui(IndustrialWires.MODID, 1, worldIn, 0, 0, hand == EnumHand.MAIN_HAND ? 1 : 0);
 		}
 		return new ActionResult<>(EnumActionResult.SUCCESS, playerIn.getHeldItem(hand));
