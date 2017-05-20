@@ -25,6 +25,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagInt;
+import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
@@ -36,6 +37,7 @@ import javax.annotation.Nonnull;
 
 public class ItemKey extends Item implements INetGUIItem {
 	private static final String lockId = "lockId";
+	public static final String[] types = {"blank_key", "key"};
 
 	public ItemKey() {
 		setUnlocalizedName(IndustrialWires.MODID + ".key");
@@ -71,7 +73,7 @@ public class ItemKey extends Item implements INetGUIItem {
 	}
 
 	public static int idForKey(@Nonnull ItemStack held) {
-		if (held.getItem()!=IndustrialWires.key) {
+		if (held.getItem()!=IndustrialWires.key||held.getMetadata()==0) {
 			return 0;
 		}
 		NBTTagCompound nbt = held.getTagCompound();
@@ -89,7 +91,8 @@ public class ItemKey extends Item implements INetGUIItem {
 	@Override
 	@Nonnull
 	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, @Nonnull EnumHand hand) {
-		if (!worldIn.isRemote&&idForKey(playerIn.getHeldItem(hand))!=0) {
+		ItemStack held = playerIn.getHeldItem(hand);
+		if (!worldIn.isRemote&&idForKey(held)!=0) {
 			playerIn.openGui(IndustrialWires.MODID, 1, worldIn, 0, 0, hand == EnumHand.MAIN_HAND ? 1 : 0);
 		}
 		return new ActionResult<>(EnumActionResult.SUCCESS, playerIn.getHeldItem(hand));
@@ -98,6 +101,14 @@ public class ItemKey extends Item implements INetGUIItem {
 	@Override
 	public void onChange(NBTTagCompound nbt, EntityPlayer p, EnumHand hand) {
 		ItemStack held = p.getHeldItem(hand);
-		held.setTagInfo("name", nbt.getTag("name"));
+		String name = nbt.getString("name");
+		if (!name.trim().isEmpty()) {
+			held.setTagInfo("name", new NBTTagString(name));
+		} else {
+			NBTTagCompound heldNBT = held.getTagCompound();
+			if (heldNBT!=null) {
+				heldNBT.removeTag("name");
+			}
+		}
 	}
 }

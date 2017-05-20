@@ -42,6 +42,7 @@ import malte0811.industrialWires.client.panelmodel.PanelModelLoader;
 import malte0811.industrialWires.client.render.TileRenderJacobsLadder;
 import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.items.ItemIC2Coil;
+import malte0811.industrialWires.items.ItemKey;
 import malte0811.industrialWires.items.ItemPanelComponent;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -117,6 +118,11 @@ public class ClientProxy extends CommonProxy {
 			ResourceLocation loc = new ResourceLocation(IndustrialWires.MODID, "panel_component/" + ItemPanelComponent.types[meta]);
 			ModelBakery.registerItemVariants(IndustrialWires.panelComponent, loc);
 			ModelLoader.setCustomModelResourceLocation(IndustrialWires.panelComponent, meta, new ModelResourceLocation(loc, "inventory"));
+		}
+		for (int meta = 0; meta < ItemKey.types.length; meta++) {
+			ResourceLocation loc = new ResourceLocation(IndustrialWires.MODID, "key/" + ItemKey.types[meta]);
+			ModelBakery.registerItemVariants(IndustrialWires.key, loc);
+			ModelLoader.setCustomModelResourceLocation(IndustrialWires.key, meta, new ModelResourceLocation(loc, "inventory"));
 		}
 
 		Block[] blocks = {IndustrialWires.ic2conn, IndustrialWires.mechConv, IndustrialWires.jacobsLadder, IndustrialWires.panel};

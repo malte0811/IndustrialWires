@@ -61,7 +61,7 @@ public class ItemIC2Coil extends Item implements IWireCoil {
 		setHasSubtypes(true);
 		this.setCreativeTab(IndustrialWires.creativeTab);
 		setMaxStackSize(64);
-		setRegistryName(new ResourceLocation(IndustrialWires.MODID, "ic2WireCoil"));
+		setRegistryName(new ResourceLocation(IndustrialWires.MODID, "ic2_wire_coil"));
 		GameRegistry.register(this);
 	}
 

@@ -96,11 +96,9 @@ public class GuiRenameKey extends GuiContainer {
 	@Override
 	public void onGuiClosed() {
 		super.onGuiClosed();
-		if (!field.getText().isEmpty()) {
 			NBTTagCompound nbt = new NBTTagCompound();
 			nbt.setString("name", field.getText());
 			IndustrialWires.packetHandler.sendToServer(new MessageItemSync(hand, nbt));
-		}
 	}
 
 }

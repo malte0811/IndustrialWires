@@ -130,12 +130,18 @@ public class IndustrialWires {
 	@EventHandler
 	public void remap(FMLMissingMappingsEvent ev) {
 		for (FMLMissingMappingsEvent.MissingMapping miss : ev.get()) {
-			if (miss.resourceLocation.getResourcePath().equals("ic2connector")) {
-				if (miss.type== GameRegistry.Type.ITEM) {
+			String name = miss.resourceLocation.getResourcePath();
+			switch (name) {
+			case "ic2connector":
+				if (miss.type == GameRegistry.Type.ITEM) {
 					miss.remap(Item.getItemFromBlock(IndustrialWires.ic2conn));
 				} else {
 					miss.remap(IndustrialWires.ic2conn);
 				}
+				break;
+			case "ic2wirecoil":
+				miss.remap(IndustrialWires.coil);
+				break;
 			}
 		}
 	}

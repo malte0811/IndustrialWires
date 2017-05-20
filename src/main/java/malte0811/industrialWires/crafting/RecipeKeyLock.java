@@ -41,7 +41,7 @@ public class RecipeKeyLock implements IRecipe {
 	@Nonnull
 	@Override
 	public ItemStack getCraftingResult(@Nonnull InventoryCrafting inv) {
-		ItemStack ret = getKey(inv).copy();
+		ItemStack ret = new ItemStack(IndustrialWires.key, 1, 1);
 		ItemKey.setId(ret, getLockId(inv));
 		return ret;
 	}
@@ -54,7 +54,7 @@ public class RecipeKeyLock implements IRecipe {
 	@Nonnull
 	@Override
 	public ItemStack getRecipeOutput() {
-		return new ItemStack(IndustrialWires.key);
+		return new ItemStack(IndustrialWires.key, 1, 1);
 	}
 
 	@Nonnull
