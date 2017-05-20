@@ -129,5 +129,4 @@ public class IndustrialWires {
 	public void postInit(FMLPostInitializationEvent e) {
 		proxy.postInit();
 	}
-
 }
