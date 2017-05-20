@@ -20,25 +20,27 @@ package malte0811.industrialWires.items;
 
 import malte0811.industrialWires.IndustrialWires;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagInt;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.*;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 
 public class ItemKey extends Item implements INetGUIItem {
-	private static final String lockId = "lockId";
-	public static final String[] types = {"blank_key", "key"};
+	public static final String LOCK_ID = "lockId";
+	public static final String RING_KEYS = "ringkeys";
+	public static final String NAME = "name";
+	public static final String[] types = {"blank_key", "key", "key_ring"};
 
 	public ItemKey() {
 		setUnlocalizedName(IndustrialWires.MODID + ".key");
@@ -53,24 +55,27 @@ public class ItemKey extends Item implements INetGUIItem {
 	@Override
 	public String getItemStackDisplayName(@Nonnull ItemStack stack) {
 		NBTTagCompound nbt = stack.getTagCompound();
-		if (nbt!=null&&nbt.hasKey("name")) {
-			return I18n.format("item."+IndustrialWires.MODID+".key_named.name")+" "+nbt.getString("name");
+		if (nbt!=null&&nbt.hasKey(NAME)&&!nbt.getString(NAME).trim().isEmpty()) {
+			return I18n.format("item."+IndustrialWires.MODID+".key.key_named.name")+" "+nbt.getString(NAME);
 		}
 		return super.getItemStackDisplayName(stack);
+	}
+
+	@Override
+	public void getSubItems(@Nonnull Item itemIn, CreativeTabs tab, List<ItemStack> subItems) {
+		subItems.add(new ItemStack(this, 1, 0));
+		subItems.add(new ItemStack(this, 1, 2));
 	}
 
 	@Nonnull
 	@Override
 	public String getUnlocalizedName(ItemStack stack) {
 		NBTTagCompound nbt = stack.getTagCompound();
-		if (nbt==null||!nbt.hasKey(lockId)) {
-			return "item."+IndustrialWires.MODID+".key_raw";
-		}
-		return super.getUnlocalizedName(stack);
+		return "item."+IndustrialWires.MODID+".key."+types[stack.getMetadata()];
 	}
 
 	public static void setId(ItemStack stack, int lockID) {
-		stack.setTagInfo(lockId, new NBTTagInt(lockID));
+		stack.setTagInfo(LOCK_ID, new NBTTagInt(lockID));
 	}
 
 	public static int idForKey(@Nullable ItemStack held) {
@@ -79,7 +84,7 @@ public class ItemKey extends Item implements INetGUIItem {
 		}
 		NBTTagCompound nbt = held.getTagCompound();
 		if (nbt!=null) {
-			return nbt.getInteger(lockId);
+			return nbt.getInteger(LOCK_ID);
 		}
 		return 0;
 	}
@@ -93,8 +98,24 @@ public class ItemKey extends Item implements INetGUIItem {
 	@Override
 	public ActionResult<ItemStack> onItemRightClick(@Nonnull ItemStack stack, World worldIn, EntityPlayer playerIn, @Nonnull EnumHand hand) {
 		ItemStack held = playerIn.getHeldItem(hand);
-		if (!worldIn.isRemote&&idForKey(held)!=0) {
-			playerIn.openGui(IndustrialWires.MODID, 1, worldIn, 0, 0, hand == EnumHand.MAIN_HAND ? 1 : 0);
+		if (!worldIn.isRemote) {
+			if (playerIn.isSneaking()&&held.getMetadata()==2) {
+				//select next key
+				NBTTagCompound nbt = held.getTagCompound();
+				if (nbt!=null) {
+					NBTTagList allKeys = nbt.getTagList(RING_KEYS, 10);
+					if (allKeys.tagCount()>1) {
+						NBTTagCompound next = allKeys.getCompoundTagAt(0);
+						allKeys.removeTag(0);
+						allKeys.appendTag(next);
+						nbt.setInteger(LOCK_ID, next.getInteger(LOCK_ID));
+						nbt.setString(NAME, next.getString(NAME));
+						playerIn.inventory.markDirty();
+					}
+				}
+			} else if (idForKey(held)!=0&&held.getMetadata()==1) {
+				playerIn.openGui(IndustrialWires.MODID, 1, worldIn, 0, 0, hand == EnumHand.MAIN_HAND ? 1 : 0);
+			}
 		}
 		return new ActionResult<>(EnumActionResult.SUCCESS, stack);
 	}
@@ -102,13 +123,13 @@ public class ItemKey extends Item implements INetGUIItem {
 	@Override
 	public void onChange(NBTTagCompound nbt, EntityPlayer p, EnumHand hand) {
 		ItemStack held = p.getHeldItem(hand);
-		String name = nbt.getString("name");
+		String name = nbt.getString(NAME);
 		if (!name.trim().isEmpty()) {
-			held.setTagInfo("name", new NBTTagString(name));
+			held.setTagInfo(NAME, new NBTTagString(name));
 		} else {
 			NBTTagCompound heldNBT = held.getTagCompound();
 			if (heldNBT!=null) {
-				heldNBT.removeTag("name");
+				heldNBT.removeTag(NAME);
 			}
 		}
 	}

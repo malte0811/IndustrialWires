@@ -79,8 +79,8 @@ public class RecipeKeyLock implements IRecipe {
 		boolean hasKey = false;
 		for (int i = 0; i < inv.getSizeInventory(); i++) {
 			ItemStack here = inv.getStackInSlot(i);
-			if (here!=null && here.getItem() == IndustrialWires.key) {
-				if (hasKey || ItemKey.idForKey(here) != 0) {//too many keys or non-blanks
+			if (here!=null && here.getItem() == IndustrialWires.key && here.getMetadata()==0) {
+				if (hasKey) {//too many keys
 					return 0;
 				}
 				hasKey = true;

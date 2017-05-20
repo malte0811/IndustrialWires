@@ -31,6 +31,8 @@ public class IWConfig {
 	public static boolean enableConversion = true;
 
 	public static MechConversion mech = new MechConversion();
+	@Comment({"The highest number of keys that can be put on one key ring"})
+	public static int maxKeysOnRing = 10;
 
 	public static class MechConversion {
 		@Comment({"The amount of EU that would be produced by an ideal converter from 1 IF (default: 0.25)"})

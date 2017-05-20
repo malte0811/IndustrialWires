@@ -36,9 +36,10 @@ item.industrialwires.panel_component.variac.name=Variac®
 item.industrialwires.panel_component.toggle_switch.name=Toggle Switch
 item.industrialwires.panel_component.toggle_switch_covered.name=Covered Toggle Switch
 item.industrialwires.panel_component.lock.name=Lock Switch
-item.industrialwires.key.name=Key
-item.industrialwires.key_named.name=Key for
-item.industrialwires.key_raw.name=Blank Key
+item.industrialwires.key.key.name=Key
+item.industrialwires.key.key_named.name=Key for
+item.industrialwires.key.blank_key.name=Blank Key
+item.industrialwires.key.key_ring.name=Key Ring
 
 
 industrialwires.desc.wireLength=Wire length: %1s block(s)
