@@ -26,10 +26,7 @@ import blusunrize.immersiveengineering.common.blocks.stone.BlockTypes_StoneDecor
 import ic2.api.item.IC2Items;
 import malte0811.industrialWires.blocks.controlpanel.BlockTypes_Panel;
 import malte0811.industrialWires.controlpanel.PanelUtils;
-import malte0811.industrialWires.crafting.RecipeCoilLength;
-import malte0811.industrialWires.crafting.RecipeComponentCopy;
-import malte0811.industrialWires.crafting.RecipeInitPC;
-import malte0811.industrialWires.crafting.RecipeKeyLock;
+import malte0811.industrialWires.crafting.*;
 import malte0811.industrialWires.wires.IC2Wiretype;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -92,11 +89,13 @@ public class Recipes {
 	}
 
 	private static void addCustomRecipes() {
+		RecipeSorter.register("industrialwires:key_ring", RecipeKeyRing.class, RecipeSorter.Category.SHAPELESS, "after:forge:shapelessore");
 		RecipeSorter.register("industrialwires:key_lock", RecipeKeyLock.class, RecipeSorter.Category.SHAPELESS, "after:forge:shapelessore");
 		RecipeSorter.register("industrialwires:cmp_copy", RecipeComponentCopy.class, RecipeSorter.Category.SHAPED, "after:forge:shapelessore");
 		RecipeSorter.register("industrialwires:coilLength", RecipeCoilLength.class, RecipeSorter.Category.SHAPELESS, "after:forge:shapelessore");
 		RecipeSorter.register("industrialwires:init_pc", RecipeInitPC.class, RecipeSorter.Category.SHAPED, "after:forge:shapedore");
 		GameRegistry.addRecipe(new RecipeKeyLock());
+		GameRegistry.addRecipe(new RecipeKeyRing());
 		GameRegistry.addRecipe(new RecipeComponentCopy());
 		for (int i = 0; i < IC2Wiretype.IC2_TYPES.length; i++) {
 			GameRegistry.addRecipe(new RecipeCoilLength(i));
@@ -104,6 +103,7 @@ public class Recipes {
 		AssemblerHandler.registerRecipeAdapter(RecipeCoilLength.class, new AllRecipeAdapter<>());
 		AssemblerHandler.registerRecipeAdapter(RecipeComponentCopy.class, new AllRecipeAdapter<>());
 		AssemblerHandler.registerRecipeAdapter(RecipeKeyLock.class, new AllRecipeAdapter<>());
+		AssemblerHandler.registerRecipeAdapter(RecipeKeyRing.class, new AllRecipeAdapter<>());
 	}
 	private static void registerPanels() {
 		// CONTROL PANELS
