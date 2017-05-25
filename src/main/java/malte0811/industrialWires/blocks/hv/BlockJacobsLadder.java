@@ -16,10 +16,12 @@
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package malte0811.industrialWires.blocks;
+package malte0811.industrialWires.blocks.hv;
 
 import blusunrize.immersiveengineering.api.IEProperties;
-import malte0811.industrialWires.blocks.TileEntityJacobsLadder.LadderSize;
+import malte0811.industrialWires.blocks.BlockIWBase;
+import malte0811.industrialWires.blocks.IMetaEnum;
+import malte0811.industrialWires.blocks.IPlacementCheck;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
@@ -43,7 +45,7 @@ import net.minecraft.world.World;
 import javax.annotation.Nonnull;
 
 public class BlockJacobsLadder extends BlockIWBase implements IMetaEnum, IPlacementCheck {
-	private static PropertyEnum<LadderSize> size_property = PropertyEnum.create("size", LadderSize.class);
+	private static PropertyEnum<TileEntityJacobsLadder.LadderSize> size_property = PropertyEnum.create("size", TileEntityJacobsLadder.LadderSize.class);
 
 	public BlockJacobsLadder() {
 		super(Material.IRON, "jacobs_ladder");
@@ -75,19 +77,19 @@ public class BlockJacobsLadder extends BlockIWBase implements IMetaEnum, IPlacem
 	@Nonnull
 	@Override
 	public IBlockState getStateFromMeta(int meta) {
-		return super.getStateFromMeta(meta).withProperty(size_property, LadderSize.values()[meta]);
+		return super.getStateFromMeta(meta).withProperty(size_property, TileEntityJacobsLadder.LadderSize.values()[meta]);
 	}
 
 	@Override
 	public void getSubBlocks(@Nonnull Item itemIn, CreativeTabs tab, NonNullList<ItemStack> list) {
-		for (int i = 0; i < LadderSize.values().length; i++) {
+		for (int i = 0; i < TileEntityJacobsLadder.LadderSize.values().length; i++) {
 			list.add(new ItemStack(this, 1, i));
 		}
 	}
 
 	@Override
 	public Object[] getValues() {
-		return LadderSize.values();
+		return TileEntityJacobsLadder.LadderSize.values();
 	}
 
 	@Override
@@ -163,7 +165,7 @@ public class BlockJacobsLadder extends BlockIWBase implements IMetaEnum, IPlacem
 
 	@Override
 	public boolean canPlaceBlockAt(World w, BlockPos pos, ItemStack stack) {
-		int dummyCount = LadderSize.values()[stack.getMetadata()].dummyCount;
+		int dummyCount = TileEntityJacobsLadder.LadderSize.values()[stack.getMetadata()].dummyCount;
 		for (int i = 1; i <= dummyCount; i++) {
 			if (!w.isAirBlock(pos.up(i))) {
 				return false;

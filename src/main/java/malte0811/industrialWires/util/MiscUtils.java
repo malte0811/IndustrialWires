@@ -84,4 +84,14 @@ public final class MiscUtils {
 		}
 		return ret;
 	}
+
+	/**
+	 * @param mirror inverts right
+	 */
+	public static BlockPos offset(BlockPos p, EnumFacing f, boolean mirror, int right, int forward, int up) {
+		if (mirror) {
+			right *= -1;
+		}
+		return p.offset(f, forward).offset(f.rotateY(), right).add(0, up, 0);
+	}
 }

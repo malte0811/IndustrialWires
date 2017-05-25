@@ -18,8 +18,8 @@
 
 package malte0811.industrialWires.client.render;
 
-import malte0811.industrialWires.blocks.TileEntityJacobsLadder;
-import malte0811.industrialWires.blocks.TileEntityJacobsLadder.LadderSize;
+import malte0811.industrialWires.blocks.hv.TileEntityJacobsLadder;
+import malte0811.industrialWires.blocks.hv.TileEntityJacobsLadder.LadderSize;
 import malte0811.industrialWires.util.Beziers;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;

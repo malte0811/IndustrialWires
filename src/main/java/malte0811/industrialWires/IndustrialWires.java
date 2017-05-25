@@ -17,8 +17,7 @@
  */
 package malte0811.industrialWires;
 
-import malte0811.industrialWires.blocks.BlockJacobsLadder;
-import malte0811.industrialWires.blocks.TileEntityJacobsLadder;
+import blusunrize.immersiveengineering.api.MultiblockHandler;
 import malte0811.industrialWires.blocks.controlpanel.BlockPanel;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanelCreator;
@@ -27,6 +26,7 @@ import malte0811.industrialWires.blocks.converter.BlockMechanicalConverter;
 import malte0811.industrialWires.blocks.converter.TileEntityIEMotor;
 import malte0811.industrialWires.blocks.converter.TileEntityMechICtoIE;
 import malte0811.industrialWires.blocks.converter.TileEntityMechIEtoIC;
+import malte0811.industrialWires.blocks.hv.*;
 import malte0811.industrialWires.blocks.wire.*;
 import malte0811.industrialWires.items.ItemIC2Coil;
 import malte0811.industrialWires.items.ItemKey;
@@ -58,7 +58,9 @@ public class IndustrialWires {
 	public static BlockIC2Connector ic2conn;
 	public static BlockMechanicalConverter mechConv;
 	public static BlockJacobsLadder jacobsLadder;
+	public static BlockHVMultiblocks hvMultiblocks;
 	public static BlockPanel panel;
+
 	public static ItemIC2Coil coil;
 	public static ItemPanelComponent panelComponent;
 	public static ItemKey key;
@@ -82,6 +84,7 @@ public class IndustrialWires {
 		if (IWConfig.enableConversion)
 			mechConv = new BlockMechanicalConverter();
 		jacobsLadder = new BlockJacobsLadder();
+		hvMultiblocks = new BlockHVMultiblocks();
 		panel = new BlockPanel();
 
 		coil = new ItemIC2Coil();
@@ -94,6 +97,7 @@ public class IndustrialWires {
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorHV.class, MODID + "ic2ConnectorHV");
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorGlass.class, MODID + "ic2ConnectorGlass");
 		GameRegistry.registerTileEntity(TileEntityJacobsLadder.class, MODID + ":jacobsLadder");
+		GameRegistry.registerTileEntity(TileEntityMarx.class, MODID + ":marx_generator");
 		GameRegistry.registerTileEntity(TileEntityPanel.class, MODID + ":control_panel");
 		GameRegistry.registerTileEntity(TileEntityRSPanelConn.class, MODID + ":control_panel_rs");
 		GameRegistry.registerTileEntity(TileEntityPanelCreator.class, MODID + ":panel_creator");
@@ -105,6 +109,7 @@ public class IndustrialWires {
 		if (IC2Wiretype.IC2_TYPES == null) {
 			throw new IllegalStateException("No IC2 wires registered");
 		}
+		MultiblockHandler.registerMultiblock(new MultiblockMarx());
 		proxy.preInit();
 	}
 
