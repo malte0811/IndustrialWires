@@ -17,16 +17,6 @@
  */
 package malte0811.industrialWires.blocks.wire;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import malte0811.industrialWires.blocks.IBlockBoundsIW;
-import net.minecraft.util.math.AxisAlignedBB;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-
 import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.api.TargetingInfo;
 import blusunrize.immersiveengineering.api.energy.wires.IImmersiveConnectable;
@@ -35,7 +25,6 @@ import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler.Abst
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler.Connection;
 import blusunrize.immersiveengineering.api.energy.wires.TileEntityImmersiveConnectable;
 import blusunrize.immersiveengineering.api.energy.wires.WireType;
-import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IBlockBounds;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDirectionalTile;
 import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
@@ -44,13 +33,22 @@ import ic2.api.energy.tile.IEnergyEmitter;
 import ic2.api.energy.tile.IEnergySink;
 import ic2.api.energy.tile.IEnergySource;
 import malte0811.industrialWires.IIC2Connector;
+import malte0811.industrialWires.blocks.IBlockBoundsIW;
 import malte0811.industrialWires.wires.IC2Wiretype;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.common.MinecraftForge;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable implements IEnergySource, IEnergySink, IDirectionalTile, ITickable, IIC2Connector, IBlockBoundsIW {
 	EnumFacing f = EnumFacing.NORTH;
@@ -86,7 +84,7 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 		for (AbstractConnection c:conns) {
 			IImmersiveConnectable iic = ApiUtils.toIIC(c.end, worldObj);
 			if (iic instanceof IIC2Connector) {
-				double tmp = inBuffer-((IIC2Connector)iic).insertEnergy(outputMax, true);
+				double tmp = outputMax-((IIC2Connector)iic).insertEnergy(outputMax, true);
 				if (tmp>.00000001) {
 					maxOutputs.put(c, new ImmutablePair<>((IIC2Connector)iic, tmp));
 					sum+=tmp;
