@@ -70,6 +70,7 @@ public class IndustrialWires {
 		public Item getTabIconItem() {
 			return null;
 		}
+		@Override
 		public ItemStack getIconItemStack() {
 			return new ItemStack(coil, 1, 2);
 		}
@@ -90,7 +91,6 @@ public class IndustrialWires {
 		panelComponent = new ItemPanelComponent();
 
 		key = new ItemKey();
-		panel = new BlockPanel();
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorTin.class, "ic2ConnectorTin");
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorCopper.class, "ic2ConnectorCopper");
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorGold.class, "ic2ConnectorGold");

@@ -37,13 +37,12 @@ import java.util.function.Supplier;
 
 public class ContainerPanelCreator extends Container {
 	public TileEntityPanelCreator tile;
-	private IInventory inv;
 
 	public ContainerPanelCreator(InventoryPlayer inventoryPlayer, TileEntityPanelCreator tile) {
 		int slotH = 150;
 		int slotX = 14;
 		this.tile = tile;
-		inv = new SingleSlotInventory((i) -> tile.inv = i, () -> tile.inv, tile::markDirty, this::canInteractWith, "panel_creator");
+		IInventory inv = new SingleSlotInventory((i) -> tile.inv = i, () -> tile.inv, tile::markDirty, this::canInteractWith, "panel_creator");
 		addSlotToContainer(new Slot(inv, 0, 7, 37) {
 			@Override
 			public int getSlotStackLimit() {
@@ -68,7 +67,6 @@ public class ContainerPanelCreator extends Container {
 		return player.getDistanceSq(tile.getPos()) < 100;
 	}
 
-	@Nonnull
 	@Override
 	public ItemStack transferStackInSlot(EntityPlayer player, int index) {
 		Slot clicked = getSlot(index);
@@ -77,13 +75,19 @@ public class ContainerPanelCreator extends Container {
 			if (change) {
 				clicked.onSlotChanged();
 			}
+			if (clicked.getStack().stackSize<=0) {
+				clicked.putStack(null);
+			}
 		} else {
 			ItemStack inSlot = clicked.getStack();
 			Slot slot0 = getSlot(0);
 			ItemStack stack0 = slot0.getStack();
-			if (inSlot!=null && slot0.isItemValid(inSlot) && stack0!=null && stack0.stackSize < slot0.getSlotStackLimit()) {
+			if (inSlot!=null && slot0.isItemValid(inSlot) && (stack0==null || stack0.stackSize < slot0.getSlotStackLimit())) {
 				slot0.putStack(inSlot.splitStack(slot0.getSlotStackLimit()));
 				clicked.onSlotChanged();
+				if (clicked.getStack()!=null&&clicked.getStack().stackSize<=0) {
+					clicked.putStack(null);
+				}
 			}
 		}
 		return null;

@@ -95,8 +95,8 @@ public class ItemPanelComponent extends Item implements INetGUIItem {
 	}
 
 	@Nullable
-	public static PanelComponent componentFromStack(ItemStack stack) {
-		if (stack.getItem()!=IndustrialWires.panelComponent) {
+	public static PanelComponent componentFromStack(@Nullable ItemStack stack) {
+		if (stack==null||stack.getItem()!=IndustrialWires.panelComponent) {
 			return null;
 		}
 		NBTTagCompound loadFrom = getTagCompound(stack).getCompoundTag("data").copy();

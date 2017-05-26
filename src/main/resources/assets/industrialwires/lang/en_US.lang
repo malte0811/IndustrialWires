@@ -22,11 +22,11 @@ tile.industrialwires.control_panel.rs_wire.name=Redstone Wire Controller
 tile.industrialwires.control_panel.dummy.name=Panel Connector
 tile.industrialwires.control_panel.creator.name=Control Panel Creator
 
-item.industrialwires.ic2_wire_coil.tin.name=Tin Wire Coil
-item.industrialwires.ic2_wire_coil.copper.name=Copper Wire Coil
-item.industrialwires.ic2_wire_coil.gold.name=Gold Wire Coil
-item.industrialwires.ic2_wire_coil.hv.name=IC2 HV Wire Coil
-item.industrialwires.ic2_wire_coil.glass.name=Glass Fiber Wire Coil
+item.industrialwires.ic2wireCoil.tin.name=Tin Wire Coil
+item.industrialwires.ic2wireCoil.copper.name=Copper Wire Coil
+item.industrialwires.ic2wireCoil.gold.name=Gold Wire Coil
+item.industrialwires.ic2wireCoil.hv.name=IC2 HV Wire Coil
+item.industrialwires.ic2wireCoil.glass.name=Glass Fiber Wire Coil
 
 item.industrialwires.panel_component.lighted_button.name=Lighted Button
 item.industrialwires.panel_component.label.name=Label
@@ -53,6 +53,7 @@ industrialwires.desc.latching_info=Does this button stay on indefinitely?
 industrialwires.desc.latching_info=Does this button stay on indefinitely?
 industrialwires.desc.disassemble=Disassemble the panel
 industrialwires.desc.rsid_info=The ID of the redstone wire controller to output a signal to
+industrialwires.desc.rschannel_info=The color of the redstone channel to output a signal to
 industrialwires.desc.label_text=The text in this label
 industrialwires.desc.red=Red
 industrialwires.desc.green=Green
