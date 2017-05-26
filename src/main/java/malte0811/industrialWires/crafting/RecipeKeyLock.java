@@ -25,10 +25,11 @@ import malte0811.industrialWires.items.ItemPanelComponent;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 //TODO JEI
 public class RecipeKeyLock implements IRecipe {
 
@@ -40,7 +41,11 @@ public class RecipeKeyLock implements IRecipe {
 	@Nonnull
 	@Override
 	public ItemStack getCraftingResult(@Nonnull InventoryCrafting inv) {
-		ItemStack ret = getKey(inv).copy();
+		ItemStack key = getKey(inv);
+		if (key==null) {
+			return null;
+		}
+		ItemStack ret = key.copy();
 		ItemKey.setId(ret, getLockId(inv));
 		return ret;
 	}
@@ -58,12 +63,12 @@ public class RecipeKeyLock implements IRecipe {
 
 	@Nonnull
 	@Override
-	public NonNullList<ItemStack> getRemainingItems(@Nonnull InventoryCrafting inv) {
-		NonNullList<ItemStack> ret = NonNullList.withSize(inv.getSizeInventory(), ItemStack.EMPTY);
-		for (int i = 0; i < ret.size(); i++) {
+	public ItemStack[] getRemainingItems(@Nonnull InventoryCrafting inv) {
+		ItemStack[] ret = new ItemStack[inv.getSizeInventory()];
+		for (int i = 0; i < ret.length; i++) {
 			ItemStack here = inv.getStackInSlot(i);
-			if (here.getItem() == IndustrialWires.panelComponent) {
-				ret.set(i, here);
+			if (here!=null && here.getItem() == IndustrialWires.panelComponent) {
+				ret[i] = here;
 			}
 		}
 		return ret;
@@ -74,12 +79,12 @@ public class RecipeKeyLock implements IRecipe {
 		boolean hasKey = false;
 		for (int i = 0; i < inv.getSizeInventory(); i++) {
 			ItemStack here = inv.getStackInSlot(i);
-			if (here.getItem() == IndustrialWires.key) {
+			if (here!=null && here.getItem() == IndustrialWires.key) {
 				if (hasKey || ItemKey.idForKey(here) != 0) {//too many keys or non-blanks
 					return 0;
 				}
 				hasKey = true;
-			} else if (here.getItem() == IndustrialWires.panelComponent) {
+			} else if (here != null && here.getItem() == IndustrialWires.panelComponent) {
 				if (id != 0) {//too many locks/components
 					return 0;
 				}
@@ -97,15 +102,15 @@ public class RecipeKeyLock implements IRecipe {
 		return id;
 	}
 
-	@Nonnull
+	@Nullable
 	//assumes that the recipe is valid
 	private ItemStack getKey(@Nonnull InventoryCrafting inv) {
 		for (int i = 0; i < inv.getSizeInventory(); i++) {
 			ItemStack here = inv.getStackInSlot(i);
-			if (here.getItem() == IndustrialWires.key) {
+			if (here!=null && here.getItem() == IndustrialWires.key) {
 				return here;
 			}
 		}
-		return ItemStack.EMPTY;
+		return null;
 	}
 }

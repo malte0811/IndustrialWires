@@ -56,10 +56,10 @@ public class MessageItemSync implements IMessage {
 	public static class HandlerServer implements IMessageHandler<MessageItemSync, IMessage> {
 		@Override
 		public IMessage onMessage(MessageItemSync message, MessageContext ctx) {
-			EntityPlayer player = ctx.getServerHandler().player;
+			EntityPlayer player = ctx.getServerHandler().playerEntity;
 			ItemStack held = player.getHeldItem(message.hand);
-			if (held.getItem() instanceof INetGUIItem) {
-				ctx.getServerHandler().player.getServerWorld().addScheduledTask(() ->
+			if (held!=null && held.getItem() instanceof INetGUIItem) {
+				ctx.getServerHandler().playerEntity.getServerWorld().addScheduledTask(() ->
 						((INetGUIItem)held.getItem()).onChange(message.data, player, message.hand));
 			}
 			return null;

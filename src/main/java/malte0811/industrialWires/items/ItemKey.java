@@ -86,13 +86,13 @@ public class ItemKey extends Item implements INetGUIItem {
 		return 1;
 	}
 
-	@Override
 	@Nonnull
-	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, @Nonnull EnumHand hand) {
+	@Override
+	public ActionResult<ItemStack> onItemRightClick(@Nonnull ItemStack stack, World worldIn, EntityPlayer playerIn, @Nonnull EnumHand hand) {
 		if (!worldIn.isRemote) {
 			playerIn.openGui(IndustrialWires.MODID, 1, worldIn, 0, 0, hand == EnumHand.MAIN_HAND ? 1 : 0);
 		}
-		return new ActionResult<>(EnumActionResult.SUCCESS, playerIn.getHeldItem(hand));
+		return new ActionResult<>(EnumActionResult.SUCCESS, stack);
 	}
 
 	@Override

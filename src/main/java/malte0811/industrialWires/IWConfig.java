@@ -30,7 +30,7 @@ public class IWConfig {
 	@Comment({"Set this to false to completely disable any conversion between IF and EU (default: true)"})
 	public static boolean enableConversion = true;
 
-	public static MechConversion mech;
+	public static MechConversion mech = new MechConversion();
 
 	public static class MechConversion {
 		@Comment({"The amount of EU that would be produced by an ideal converter from 1 IF (default: 0.25)"})
@@ -54,7 +54,7 @@ public class IWConfig {
 		public static double kinToRotEfficiency = .8;
 	}
 
-	public static HVStuff hv;
+	public static HVStuff hv = new HVStuff();
 
 	public static class HVStuff {
 		@Comment({"The amount of EU a Jacobs Ladder uses per tick, sorted by size of the ladder"})

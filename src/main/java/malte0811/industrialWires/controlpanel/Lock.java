@@ -165,15 +165,15 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 		if (keyNBT == null) {
 			for (EnumHand hand : EnumHand.values()) {
 				ItemStack held = player.getHeldItem(hand);
-				if (held.getItem() == IndustrialWires.key && ItemKey.idForKey(held) == lockID) {
+				if (held!=null && held.getItem() == IndustrialWires.key && ItemKey.idForKey(held) == lockID) {
 					keyNBT = held.serializeNBT();
-					player.setHeldItem(hand, ItemStack.EMPTY);
+					player.setHeldItem(hand, null);
 					break;
 				}
 			}
 		} else if (!turned) {
-			if (player.isSneaking() && player.getHeldItemMainhand().isEmpty()) {
-				player.setHeldItem(EnumHand.MAIN_HAND, new ItemStack(keyNBT));
+			if (player.isSneaking() && player.getHeldItemMainhand()== null) {
+				player.setHeldItem(EnumHand.MAIN_HAND, ItemStack.loadItemStackFromNBT(keyNBT));
 				keyNBT = null;
 			} else {
 				turned = true;

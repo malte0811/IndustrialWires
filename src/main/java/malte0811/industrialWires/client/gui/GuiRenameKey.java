@@ -45,11 +45,13 @@ public class GuiRenameKey extends GuiContainer {
 	@Override
 	public void initGui() {
 		super.initGui();
-		field = new GuiTextField(0, mc.fontRenderer, (width-58)/2, (height-12)/2, 58, 12);
-		ItemStack held = mc.player.getHeldItem(hand);
-		NBTTagCompound nbt = held.getTagCompound();
-		if (nbt!=null&&nbt.hasKey("name")) {
-			field.setText(nbt.getString("name"));
+		field = new GuiTextField(0, mc.fontRendererObj, (width-58)/2, (height-12)/2, 58, 12);
+		ItemStack held = mc.thePlayer.getHeldItem(hand);
+		if (held!=null) {
+			NBTTagCompound nbt = held.getTagCompound();
+			if (nbt != null && nbt.hasKey("name")) {
+				field.setText(nbt.getString("name"));
+			}
 		}
 		xSize = 64;
 		ySize = 64;
