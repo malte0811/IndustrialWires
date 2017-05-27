@@ -18,6 +18,7 @@
 
 package malte0811.industrialWires.client.panelmodel;
 
+import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import com.google.common.collect.ImmutableList;
 import malte0811.industrialWires.client.RawQuad;
 import net.minecraft.client.Minecraft;
@@ -37,6 +38,7 @@ public class RawModelFontRenderer extends FontRenderer {
 	private ImmutableList.Builder<RawQuad> builder = ImmutableList.builder();
 	private final Vector3f normal = new Vector3f(0, 1, 0);
 	public final float scale;
+	public Matrix4 transform = null;
 
 	private TextureAtlasSprite sprite;
 
@@ -63,9 +65,13 @@ public class RawModelFontRenderer extends FontRenderer {
 		v2.scale(scale);
 		Vector3f v3 = new Vector3f(posX + w, h0, posY);
 		v3.scale(scale);
-		builder.add(new RawQuad(v0, v1, v2, v3,
+		RawQuad quad = new RawQuad(v0, v1, v2, v3,
 				EnumFacing.UP, sprite, colorA, new Vector3f(0, 1, 0),
-				new float[]{x, y, x + wt, y + ht}));
+				new float[]{x, y, x + wt, y + ht});
+		if (transform!=null) {
+			quad = quad.apply(transform);
+		}
+		builder.add(quad);
 		return charWidth[pos];
 	}
 

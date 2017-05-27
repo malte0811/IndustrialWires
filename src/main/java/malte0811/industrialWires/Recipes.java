@@ -137,6 +137,8 @@ public class Recipes {
 				"rdr", " w ", 'r', "stickSteel", 'd', Items.IRON_DOOR, 'w', "wireCopper"));
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(key, 1, 0),
 				"rrp", 'r', "stickSteel", 'p', "plateSteel"));
+		GameRegistry.addRecipe(new ShapelessOreRecipe(new ItemStack(panelComponent, 1, 8),
+				"wireCopper", new ItemStack(IEContent.itemTool, 1, 2)));
 	}
 	private static void addJacobs() {
 		ItemStack mvTransformer = IC2Items.getItem("te", "mv_transformer");

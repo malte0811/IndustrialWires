@@ -75,7 +75,6 @@ public class IndicatorLight extends PanelComponent implements IConfigurableCompo
 	}
 
 	private static final float size = .0625F;
-	private static final float antiZOffset = .001F;
 
 	@Override
 	public List<RawQuad> getQuads() {
@@ -85,7 +84,7 @@ public class IndicatorLight extends PanelComponent implements IConfigurableCompo
 			color[i] = ((this.colorA >> (8 * (2 - i))) & 255) / 255F * (rsInput + 15F) / 30F;
 		}
 		List<RawQuad> ret = new ArrayList<>(1);
-		PanelUtils.addColoredQuad(ret, new Vector3f(), new Vector3f(0, antiZOffset, size), new Vector3f(size, antiZOffset, size), new Vector3f(size, antiZOffset, 0), EnumFacing.UP, color);
+		PanelUtils.addColoredQuad(ret, new Vector3f(), new Vector3f(0, 0, size), new Vector3f(size, 0, size), new Vector3f(size, 0, 0), EnumFacing.UP, color);
 		if (rsInput>0) {
 			ret.get(ret.size()-1).light = 0xff0ff;
 		}

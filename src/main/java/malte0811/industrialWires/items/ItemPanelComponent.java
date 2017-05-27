@@ -45,7 +45,8 @@ import java.util.List;
 
 public class ItemPanelComponent extends Item implements INetGUIItem {
 	public static final String[] types = {
-			"lighted_button", "label", "indicator_light", "slider", "variac", "toggle_switch", "toggle_switch_covered", "lock"
+			"lighted_button", "label", "indicator_light", "slider", "variac", "toggle_switch", "toggle_switch_covered",
+			"lock", "panel_meter"
 	};
 	public static final String TYPE = "type";
 	public static final String ID = "cfgId";
