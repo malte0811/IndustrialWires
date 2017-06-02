@@ -45,9 +45,7 @@ public class TileRenderJacobsLadder extends TileEntitySpecialRenderer<TileEntity
 			GlStateManager.disableLighting();
 			GlStateManager.shadeModel(GL11.GL_SMOOTH);
 
-			float oldBX = OpenGlHelper.lastBrightnessX;
-			float oldBY = OpenGlHelper.lastBrightnessY;
-			OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 238, 238);
+			setLightmapDisabled(true);
 			GlStateManager.color(1, .85F, 1, 1);
 			Vec3d[] controls = new Vec3d[tile.size.arcPoints];
 			for (int i = 0; i < tile.size.arcPoints; i++) {
@@ -70,7 +68,7 @@ public class TileRenderJacobsLadder extends TileEntitySpecialRenderer<TileEntity
 			tes.draw();*/
 			//END OF DEBUG CODE
 
-			OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, oldBX, oldBY);
+			setLightmapDisabled(false);
 
 			GlStateManager.enableTexture2D();
 			GlStateManager.enableLighting();

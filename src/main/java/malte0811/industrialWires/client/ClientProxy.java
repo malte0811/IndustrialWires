@@ -34,12 +34,14 @@ import malte0811.industrialWires.blocks.controlpanel.BlockTypes_Panel;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanelCreator;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityRSPanelConn;
 import malte0811.industrialWires.blocks.hv.TileEntityJacobsLadder;
+import malte0811.industrialWires.blocks.hv.TileEntityMarx;
 import malte0811.industrialWires.client.gui.GuiPanelComponent;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import malte0811.industrialWires.client.gui.GuiRSPanelConn;
 import malte0811.industrialWires.client.gui.GuiRenameKey;
 import malte0811.industrialWires.client.panelmodel.PanelModelLoader;
 import malte0811.industrialWires.client.render.TileRenderJacobsLadder;
+import malte0811.industrialWires.client.render.TileRenderMarx;
 import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.items.ItemIC2Coil;
 import malte0811.industrialWires.items.ItemKey;
@@ -148,6 +150,7 @@ public class ClientProxy extends CommonProxy {
 		ModelLoaderRegistry.registerLoader(new PanelModelLoader());
 		MinecraftForge.EVENT_BUS.register(new ClientEventHandler());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityJacobsLadder.class, new TileRenderJacobsLadder());
+		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMarx.class, new TileRenderMarx());
 	}
 
 	@Override

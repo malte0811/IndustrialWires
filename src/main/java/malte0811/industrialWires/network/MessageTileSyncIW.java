@@ -22,6 +22,7 @@ import blusunrize.immersiveengineering.common.blocks.TileEntityIEBase;
 import io.netty.buffer.ByteBuf;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.ISyncReceiver;
+import malte0811.industrialWires.blocks.TileEntityIWBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -36,7 +37,7 @@ public class MessageTileSyncIW implements IMessage {
 	BlockPos pos;
 	NBTTagCompound nbt;
 
-	public MessageTileSyncIW(TileEntityIEBase tile, NBTTagCompound nbt) {
+	public MessageTileSyncIW(TileEntity tile, NBTTagCompound nbt) {
 		this.pos = tile.getPos();
 		this.nbt = nbt;
 	}
