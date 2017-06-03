@@ -21,11 +21,15 @@ package malte0811.industrialWires.util;
 import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.api.energy.wires.IImmersiveConnectable;
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler;
+import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -93,5 +97,13 @@ public final class MiscUtils {
 			right *= -1;
 		}
 		return p.offset(f, forward).offset(f.rotateY(), right).add(0, up, 0);
+	}
+	@Nonnull
+	public static AxisAlignedBB apply(@Nonnull Matrix4 mat, @Nonnull AxisAlignedBB in) {
+		Vec3d min = new Vec3d(in.minX, in.minY, in.minZ);
+		Vec3d max = new Vec3d(in.maxX, in.maxY, in.maxZ);
+		min = mat.apply(min);
+		max = mat.apply(max);
+		return new AxisAlignedBB(min.xCoord, min.yCoord, min.zCoord, max.xCoord, max.yCoord, max.zCoord);
 	}
 }

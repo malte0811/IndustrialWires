@@ -28,7 +28,8 @@ public final class IWProperties {
 		NO_MODEL,
 		BOTTOM,
 		STAGE,
-		TOP;
+		TOP,
+		CONNECTOR;
 
 		@Override
 		public String getName() {

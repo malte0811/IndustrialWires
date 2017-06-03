@@ -50,13 +50,13 @@ public abstract class TileEntityIWMultiblock extends TileEntityIWBase {
 		return (w, p)->w.setBlockState(p, getOriginalBlock());
 	}
 	@Nullable
-	public TileEntity master() {
+	public <T extends TileEntityIWMultiblock> T master(T here) {
 		if (offset.getX()==0&&offset.getY()==0&&offset.getZ()==0) {
-			return this;
+			return here;
 		}
 		TileEntity m = world.getTileEntity(pos.subtract(offset));
 		if (m!=null&&m.getClass().equals(this.getClass())) {
-			return m;
+			return (T) m;
 		}
 		return null;
 	}
@@ -107,5 +107,17 @@ public abstract class TileEntityIWMultiblock extends TileEntityIWBase {
 
 	public Vec3i getSize() {
 		return size;
+	}
+
+	public int getRight() {
+		return dot(offset, facing.rotateY().getDirectionVec())*(mirrored?-1:1);
+	}
+
+	public int getForward() {
+		return dot(offset, facing.getDirectionVec());
+	}
+
+	protected int dot(Vec3i a, Vec3i b) {
+		return a.getX()*b.getX()+a.getY()*b.getY()+a.getZ()*b.getZ();
 	}
 }

@@ -18,6 +18,7 @@
 
 package malte0811.industrialWires.client.render;
 
+import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import malte0811.industrialWires.blocks.IWProperties;
 import malte0811.industrialWires.blocks.hv.TileEntityMarx;
 import malte0811.industrialWires.util.MiscUtils;
@@ -29,13 +30,16 @@ import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
+import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector3f;
 
 public class TileRenderMarx extends TileEntitySpecialRenderer<TileEntityMarx> {
 	@Override
 	public void renderTileEntityAt(TileEntityMarx te, double x, double y, double z, float partialTicks, int destroyStage) {
-		if (te.type== IWProperties.MarxType.BOTTOM&&te.state== TileEntityMarx.FiringState.FIRE) {
+		final boolean debug = false;
+		//noinspection PointlessBooleanExpression
+		if (te.type== IWProperties.MarxType.BOTTOM&&(debug||te.state== TileEntityMarx.FiringState.FIRE)) {
 			prepare(x, y, z, te);
 			Tessellator tes = Tessellator.getInstance();
 			VertexBuffer vb = tes.getBuffer();
@@ -59,8 +63,8 @@ public class TileRenderMarx extends TileEntitySpecialRenderer<TileEntityMarx> {
 				tes.draw();
 				GlStateManager.popMatrix();
 			}
-
 			cleanUp();
+			te.state = TileEntityMarx.FiringState.CHARGING;
 		}
 	}
 	private void prepare(double x, double y, double z, TileEntityMarx te) {
@@ -112,5 +116,60 @@ public class TileRenderMarx extends TileEntitySpecialRenderer<TileEntityMarx> {
 		public float energy;
 		public Vector3f[] vertices;
 		public float diameter = .25F;
+		public final int stageCount;
+		public Discharge(int stages) {
+			stageCount = stages;
+			int count = 1;
+			while (count<stageCount) {
+				count <<= 1;
+			}
+			count = 8;
+			vertices = new Vector3f[2*count];
+			vertices[0] = new Vector3f(0, -.5F, 0);
+			for (int i = 1;i<vertices.length;i++) {
+				vertices[i] = new Vector3f();
+			}
+			vertices[vertices.length-1] = new Vector3f(0, stageCount-1.9375F, 0);
+
+		}
+
+		// Meant to be const
+		private final Vector3f up = new Vector3f(0, 1, 0);
+		private final Vector3f side = new Vector3f(0, 0, 1);
+		//used for calculation buffering
+		private final Vector3f diff = new Vector3f();
+		private final Vector3f center = new Vector3f();
+		private final Vector3f v0 = new Vector3f();
+		private final Matrix4 transform = new Matrix4();
+		/**
+		 * @param min The first point of the discharge section to be generated. has to be pre-populated
+		 * @param max The last point of the discharge section to be generated. has to be pre-populated
+		 */
+		public void genMarxPoint(int min, int max) {
+			World world = Minecraft.getMinecraft().world;
+			int toGenerate = (min+max)/2;
+			Vector3f.sub(vertices[max], vertices[min], diff);
+			Vector3f.cross(diff, side, v0);
+			transform.setIdentity();
+			double noise = Math.sqrt(diff.length())*world.rand.nextDouble()*1/(1+Math.abs(stageCount/2.0-toGenerate))*.75;
+			if ((max-min)%2==1) {
+				noise *= (toGenerate-min)/(double)(max-min);
+			}
+			v0.scale((float) (noise/v0.length()));
+			diff.scale(1/diff.length());
+			transform.rotate(Math.PI*2*world.rand.nextDouble(), diff.x, diff.y, diff.z);
+			Vector3f.add(vertices[max], vertices[min], center);
+			center.scale(.5F);
+			vertices[toGenerate] = transform.apply(v0);
+			//IELogger.info(toGenerate+" with noise "+noise+" shift-to-noise "+vertices[toGenerate].length()/noise);
+			Vector3f.add(vertices[toGenerate], center, vertices[toGenerate]);
+
+			if (toGenerate-min>1) {
+				genMarxPoint(min, toGenerate);
+			}
+			if (max-toGenerate>1) {
+				genMarxPoint(toGenerate, max);
+			}
+		}
 	}
 }

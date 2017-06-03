@@ -111,6 +111,9 @@ public class ClientProxy extends CommonProxy {
 				IndustrialWires.MODID + ":blocks/ic2_relay_glass"));
 
 		ConnLoader.baseModels.put("rs_panel_conn", new ResourceLocation("industrialwires:block/rs_panel_conn.obj"));
+
+
+		ConnLoader.baseModels.put("empty", new ResourceLocation("builtin/generated"));
 		for (int meta = 0; meta < ItemIC2Coil.subNames.length; meta++) {
 			ResourceLocation loc = new ResourceLocation(IndustrialWires.MODID, "ic2_wire_coil/" + ItemIC2Coil.subNames[meta]);
 			ModelBakery.registerItemVariants(IndustrialWires.coil, loc);

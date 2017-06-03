@@ -24,6 +24,7 @@ import malte0811.industrialWires.blocks.IWProperties;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
@@ -33,6 +34,8 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.common.property.ExtendedBlockState;
+import net.minecraftforge.common.property.IUnlistedProperty;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -84,5 +87,14 @@ public class BlockHVMultiblocks extends BlockIWMultiblock {
 			ret = ret.withProperty(IEProperties.BOOLEANS[0], ((TileEntityMarx)te).mirrored);
 		}
 		return ret;
+	}
+
+	@Nonnull
+	@Override
+	protected BlockStateContainer createBlockState() {
+		BlockStateContainer base = super.createBlockState();
+		return new ExtendedBlockState(this, base.getProperties().toArray(new IProperty[0]), new IUnlistedProperty[]{
+				IEProperties.CONNECTIONS
+		});
 	}
 }

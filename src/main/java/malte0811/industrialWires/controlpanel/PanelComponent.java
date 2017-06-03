@@ -22,6 +22,7 @@ import blusunrize.immersiveengineering.common.util.IELogger;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
+import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
@@ -165,7 +166,7 @@ public abstract class PanelComponent {
 		double px = te.getPos().getX() - TileEntityRendererDispatcher.staticPlayerX;
 		double py = te.getPos().getY() - TileEntityRendererDispatcher.staticPlayerY;
 		double pz = te.getPos().getZ() - TileEntityRendererDispatcher.staticPlayerZ;
-		RenderGlobal.drawSelectionBoundingBox(te.apply(te.getComponents().getPanelTopTransform(), getBlockRelativeAABB()).expandXyz(0.002).offset(px, py, pz),
+		RenderGlobal.drawSelectionBoundingBox(MiscUtils.apply(te.getComponents().getPanelTopTransform(), getBlockRelativeAABB()).expandXyz(0.002).offset(px, py, pz),
 				0.0F, 0.0F, 0.0F, 0.4F);
 		GlStateManager.depthMask(true);
 		GlStateManager.enableTexture2D();

@@ -27,6 +27,9 @@
 					},
 					"no_model": {
 						"model": "builtin/generated"
+					},
+					"connector": {
+						"model": "immersiveengineering:smartmodel/conn_empty"
 					}
 				},
 		"facing": {

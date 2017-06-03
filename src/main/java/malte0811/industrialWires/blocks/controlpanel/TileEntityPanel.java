@@ -53,6 +53,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static malte0811.industrialWires.util.MiscUtils.apply;
+
 public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTile, IBlockBoundsIW, IPlayerInteraction, ITickable, IEBlockInterfaces.ITileDrop {
 	private PropertyComponents.PanelRenderProperties components = new PropertyComponents.PanelRenderProperties();
 	private boolean firstTick = true;
@@ -215,13 +217,6 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		return components;
 	}
 
-	public AxisAlignedBB apply(Matrix4 mat, AxisAlignedBB in) {
-		Vec3d min = new Vec3d(in.minX, in.minY, in.minZ);
-		Vec3d max = new Vec3d(in.maxX, in.maxY, in.maxZ);
-		min = mat.apply(min);
-		max = mat.apply(max);
-		return new AxisAlignedBB(min.xCoord, min.yCoord, min.zCoord, max.xCoord, max.yCoord, max.zCoord);
-	}
 
 	@Nullable
 	public Pair<PanelComponent, RayTraceResult> getSelectedComponent(EntityPlayer player, Vec3d hit, boolean hitAbs) {

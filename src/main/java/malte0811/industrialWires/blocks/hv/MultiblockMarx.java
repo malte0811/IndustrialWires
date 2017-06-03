@@ -37,7 +37,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 
 import java.util.Set;
@@ -131,12 +130,11 @@ public class MultiblockMarx implements IMultiblock {
 				return false;
 			}
 			Set<Connection> existingConns = ImmersiveNetHandler.INSTANCE.getConnections(world, local);
-			return existingConns==null;
+			return existingConns==null||existingConns.isEmpty();
 		};
 
 		mirrorLoop:for (int fakeI = 0; fakeI < 2; fakeI++) {
 			mirrored = !mirrored;
-			facing = facing.getOpposite();
 			// PSU
 			if (!connNoConns.test(offset(pos, facing, mirrored, 0, -3, 0), CONNECTOR_REDSTONE)) {
 				continue;
@@ -200,12 +198,12 @@ public class MultiblockMarx implements IMultiblock {
 					continue mirrorLoop;
 				}
 			}
-			player.sendMessage(new TextComponentString(stages+" stage Marx generator found. Forming..."));
 			//REPLACE STRUCTURE
 			if (!world.isRemote) {
 				IBlockState noModel = IndustrialWires.hvMultiblocks.getDefaultState().withProperty(BlockHVMultiblocks.type, MARX)
 						.withProperty(IWProperties.MARX_TYPE, NO_MODEL).withProperty(IEProperties.BOOLEANS[0], mirrored);
 				IBlockState stageModel = noModel.withProperty(IWProperties.MARX_TYPE, STAGE);
+				IBlockState connModel = noModel.withProperty(IWProperties.MARX_TYPE, CONNECTOR);
 				// Main tower
 				for (int s = 0; s < stages; s++) {
 					for (int f = -1; f < 2; f++) {
@@ -224,8 +222,12 @@ public class MultiblockMarx implements IMultiblock {
 						}
 					}
 				}
+				//conns
+				for (int i = 0;i<2;i++) {
+					set(world, offset(pos, facing, mirrored, i, -3, 0), connModel, stages, pos);
+				}
 				//bottom electrode
-				for (int i = -3;i<5;i++) {
+				for (int i = -2;i<5;i++) {
 					if (i>-2&&i<2) {
 						continue;
 					}
@@ -244,7 +246,6 @@ public class MultiblockMarx implements IMultiblock {
 			}
 			return true;
 		}
-		player.sendMessage(new TextComponentString("NOT FOUND"));
 		return false;
 	}
 	private void set(World world, BlockPos p, IBlockState state, int stages, BlockPos origin) {
