@@ -90,7 +90,7 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 		for (AbstractConnection c : conns) {
 			IImmersiveConnectable iic = ApiUtils.toIIC(c.end, world);
 			if (iic instanceof IIC2Connector) {
-				double tmp = inBuffer - ((IIC2Connector) iic).insertEnergy(outputMax, true);
+				double tmp = outputMax - ((IIC2Connector) iic).insertEnergy(outputMax, true);
 				if (tmp > .00000001) {
 					maxOutputs.put(c, new ImmutablePair<>((IIC2Connector) iic, tmp));
 					sum += tmp;

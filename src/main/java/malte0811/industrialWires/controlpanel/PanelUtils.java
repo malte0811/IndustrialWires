@@ -81,7 +81,7 @@ public final class PanelUtils {
 		m4RotOnly.invert();
 		m4RotOnly.transpose();
 		for (PanelComponent pc : components) {
-			Matrix4 m4Here = m4.copy().translate(pc.getX(), 0, pc.getY());
+			Matrix4 m4Here = m4.copy().translate(pc.getX(), .0001, pc.getY());
 			List<RawQuad> compQuads = pc.getQuads();
 			for (RawQuad bq : compQuads) {
 				ret.add(bakeQuad(bq, m4Here, m4RotOnly, false));
@@ -290,6 +290,12 @@ public final class PanelUtils {
 			addCommonInfo(data, list, false, true);
 			if (data.hasKey(LATCHING)) {
 				list.add(I18n.format(IndustrialWires.MODID + ".tooltip." + (data.getBoolean(LATCHING) ? "latching" : "instantaneous")));
+			}
+			break;
+		case 8://Panel meter
+			addCommonInfo(data, list, false, true);
+			if (data.hasKey(PanelMeter.WIDE)) {
+				list.add(I18n.format(IndustrialWires.MODID + ".tooltip." + (data.getBoolean(PanelMeter.WIDE) ? "wide" : "narrow")));
 			}
 			break;
 		}

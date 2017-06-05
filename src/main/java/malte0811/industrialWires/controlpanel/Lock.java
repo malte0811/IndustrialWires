@@ -144,6 +144,7 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 	public PanelComponent copyOf() {
 		Lock ret = new Lock(latching, rsOutputId, rsOutputChannel);
 		ret.turned = turned;
+		ret.lockID = lockID;
 		ret.keyNBT = keyNBT == null ? null : keyNBT.copy();
 		ret.ticksTillOff = ticksTillOff;
 		ret.setX(x);

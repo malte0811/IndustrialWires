@@ -39,10 +39,10 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public class Label extends PanelComponent implements IConfigurableComponent {
-	private static final ResourceLocation font = new ResourceLocation("minecraft", "textures/font/ascii.png");
-	String text = "Test";
-	RawModelFontRenderer renderer;
-	int color = 0x808080;
+	public static final ResourceLocation FONT = new ResourceLocation("minecraft", "textures/font/ascii.png");
+	private String text = "Test";
+	private RawModelFontRenderer renderer;
+	private int color = 0x808080;
 
 	public Label(String text, int color) {
 		this();
@@ -116,7 +116,7 @@ public class Label extends PanelComponent implements IConfigurableComponent {
 
 	private RawModelFontRenderer fontRenderer() {
 		if (renderer == null) {
-			renderer = new RawModelFontRenderer(Minecraft.getMinecraft().gameSettings, font, Minecraft.getMinecraft().getTextureManager(),
+			renderer = new RawModelFontRenderer(Minecraft.getMinecraft().gameSettings, FONT, Minecraft.getMinecraft().getTextureManager(),
 					false, 1);
 		}
 		return renderer;
