@@ -65,6 +65,10 @@ public class DualEnergyStorage {
 		return extr;
 	}
 
+	public void extractEURaw(double extract) {
+		storedEU -= extract;
+	}
+
 	public double extractIF(int extractMax, boolean doExtract) {
 		double eu = extractMax * ConversionUtil.euPerIfIdeal();
 		return ConversionUtil.ifPerEuIdeal() * extractEU(eu, doExtract);
@@ -114,7 +118,7 @@ public class DualEnergyStorage {
 		}
 	}
 
-	public static DualEnergyStorage readFromNBT(NBTTagCompound nbt) {
-		return new DualEnergyStorage(nbt.getDouble("stored"), nbt.getDouble("maxStored"), nbt.getDouble("maxIn"), nbt.getDouble("maxOut"));
+	public void readFromNBT(NBTTagCompound nbt) {
+		storedEU = nbt.getDouble("stored");
 	}
 }

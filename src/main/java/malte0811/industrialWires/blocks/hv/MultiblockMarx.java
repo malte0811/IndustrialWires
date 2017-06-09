@@ -253,7 +253,7 @@ public class MultiblockMarx implements IMultiblock {
 		TileEntity te = world.getTileEntity(p);
 		if (te instanceof TileEntityMarx) {
 			TileEntityMarx marx = (TileEntityMarx) te;
-			marx.stageCount = stages;
+			marx.setStageCount(stages);
 			marx.offset = p.subtract(origin);
 			marx.formed = true;
 			marx.markDirty();

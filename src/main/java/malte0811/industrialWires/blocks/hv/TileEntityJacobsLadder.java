@@ -203,7 +203,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 			initControl();
 		}
 		dummy = nbt.getInteger("dummy");
-		energy = DualEnergyStorage.readFromNBT(nbt.getCompoundTag("energy"));
+		energy.readFromNBT(nbt.getCompoundTag("energy"));
 		facing = EnumFacing.HORIZONTALS[nbt.getInteger("facing")];
 		salt = nbt.getDouble("salt");
 	}

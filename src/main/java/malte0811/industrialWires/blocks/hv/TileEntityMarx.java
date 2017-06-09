@@ -31,11 +31,13 @@ import blusunrize.immersiveengineering.common.blocks.metal.*;
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import ic2.api.item.IC2Items;
 import malte0811.industrialWires.IIC2Connector;
+import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.IBlockBoundsIW;
 import malte0811.industrialWires.blocks.ISyncReceiver;
 import malte0811.industrialWires.blocks.IWProperties;
 import malte0811.industrialWires.blocks.TileEntityIWMultiblock;
 import malte0811.industrialWires.client.render.TileRenderMarx;
+import malte0811.industrialWires.network.MessageTileSyncIW;
 import malte0811.industrialWires.util.DualEnergyStorage;
 import malte0811.industrialWires.util.MiscUtils;
 import malte0811.industrialWires.wires.IC2Wiretype;
@@ -44,6 +46,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
@@ -69,14 +72,24 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	private static final String TYPE = "type";
 	private static final String STAGES = "stages";
 	private static final String HAS_CONN = "hasConn";
+	private static final String CAP_VOLTAGES = "capVoltages";
+	private double rcTimeConst;
+	private double timeFactor;
+	private double cReciproke = 1_000_000;
+	private double maxVoltage = 250_000;
 
 	public IWProperties.MarxType type = IWProperties.MarxType.NO_MODEL;
-	public int stageCount = 0;
+	private int stageCount = 0;
 	public FiringState state = FiringState.CHARGING;
 	@SideOnly(Side.CLIENT)
 	public TileRenderMarx.Discharge dischargeData;
-	private DualEnergyStorage storage = new DualEnergyStorage(10000, 1000);
+	// Voltage=100*storedEU
+	private DualEnergyStorage storage = new DualEnergyStorage(10_000, 8192);
 	private boolean hasConnection;
+	private double[] capVoltages;
+	//RS channel 1/white
+	private int voltageControl = 0;
+	private boolean loaded = false;
 
 	public TileEntityMarx(EnumFacing facing, IWProperties.MarxType type, boolean mirrored) {
 		this.facing = facing;
@@ -98,8 +111,13 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	public void readNBT(NBTTagCompound in, boolean updatePacket) {
 		super.readNBT(in, updatePacket);
 		type = IWProperties.MarxType.values()[in.getInteger(TYPE)];
-		stageCount = in.getInteger(STAGES);
-		storage = DualEnergyStorage.readFromNBT(in.getCompoundTag(ENERGY_TAG));
+		setStageCount(in.getInteger(STAGES));
+		NBTTagList voltages = in.getTagList(CAP_VOLTAGES, 6);//DOUBLE
+		capVoltages = new double[stageCount];
+		for (int i = 0;i<stageCount;i++) {
+			capVoltages[i] = voltages.getDoubleAt(i);
+		}
+		storage.readFromNBT(in.getCompoundTag(ENERGY_TAG));
 		hasConnection = in.getBoolean(HAS_CONN);
 		boundingAabb = null;
 		renderAabb = null;
@@ -178,16 +196,50 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		} else if (state==FiringState.NEXT_TICK) {
 			state = FiringState.FIRE;
 			if (!world.isRemote) {
-				//TODO server-side effects of Marx discharges (damage (electric+sound), block processing, reset cap voltages, more?
+				//calculate energy
+				double energyStored = 0;
+				//TODO handle high cap voltage differences
+				for (int i = 0;i<stageCount;i++) {
+					energyStored += capVoltages[i]*capVoltages[i]/cReciproke;
+					capVoltages[i] = 0;
+				}
+				net.updateValues();
+				NBTTagCompound data = new NBTTagCompound();
+				data.setDouble("energy", energyStored);
+				IndustrialWires.packetHandler.sendToDimension(new MessageTileSyncIW(this, data), world.provider.getDimension());
 			} else {
 				dischargingMarxes.add(this);//TODO deal with breaking during discharges
 			}
 		}
 		if (!world.isRemote&&type== IWProperties.MarxType.BOTTOM) {
-			if (world.getTotalWorldTime()%40==0) {
-				NBTTagCompound nbt = new NBTTagCompound();
-				nbt.setFloat("energy", stageCount*9*9);
-			//	IndustrialWires.packetHandler.sendToAll(new MessageTileSyncIW(this, nbt));
+			if (capVoltages==null||capVoltages.length!=stageCount) {
+				capVoltages = new double[stageCount];//TODO save to NBT
+			}
+			double oldTopVoltage = capVoltages[stageCount-1];
+			for (int i = stageCount-1;i>0;i--) {
+				double oldVoltage = capVoltages[i];
+				double u0 = capVoltages[i-1];
+				capVoltages[i] = u0-(u0-oldVoltage)*timeFactor;
+				capVoltages[i-1] -= capVoltages[i]-oldVoltage;
+			}
+			//charge bottom cap from storage
+			double u0 = 250_000*voltageControl/15D;
+			if (u0<=100*storage.getEnergyStoredEU()) {
+				double oldVoltage = capVoltages[0];
+				capVoltages[0] = u0 - (u0 - oldVoltage) * timeFactor;
+				double energyUsed = (capVoltages[0] * capVoltages[0] - oldVoltage * oldVoltage)/cReciproke;
+				if (energyUsed > 0) {// energyUsed can be negative when discharging the caps
+					storage.extractEURaw(energyUsed);
+				}
+				double vMax = 250_000;
+				if (Math.round(15*oldVoltage/vMax)!=Math.round(15*capVoltages[0]/vMax)) {
+					net.updateValues();
+				} else if (Math.round(15*oldTopVoltage/vMax)!=Math.round(15*capVoltages[stageCount-1]/vMax)) {
+					net.updateValues();
+				}
+				if (capVoltages[0] > 250_000 * 14 / 15) {
+					state = FiringState.NEXT_TICK;
+				}
 			}
 		}
 	}
@@ -204,7 +256,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 			dischargeData = new TileRenderMarx.Discharge(stageCount);
 		}
 		dischargeData.energy = nbt.getFloat("energy");
-		dischargeData.diameter = dischargeData.energy/(stageCount*15*15);
+		dischargeData.diameter = dischargeData.energy/(stageCount*250*250);
 		dischargeData.genMarxPoint(0, dischargeData.vertices.length-1);
 	}
 
@@ -225,7 +277,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	private AxisAlignedBB boundingAabb = null;
 	@Override
 	public AxisAlignedBB getBoundingBox() {
-		if (boundingAabb==null||true) {
+		if (boundingAabb==null) {
 			int forward = getForward();
 			int right = getRight();
 			int up = offset.getY();
@@ -389,20 +441,39 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		return getRaytraceOffset(null);
 	}
 
-	private RedstoneWireNetwork net = new RedstoneWireNetwork().add(this);
+	private RedstoneWireNetwork net = new RedstoneWireNetwork();
 	@Override
 	public void setNetwork(RedstoneWireNetwork net) {
-		this.net = net;
+		masterOr(this, this).net = net;
 	}
 
 	@Override
 	public RedstoneWireNetwork getNetwork() {
-		return net;
+		TileEntityMarx master = masterOr(this, this);
+		if (!loaded) {
+			master.net.add(this);
+			loaded = true;
+		}
+		return master.net;
 	}
 
 	@Override
 	public void onChange() {
-		//TODO
+		TileEntityMarx master = masterOr(this, this);
+		master.voltageControl = master.net.channelValues[0];
+		if (master.net.channelValues[3]!=0) {//light blue is firing trigger
+			master.tryTriggeredDischarge();
+		}
+	}
+	public void tryTriggeredDischarge() {
+		if (capVoltages[0]>=8/15D*maxVoltage) {
+			state = FiringState.NEXT_TICK;
+		} else {
+			for (int i = 0;i<stageCount;i++) {
+				capVoltages[i] = 0;
+			}
+			net.updateValues();
+		}
 	}
 
 	@Override
@@ -412,9 +483,24 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 
 	@Override
 	public void updateInput(byte[] signals) {
-		//TODO
+		TileEntityMarx master = masterOr(this, this);
+		if (master.capVoltages!=null&&master.capVoltages.length==stageCount) {
+			//1/orange is voltage measurement from the top cap
+			//2/magenta is for the bottom one
+			signals[1] = (byte)(Math.round(15*master.capVoltages[stageCount-1]/maxVoltage));
+			signals[2] = (byte)(Math.round(15*master.capVoltages[0]/maxVoltage));
+		}
 	}
 
+	public void setStageCount(int stageCount) {
+		this.stageCount = stageCount;
+		rcTimeConst = 5D/stageCount;
+		timeFactor = Math.exp(-1/(20*rcTimeConst));
+	}
+
+	public int getStageCount() {
+		return stageCount;
+	}
 
 	public enum FiringState {
 		CHARGING,

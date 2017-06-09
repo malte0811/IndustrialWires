@@ -60,6 +60,11 @@ public abstract class TileEntityIWMultiblock extends TileEntityIWBase {
 		}
 		return null;
 	}
+	@Nonnull
+	public <T extends TileEntityIWMultiblock> T masterOr(T here, @Nonnull T def) {
+		T master = master(here);
+		return master!=null?master:def;
+	}
 	public void disassemble()
 	{
 		if(formed && !world.isRemote)

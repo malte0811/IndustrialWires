@@ -38,7 +38,7 @@ public class TileRenderMarx extends TileEntitySpecialRenderer<TileEntityMarx> {
 	@Override
 	public void renderTileEntityAt(TileEntityMarx te, double x, double y, double z, float partialTicks, int destroyStage) {
 		final boolean debug = false;
-		//noinspection PointlessBooleanExpression
+		//noinspection ConstantConditions,PointlessBooleanExpression
 		if (te.type== IWProperties.MarxType.BOTTOM&&(debug||te.state== TileEntityMarx.FiringState.FIRE)) {
 			prepare(x, y, z, te);
 			Tessellator tes = Tessellator.getInstance();
@@ -53,7 +53,7 @@ public class TileRenderMarx extends TileEntitySpecialRenderer<TileEntityMarx> {
 			final float pos = .6875F;
 			GlStateManager.translate(-facing.getX()*pos, 0, -facing.getZ()*pos);
 			//draw firing spark gaps
-			for (int i = 0;i<te.stageCount-1;i++) {
+			for (int i = 0;i<te.getStageCount()-1;i++) {
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(0, i, 0);
 				GlStateManager.rotate(-45, facing.getX(), facing.getY(), facing.getZ());
