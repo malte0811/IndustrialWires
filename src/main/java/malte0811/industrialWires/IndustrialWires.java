@@ -110,6 +110,8 @@ public class IndustrialWires {
 			throw new IllegalStateException("No IC2 wires registered");
 		}
 		MultiblockHandler.registerMultiblock(new MultiblockMarx());
+		IWPotions.init();
+
 		proxy.preInit();
 	}
 

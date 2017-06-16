@@ -56,10 +56,10 @@ minecraft {
 }
 
 repositories {
-    maven {
-        name 'ic2'
-        url 'http://maven.ic2.player.to/'
-    }
+    //maven {
+    //    name 'ic2'
+    //    url 'http://maven.ic2.player.to/'
+    //}
     maven {
     	name 'jared maven'
     	url 'http://blamejared.com/maven'
@@ -68,7 +68,7 @@ repositories {
 
 dependencies {
 //    deobfCompile "net.industrial-craft:industrialcraft-2:2.7.+:api"
-//    deobfCompile "blusunrize:ImmersiveEngineering:0.11-+:deobf"
+    deobfCompile "blusunrize:ImmersiveEngineering:0.11-+:deobf"
 }
 
 jar {

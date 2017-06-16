@@ -31,6 +31,8 @@ import blusunrize.immersiveengineering.common.blocks.metal.*;
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import ic2.api.item.IC2Items;
 import malte0811.industrialWires.IIC2Connector;
+import malte0811.industrialWires.IWDamageSources;
+import malte0811.industrialWires.IWPotions;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.IBlockBoundsIW;
 import malte0811.industrialWires.blocks.ISyncReceiver;
@@ -43,10 +45,14 @@ import malte0811.industrialWires.util.MiscUtils;
 import malte0811.industrialWires.wires.IC2Wiretype;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagDouble;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
@@ -61,6 +67,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
@@ -105,6 +112,11 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		out.setInteger(STAGES, stageCount);
 		out.setBoolean(HAS_CONN, hasConnection);
 		storage.writeToNbt(out, ENERGY_TAG);
+		NBTTagList voltages = new NBTTagList();
+		for (int i = 0;i<stageCount;i++) {
+			voltages.appendTag(new NBTTagDouble(capVoltages[i]));
+		}
+		out.setTag(CAP_VOLTAGES, voltages);
 	}
 
 	@Override
@@ -195,20 +207,10 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 			}
 		} else if (state==FiringState.NEXT_TICK) {
 			state = FiringState.FIRE;
-			if (!world.isRemote) {
-				//calculate energy
-				double energyStored = 0;
-				//TODO handle high cap voltage differences
-				for (int i = 0;i<stageCount;i++) {
-					energyStored += capVoltages[i]*capVoltages[i]/cReciproke;
-					capVoltages[i] = 0;
-				}
-				net.updateValues();
-				NBTTagCompound data = new NBTTagCompound();
-				data.setDouble("energy", energyStored);
-				IndustrialWires.packetHandler.sendToDimension(new MessageTileSyncIW(this, data), world.provider.getDimension());
+			if (world.isRemote) {
+				IndustrialWires.proxy.playMarxBang(this, getMiddle(), dischargeData.energy/(stageCount*250*250));
 			} else {
-				dischargingMarxes.add(this);//TODO deal with breaking during discharges
+				fire();
 			}
 		}
 		if (!world.isRemote&&type== IWProperties.MarxType.BOTTOM) {
@@ -241,6 +243,64 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 					state = FiringState.NEXT_TICK;
 				}
 			}
+		}
+	}
+
+	private void fire() {
+		if (!world.isRemote) {
+			//calculate energy
+			double energyStored = 0;
+			//TODO handle high cap voltage differences
+			for (int i = 0;i<stageCount;i++) {
+				energyStored += capVoltages[i]*capVoltages[i]/cReciproke;
+				capVoltages[i] = 0;
+			}
+			net.updateValues();
+			NBTTagCompound data = new NBTTagCompound();
+			data.setDouble("energy", energyStored);
+			IndustrialWires.packetHandler.sendToDimension(new MessageTileSyncIW(this, data), world.provider.getDimension());
+			Vec3d v0 = getMiddle();
+			AxisAlignedBB aabb = new AxisAlignedBB(v0, v0);
+			aabb = aabb.expand(0, stageCount/2-1,0);
+			final double sqrtStages = Math.sqrt(stageCount);
+			aabb = aabb.expandXyz(5*sqrtStages);
+			List<EntityLivingBase> fools = world.getEntitiesWithinAABB(EntityLivingBase.class, aabb);
+			double energyNormed = energyStored/(stageCount*250*250);
+			double damageDistSqu = .5*energyNormed*sqrtStages;
+			double tinnitusDistSqu = 3*energyNormed*sqrtStages;
+			damageDistSqu *= damageDistSqu;
+			tinnitusDistSqu *= tinnitusDistSqu;
+			for (EntityLivingBase entity:fools) {
+				double y;
+				if (entity.posY<pos.getY()+1) {
+					y = pos.getY()+1;
+				} else if (entity.posY>pos.getY()+stageCount-2) {
+					y = pos.getY()+stageCount-2;
+				} else {
+					y = entity.posY;
+				}
+				double distSqu = entity.getDistanceSq(v0.xCoord, y, v0.zCoord);
+				if (distSqu<=damageDistSqu) {
+					//TODO damage entity
+					float dmg = (float) (10*stageCount*(1-distSqu/damageDistSqu));
+					entity.attackEntityFrom(IWDamageSources.dmg_marx, dmg);
+				}
+				if (distSqu<=tinnitusDistSqu && entity instanceof EntityPlayer) {
+					ItemStack helmet = ((EntityPlayer) entity).inventory.armorInventory.get(3);
+					boolean earMuff = helmet.getItem()==IEContent.itemEarmuffs;
+					if (!earMuff&&helmet.hasTagCompound()) {
+						earMuff = helmet.getTagCompound().hasKey("IE:Earmuffs");
+					}
+					if (!earMuff) {//TODO they work on other helmets, don't they?
+						//TODO 13kHz
+						double multipl = Math.min(5, Math.sqrt(stageCount));
+						int duration = (int) (20*20*(1+multipl*(1-distSqu/tinnitusDistSqu)));
+						entity.addPotionEffect(new PotionEffect(IWPotions.tinnitus, duration));
+					}
+				}
+			}
+		} else {
+			dischargingMarxes.add(this);//TODO deal with breaking during discharges
 		}
 	}
 
@@ -500,6 +560,12 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 
 	public int getStageCount() {
 		return stageCount;
+	}
+
+	public Vec3d getMiddle() {
+		double middleY = pos.getY()+(stageCount)/2D;
+		Vec3i electrodXZ = MiscUtils.offset(pos, facing, mirrored, 1, 4, 0);
+		return new Vec3d(electrodXZ.getX()+.5, middleY, electrodXZ.getZ()+.5);
 	}
 
 	public enum FiringState {

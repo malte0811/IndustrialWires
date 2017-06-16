@@ -20,6 +20,7 @@ package malte0811.industrialWires;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanelCreator;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityRSPanelConn;
 import malte0811.industrialWires.blocks.hv.TileEntityJacobsLadder;
+import malte0811.industrialWires.blocks.hv.TileEntityMarx;
 import malte0811.industrialWires.containers.ContainerPanelComponent;
 import malte0811.industrialWires.containers.ContainerPanelCreator;
 import malte0811.industrialWires.containers.ContainerRSPanelConn;
@@ -46,6 +47,8 @@ public class CommonProxy implements IGuiHandler {
 	}
 
 	public void playJacobsLadderSound(TileEntityJacobsLadder te, int phase, Vec3d soundPos) {
+	}
+	public void startTinnitus() {
 	}
 
 	@Override
@@ -76,4 +79,6 @@ public class CommonProxy implements IGuiHandler {
 	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
 		return null;
 	}
+
+	public void playMarxBang(TileEntityMarx tileEntityMarx, Vec3d vec3d, float energy) {}
 }

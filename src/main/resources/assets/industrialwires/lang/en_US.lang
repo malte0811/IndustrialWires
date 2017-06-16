@@ -80,6 +80,7 @@ industrialwires.chat.tooLong=This coil does not contain enough wire for this con
 industrialwires.chat.stackSize=Linking is only possible with a stack of size 1
 
 death.attack.industrialwires.jacobs_ladder=%1$s was electrocuted by a Jacob's Ladder
+death.attack.industrialwires.marx=%1$s was struck by lightning produced by a Marx generator
 
  
 itemGroup.industrialwires=Industrial Wires

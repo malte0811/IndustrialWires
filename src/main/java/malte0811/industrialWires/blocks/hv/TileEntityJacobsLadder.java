@@ -26,6 +26,7 @@ import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergyEmitter;
 import ic2.api.energy.tile.IEnergySink;
 import malte0811.industrialWires.IWConfig;
+import malte0811.industrialWires.IWDamageSources;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.IBlockBoundsIW;
 import malte0811.industrialWires.blocks.IHasDummyBlocksIW;
@@ -43,7 +44,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.*;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -329,7 +333,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 	}
 
 	private void hurtEntity(Entity e) {
-		e.attackEntityFrom(new DamageSource("industrialwires.jacobs_ladder"), IWConfig.HVStuff.jacobsBaseDmg * (size.ordinal() + 1));
+		e.attackEntityFrom(IWDamageSources.dmg_jacobs, IWConfig.HVStuff.jacobsBaseDmg * (size.ordinal() + 1));
 	}
 
 	public boolean onActivated(EntityPlayer player, EnumHand hand) {

@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableMap;
 import ic2.api.item.IC2Items;
 import malte0811.industrialWires.CommonProxy;
 import malte0811.industrialWires.IWConfig;
+import malte0811.industrialWires.IWPotions;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.IMetaEnum;
 import malte0811.industrialWires.blocks.controlpanel.BlockTypes_Panel;
@@ -49,6 +50,7 @@ import malte0811.industrialWires.items.ItemPanelComponent;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
+import net.minecraft.client.audio.MovingSound;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.block.model.ModelBakery;
@@ -60,6 +62,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -69,6 +72,7 @@ import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Random;
 import java.util.WeakHashMap;
@@ -253,6 +257,49 @@ public class ClientProxy extends CommonProxy {
 		);
 	}
 
+	private static ISound tinnitus;
+	@Override
+	public void startTinnitus() {
+		final Minecraft mc = Minecraft.getMinecraft();
+		if (tinnitus==null) {
+			tinnitus = new MovingSound(new SoundEvent(new ResourceLocation(IndustrialWires.MODID, "tinnitus")), SoundCategory.PLAYERS) {
+				@Override
+				public void update() {
+					if (mc.player.getActivePotionEffect(IWPotions.tinnitus)==null) {
+						donePlaying = true;
+					}
+				}
+
+				@Override
+				public float getXPosF() {
+					return (float) mc.player.posX;
+				}
+
+				@Override
+				public float getYPosF() {
+					return (float) mc.player.posY;
+				}
+
+				@Override
+				public float getZPosF() {
+					return (float) mc.player.posZ;
+				}
+
+				@Override
+				public boolean canRepeat() {
+					return true;
+				}
+			};
+			int oldLength = Config.IEConfig.Tools.earDefenders_SoundBlacklist.length;
+			Config.IEConfig.Tools.earDefenders_SoundBlacklist =
+					Arrays.copyOf(Config.IEConfig.Tools.earDefenders_SoundBlacklist, oldLength+1);
+			Config.IEConfig.Tools.earDefenders_SoundBlacklist[oldLength] = tinnitus.getSoundLocation().toString();
+		}
+		if (!mc.getSoundHandler().isSoundPlaying(tinnitus)) {
+			mc.getSoundHandler().playSound(tinnitus);
+		}
+	}
+
 	@Override
 	public World getClientWorld() {
 		return Minecraft.getMinecraft().world;
@@ -262,6 +309,7 @@ public class ClientProxy extends CommonProxy {
 	private static ResourceLocation jacobsStart = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_start");//~470 ms ~=9 ticks
 	private static ResourceLocation jacobsMiddle = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_middle");
 	private static ResourceLocation jacobsEnd = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_end");//~210 ms ~= 4 ticks
+	private static ResourceLocation marxBang = new ResourceLocation(IndustrialWires.MODID, "marx_bang");
 
 	@Override
 	public void playJacobsLadderSound(TileEntityJacobsLadder te, int phase, Vec3d soundPos) {
@@ -289,6 +337,13 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@Override
+	public void playMarxBang(TileEntityMarx te, Vec3d pos, float energy) {
+		PositionedSoundRecord sound = new PositionedSoundRecord(marxBang, SoundCategory.BLOCKS, 5*energy, 1, false, 0, ISound.AttenuationType.LINEAR, (float) pos.xCoord, (float) pos.yCoord, (float) pos.zCoord);
+		ClientUtils.mc().getSoundHandler().playSound(sound);
+		playingSounds.put(te.getPos(), sound);
+	}
+
+	@Override
 	public Gui getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
 		if (ID == 0) {
 			TileEntity te = world.getTileEntity(new BlockPos(x, y, z));
@@ -311,4 +366,5 @@ public class ClientProxy extends CommonProxy {
 		}
 		return null;
 	}
+
 }
