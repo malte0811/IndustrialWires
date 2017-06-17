@@ -1,6 +1,20 @@
+#####Version 1.5-11
+ - Updated to Minecraft 1.11.2
+ - Added Panel Meters to monitor a redstone signal with reasonable accuracy
+ - Multiple components on the same panel network can modify the same signal now without causing undefined behavior
+ - Lock Switches no longer break the model cache
+
+#####Version 1.4-10
+ - added lock switches for control panels (backport from 1.11)
+   - Can only be turned on by someone with the correct key to prevent unauthorized access
+   - up to 10 keys can be added to a keyring to reduce inventory spam
+ - IC2 items can be added to the appropriate sections of the engineers toolbox (backport from 1.11)
+ - Components (lighted button, indicator light, etc.) on panels now actually light up (backport from 1.11)
+ - Fixed power loss when no energy is being transmitted
 #####Version 1.4-9
  - added Control Panels
    - They can be used to control and monitor a lot of redstone signals from a few blocks
+
 #####Version 1.3-8
  - the converters and the motor don't have missing textures any more when using Chisel
 #####Version 1.3-7

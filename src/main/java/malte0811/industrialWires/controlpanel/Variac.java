@@ -100,10 +100,10 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 				new Vector3f(innerSize, getHeight() / 2, innerSize), ret, false, mat);
 		mat.translate(SIZE / 2, 0, SIZE / 2);
 		mat.rotate(Math.PI / 2, 0, 1, 0);
-		mat.translate(-SIZE / 2, 0, -SIZE / 2);
-		PanelUtils.addColoredQuad(ret, new Vector3f(offset, getHeight() + .00001F, offset), new Vector3f(offset, getHeight() + .00001F, offset),
-				new Vector3f(offset + arrowSize / 2, getHeight() + .00001F, offset + arrowSize),
-				new Vector3f(offset + arrowSize, getHeight() + .00001F, offset + arrowSize / 2), EnumFacing.UP, white, mat);
+		mat.translate(-SIZE / 2, .0001, -SIZE / 2);
+		PanelUtils.addColoredQuad(ret, new Vector3f(offset, getHeight(), offset), new Vector3f(offset, getHeight(), offset),
+				new Vector3f(offset + arrowSize / 2, getHeight(), offset + arrowSize),
+				new Vector3f(offset + arrowSize, getHeight(), offset + arrowSize / 2), EnumFacing.UP, white, mat);
 		return ret;
 	}
 
