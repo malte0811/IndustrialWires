@@ -111,7 +111,7 @@ ie.manual.entry.industrialwires.intro.subtext=
 ie.manual.entry.industrialwires.intro0=Control Panels allow you to monitor and control a large amount of redstone signals using only a few blocks. Those signals can currently be connected using redstone wires and connectors.<br>Buttons, switches, indicator lights and other things that can be placed on a control panel are called §l(Panel) Components§r<br>To create a control panel you will need a Panel Creator, the individual components and a basic machine casing as the enclosure of the panel. Each
 ie.manual.entry.industrialwires.intro1=component is described in the entry "Panel Components". Right-clicking with a panel component opens up a GUI in which the properties of the component, like the redstone channel and ID or the color, can be configured.
 ie.manual.entry.industrialwires.intro2=A §l(panel) network§r is formed by panel blocks connected to each other, directly or through other panel blocks. Panel blocks include the control panel itself, the panel connector and the Redstone Wire Controller. If multiple components in one network are configured to modify the same
-ie.manual.entry.industrialwires.intro3=redstone signal, the resulting behavior is undefined (but won't crash the game). Having multiple components accepting the same signal on a network is valid though.
+ie.manual.entry.industrialwires.intro3=redstone signal, the resulting signal will be the highest of the individual signals. Having multiple components accepting the same signal on a network is valid as well.
 
 ie.manual.entry.industrialwires.panel_creator.name=Panel Creator
 ie.manual.entry.industrialwires.panel_creator.subtext=

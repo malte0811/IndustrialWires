@@ -23,6 +23,7 @@ import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
+import malte0811.industrialWires.util.TriConsumer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -37,16 +38,12 @@ import org.lwjgl.util.vector.Vector3f;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.function.BiConsumer;
 
 public class ToggleSwitch extends PanelComponent implements IConfigurableComponent {
 	public boolean active;
 	public int rsOutputId;
 	public byte rsOutputChannel;
-	private Set<BiConsumer<Integer, Byte>> rsOut = new HashSet<>();
 
 	public ToggleSwitch() {
 		super("toggle_switch");
@@ -132,17 +129,10 @@ public class ToggleSwitch extends PanelComponent implements IConfigurableCompone
 	}
 
 	@Override
-	public void registerRSOutput(int id, @Nonnull BiConsumer<Integer, Byte> out) {
+	public void registerRSOutput(int id, @Nonnull TriConsumer<Integer, Byte, PanelComponent> out) {
 		if (id == rsOutputId) {
-			rsOut.add(out);
-			out.accept((int) rsOutputChannel, (byte) (active ? 15 : 0));
-		}
-	}
-
-	@Override
-	public void unregisterRSOutput(int id, @Nonnull BiConsumer<Integer, Byte> out) {
-		if (id == rsOutputId) {
-			rsOut.remove(out);
+			super.registerRSOutput(id, out);
+			out.accept((int) rsOutputChannel, (byte) (active ? 15 : 0), this);
 		}
 	}
 
@@ -178,9 +168,7 @@ public class ToggleSwitch extends PanelComponent implements IConfigurableCompone
 		active = on;
 		tile.markDirty();
 		tile.triggerRenderUpdate();
-		for (BiConsumer<Integer, Byte> rs : rsOut) {
-			rs.accept((int) rsOutputChannel, (byte) (active ? 15 : 0));
-		}
+		setOut(rsOutputChannel, active ? 15 : 0);
 	}
 
 	@Override
