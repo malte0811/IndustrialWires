@@ -30,6 +30,7 @@ import malte0811.industrialWires.blocks.IBlockBoundsIW;
 import malte0811.industrialWires.blocks.INetGUI;
 import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.controlpanel.PanelUtils;
+import malte0811.industrialWires.util.TriConsumer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -44,8 +45,8 @@ import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.ref.WeakReference;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implements IRedstoneConnector, ITickable, INetGUI, IEBlockInterfaces.IDirectionalTile, IBlockBoundsIW {
@@ -109,12 +110,54 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 		aabb = null;
 	}
 
-	private BiConsumer<Integer, Byte> rsOut = (channel, value) -> {
-		if (value != out[channel]) {
+	private final Map<PCWrapper, byte[]> outputs = new HashMap<>();
+	private TriConsumer<Integer, Byte, PanelComponent> rsOut = (channel, value, pc) -> {
+		PCWrapper wrapper = new PCWrapper(pc);
+		if (!outputs.containsKey(wrapper)) {
+			outputs.put(wrapper, new byte[16]);
+		}
+		if (outputs.get(wrapper)[channel] != value) {
+			outputs.get(wrapper)[channel] = value;
+			byte max = 0;
+			Iterator<Map.Entry<PCWrapper, byte[]>> it = outputs.entrySet().iterator();
+			while (it.hasNext()) {
+				Map.Entry<PCWrapper, byte[]> curr = it.next();
+				if (curr.getKey().pc.get() == null) {
+					it.remove();
+					continue;
+				}
+				if (curr.getValue()[channel] > max) {
+					max = curr.getValue()[channel];
+				}
+			}
 			dirty = true;
-			out[channel] = value;
+			out[channel] = max;
 		}
 	};
+
+	private class PCWrapper {
+		@Nonnull
+		private final WeakReference<PanelComponent> pc;
+
+		public PCWrapper(@Nonnull PanelComponent pc) {
+			this.pc = new WeakReference<>(pc);
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+
+			PCWrapper pcWrapper = (PCWrapper) o;
+
+			return pcWrapper.pc.get() == pc.get();
+		}
+
+		@Override
+		public int hashCode() {
+			return System.identityHashCode(pc.get());
+		}
+	}
 
 	public void registerPanel(TileEntityPanel panel) {
 		PropertyComponents.PanelRenderProperties p = panel.getComponents();

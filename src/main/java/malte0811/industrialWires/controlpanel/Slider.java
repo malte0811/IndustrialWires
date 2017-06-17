@@ -22,6 +22,7 @@ import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
+import malte0811.industrialWires.util.TriConsumer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -33,10 +34,7 @@ import org.lwjgl.util.vector.Vector3f;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.function.BiConsumer;
 
 public class Slider extends PanelComponent implements IConfigurableComponent {
 	private static final float WIDTH = .0625F;
@@ -46,7 +44,6 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 	private byte out;
 	private byte rsChannel;
 	private int rsId;
-	private Set<BiConsumer<Integer, Byte>> outputs = new HashSet<>();
 
 	public Slider(float length, int color, boolean horizontal, int rsId, byte rsChannel) {
 		this();
@@ -135,9 +132,7 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 		double pos = horizontal ? hitRelative.xCoord : (length - hitRelative.zCoord);
 		byte newLevel = (byte) (Math.min(pos * 16 / length, 15));
 		if (newLevel != out) {
-			for (BiConsumer<Integer, Byte> output : outputs) {
-				output.accept((int) rsChannel, newLevel);
-			}
+			setOut(rsChannel, newLevel);
 			out = newLevel;
 			tile.markDirty();
 			tile.triggerRenderUpdate();
@@ -145,17 +140,10 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
-	public void registerRSOutput(int id, @Nonnull BiConsumer<Integer, Byte> out) {
+	public void registerRSOutput(int id, @Nonnull TriConsumer<Integer, Byte, PanelComponent> out) {
 		if (id == rsId) {
-			outputs.add(out);
-			out.accept((int) rsChannel, this.out);
-		}
-	}
-
-	@Override
-	public void unregisterRSOutput(int id, @Nonnull BiConsumer<Integer, Byte> out) {
-		if (id == rsId) {
-			outputs.remove(out);
+			super.registerRSOutput(id, out);
+			out.accept((int) rsChannel, this.out, this);
 		}
 	}
 
@@ -183,9 +171,7 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 
 	@Override
 	public void invalidate(TileEntityPanel te) {
-		for (BiConsumer<Integer, Byte> out : outputs) {
-			out.accept((int) rsChannel, (byte) 0);
-		}
+		setOut(rsChannel, 0);
 	}
 
 	@Override

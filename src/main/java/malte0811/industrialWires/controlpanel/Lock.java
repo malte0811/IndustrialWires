@@ -24,6 +24,7 @@ import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import malte0811.industrialWires.items.ItemKey;
+import malte0811.industrialWires.util.TriConsumer;
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.resources.I18n;
@@ -41,8 +42,9 @@ import org.lwjgl.util.vector.Vector3f;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
-import java.util.function.BiConsumer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class Lock extends PanelComponent implements IConfigurableComponent {
 	private final static Random rand = new Random();
@@ -54,7 +56,6 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 	private int rsOutputChannel;
 	private int ticksTillOff;
 	private int lockID;
-	private Set<BiConsumer<Integer, Byte>> rsOut = new HashSet<>();
 
 	public Lock() {
 		super("lock");
@@ -214,17 +215,10 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
-	public void registerRSOutput(int id, @Nonnull BiConsumer<Integer, Byte> out) {
+	public void registerRSOutput(int id, @Nonnull TriConsumer<Integer, Byte, PanelComponent> out) {
 		if (id == rsOutputId) {
-			rsOut.add(out);
-			out.accept(rsOutputChannel, (byte) (turned ? 15 : 0));
-		}
-	}
-
-	@Override
-	public void unregisterRSOutput(int id, @Nonnull BiConsumer<Integer, Byte> out) {
-		if (id == rsOutputId) {
-			rsOut.remove(out);
+			super.registerRSOutput(id, out);
+			out.accept(rsOutputChannel, (byte) (turned ? 15 : 0), this);
 		}
 	}
 
@@ -252,9 +246,7 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 	private void setOut(TileEntityPanel tile) {
 		tile.markDirty();
 		tile.triggerRenderUpdate();
-		for (BiConsumer<Integer, Byte> rs : rsOut) {
-			rs.accept(rsOutputChannel, (byte) (turned ? 15 : 0));
-		}
+		setOut(rsOutputChannel, turned ? 15 : 0);
 	}
 
 	@Override
