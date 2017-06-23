@@ -23,6 +23,7 @@ import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import malte0811.industrialWires.util.MiscUtils;
+import malte0811.industrialWires.util.TriConsumer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
@@ -34,10 +35,7 @@ import net.minecraft.util.math.Vec3d;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiConsumer;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -48,6 +46,7 @@ public abstract class PanelComponent {
 	private final String type;
 	protected final static float[] GRAY = {.8F, .8F, .8F};
 	protected final static int GRAY_INT = 0xFFD0D0D0;
+	private Set<TriConsumer<Integer, Byte, PanelComponent>> outputs = new HashSet<>();
 
 	protected PanelComponent(String type) {
 		this.type = type;
@@ -99,10 +98,12 @@ public abstract class PanelComponent {
 		return null;
 	}
 
-	public void registerRSOutput(int id, @Nonnull BiConsumer<Integer, Byte> out) {
+	public void registerRSOutput(int id, @Nonnull TriConsumer<Integer, Byte, PanelComponent> out) {
+		outputs.add(out);
 	}
 
-	public void unregisterRSOutput(int id, @Nonnull BiConsumer<Integer, Byte> out) {
+	public void unregisterRSOutput(int id, @Nonnull TriConsumer<Integer, Byte, PanelComponent> out) {
+		outputs.remove(out);
 	}
 
 	public void dropItems(TileEntityPanel te) {
@@ -209,6 +210,12 @@ public abstract class PanelComponent {
 			}
 		}
 		return true;
+	}
+
+	void setOut(int channel, int level) {
+		for (TriConsumer<Integer, Byte, PanelComponent> out : outputs) {
+			out.accept(channel, (byte) level, this);
+		}
 	}
 
 	@Override

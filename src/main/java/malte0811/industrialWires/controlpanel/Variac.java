@@ -23,6 +23,7 @@ import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
+import malte0811.industrialWires.util.TriConsumer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -38,10 +39,7 @@ import org.lwjgl.util.vector.Vector3f;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.function.BiConsumer;
 
 public class Variac extends PanelComponent implements IConfigurableComponent {
 	private static final float SIZE = 3 / 16F;
@@ -56,7 +54,6 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 	private byte out;
 	private byte rsChannel;
 	private int rsId;
-	private Set<BiConsumer<Integer, Byte>> outputs = new HashSet<>();
 
 	public Variac(int rsId, byte rsChannel) {
 		this();
@@ -103,10 +100,10 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 				new Vector3f(innerSize, getHeight() / 2, innerSize), ret, false, mat);
 		mat.translate(SIZE / 2, 0, SIZE / 2);
 		mat.rotate(Math.PI / 2, 0, 1, 0);
-		mat.translate(-SIZE / 2, 0, -SIZE / 2);
-		PanelUtils.addColoredQuad(ret, new Vector3f(offset, getHeight() + .00001F, offset), new Vector3f(offset, getHeight() + .00001F, offset),
-				new Vector3f(offset + arrowSize / 2, getHeight() + .00001F, offset + arrowSize),
-				new Vector3f(offset + arrowSize, getHeight() + .00001F, offset + arrowSize / 2), EnumFacing.UP, white, mat);
+		mat.translate(-SIZE / 2, .0001, -SIZE / 2);
+		PanelUtils.addColoredQuad(ret, new Vector3f(offset, getHeight(), offset), new Vector3f(offset, getHeight(), offset),
+				new Vector3f(offset + arrowSize / 2, getHeight(), offset + arrowSize),
+				new Vector3f(offset + arrowSize, getHeight(), offset + arrowSize / 2), EnumFacing.UP, white, mat);
 		return ret;
 	}
 
@@ -153,9 +150,7 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 		}
 		newLevel = (byte) Math.max(0, Math.min(newLevel, 15));
 		if (newLevel != out) {
-			for (BiConsumer<Integer, Byte> output : outputs) {
-				output.accept((int) rsChannel, newLevel);
-			}
+			setOut(rsChannel, newLevel);
 			out = newLevel;
 			tile.markDirty();
 			tile.triggerRenderUpdate();
@@ -163,17 +158,10 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
-	public void registerRSOutput(int id, @Nonnull BiConsumer<Integer, Byte> out) {
+	public void registerRSOutput(int id, @Nonnull TriConsumer<Integer, Byte, PanelComponent> out) {
 		if (id == rsId) {
-			outputs.add(out);
-			out.accept((int) rsChannel, this.out);
-		}
-	}
-
-	@Override
-	public void unregisterRSOutput(int id, @Nonnull BiConsumer<Integer, Byte> out) {
-		if (id == rsId) {
-			outputs.remove(out);
+			super.registerRSOutput(id, out);
+			out.accept((int) rsChannel, this.out, this);
 		}
 	}
 
@@ -208,9 +196,7 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 
 	@Override
 	public void invalidate(TileEntityPanel te) {
-		for (BiConsumer<Integer, Byte> out : outputs) {
-			out.accept((int) rsChannel, (byte) 0);
-		}
+		setOut(rsChannel, 0);
 	}
 
 	@Override

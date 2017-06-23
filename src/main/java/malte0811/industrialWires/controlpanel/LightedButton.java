@@ -22,6 +22,7 @@ import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
+import malte0811.industrialWires.util.TriConsumer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
@@ -34,10 +35,7 @@ import org.lwjgl.util.vector.Vector3f;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.function.BiConsumer;
 
 public class LightedButton extends PanelComponent implements IConfigurableComponent {
 	public int color = 0xFF0000;
@@ -46,7 +44,6 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 	public int rsOutputId;
 	public int rsOutputChannel;
 	private int ticksTillOff;
-	private Set<BiConsumer<Integer, Byte>> rsOut = new HashSet<>();
 
 	public LightedButton() {
 		super("lighted_button");
@@ -141,17 +138,10 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 	}
 
 	@Override
-	public void registerRSOutput(int id, @Nonnull BiConsumer<Integer, Byte> out) {
+	public void registerRSOutput(int id, @Nonnull TriConsumer<Integer, Byte, PanelComponent> out) {
 		if (id == rsOutputId) {
-			rsOut.add(out);
-			out.accept(rsOutputChannel, (byte) (active ? 15 : 0));
-		}
-	}
-
-	@Override
-	public void unregisterRSOutput(int id, @Nonnull BiConsumer<Integer, Byte> out) {
-		if (id == rsOutputId) {
-			rsOut.remove(out);
+			super.registerRSOutput(id, out);
+			out.accept(rsOutputChannel, (byte) (active ? 15 : 0), this);
 		}
 	}
 
@@ -174,9 +164,7 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 		active = on;
 		tile.markDirty();
 		tile.triggerRenderUpdate();
-		for (BiConsumer<Integer, Byte> rs : rsOut) {
-			rs.accept(rsOutputChannel, (byte) (active ? 15 : 0));
-		}
+		setOut(rsOutputChannel, active ? 15 : 0);
 	}
 
 	@Override
