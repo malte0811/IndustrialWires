@@ -63,5 +63,8 @@ public class IWConfig {
 		public static double[] jacobsUsageEU = {20, 50, 100};
 		@Comment({"The damage dealt by a small Jacobs Ladder. Normal Ladders deal twice this damage, huge ones 3 times as much"})
 		public static float jacobsBaseDmg = 5;
+		@Comment({"The effect of standing somewhat close to a Marx generator discharge.",
+				"0: Tinnitus, 1: Nausea, 2: normal damage"})
+		public static int marxSoundDamage = 0;
 	}
 }

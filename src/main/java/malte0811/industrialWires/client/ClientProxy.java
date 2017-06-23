@@ -271,6 +271,11 @@ public class ClientProxy extends CommonProxy {
 				}
 
 				@Override
+				public float getVolume() {
+					return .25F;
+				}
+
+				@Override
 				public float getXPosF() {
 					return (float) mc.player.posX;
 				}

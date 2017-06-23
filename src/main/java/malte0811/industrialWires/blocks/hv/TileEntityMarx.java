@@ -30,10 +30,7 @@ import blusunrize.immersiveengineering.common.blocks.BlockTypes_MetalsIE;
 import blusunrize.immersiveengineering.common.blocks.metal.*;
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import ic2.api.item.IC2Items;
-import malte0811.industrialWires.IIC2Connector;
-import malte0811.industrialWires.IWDamageSources;
-import malte0811.industrialWires.IWPotions;
-import malte0811.industrialWires.IndustrialWires;
+import malte0811.industrialWires.*;
 import malte0811.industrialWires.blocks.IBlockBoundsIW;
 import malte0811.industrialWires.blocks.ISyncReceiver;
 import malte0811.industrialWires.blocks.IWProperties;
@@ -45,13 +42,14 @@ import malte0811.industrialWires.util.MiscUtils;
 import malte0811.industrialWires.wires.IC2Wiretype;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagDouble;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -66,15 +64,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.BiConsumer;
 
 public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable, ISyncReceiver, IBlockBoundsIW, IImmersiveConnectable, IIC2Connector,
 		IRedstoneConnector{
-	// TODO do I want to do this?
-	public static final Set<TileEntityMarx> dischargingMarxes = new HashSet<>();
 
 	private static final String TYPE = "type";
 	private static final String STAGES = "stages";
@@ -82,8 +76,10 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	private static final String CAP_VOLTAGES = "capVoltages";
 	private double rcTimeConst;
 	private double timeFactor;
+	private double timeFactorBottom;
 	private double cReciproke = 1_000_000;
 	private double maxVoltage = 250_000;
+	private boolean allowSlowDischarge = true;
 
 	public IWProperties.MarxType type = IWProperties.MarxType.NO_MODEL;
 	private int stageCount = 0;
@@ -91,7 +87,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	@SideOnly(Side.CLIENT)
 	public TileRenderMarx.Discharge dischargeData;
 	// Voltage=100*storedEU
-	private DualEnergyStorage storage = new DualEnergyStorage(10_000, 8192);
+	private DualEnergyStorage storage = new DualEnergyStorage(100_000, 100_000);
 	private boolean hasConnection;
 	private double[] capVoltages;
 	//RS channel 1/white
@@ -113,8 +109,10 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		out.setBoolean(HAS_CONN, hasConnection);
 		storage.writeToNbt(out, ENERGY_TAG);
 		NBTTagList voltages = new NBTTagList();
-		for (int i = 0;i<stageCount;i++) {
-			voltages.appendTag(new NBTTagDouble(capVoltages[i]));
+		if (capVoltages != null) {
+			for (int i = 0; i < stageCount; i++) {
+				voltages.appendTag(new NBTTagDouble(capVoltages[i]));
+			}
 		}
 		out.setTag(CAP_VOLTAGES, voltages);
 	}
@@ -202,9 +200,6 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	public void update() {
 		if (state==FiringState.FIRE) {
 			state = FiringState.CHARGING;
-			if (world.isRemote) {
-				dischargingMarxes.remove(this);
-			}
 		} else if (state==FiringState.NEXT_TICK) {
 			state = FiringState.FIRE;
 			if (world.isRemote) {
@@ -225,10 +220,14 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 				capVoltages[i-1] -= capVoltages[i]-oldVoltage;
 			}
 			//charge bottom cap from storage
-			double u0 = 250_000*voltageControl/15D;
-			if (u0<=100*storage.getEnergyStoredEU()) {
+			double setVoltage = 250_000 * voltageControl / 15D;
+			double u0 = Math.min(setVoltage, 100 * storage.getEnergyStoredEU());
+			if (u0 < capVoltages[0] && setVoltage > capVoltages[0]) {
+				u0 = capVoltages[0];
+			}
+			if (u0 > 0 && (allowSlowDischarge || setVoltage > capVoltages[0])) {
 				double oldVoltage = capVoltages[0];
-				capVoltages[0] = u0 - (u0 - oldVoltage) * timeFactor;
+				capVoltages[0] = u0 - (u0 - oldVoltage) * timeFactor / 2;
 				double energyUsed = (capVoltages[0] * capVoltages[0] - oldVoltage * oldVoltage)/cReciproke;
 				if (energyUsed > 0) {// energyUsed can be negative when discharging the caps
 					storage.extractEURaw(energyUsed);
@@ -250,7 +249,6 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		if (!world.isRemote) {
 			//calculate energy
 			double energyStored = 0;
-			//TODO handle high cap voltage differences
 			for (int i = 0;i<stageCount;i++) {
 				energyStored += capVoltages[i]*capVoltages[i]/cReciproke;
 				capVoltages[i] = 0;
@@ -264,13 +262,17 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 			aabb = aabb.expand(0, stageCount/2-1,0);
 			final double sqrtStages = Math.sqrt(stageCount);
 			aabb = aabb.expandXyz(5*sqrtStages);
-			List<EntityLivingBase> fools = world.getEntitiesWithinAABB(EntityLivingBase.class, aabb);
+			List<Entity> fools = world.getEntitiesWithinAABB(Entity.class, aabb);
 			double energyNormed = energyStored/(stageCount*250*250);
-			double damageDistSqu = .5*energyNormed*sqrtStages;
-			double tinnitusDistSqu = 3*energyNormed*sqrtStages;
+			double damageDistSqu = energyNormed * sqrtStages;
+			double tinnitusDistSqu = 5 * energyNormed * sqrtStages;
 			damageDistSqu *= damageDistSqu;
 			tinnitusDistSqu *= tinnitusDistSqu;
-			for (EntityLivingBase entity:fools) {
+			if (IWConfig.HVStuff.marxSoundDamage == 2) {
+				damageDistSqu = tinnitusDistSqu;
+				tinnitusDistSqu = -1;
+			}
+			for (Entity entity : fools) {
 				double y;
 				if (entity.posY<pos.getY()+1) {
 					y = pos.getY()+1;
@@ -281,7 +283,6 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 				}
 				double distSqu = entity.getDistanceSq(v0.xCoord, y, v0.zCoord);
 				if (distSqu<=damageDistSqu) {
-					//TODO damage entity
 					float dmg = (float) (10*stageCount*(1-distSqu/damageDistSqu));
 					entity.attackEntityFrom(IWDamageSources.dmg_marx, dmg);
 				}
@@ -291,16 +292,17 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 					if (!earMuff&&helmet.hasTagCompound()) {
 						earMuff = helmet.getTagCompound().hasKey("IE:Earmuffs");
 					}
-					if (!earMuff) {//TODO they work on other helmets, don't they?
-						//TODO 13kHz
+					if (!earMuff) {
 						double multipl = Math.min(5, Math.sqrt(stageCount));
 						int duration = (int) (20*20*(1+multipl*(1-distSqu/tinnitusDistSqu)));
-						entity.addPotionEffect(new PotionEffect(IWPotions.tinnitus, duration));
+						if (IWConfig.HVStuff.marxSoundDamage == 0) {
+							((EntityPlayer) entity).addPotionEffect(new PotionEffect(IWPotions.tinnitus, duration));
+						} else {
+							((EntityPlayer) entity).addPotionEffect(new PotionEffect(Potion.getPotionFromResourceLocation("nausea"), duration));
+						}
 					}
 				}
 			}
-		} else {
-			dischargingMarxes.add(this);//TODO deal with breaking during discharges
 		}
 	}
 
@@ -524,6 +526,8 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		if (master.net.channelValues[3]!=0) {//light blue is firing trigger
 			master.tryTriggeredDischarge();
 		}
+		//yellow determines whether a lower charge- than cap0-voltage will discharge the generator
+		master.allowSlowDischarge = master.net.channelValues[4] == 0;
 	}
 	public void tryTriggeredDischarge() {
 		if (capVoltages[0]>=8/15D*maxVoltage) {
@@ -556,6 +560,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		this.stageCount = stageCount;
 		rcTimeConst = 5D/stageCount;
 		timeFactor = Math.exp(-1/(20*rcTimeConst));
+		timeFactorBottom = Math.exp(-1 / (20 * rcTimeConst * 2 / 3));
 	}
 
 	public int getStageCount() {
