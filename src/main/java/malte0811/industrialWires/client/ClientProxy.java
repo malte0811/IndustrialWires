@@ -277,7 +277,7 @@ public class ClientProxy extends CommonProxy {
 		default:
 			return;
 		}
-		PositionedSoundRecord sound = new PositionedSoundRecord(event, SoundCategory.BLOCKS, te.size.soundVolume, 1, false, 0, ISound.AttenuationType.LINEAR, (float) soundPos.xCoord, (float) soundPos.yCoord, (float) soundPos.zCoord);
+		PositionedSoundRecord sound = new PositionedSoundRecord(event, SoundCategory.BLOCKS, te.size.soundVolume, 1, false, 0, ISound.AttenuationType.LINEAR, (float) soundPos.x, (float) soundPos.y, (float) soundPos.z);
 		ClientUtils.mc().getSoundHandler().playSound(sound);
 		playingSounds.put(te.getPos(), sound);
 	}

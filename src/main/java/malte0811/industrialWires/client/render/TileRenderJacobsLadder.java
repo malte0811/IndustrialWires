@@ -52,7 +52,7 @@ public class TileRenderJacobsLadder extends TileEntitySpecialRenderer<TileEntity
 			Vec3d[] controls = new Vec3d[tile.size.arcPoints];
 			for (int i = 0; i < tile.size.arcPoints; i++) {
 				Vec3d speed = tile.controlMovement[i];
-				controls[i] = tile.controls[i].addVector(speed.xCoord * partialTicks, speed.yCoord * partialTicks, speed.zCoord * partialTicks);
+				controls[i] = tile.controls[i].addVector(speed.x * partialTicks, speed.y * partialTicks, speed.z * partialTicks);
 			}
 			drawBezier(controls, tile.salt, tile.size);
 			//DEBUG CODE
@@ -136,15 +136,15 @@ public class TileRenderJacobsLadder extends TileEntitySpecialRenderer<TileEntity
 	}
 
 	private void drawQuad(Vec3d v0, Vec3d v1, Vec3d rad, float[] color0, float[] color1, VertexBuffer vertexBuffer) {
-		color(color1, vertexBuffer.pos(v1.xCoord - rad.xCoord, v1.yCoord - rad.yCoord, v1.zCoord - rad.zCoord)).endVertex();
-		color(color0, vertexBuffer.pos(v0.xCoord - rad.xCoord, v0.yCoord - rad.yCoord, v0.zCoord - rad.zCoord)).endVertex();
-		color(color0, vertexBuffer.pos(v0.xCoord + rad.xCoord, v0.yCoord + rad.yCoord, v0.zCoord + rad.zCoord)).endVertex();
-		color(color1, vertexBuffer.pos(v1.xCoord + rad.xCoord, v1.yCoord + rad.yCoord, v1.zCoord + rad.zCoord)).endVertex();
+		color(color1, vertexBuffer.pos(v1.x - rad.x, v1.y - rad.y, v1.z - rad.z)).endVertex();
+		color(color0, vertexBuffer.pos(v0.x - rad.x, v0.y - rad.y, v0.z - rad.z)).endVertex();
+		color(color0, vertexBuffer.pos(v0.x + rad.x, v0.y + rad.y, v0.z + rad.z)).endVertex();
+		color(color1, vertexBuffer.pos(v1.x + rad.x, v1.y + rad.y, v1.z + rad.z)).endVertex();
 
-		color(color1, vertexBuffer.pos(v1.xCoord + rad.xCoord, v1.yCoord + rad.yCoord, v1.zCoord + rad.zCoord)).endVertex();
-		color(color0, vertexBuffer.pos(v0.xCoord + rad.xCoord, v0.yCoord + rad.yCoord, v0.zCoord + rad.zCoord)).endVertex();
-		color(color0, vertexBuffer.pos(v0.xCoord - rad.xCoord, v0.yCoord - rad.yCoord, v0.zCoord - rad.zCoord)).endVertex();
-		color(color1, vertexBuffer.pos(v1.xCoord - rad.xCoord, v1.yCoord - rad.yCoord, v1.zCoord - rad.zCoord)).endVertex();
+		color(color1, vertexBuffer.pos(v1.x + rad.x, v1.y + rad.y, v1.z + rad.z)).endVertex();
+		color(color0, vertexBuffer.pos(v0.x + rad.x, v0.y + rad.y, v0.z + rad.z)).endVertex();
+		color(color0, vertexBuffer.pos(v0.x - rad.x, v0.y - rad.y, v0.z - rad.z)).endVertex();
+		color(color1, vertexBuffer.pos(v1.x - rad.x, v1.y - rad.y, v1.z - rad.z)).endVertex();
 	}
 
 	private VertexBuffer color(float[] color, VertexBuffer vb) {

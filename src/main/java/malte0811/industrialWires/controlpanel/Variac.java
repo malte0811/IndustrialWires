@@ -129,8 +129,8 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 
 	@Override
 	public void interactWith(Vec3d hitRelative, TileEntityPanel tile, EntityPlayerMP player) {
-		double xRel = hitRelative.xCoord - SIZE / 2;
-		double yRel = -(hitRelative.zCoord - SIZE / 2);
+		double xRel = hitRelative.x - SIZE / 2;
+		double yRel = -(hitRelative.z - SIZE / 2);
 		double angle = 1.5 * Math.PI - Math.atan2(yRel, xRel);
 		if (angle < 0) {
 			angle += 2 * Math.PI;

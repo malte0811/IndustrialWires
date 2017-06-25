@@ -23,6 +23,7 @@ import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.BlockIWBase;
 import malte0811.industrialWires.blocks.IMetaEnum;
 import malte0811.industrialWires.controlpanel.PanelComponent;
+import malte0811.industrialWires.controlpanel.PropertyComponents;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;

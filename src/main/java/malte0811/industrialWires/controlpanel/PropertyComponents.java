@@ -16,10 +16,9 @@
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package malte0811.industrialWires.blocks.controlpanel;
+package malte0811.industrialWires.controlpanel;
 
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
-import malte0811.industrialWires.controlpanel.PanelComponent;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.property.IUnlistedProperty;
 
@@ -52,6 +51,7 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 		public EnumFacing facing = EnumFacing.NORTH;
 		public float height = .5F;
 		public EnumFacing top = EnumFacing.UP;
+		public float angle = 0;
 
 		public PanelRenderProperties() {
 			super();
@@ -74,25 +74,29 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 		}
 
 		public Matrix4 getPanelTopTransform() {
-			return getPanelBaseTransform().translate(0, height, 0);
+			return getPanelBaseTransformUnrotated().translate(0, height, 0).rotate(angle, 1, 0, 0);
 		}
 
 		public Matrix4 getPanelBaseTransform() {
+			return getPanelBaseTransformUnrotated().rotate(angle, 1, 0, 0);
+		}
+
+		public Matrix4 getPanelBaseTransformUnrotated() {
 			Matrix4 ret = new Matrix4();
 			ret.translate(.5, .5, .5);
 			switch (top) {
-			case DOWN:
-				ret.rotate(Math.PI, 0, 0, 1);
-			case UP:
-				ret.rotate(-facing.getHorizontalAngle() * Math.PI / 180 + Math.PI, 0, 1, 0);
-				break;
-			case NORTH:
-			case SOUTH:
-			case WEST:
-			case EAST:
-				ret.rotate(Math.PI / 2, 1, 0, 0);
-				ret.rotate(top.getHorizontalAngle() * Math.PI / 180, 0, 0, 1);
-				break;
+				case DOWN:
+					ret.rotate(Math.PI, 0, 0, 1);
+				case UP:
+					ret.rotate(-facing.getHorizontalAngle() * Math.PI / 180 + Math.PI, 0, 1, 0);
+					break;
+				case NORTH:
+				case SOUTH:
+				case WEST:
+				case EAST:
+					ret.rotate(Math.PI / 2, 1, 0, 0);
+					ret.rotate(top.getHorizontalAngle() * Math.PI / 180, 0, 0, 1);
+					break;
 			}
 			ret.translate(-.5, -.5, -.5);
 			return ret;

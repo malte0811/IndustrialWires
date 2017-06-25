@@ -135,6 +135,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 			NBTTagList l = nbt.getTagList("components", 10);
 			PanelUtils.readListFromNBT(l, components);
 			components.height = nbt.getFloat("height");
+			components.angle = nbt.getFloat("angle");
 		}
 		defAABB = null;
 	}
@@ -148,6 +149,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		}
 		nbt.setTag("components", comps);
 		nbt.setFloat("height", components.height);
+		nbt.setFloat("angle", components.angle);
 	}
 
 	@Nonnull
@@ -220,7 +222,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		Vec3d max = new Vec3d(in.maxX, in.maxY, in.maxZ);
 		min = mat.apply(min);
 		max = mat.apply(max);
-		return new AxisAlignedBB(min.xCoord, min.yCoord, min.zCoord, max.xCoord, max.yCoord, max.zCoord);
+		return new AxisAlignedBB(min.x, min.y, min.z, max.x, max.y, max.z);
 	}
 
 	@Nullable
@@ -232,7 +234,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		for (PanelComponent pc : components) {
 			AxisAlignedBB box = pc.getBlockRelativeAABB();
 			if (box.maxY > box.minY) {
-				box = apply(mat, box.expandXyz(.002));
+				box = apply(mat, box.grow(.002));
 				Vec3d hitVec = hitAbs ? hit.addVector(-pos.getX(), -pos.getY(), -pos.getZ()) : hit;
 				hitVec = hitVec.scale(2).subtract(playerPos);
 				RayTraceResult ray = box.calculateIntercept(playerPos, hitVec);

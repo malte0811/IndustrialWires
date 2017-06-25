@@ -129,7 +129,7 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 
 	@Override
 	public void interactWith(Vec3d hitRelative, TileEntityPanel tile, EntityPlayerMP player) {
-		double pos = horizontal ? hitRelative.xCoord : (length - hitRelative.zCoord);
+		double pos = horizontal ? hitRelative.x : (length - hitRelative.z);
 		byte newLevel = (byte) (Math.min(pos * 16 / length, 15));
 		if (newLevel != out) {
 			setOut(rsChannel, newLevel);

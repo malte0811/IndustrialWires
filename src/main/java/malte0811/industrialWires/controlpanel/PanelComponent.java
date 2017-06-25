@@ -167,7 +167,7 @@ public abstract class PanelComponent {
 		double px = te.getPos().getX() - TileEntityRendererDispatcher.staticPlayerX;
 		double py = te.getPos().getY() - TileEntityRendererDispatcher.staticPlayerY;
 		double pz = te.getPos().getZ() - TileEntityRendererDispatcher.staticPlayerZ;
-		RenderGlobal.drawSelectionBoundingBox(te.apply(te.getComponents().getPanelTopTransform(), getBlockRelativeAABB()).expandXyz(0.002).offset(px, py, pz),
+		RenderGlobal.drawSelectionBoundingBox(te.apply(te.getComponents().getPanelTopTransform(), getBlockRelativeAABB()).grow(0.002).offset(px, py, pz),
 				0.0F, 0.0F, 0.0F, 0.4F);
 		GlStateManager.depthMask(true);
 		GlStateManager.enableTexture2D();

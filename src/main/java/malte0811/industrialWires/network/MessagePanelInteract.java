@@ -55,7 +55,7 @@ public class MessagePanelInteract implements IMessage {
 		buf.writeInt(this.pos.getY());
 		buf.writeInt(this.pos.getZ());
 		buf.writeInt(pcId);
-		buf.writeDouble(hitRelative.xCoord).writeDouble(hitRelative.yCoord).writeDouble(hitRelative.zCoord);
+		buf.writeDouble(hitRelative.x).writeDouble(hitRelative.y).writeDouble(hitRelative.z);
 	}
 
 	public static class HandlerServer implements IMessageHandler<MessagePanelInteract, IMessage> {

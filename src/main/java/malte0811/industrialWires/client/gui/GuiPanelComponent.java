@@ -223,8 +223,8 @@ public class GuiPanelComponent extends GuiContainer {
 		for (int i = 0; i < stringTexts.size(); i++) {
 			GuiTextField field = stringTexts.get(i);
 			String tooltip = confComp.fomatConfigDescription(IConfigurableComponent.ConfigType.STRING, i);
-			if (tooltip != null && mouseX >= field.xPosition && mouseX < field.xPosition + field.width &&
-					mouseY >= field.yPosition && mouseY < field.yPosition + field.height) {
+			if (tooltip != null && mouseX >= field.x && mouseX < field.x + field.width &&
+					mouseY >= field.y && mouseY < field.y + field.height) {
 				ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRenderer);
 			}
 		}

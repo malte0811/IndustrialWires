@@ -101,7 +101,7 @@ public class BlockJacobsLadder extends BlockIWBase implements IMetaEnum, IPlacem
 	}
 
 	@Override
-	public boolean isFullyOpaque(IBlockState state) {
+	public boolean isTopSolid(IBlockState state) {
 		return false;
 	}
 

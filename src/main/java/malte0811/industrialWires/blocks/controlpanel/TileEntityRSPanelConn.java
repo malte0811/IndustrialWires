@@ -30,6 +30,7 @@ import malte0811.industrialWires.blocks.IBlockBoundsIW;
 import malte0811.industrialWires.blocks.INetGUI;
 import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.controlpanel.PanelUtils;
+import malte0811.industrialWires.controlpanel.PropertyComponents;
 import malte0811.industrialWires.util.TriConsumer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
