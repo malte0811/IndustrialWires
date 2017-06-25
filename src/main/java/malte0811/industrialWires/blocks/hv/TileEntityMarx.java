@@ -87,7 +87,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	@SideOnly(Side.CLIENT)
 	public TileRenderMarx.Discharge dischargeData;
 	// Voltage=100*storedEU
-	private DualEnergyStorage storage = new DualEnergyStorage(100_000, 100_000);
+	private DualEnergyStorage storage = new DualEnergyStorage(50_000, 50_000);
 	private boolean hasConnection;
 	private double[] capVoltages;
 	//RS channel 1/white
