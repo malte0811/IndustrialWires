@@ -67,7 +67,7 @@ repositories {
 }
 
 dependencies {
-    deobfCompile "net.industrial-craft:industrialcraft-2:2.7.+:api"
+    compile "net.industrial-craft:industrialcraft-2:2.7.+"
     deobfCompile "blusunrize:ImmersiveEngineering:0.11-+:deobf"
 }
 

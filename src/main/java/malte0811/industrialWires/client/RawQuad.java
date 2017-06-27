@@ -23,7 +23,11 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.EnumFacing;
 import org.lwjgl.util.vector.Vector3f;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
+
+import static org.lwjgl.util.vector.Vector3f.cross;
+import static org.lwjgl.util.vector.Vector3f.sub;
 
 public class RawQuad {
 	public final Vector3f[] vertices = new Vector3f[4];
@@ -31,7 +35,7 @@ public class RawQuad {
 	public final TextureAtlasSprite tex;
 	public final float[] colorA;
 	public final Vector3f normal;
-	public final float[] uvs;
+	public final float[][] uvs;
 	public int light;
 
 	public RawQuad(Vector3f v0, Vector3f v1, Vector3f v2, Vector3f v3,
@@ -43,6 +47,15 @@ public class RawQuad {
 	public RawQuad(Vector3f v0, Vector3f v1, Vector3f v2, Vector3f v3,
 				   EnumFacing facing, TextureAtlasSprite tex, float[] colorA,
 				   Vector3f normal, float[] uvs, int light) {
+		this(v0, v1, v2, v3, facing, tex, colorA, normal, new float[][]{
+				{uvs[0], uvs[1]}, {uvs[0], uvs[3]},
+				{uvs[2], uvs[3]}, {uvs[2], uvs[1]}
+		}, light);
+	}
+
+	public RawQuad(Vector3f v0, Vector3f v1, Vector3f v2, Vector3f v3,
+				   EnumFacing facing, TextureAtlasSprite tex, float[] colorA,
+				   @Nullable Vector3f normal, float[][] uvs, int light) {
 		vertices[0] = v0;
 		vertices[1] = v1;
 		vertices[2] = v2;
@@ -55,7 +68,12 @@ public class RawQuad {
 		} else {
 			this.colorA = colorA;
 		}
-		this.normal = normal;
+		if (normal != null) {
+			this.normal = normal;
+		} else {
+			this.normal = cross(sub(v1, v3, null), sub(v2, v0, null), null);//TODO is this the right way around?
+			this.normal.normalise(this.normal);
+		}
 		this.uvs = uvs;
 		this.light = light;
 	}
@@ -64,6 +82,6 @@ public class RawQuad {
 		Matrix4 matNormal = mat.copy().transpose();
 		matNormal.invert();
 		return new RawQuad(mat.apply(vertices[0]), mat.apply(vertices[1]), mat.apply(vertices[2]), mat.apply(vertices[3]),
-				facing, tex, colorA, matNormal.apply(normal), uvs);
+				facing, tex, colorA, matNormal.apply(normal), uvs, light);
 	}
 }

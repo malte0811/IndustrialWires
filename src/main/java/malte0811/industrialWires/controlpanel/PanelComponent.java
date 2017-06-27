@@ -26,11 +26,12 @@ import malte0811.industrialWires.util.TriConsumer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -158,20 +159,21 @@ public abstract class PanelComponent {
 		}
 	}
 
+	@SideOnly(Side.CLIENT)
 	public void renderBox(TileEntityPanel te) {
+		GlStateManager.pushMatrix();
 		GlStateManager.enableBlend();
 		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 		GlStateManager.glLineWidth(2.0F);
 		GlStateManager.disableTexture2D();
 		GlStateManager.depthMask(false);
-		double px = te.getPos().getX() - TileEntityRendererDispatcher.staticPlayerX;
-		double py = te.getPos().getY() - TileEntityRendererDispatcher.staticPlayerY;
-		double pz = te.getPos().getZ() - TileEntityRendererDispatcher.staticPlayerZ;
-		RenderGlobal.drawSelectionBoundingBox(te.apply(te.getComponents().getPanelTopTransform(), getBlockRelativeAABB()).grow(0.002).offset(px, py, pz),
+		te.getComponents().transformGLForTop(te.getPos());
+		RenderGlobal.drawSelectionBoundingBox(getBlockRelativeAABB().grow(0.002),
 				0.0F, 0.0F, 0.0F, 0.4F);
 		GlStateManager.depthMask(true);
 		GlStateManager.enableTexture2D();
 		GlStateManager.disableBlend();
+		GlStateManager.popMatrix();
 	}
 
 	public abstract void renderInGUI(GuiPanelCreator gui);

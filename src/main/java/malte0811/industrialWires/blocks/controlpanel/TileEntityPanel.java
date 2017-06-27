@@ -28,7 +28,6 @@ import malte0811.industrialWires.blocks.TileEntityIWBase;
 import malte0811.industrialWires.controlpanel.*;
 import malte0811.industrialWires.network.MessagePanelInteract;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -227,25 +226,30 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 
 	@Nullable
 	public Pair<PanelComponent, RayTraceResult> getSelectedComponent(EntityPlayer player, Vec3d hit, boolean hitAbs) {
+		//TODO prvent clicking through the back of the panel
 		Matrix4 mat = components.getPanelTopTransform();
+		mat.invert();
 		PanelComponent retPc = null;
 		RayTraceResult retRay = null;
-		Vec3d playerPos = Minecraft.getMinecraft().player.getPositionVector().addVector(-pos.getX(), player.getEyeHeight() - pos.getY(), -pos.getZ());
+		Vec3d playerPosRelative = player.getPositionVector().addVector(-pos.getX(), player.getEyeHeight() - pos.getY(), -pos.getZ());
+		Vec3d playerPosTransformed = mat.apply(playerPosRelative);
 		for (PanelComponent pc : components) {
 			AxisAlignedBB box = pc.getBlockRelativeAABB();
 			if (box.maxY > box.minY) {
-				box = apply(mat, box.grow(.002));
+				box = box.grow(.002);
 				Vec3d hitVec = hitAbs ? hit.addVector(-pos.getX(), -pos.getY(), -pos.getZ()) : hit;
-				hitVec = hitVec.scale(2).subtract(playerPos);
-				RayTraceResult ray = box.calculateIntercept(playerPos, hitVec);
+				hitVec = hitVec.subtract(playerPosRelative.subtract(hitVec).scale(10));
+				RayTraceResult ray = box.calculateIntercept(playerPosTransformed, mat.apply(hitVec));
 				if (ray != null) {
 					if (retPc == null) {
+						ray.hitVec = ray.hitVec.subtract(pc.getX(), 0, pc.getY());
 						retPc = pc;
 						retRay = ray;
 					} else {
-						double oldDist = retRay.hitVec.subtract(playerPos).lengthSquared();
-						double newDist = ray.hitVec.subtract(playerPos).lengthSquared();
+						double oldDist = retRay.hitVec.subtract(playerPosRelative).lengthSquared();
+						double newDist = ray.hitVec.subtract(playerPosRelative).lengthSquared();
 						if (newDist < oldDist) {
+							ray.hitVec = ray.hitVec.subtract(pc.getX(), 0, pc.getY());
 							retPc = pc;
 							retRay = ray;
 						}
@@ -261,12 +265,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		if (world.isRemote) {
 			Pair<PanelComponent, RayTraceResult> pc = getSelectedComponent(player, new Vec3d(hitX, hitY, hitZ), false);
 			if (pc != null) {
-				Matrix4 inv = components.getPanelTopTransform();
-				inv.translate(pc.getLeft().getX(), 0, pc.getLeft().getY());
-				inv.invert();
-				Vec3d hitVec = inv.apply(pc.getRight().hitVec);
-				hitVec.subtract(pc.getLeft().getX(), 0, -pc.getLeft().getY());
-				IndustrialWires.packetHandler.sendToServer(new MessagePanelInteract(this, components.indexOf(pc.getKey()), hitVec));
+				IndustrialWires.packetHandler.sendToServer(new MessagePanelInteract(this, components.indexOf(pc.getKey()), pc.getRight().hitVec));
 			}
 		}
 		return true;

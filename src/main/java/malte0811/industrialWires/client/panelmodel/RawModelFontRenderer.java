@@ -66,7 +66,7 @@ public class RawModelFontRenderer extends FontRenderer {
 		Vector3f v3 = new Vector3f(posX + w, h0, posY);
 		v3.scale(scale);
 		RawQuad quad = new RawQuad(v0, v1, v2, v3,
-				EnumFacing.UP, sprite, colorA, new Vector3f(0, 1, 0),
+				EnumFacing.UP, sprite, colorA, normal,
 				new float[]{x, y, x + wt, y + ht});
 		if (transform!=null) {
 			quad = quad.apply(transform);

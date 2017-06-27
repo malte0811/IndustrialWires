@@ -19,8 +19,14 @@
 package malte0811.industrialWires.controlpanel;
 
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.property.IUnlistedProperty;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
 
@@ -51,6 +57,7 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 		public EnumFacing facing = EnumFacing.NORTH;
 		public float height = .5F;
 		public EnumFacing top = EnumFacing.UP;
+		// as radians!
 		public float angle = 0;
 
 		public PanelRenderProperties() {
@@ -74,14 +81,40 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 		}
 
 		public Matrix4 getPanelTopTransform() {
-			return getPanelBaseTransformUnrotated().translate(0, height, 0).rotate(angle, 1, 0, 0);
+			double centerOffset = -.5 * (1 / Math.cos(angle) - 1);
+			return getPanelBaseTransform().translate(0, height, 1)
+					.rotate(angle, 1, 0, 0).translate(0, 0, centerOffset - 1);
+		}
+
+		@SideOnly(Side.CLIENT)
+		public void transformGLForTop(BlockPos panelPos) {
+			double px = panelPos.getX() - TileEntityRendererDispatcher.staticPlayerX;
+			double py = panelPos.getY() - TileEntityRendererDispatcher.staticPlayerY;
+			double pz = panelPos.getZ() - TileEntityRendererDispatcher.staticPlayerZ;
+			GlStateManager.translate(px + .5, py + .5, pz + .5);
+			switch (top) {
+				case DOWN:
+					GlStateManager.rotate(180, 0, 0, 1);
+				case UP:
+					GlStateManager.rotate(-facing.getHorizontalAngle(), 0, 1, 0);
+					break;
+				case NORTH:
+				case SOUTH:
+				case WEST:
+				case EAST:
+					GlStateManager.rotate(90, 1, 0, 0);
+					GlStateManager.rotate(top.getHorizontalAngle(), 0, 0, 1);
+					break;
+			}
+			GlStateManager.translate(-.5, height - .5, -.5);
+			GlStateManager.rotate((float) (-angle * 180 / Math.PI), 1, 0, 0);
+			GlStateManager.translate(.5, 0, .5);
+			GlStateManager.rotate(180, 0, 1, 0);
+			double centerOffset = .5 * (1 / Math.cos(angle) - 1);
+			GlStateManager.translate(-.5, 0, -.5 - centerOffset);
 		}
 
 		public Matrix4 getPanelBaseTransform() {
-			return getPanelBaseTransformUnrotated().rotate(angle, 1, 0, 0);
-		}
-
-		public Matrix4 getPanelBaseTransformUnrotated() {
 			Matrix4 ret = new Matrix4();
 			ret.translate(.5, .5, .5);
 			switch (top) {
@@ -103,14 +136,18 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 		}
 
 		public float getMaxHeight() {
-			float ret = 0;
+			float max = getPanelMaxHeight();
+			double centerOffset = .5 * (1 / Math.cos(angle) - 1);
 			for (PanelComponent pc : this) {
-				float hHere = pc.getHeight();
-				if (hHere > ret) {
-					ret = hHere;
+				AxisAlignedBB aabb = pc.getBlockRelativeAABB();
+				double y = angle > 0 ? aabb.minY : aabb.maxY;
+				float hComp = (float) (pc.getHeight() * Math.cos(angle));
+				float localPanelHeight = (float) (height + (1 - (y + centerOffset)) * Math.sin(angle));
+				if (hComp + localPanelHeight > max) {
+					max = hComp + localPanelHeight;
 				}
 			}
-			return ret + height;
+			return max;
 		}
 
 		public PanelRenderProperties copyOf() {
@@ -120,7 +157,12 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 			}
 			ret.facing = facing;
 			ret.top = top;
+			ret.angle = angle;
 			return ret;
+		}
+
+		public float getPanelMaxHeight() {
+			return (float) (height + Math.tan(angle));
 		}
 
 		@Override
@@ -132,6 +174,7 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 			PanelRenderProperties that = (PanelRenderProperties) o;
 
 			if (Float.compare(that.height, height) != 0) return false;
+			if (Float.compare(that.angle, angle) != 0) return false;
 			if (facing != that.facing) return false;
 			return top == that.top;
 		}
@@ -142,6 +185,7 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 			result = 31 * result + facing.hashCode();
 			result = 31 * result + (height != +0.0f ? Float.floatToIntBits(height) : 0);
 			result = 31 * result + top.hashCode();
+			result = 31 * result + (angle != +0.0f ? Float.floatToIntBits(angle) : 0);
 			return result;
 		}
 	}

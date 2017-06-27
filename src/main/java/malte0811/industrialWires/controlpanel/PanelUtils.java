@@ -84,7 +84,7 @@ public final class PanelUtils {
 			Matrix4 m4Here = m4.copy().translate(pc.getX(), .0001, pc.getY());
 			List<RawQuad> compQuads = pc.getQuads();
 			for (RawQuad bq : compQuads) {
-				ret.add(bakeQuad(bq, m4Here, m4RotOnly, false));
+				ret.add(bakeQuad(bq, m4Here, m4RotOnly));
 			}
 		}
 		Matrix4 baseTrans = components.getPanelBaseTransform();
@@ -94,50 +94,60 @@ public final class PanelUtils {
 
 		List<RawQuad> rawOut = new ArrayList<>();
 		//addTexturedBox(new Vector3f(0, 0, 0), new Vector3f(1, components.height, 1), rawOut, UV_FULL, PANEL_TEXTURE);
-		float vMax = 16 * components.height;
-		addQuad(rawOut, new Vector3f(0, components.height, 0), new Vector3f(0, components.height, 1),
-				new Vector3f(1, components.height, 1), new Vector3f(1, components.height, 0),
-				EnumFacing.UP, WHITE, PANEL_TEXTURE, UV_FULL, null, false);
-		addQuad(rawOut, new Vector3f(0, 0, 0), new Vector3f(1, 0, 0),
+		float maxHeight = components.getPanelMaxHeight();
+		float vMaxLower = 16 * components.height;
+		float vMaxUpper = 16 * maxHeight;
+		//TOP
+		rawOut.add(new RawQuad(new Vector3f(0, maxHeight, 0), new Vector3f(0, components.height, 1),
+				new Vector3f(1, components.height, 1), new Vector3f(1, maxHeight, 0),
+				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, UV_FULL, -1));
+		//BOTTOM
+		rawOut.add(new RawQuad(new Vector3f(0, 0, 0), new Vector3f(1, 0, 0),
 				new Vector3f(1, 0, 1), new Vector3f(0, 0, 1),
-				EnumFacing.DOWN, WHITE, PANEL_TEXTURE, new float[]{0, 16, 16, 0}, null, false);
-		addQuad(rawOut, new Vector3f(0, 0, 0), new Vector3f(0, 0, 1),
-				new Vector3f(0, components.height, 1), new Vector3f(0, components.height, 0),
-				EnumFacing.WEST, WHITE, PANEL_TEXTURE, new float[]{0, vMax, 16, 0}, null, false);
-		addQuad(rawOut, new Vector3f(1, 0, 0), new Vector3f(1, components.height, 0),
+				EnumFacing.DOWN, PANEL_TEXTURE, WHITE, null, UV_FULL, -1));
+		//LEFT
+		rawOut.add(new RawQuad(new Vector3f(0, 0, 0), new Vector3f(0, 0, 1),
+				new Vector3f(0, components.height, 1), new Vector3f(0, maxHeight, 0),
+				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, new float[][]{
+				{0, 0}, {0, 16},
+				{vMaxLower, 16}, {vMaxUpper, 0}
+		}, -1));
+		//RIGHT
+		rawOut.add(new RawQuad(new Vector3f(1, 0, 0), new Vector3f(1, maxHeight, 0),
 				new Vector3f(1, components.height, 1), new Vector3f(1, 0, 1),
-				EnumFacing.EAST, WHITE, PANEL_TEXTURE, new float[]{16, vMax, 0, 0}, null, false);
-		addQuad(rawOut, new Vector3f(1, 0, 0), new Vector3f(0, 0, 0),
-				new Vector3f(0, components.height, 0), new Vector3f(1, components.height, 0),
-				EnumFacing.NORTH, WHITE, PANEL_TEXTURE, new float[]{0, vMax, 16, 0}, null, false);
-		addQuad(rawOut, new Vector3f(0, 0, 1), new Vector3f(1, 0, 1),
+				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, new float[][]{
+				{0, 0}, {vMaxUpper, 0},
+				{vMaxLower, 16}, {0, 16}
+		}, -1));
+		//BACK
+		rawOut.add(new RawQuad(new Vector3f(1, 0, 0), new Vector3f(0, 0, 0),
+				new Vector3f(0, maxHeight, 0), new Vector3f(1, maxHeight, 0),
+				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, new float[]{0, 0, vMaxUpper, 16}, -1));
+		//FRONT
+		rawOut.add(new RawQuad(new Vector3f(0, 0, 1), new Vector3f(1, 0, 1),
 				new Vector3f(1, components.height, 1), new Vector3f(0, components.height, 1),
-				EnumFacing.SOUTH, WHITE, PANEL_TEXTURE, new float[]{0, vMax, 16, 0}, null, false);
+				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, new float[]{0, 0, vMaxLower, 16}, -1));
 		for (RawQuad bq : rawOut) {
-			ret.add(bakeQuad(bq, baseTrans, baseNorm, bq.facing != EnumFacing.EAST && bq.facing != EnumFacing.UP));//flip south and west
+			ret.add(bakeQuad(bq, baseTrans, baseNorm));
 		}
 
 		return ret;
 	}
 
 	@SideOnly(Side.CLIENT)
-	public static BakedQuad bakeQuad(RawQuad raw, Matrix4 transform, Matrix4 transfNormal, boolean flip) {
+	public static BakedQuad bakeQuad(RawQuad raw, Matrix4 transform, Matrix4 transfNormal) {
 		VertexFormat format = DefaultVertexFormats.ITEM;
 		UnpackedBakedQuad.Builder builder = new UnpackedBakedQuad.Builder(format);
 		builder.setQuadOrientation(raw.facing);
 		builder.setTexture(raw.tex);
 		Vector3f[] vertices = raw.vertices;
-		float[] uvs = raw.uvs;
+		float[][] uvs = raw.uvs;
 		Vector3f normal = transfNormal.apply(raw.normal);
 		OBJModel.Normal faceNormal = new OBJModel.Normal(normal.x, normal.y, normal.z);
-		putVertexData(format, builder, transform.apply(vertices[0]), faceNormal, uvs[0], uvs[1], raw.tex,
-				raw.colorA);
-		putVertexData(format, builder, transform.apply(vertices[1]), faceNormal, uvs[flip ? 2 : 0], uvs[flip ? 1 : 3], raw.tex,
-				raw.colorA);
-		putVertexData(format, builder, transform.apply(vertices[2]), faceNormal, uvs[2], uvs[3], raw.tex,
-				raw.colorA);
-		putVertexData(format, builder, transform.apply(vertices[3]), faceNormal, uvs[flip ? 0 : 2], uvs[flip ? 3 : 1], raw.tex,
-				raw.colorA);
+		for (int i = 0; i < 4; i++) {
+			putVertexData(format, builder, transform.apply(vertices[i]), faceNormal, uvs[i][0], uvs[i][1], raw.tex,
+					raw.colorA);
+		}
 		BakedQuad ret = builder.build();
 		if (raw.light>0) {
 			ret = new SmartLightingQuadIW(ret, raw.light);
