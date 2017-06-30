@@ -18,7 +18,7 @@
 
 package malte0811.industrialWires.controlpanel;
 
-import blusunrize.immersiveengineering.common.util.IELogger;
+import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
@@ -30,8 +30,10 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.apache.logging.log4j.Level;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -154,7 +156,7 @@ public abstract class PanelComponent {
 			ret.setPanelHeight(nbt.getFloat("panelHeight"));
 			return ret;
 		} else {
-			IELogger.info("(IndustrialWires) Unknown panel component: " + type);//TODO own logger?
+			FMLLog.log(IndustrialWires.MODID, Level.WARN, "Unknown panel component: " + type);
 			return null;
 		}
 	}
@@ -189,18 +191,20 @@ public abstract class PanelComponent {
 	}
 
 
-	public boolean isValidPos(List<PanelComponent> components) {
-		AxisAlignedBB aabb = getBlockRelativeAABB().offset(0, panelHeight, 0);
-		if (aabb.minX < 0 || aabb.maxX > 1) {
+	public boolean isValidPos(List<PanelComponent> components, float height, float angle) {
+		float h = PanelUtils.getHeightWithComponent(this, angle, height);
+		if (h < 0 || h > 1) {
 			return false;
 		}
-		if (aabb.minY < 0 || aabb.maxY > 1) {
+
+		AxisAlignedBB aabb = getBlockRelativeAABB();
+		if (aabb.minX < 0 || aabb.maxX > 1) {
 			return false;
 		}
 		if (aabb.minZ < 0 || aabb.maxZ > 1) {
 			return false;
 		}
-		aabb = getBlockRelativeAABB();
+
 		for (PanelComponent pc : components) {
 			if (pc == this) {
 				continue;

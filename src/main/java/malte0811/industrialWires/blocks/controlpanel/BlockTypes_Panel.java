@@ -26,7 +26,8 @@ public enum BlockTypes_Panel implements IStringSerializable {
 	TOP,
 	RS_WIRE,
 	DUMMY,
-	CREATOR;
+	CREATOR,
+	UNFINISHED;
 
 	@Override
 	public String getName() {

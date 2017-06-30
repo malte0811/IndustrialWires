@@ -32,6 +32,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
@@ -57,6 +58,11 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 	}
 
 	@Override
+	protected ItemBlock createItemBlock() {
+		return new ItemBlockPanel(this);
+	}
+
+	@Override
 	public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer) {
 		switch (state.getValue(type)) {
 		case TOP:
@@ -77,6 +83,8 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 			return new TileEntityRSPanelConn();
 		case CREATOR:
 			return new TileEntityPanelCreator();
+			case UNFINISHED:
+				return new TileEntityUnfinishedPanel();
 		default:
 			return null;
 		}
@@ -145,10 +153,9 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 
 	@Override
 	public void getSubBlocks(@Nonnull Item itemIn, CreativeTabs tab, NonNullList<ItemStack> list) {
-		list.add(new ItemStack(itemIn, 1, 0));
-		list.add(new ItemStack(itemIn, 1, 1));
-		list.add(new ItemStack(itemIn, 1, 2));
-		list.add(new ItemStack(itemIn, 1, 3));
+		for (int i = 0; i < BlockTypes_Panel.values().length; i++) {
+			list.add(new ItemStack(itemIn, 1, i));
+		}
 	}
 
 	@Override
@@ -195,11 +202,9 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 	@Override
 	@Nonnull
 	public ItemStack getPickBlock(@Nonnull IBlockState state, RayTraceResult target, @Nonnull World world, @Nonnull BlockPos pos, EntityPlayer player) {
-		if (state.getValue(type) == BlockTypes_Panel.TOP) {
-			TileEntity te = world.getTileEntity(pos);
-			if (te instanceof TileEntityPanel) {
-				return ((TileEntityPanel) te).getTileDrop(player, state);
-			}
+		TileEntity te = world.getTileEntity(pos);
+		if (te instanceof TileEntityPanel) {
+			return ((TileEntityPanel) te).getTileDrop(player, state);
 		}
 		return super.getPickBlock(state, target, world, pos, player);
 	}

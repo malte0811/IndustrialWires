@@ -98,5 +98,6 @@ public class ClientEventHandler {
 	@SubscribeEvent
 	public void bakeModel(ModelBakeEvent event) {
 		event.getModelRegistry().putObject(new ModelResourceLocation(IndustrialWires.MODID + ":control_panel", "inventory,type=top"), new PanelModel());
+		event.getModelRegistry().putObject(new ModelResourceLocation(IndustrialWires.MODID + ":control_panel", "inventory,type=unfinished"), new PanelModel());
 	}
 }

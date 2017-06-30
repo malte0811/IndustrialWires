@@ -20,7 +20,6 @@ package malte0811.industrialWires.controlpanel;
 
 import blusunrize.immersiveengineering.api.Lib;
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
-import ic2.api.item.IC2Items;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.controlpanel.BlockPanel;
 import malte0811.industrialWires.blocks.controlpanel.BlockTypes_Panel;
@@ -93,13 +92,13 @@ public final class PanelUtils {
 		baseNorm.transpose();
 
 		List<RawQuad> rawOut = new ArrayList<>();
-		//addTexturedBox(new Vector3f(0, 0, 0), new Vector3f(1, components.height, 1), rawOut, UV_FULL, PANEL_TEXTURE);
-		float maxHeight = components.getPanelMaxHeight();
-		float vMaxLower = 16 * components.height;
-		float vMaxUpper = 16 * maxHeight;
+		float height1 = getLocalHeightFromZ(1, components.height, components.angle);
+		float height0 = getLocalHeightFromZ(0, components.height, components.angle);
+		float vMax1 = 16 * height1;
+		float vMax0 = 16 * height0;
 		//TOP
-		rawOut.add(new RawQuad(new Vector3f(0, maxHeight, 0), new Vector3f(0, components.height, 1),
-				new Vector3f(1, components.height, 1), new Vector3f(1, maxHeight, 0),
+		rawOut.add(new RawQuad(new Vector3f(0, height0, 0), new Vector3f(0, height1, 1),
+				new Vector3f(1, height1, 1), new Vector3f(1, height0, 0),
 				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, UV_FULL, -1));
 		//BOTTOM
 		rawOut.add(new RawQuad(new Vector3f(0, 0, 0), new Vector3f(1, 0, 0),
@@ -107,26 +106,26 @@ public final class PanelUtils {
 				EnumFacing.DOWN, PANEL_TEXTURE, WHITE, null, UV_FULL, -1));
 		//LEFT
 		rawOut.add(new RawQuad(new Vector3f(0, 0, 0), new Vector3f(0, 0, 1),
-				new Vector3f(0, components.height, 1), new Vector3f(0, maxHeight, 0),
+				new Vector3f(0, height1, 1), new Vector3f(0, height0, 0),
 				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, new float[][]{
 				{0, 0}, {0, 16},
-				{vMaxLower, 16}, {vMaxUpper, 0}
+				{vMax1, 16}, {vMax0, 0}
 		}, -1));
 		//RIGHT
-		rawOut.add(new RawQuad(new Vector3f(1, 0, 0), new Vector3f(1, maxHeight, 0),
-				new Vector3f(1, components.height, 1), new Vector3f(1, 0, 1),
+		rawOut.add(new RawQuad(new Vector3f(1, 0, 0), new Vector3f(1, height0, 0),
+				new Vector3f(1, height1, 1), new Vector3f(1, 0, 1),
 				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, new float[][]{
-				{0, 0}, {vMaxUpper, 0},
-				{vMaxLower, 16}, {0, 16}
+				{0, 0}, {vMax0, 0},
+				{vMax1, 16}, {0, 16}
 		}, -1));
 		//BACK
 		rawOut.add(new RawQuad(new Vector3f(1, 0, 0), new Vector3f(0, 0, 0),
-				new Vector3f(0, maxHeight, 0), new Vector3f(1, maxHeight, 0),
-				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, new float[]{0, 0, vMaxUpper, 16}, -1));
+				new Vector3f(0, height0, 0), new Vector3f(1, height0, 0),
+				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, new float[]{0, 0, vMax0, 16}, -1));
 		//FRONT
 		rawOut.add(new RawQuad(new Vector3f(0, 0, 1), new Vector3f(1, 0, 1),
-				new Vector3f(1, components.height, 1), new Vector3f(0, components.height, 1),
-				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, new float[]{0, 0, vMaxLower, 16}, -1));
+				new Vector3f(1, height1, 1), new Vector3f(0, height1, 1),
+				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, new float[]{0, 0, vMax1, 16}, -1));
 		for (RawQuad bq : rawOut) {
 			ret.add(bakeQuad(bq, baseTrans, baseNorm));
 		}
@@ -358,7 +357,7 @@ public final class PanelUtils {
 
 	public static ItemStack getPanelBase() {
 		if (panelBase == null) {
-			panelBase = IC2Items.getItem("resource", "machine");
+			panelBase = new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.UNFINISHED.ordinal());
 		}
 		return panelBase;
 	}
@@ -379,5 +378,39 @@ public final class PanelUtils {
 			}
 		}
 		return ret;
+	}
+
+	public static float getAngle(ItemStack inv) {
+		float angle = 0;
+		if (inv.hasTagCompound()) {
+			angle = inv.getTagCompound().getFloat("angle");
+		}
+		return angle;
+	}
+
+	public static float getHeight(ItemStack inv) {
+		float height = 0;
+		if (inv.hasTagCompound()) {
+			height = inv.getTagCompound().getFloat("height");
+		}
+		return height;
+	}
+
+	public static float getHeightWithComponent(PanelComponent pc, float angle, float height) {
+		AxisAlignedBB aabb = pc.getBlockRelativeAABB();
+		double y = angle > 0 ? aabb.minZ : aabb.maxZ;
+		float hComp = (float) (pc.getHeight() * Math.cos(angle));
+		float localPanelHeight = getLocalHeight(y, angle, height);
+		return hComp + localPanelHeight;
+	}
+
+	public static float getLocalHeight(double y, float angle, float height) {
+		double centerOffset = .5 * (1 / Math.cos(angle) - 1);
+		y += centerOffset;
+		return getLocalHeightFromZ(Math.cos(angle) * y, height, angle);
+	}
+
+	public static float getLocalHeightFromZ(double z, float height, float angle) {
+		return (float) (height + (.5 - z) * Math.tan(angle));
 	}
 }

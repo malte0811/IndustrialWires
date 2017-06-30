@@ -226,7 +226,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 
 	@Nullable
 	public Pair<PanelComponent, RayTraceResult> getSelectedComponent(EntityPlayer player, Vec3d hit, boolean hitAbs) {
-		//TODO prvent clicking through the back of the panel
+		//TODO prevent clicking through the back of the panel
 		Matrix4 mat = components.getPanelTopTransform();
 		mat.invert();
 		PanelComponent retPc = null;

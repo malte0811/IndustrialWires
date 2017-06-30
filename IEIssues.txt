@@ -1,2 +1,0 @@
-LV conn=rel item model
-RS conns don't update color instantly

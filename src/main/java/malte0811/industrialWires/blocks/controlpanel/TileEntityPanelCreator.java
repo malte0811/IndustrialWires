@@ -41,7 +41,6 @@ import java.util.List;
 
 public class TileEntityPanelCreator extends TileEntityIWBase implements INetGUI, IBlockBoundsIW {
 	public List<PanelComponent> components = new ArrayList<>();
-	public float height = 0.5F;
 	@Nonnull
 	public ItemStack inv = ItemStack.EMPTY;
 
@@ -49,7 +48,6 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements INetGUI,
 	public void readNBT(NBTTagCompound nbt, boolean updatePacket) {
 		NBTTagList l = nbt.getTagList("components", 10);
 		PanelUtils.readListFromNBT(l, components);
-		height = nbt.getFloat("height");
 		NBTTagCompound invTag;
 		if (nbt.hasKey("inventory", 9)) {
 			invTag = nbt.getTagList("inventory", 10).getCompoundTagAt(0);
@@ -73,7 +71,8 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements INetGUI,
 			comps.appendTag(nbtInner);
 		}
 		nbt.setTag("components", comps);
-		nbt.setFloat("height", height);
+		nbt.setFloat("height", PanelUtils.getHeight(inv));
+		nbt.setFloat("angle", PanelUtils.getAngle(inv));
 	}
 
 	@Override
@@ -86,7 +85,6 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements INetGUI,
 			if (pc != null) {
 				pc.setX(nbt.getFloat("x"));
 				pc.setY(nbt.getFloat("y"));
-				pc.setPanelHeight(height);
 				components.add(pc);
 				if (!curr.isEmpty()) {
 					curr.shrink(1);
@@ -110,13 +108,24 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements INetGUI,
 			}
 			break;
 		case CREATE_PANEL:
-			if (ItemStack.areItemStacksEqual(PanelUtils.getPanelBase(), inv)) {
-				NBTTagCompound panelNBT = new NBTTagCompound();
-				writeToItemNBT(panelNBT, true);
-				ItemStack panel = new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.TOP.ordinal());
-				panel.setTagCompound(panelNBT);
-				inv = panel;
-				components.clear();
+			if (ItemStack.areItemsEqual(PanelUtils.getPanelBase(), inv)) {
+				float height = PanelUtils.getHeight(inv);
+				float angle = PanelUtils.getAngle(inv);
+				boolean valid = true;
+				for (PanelComponent comp : components) {
+					if (!comp.isValidPos(components, height, angle)) {
+						valid = false;
+						break;
+					}
+				}
+				if (valid) {
+					NBTTagCompound panelNBT = new NBTTagCompound();
+					writeToItemNBT(panelNBT, true);
+					ItemStack panel = new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.TOP.ordinal());
+					panel.setTagCompound(panelNBT);
+					inv = panel;
+					components.clear();
+				}
 			}
 			break;
 		case REMOVE_ALL:
@@ -138,7 +147,6 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements INetGUI,
 				TileEntityPanel te = new TileEntityPanel();
 				te.readFromItemNBT(inv.getTagCompound());
 				components = new ArrayList<>(te.getComponents());
-				height = te.getComponents().height;
 				inv = ItemStack.EMPTY;
 			}
 			break;

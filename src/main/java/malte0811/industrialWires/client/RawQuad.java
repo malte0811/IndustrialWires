@@ -71,7 +71,7 @@ public class RawQuad {
 		if (normal != null) {
 			this.normal = normal;
 		} else {
-			this.normal = cross(sub(v1, v3, null), sub(v2, v0, null), null);//TODO is this the right way around?
+			this.normal = cross(sub(v1, v3, null), sub(v2, v0, null), null);
 			this.normal.normalise(this.normal);
 		}
 		this.uvs = uvs;

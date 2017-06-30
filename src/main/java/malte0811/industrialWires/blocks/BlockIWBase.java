@@ -32,6 +32,7 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -56,9 +57,13 @@ public abstract class BlockIWBase extends Block {
 		setHardness(3.0F);
 		setResistance(15.0F);
 		GameRegistry.register(this, new ResourceLocation(IndustrialWires.MODID, name));
-		GameRegistry.register(new ItemBlockIW(this), new ResourceLocation(IndustrialWires.MODID, name));
+		GameRegistry.register(createItemBlock(), new ResourceLocation(IndustrialWires.MODID, name));
 		setUnlocalizedName(IndustrialWires.MODID + "." + name);
 		setCreativeTab(IndustrialWires.creativeTab);
+	}
+
+	protected ItemBlock createItemBlock() {
+		return new ItemBlockIW(this);
 	}
 
 	@Nonnull

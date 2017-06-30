@@ -60,6 +60,10 @@ industrialwires.desc.green=Green
 industrialwires.desc.blue=Blue
 industrialwires.desc.length=Length
 industrialwires.desc.wide_info=Wide Format
+industrialwires.desc.height=Height
+industrialwires.desc.height_info=The Height of the panel in the middle
+industrialwires.desc.angle=Angle
+industrialwires.desc.angle_info=The panel's angle to the surface it is placed on. 0=-45°, 100=45°
 industrialwires.tooltip.wide=Wide
 industrialwires.tooltip.narrow=Narrow
 

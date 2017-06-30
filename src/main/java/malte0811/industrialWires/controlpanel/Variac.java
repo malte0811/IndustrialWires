@@ -177,6 +177,7 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 
 	@Override
 	public void renderInGUI(GuiPanelCreator gui) {
+		AxisAlignedBB aabb = getBlockRelativeAABB();
 		int left = (int) Math.ceil(gui.getX0() + (offset + aabb.minX) * gui.panelSize);
 		int top = (int) Math.ceil(gui.getY0() + (offset + aabb.minZ) * gui.panelSize);
 		int right = (int) Math.floor(gui.getX0() + (aabb.maxX - offset) * gui.panelSize);
