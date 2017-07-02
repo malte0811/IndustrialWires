@@ -113,11 +113,13 @@ public class Recipes {
 		ItemStack coil = IC2Items.getItem("crafting", "coil");
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(panel, 1, BlockTypes_Panel.CREATOR.ordinal()),
 				"rmr", "rdr", "rar", 'r', "stickSteel", 'm', motor, 'd', drillHeadIron, 'a', advAlloy));
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(panel, 8, BlockTypes_Panel.DUMMY.ordinal()),
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(panel, 4, BlockTypes_Panel.DUMMY.ordinal()),
 				" r ", "rmr", " r ", 'r', "dustRedstone", 'm', PanelUtils.getPanelBase()));
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(panel, 1, BlockTypes_Panel.RS_WIRE.ordinal()),
 				"c", "d", 'd', new ItemStack(panel, 1, BlockTypes_Panel.DUMMY.ordinal()), 'c',
 				new ItemStack(IEContent.blockConnectors, 1, BlockTypes_Connector.CONNECTOR_REDSTONE.ordinal())));
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(panel, 1, BlockTypes_Panel.UNFINISHED.ordinal()),
+				"ppp", "www", "ppp", 'p', "plateIron", 'w', "wireCopper"));
 		//	PANEL COMPONENTS
 		GameRegistry.addRecipe(new ShapelessOreRecipe(new ItemStack(panelComponent, 1, 0),
 				"dustGlowstone", Blocks.STONE_BUTTON, "wireCopper"));

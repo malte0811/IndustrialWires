@@ -382,16 +382,18 @@ public final class PanelUtils {
 
 	public static float getAngle(ItemStack inv) {
 		float angle = 0;
-		if (inv.hasTagCompound()) {
-			angle = inv.getTagCompound().getFloat("angle");
+		NBTTagCompound nbt = inv.getTagCompound();
+		if (nbt != null && nbt.hasKey("angle")) {
+			angle = nbt.getFloat("angle");
 		}
 		return angle;
 	}
 
 	public static float getHeight(ItemStack inv) {
-		float height = 0;
-		if (inv.hasTagCompound()) {
-			height = inv.getTagCompound().getFloat("height");
+		float height = .5F;
+		NBTTagCompound nbt = inv.getTagCompound();
+		if (nbt != null && nbt.hasKey("height")) {
+			height = nbt.getFloat("height");
 		}
 		return height;
 	}

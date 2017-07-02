@@ -96,6 +96,8 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 					GlStateManager.rotate(-facing.getHorizontalAngle(), 0, 1, 0);
 					break;
 				case UP:
+					GlStateManager.rotate(180 - facing.getHorizontalAngle(), 0, 1, 0);
+					break;
 				case NORTH:
 				case SOUTH:
 				case WEST:

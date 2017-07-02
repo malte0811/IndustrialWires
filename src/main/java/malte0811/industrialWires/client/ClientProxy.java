@@ -222,7 +222,9 @@ public class ClientProxy extends CommonProxy {
 				new ManualPages.Text(m, "industrialwires.intro0"),
 				new ManualPages.Text(m, "industrialwires.intro1"),
 				new ManualPages.Crafting(m, "industrialwires.intro2", new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.DUMMY.ordinal())),
-				new ManualPages.Text(m, "industrialwires.intro3")
+				new ManualPages.Text(m, "industrialwires.intro3"),
+				new ManualPages.Crafting(m, "industrialwires.intro4", new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.UNFINISHED.ordinal())),
+				new ManualPages.Text(m, "industrialwires.intro5")
 		);
 		m.addEntry("industrialwires.panel_creator", "control_panels",
 				new ManualPages.Crafting(m, "industrialwires.panel_creator0", new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.CREATOR.ordinal())),
