@@ -53,7 +53,7 @@ public class ContainerPanelCreator extends Container {
 
 			@Override
 			public boolean isItemValid(ItemStack stack) {
-				if (ItemStack.areItemStacksEqual(ApiUtils.copyStackWithAmount(stack, 1), PanelUtils.getPanelBase()))
+				if (ItemStack.areItemsEqual(ApiUtils.copyStackWithAmount(stack, 1), PanelUtils.getPanelBase()))
 					return true;
 				return stack.getItem() == PanelUtils.PANEL_ITEM && stack.getMetadata() == BlockTypes_Panel.TOP.ordinal();
 			}
