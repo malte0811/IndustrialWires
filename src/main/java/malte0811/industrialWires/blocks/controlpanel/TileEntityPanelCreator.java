@@ -108,7 +108,7 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements INetGUI,
 			}
 			break;
 		case CREATE_PANEL:
-			if (ItemStack.areItemsEqual(PanelUtils.getPanelBase(), inv)) {
+			if (ItemStack.areItemsEqual(PanelUtils.getPanelBase(), inv) && !components.isEmpty()) {
 				float height = PanelUtils.getHeight(inv);
 				float angle = PanelUtils.getAngle(inv);
 				boolean valid = true;

@@ -23,6 +23,7 @@ import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.BlockIWBase;
 import malte0811.industrialWires.blocks.IMetaEnum;
 import malte0811.industrialWires.controlpanel.PanelComponent;
+import malte0811.industrialWires.controlpanel.PanelUtils;
 import malte0811.industrialWires.controlpanel.PropertyComponents;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -48,6 +49,7 @@ import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 
 public class BlockPanel extends BlockIWBase implements IMetaEnum {
 	public static final PropertyEnum<BlockTypes_Panel> type = PropertyEnum.create("type", BlockTypes_Panel.class);
@@ -215,6 +217,35 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 		if (te instanceof TileEntityPanel) {
 			for (PanelComponent pc:((TileEntityPanel) te).getComponents()) {
 				pc.dropItems((TileEntityPanel)te);
+			}
+		}
+	}
+
+	@Override
+	public void breakBlock(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
+		super.breakBlock(worldIn, pos, state);
+		//break connections
+		List<BlockPos> panels = PanelUtils.discoverPanelParts(worldIn, pos, 11 * 11 * 11);
+		for (BlockPos p : panels) {
+			if (!p.equals(pos)) {
+				TileEntity panelPart = worldIn.getTileEntity(p);
+				if (panelPart instanceof TileEntityPanel) {
+					((TileEntityPanel) panelPart).removeAllRSCons();
+				}
+			}
+		}
+	}
+
+	@Override
+	public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state) {
+		super.onBlockAdded(worldIn, pos, state);
+		List<BlockPos> panels = PanelUtils.discoverPanelParts(worldIn, pos, 11 * 11 * 11);
+		for (BlockPos p : panels) {
+			if (!p.equals(pos)) {
+				TileEntity panelPart = worldIn.getTileEntity(p);
+				if (panelPart instanceof TileEntityPanel) {
+					((TileEntityPanel) panelPart).firstTick = true;
+				}
 			}
 		}
 	}

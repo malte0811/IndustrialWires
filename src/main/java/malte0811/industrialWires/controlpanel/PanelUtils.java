@@ -377,18 +377,21 @@ public final class PanelUtils {
 		return panelBase;
 	}
 
-	public static List<BlockPos> discoverPanelParts(World w, BlockPos here) {
+	public static List<BlockPos> discoverPanelParts(World w, BlockPos here, int maxCount) {
 		BiPredicate<BlockPos, Integer> isValid = (pos, count) -> {
-			if (here.distanceSq(pos) > 25 || count > 100 || !w.isBlockLoaded(pos)) {
+			if (pos.equals(here)) {
+				return true;
+			}
+			if (here.distanceSq(pos) > 25 || count > maxCount || !w.isBlockLoaded(pos)) {
 				return false;
 			}
 			IBlockState state = w.getBlockState(pos);
-			return state.getBlock() == IndustrialWires.panel && state.getValue(BlockPanel.type) != BlockTypes_Panel.CREATOR;
+			return state.getBlock() == IndustrialWires.panel && state.getValue(BlockPanel.type).isPanelConnector();
 		};
 		List<BlockPos> all = discoverLocal(w, here, isValid);
 		List<BlockPos> ret = new ArrayList<>();
 		for (BlockPos pos : all) {
-			if (w.getBlockState(pos).getValue(BlockPanel.type) != BlockTypes_Panel.DUMMY) {
+			if (w.getBlockState(pos).getBlock() == IndustrialWires.panel && w.getBlockState(pos).getValue(BlockPanel.type) != BlockTypes_Panel.DUMMY) {
 				ret.add(pos);
 			}
 		}
