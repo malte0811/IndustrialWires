@@ -54,7 +54,7 @@ import java.util.Set;
 
 public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTile, IBlockBoundsIW, IPlayerInteraction, ITickable, IEBlockInterfaces.ITileDrop {
 	private PropertyComponents.PanelRenderProperties components = new PropertyComponents.PanelRenderProperties();
-	private boolean firstTick = true;
+	public boolean firstTick = true;
 	// non-rendered properties
 	private Set<TileEntityRSPanelConn> rsPorts = new HashSet<>();
 
@@ -91,7 +91,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		}
 		if (!worldObj.isRemote) {
 			if (firstTick) {
-				List<BlockPos> parts = PanelUtils.discoverPanelParts(worldObj, pos);
+				List<BlockPos> parts = PanelUtils.discoverPanelParts(worldObj, pos, 100);
 				for (BlockPos bp : parts) {
 					TileEntity te = worldObj.getTileEntity(bp);
 					if (te instanceof TileEntityRSPanelConn&&!rsPorts.contains(te)) {
@@ -299,9 +299,15 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		for (PanelComponent pc : components) {
 			pc.invalidate(this);
 		}
+		removeAllRSCons();
+	}
+
+	public void removeAllRSCons() {
 		for (TileEntityRSPanelConn rs : rsPorts) {
 			rs.unregisterPanel(this, true);
 		}
+		rsPorts.clear();
+		firstTick = true;
 	}
 
 	@Override
@@ -310,8 +316,6 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		for (PanelComponent pc : components) {
 			pc.invalidate(this);
 		}
-		for (TileEntityRSPanelConn rs : rsPorts) {
-			rs.unregisterPanel(this, true);
-		}
+		removeAllRSCons();
 	}
 }

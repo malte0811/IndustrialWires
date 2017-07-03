@@ -19,6 +19,7 @@
 package malte0811.industrialWires.containers;
 
 import blusunrize.immersiveengineering.api.ApiUtils;
+import malte0811.industrialWires.blocks.controlpanel.BlockTypes_Panel;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanelCreator;
 import malte0811.industrialWires.controlpanel.PanelUtils;
 import net.minecraft.entity.player.EntityPlayer;
@@ -51,7 +52,9 @@ public class ContainerPanelCreator extends Container {
 
 			@Override
 			public boolean isItemValid(ItemStack stack) {
-				return ItemStack.areItemStacksEqual(ApiUtils.copyStackWithAmount(stack, 1), PanelUtils.getPanelBase()) || stack.getItem() == PanelUtils.PANEL_ITEM;
+				if (ItemStack.areItemStacksEqual(ApiUtils.copyStackWithAmount(stack, 1), PanelUtils.getPanelBase()))
+					return true;
+				return stack.getItem() == PanelUtils.PANEL_ITEM && stack.getMetadata() == BlockTypes_Panel.TOP.ordinal();
 			}
 
 		});

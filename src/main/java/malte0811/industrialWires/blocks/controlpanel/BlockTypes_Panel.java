@@ -32,4 +32,8 @@ public enum BlockTypes_Panel implements IStringSerializable {
 	public String getName() {
 		return toString().toLowerCase(Locale.ENGLISH);
 	}
+
+	public boolean isPanelConnector() {
+		return this != CREATOR;
+	}
 }

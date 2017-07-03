@@ -76,8 +76,8 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 				loaded = true;
 				// completely reload the network
 				network.removeFromNetwork(null);
-				List<BlockPos> parts = PanelUtils.discoverPanelParts(worldObj, pos);
-				for (BlockPos bp:parts) {
+				List<BlockPos> parts = PanelUtils.discoverPanelParts(worldObj, pos, 100);
+				for (BlockPos bp : parts) {
 					TileEntity te = worldObj.getTileEntity(bp);
 					if (te instanceof TileEntityPanel) {
 						registerPanel(((TileEntityPanel) te));
@@ -165,6 +165,7 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 			Consumer<byte[]> listener = pc.getRSInputHandler(id, panel);
 			if (listener != null) {
 				changeListeners.add(listener);
+				listener.accept(out);
 			}
 			pc.registerRSOutput(id, rsOut);
 		}
@@ -173,18 +174,27 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 	}
 
 	public void unregisterPanel(TileEntityPanel panel, boolean remove) {
+		out = new byte[16];
 		PropertyComponents.PanelRenderProperties p = panel.getComponents();
 		for (PanelComponent pc : p) {
 			Consumer<byte[]> listener = pc.getRSInputHandler(id, panel);
 			if (listener != null) {
+				listener.accept(out);
 				changeListeners.remove(listener);
 			}
 			pc.unregisterRSOutput(id, rsOut);
+			outputs.remove(new PCWrapper(pc));
 		}
 		panel.unregisterRS(this);
 		if (remove) {
 			connectedPanels.remove(panel);
 		}
+		for (TileEntityPanel te : connectedPanels) {
+			for (PanelComponent pc : te.getComponents()) {
+				pc.registerRSOutput(id, rsOut);
+			}
+		}
+		network.updateValues();
 	}
 
 	@Override
@@ -286,7 +296,7 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 	@Override
 	public void onChange(NBTTagCompound nbt, EntityPlayer p) {
 		if (nbt.hasKey("rsId")) {
-			List<BlockPos> parts = PanelUtils.discoverPanelParts(worldObj, pos);
+			List<BlockPos> parts = PanelUtils.discoverPanelParts(worldObj, pos, 100);
 			List<TileEntityPanel> tes = new ArrayList<>(parts.size());
 			for (BlockPos bp:parts) {
 				TileEntity te = worldObj.getTileEntity(bp);
