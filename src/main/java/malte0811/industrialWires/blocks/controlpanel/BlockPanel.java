@@ -78,16 +78,18 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 	@Override
 	public TileEntity createTileEntity(@Nonnull World world, @Nonnull IBlockState state) {
 		switch (state.getValue(type)) {
-		case TOP:
-			return new TileEntityPanel();
-		case RS_WIRE:
-			return new TileEntityRSPanelConn();
-		case CREATOR:
-			return new TileEntityPanelCreator();
+			case TOP:
+				return new TileEntityPanel();
+			case RS_WIRE:
+				return new TileEntityRSPanelConn();
+			case CREATOR:
+				return new TileEntityPanelCreator();
 			case UNFINISHED:
 				return new TileEntityUnfinishedPanel();
-		default:
-			return null;
+			case SINGLE_COMP:
+				return new TileEntityComponentPanel();
+			default:
+				return null;
 		}
 	}
 
@@ -155,8 +157,11 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 
 	@Override
 	public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> list) {
-		for (int i = 0; i < BlockTypes_Panel.values().length; i++) {
-			list.add(new ItemStack(this, 1, i));
+		BlockTypes_Panel[] values = BlockTypes_Panel.values();
+		for (int i = 0; i < values.length; i++) {
+			if (values[i].showInCreative()) {
+				list.add(new ItemStack(this, 1, i));
+			}
 		}
 	}
 

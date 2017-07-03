@@ -67,6 +67,9 @@
       },
       "unfinished": {
         "model": "industrialwires:smartmodel/panel"
+      },
+      "single_comp": {
+        "model": "industrialwires:smartmodel/panel_single_comp"
       }
     },
     "inventory,type=rs_wire": {

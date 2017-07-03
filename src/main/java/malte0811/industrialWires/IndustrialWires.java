@@ -115,6 +115,7 @@ public class IndustrialWires {
 		GameRegistry.registerTileEntity(TileEntityRSPanelConn.class, MODID + ":control_panel_rs");
 		GameRegistry.registerTileEntity(TileEntityPanelCreator.class, MODID + ":panel_creator");
 		GameRegistry.registerTileEntity(TileEntityUnfinishedPanel.class, MODID + ":unfinished_panel");
+		GameRegistry.registerTileEntity(TileEntityComponentPanel.class, MODID + ":single_component_panel");
 		if (IWConfig.enableConversion) {
 			GameRegistry.registerTileEntity(TileEntityIEMotor.class, MODID + ":ieMotor");
 			GameRegistry.registerTileEntity(TileEntityMechICtoIE.class, MODID + ":mechIcToIe");
