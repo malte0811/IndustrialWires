@@ -116,7 +116,8 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 				new Vector3f(wHalf, 0, length), EnumFacing.UP, BLACK, mat);
 		return ret;
 	}
-	private static RawModelFontRenderer renderer;
+
+	private RawModelFontRenderer renderer;
 	private RawModelFontRenderer fontRenderer() {
 		if (renderer == null) {
 			renderer = new RawModelFontRenderer(Minecraft.getMinecraft().gameSettings, Label.FONT, Minecraft.getMinecraft().getTextureManager(),

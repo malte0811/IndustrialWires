@@ -150,15 +150,19 @@ public abstract class PanelComponent {
 		String type = nbt.getString("type");
 		if (baseCreaters.containsKey(type)) {
 			PanelComponent ret = baseCreaters.get(type).get();
-			ret.readCustomNBT(nbt);
-			ret.setX(nbt.getFloat("x"));
-			ret.setY(nbt.getFloat("y"));
-			ret.setPanelHeight(nbt.getFloat("panelHeight"));
+			ret.readFromNBT(nbt);
 			return ret;
 		} else {
 			FMLLog.log(IndustrialWires.MODID, Level.WARN, "Unknown panel component: " + type);
 			return null;
 		}
+	}
+
+	public final void readFromNBT(NBTTagCompound nbt) {
+		readCustomNBT(nbt);
+		setX(nbt.getFloat("x"));
+		setY(nbt.getFloat("y"));
+		setPanelHeight(nbt.getFloat("panelHeight"));
 	}
 
 	@SideOnly(Side.CLIENT)

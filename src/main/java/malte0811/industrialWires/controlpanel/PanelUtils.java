@@ -79,7 +79,9 @@ public final class PanelUtils {
 		Matrix4 m4RotOnly = m4.copy();
 		m4RotOnly.invert();
 		m4RotOnly.transpose();
-		for (PanelComponent pc : components) {
+		//Intentionally not a for-each to help with CME's
+		for (int i = 0; i < components.size(); i++) {
+			PanelComponent pc = components.get(i);
 			Matrix4 m4Here = m4.copy().translate(pc.getX(), .0001, pc.getY());
 			List<RawQuad> compQuads = pc.getQuads();
 			for (RawQuad bq : compQuads) {
@@ -346,11 +348,24 @@ public final class PanelUtils {
 	}
 
 	public static void readListFromNBT(NBTTagList list, @Nonnull List<PanelComponent> base) {
-		base.clear();
+		boolean allNew = list.tagCount() != base.size();
+		if (allNew) {
+			base.clear();
+		}
 		for (int i = 0; i < list.tagCount(); i++) {
-			PanelComponent pc = PanelComponent.read(list.getCompoundTagAt(i));
+			NBTTagCompound nbt = list.getCompoundTagAt(i);
+			PanelComponent pc = PanelComponent.read(nbt);
 			if (pc != null) {
-				base.add(pc);
+				if (allNew) {
+					base.add(pc);
+				} else {
+					PanelComponent oldPc = base.get(i);
+					if (pc.getClass() != oldPc.getClass()) {
+						base.set(i, pc);
+					} else {
+						oldPc.readFromNBT(nbt);
+					}
+				}
 			}
 		}
 	}
