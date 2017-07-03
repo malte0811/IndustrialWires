@@ -27,6 +27,7 @@ import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 
 public class PropertyComponents implements IUnlistedProperty<PropertyComponents.PanelRenderProperties> {
@@ -53,11 +54,15 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 	}
 
 	public static class PanelRenderProperties extends ArrayList<PanelComponent> {
-		public EnumFacing facing = EnumFacing.NORTH;
-		public float height = .5F;
-		public EnumFacing top = EnumFacing.UP;
+		private EnumFacing facing = EnumFacing.NORTH;
+		private float height = .5F;
+		private EnumFacing top = EnumFacing.UP;
 		// as radians!
-		public float angle = 0;
+		private float angle = 0;
+		private Matrix4 topTransform;
+		private Matrix4 topTransformInverse;
+		private Matrix4 baseTransform;
+
 
 		public PanelRenderProperties() {
 			super();
@@ -79,10 +84,24 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 			return ret + "]";
 		}
 
+		@Nonnull
 		public Matrix4 getPanelTopTransform() {
-			return getPanelBaseTransform().translate(0, height, .5)
-					.rotate(angle, 1, 0, 0).translate(0, 0, -.5);
+			if (topTransform == null) {
+				topTransform = getPanelBaseTransform().copy().translate(0, height, .5)
+						.rotate(angle, 1, 0, 0).translate(0, 0, -.5);
+			}
+			return topTransform;
 		}
+
+		@Nonnull
+		public Matrix4 getPanelTopTransformInverse() {
+			if (topTransformInverse == null) {
+				topTransformInverse = getPanelTopTransform().copy();
+				topTransformInverse.invert();
+			}
+			return topTransformInverse;
+		}
+
 
 		@SideOnly(Side.CLIENT)
 		public void transformGLForTop(BlockPos panelPos) {
@@ -112,25 +131,28 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 
 		}
 
+		@Nonnull
 		public Matrix4 getPanelBaseTransform() {
-			Matrix4 ret = new Matrix4();
-			ret.translate(.5, .5, .5);
-			switch (top) {
-				case DOWN:
-					ret.rotate(Math.PI, 0, 0, 1);
-				case UP:
-					ret.rotate(-facing.getHorizontalAngle() * Math.PI / 180 + Math.PI, 0, 1, 0);
-					break;
-				case NORTH:
-				case SOUTH:
-				case WEST:
-				case EAST:
-					ret.rotate(Math.PI / 2, 1, 0, 0);
-					ret.rotate(top.getHorizontalAngle() * Math.PI / 180, 0, 0, 1);
-					break;
+			if (baseTransform == null) {
+				baseTransform = new Matrix4();
+				baseTransform.translate(.5, .5, .5);
+				switch (top) {
+					case DOWN:
+						baseTransform.rotate(Math.PI, 0, 0, 1);
+					case UP:
+						baseTransform.rotate(-facing.getHorizontalAngle() * Math.PI / 180 + Math.PI, 0, 1, 0);
+						break;
+					case NORTH:
+					case SOUTH:
+					case WEST:
+					case EAST:
+						baseTransform.rotate(Math.PI / 2, 1, 0, 0);
+						baseTransform.rotate(top.getHorizontalAngle() * Math.PI / 180, 0, 0, 1);
+						break;
+				}
+				baseTransform.translate(-.5, -.5, -.5);
 			}
-			ret.translate(-.5, -.5, -.5);
-			return ret;
+			return baseTransform;
 		}
 
 		public float getMaxHeight() {
@@ -157,6 +179,57 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 
 		public float getPanelMaxHeight() {
 			return (float) (height + Math.abs(Math.tan(angle) / 2));
+		}
+
+		private void resetMatrixes() {
+			baseTransform = null;
+			topTransformInverse = null;
+			topTransform = null;
+		}
+
+		public EnumFacing getFacing() {
+			return facing;
+		}
+
+		public void setFacing(EnumFacing facing) {
+			if (facing != this.facing) {
+				this.facing = facing;
+				resetMatrixes();
+			}
+		}
+
+
+		public float getHeight() {
+			return height;
+		}
+
+		public void setHeight(float height) {
+			if (height != this.height) {
+				this.height = height;
+				resetMatrixes();
+			}
+		}
+
+		public EnumFacing getTop() {
+			return top;
+		}
+
+		public void setTop(EnumFacing top) {
+			if (top != this.top) {
+				this.top = top;
+				resetMatrixes();
+			}
+		}
+
+		public float getAngle() {
+			return angle;
+		}
+
+		public void setAngle(float angle) {
+			if (angle != this.angle) {
+				this.angle = angle;
+				resetMatrixes();
+			}
 		}
 
 		@Override

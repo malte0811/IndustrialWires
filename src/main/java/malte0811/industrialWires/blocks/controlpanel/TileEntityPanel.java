@@ -66,13 +66,13 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 			Label lbl = new Label("->", color);
 			ind.setX(0);
 			ind.setY(i / 16F);
-			ind.setPanelHeight(components.height);
+			ind.setPanelHeight(components.getHeight());
 			lbl.setX(2 / 16F);
 			lbl.setY(i / 16F);
-			lbl.setPanelHeight(components.height);
+			lbl.setPanelHeight(components.getHeight());
 			btn.setX(5 / 16F);
 			btn.setY(i / 16F);
-			btn.setPanelHeight(components.height);
+			btn.setPanelHeight(components.getHeight());
 			components.add(ind);
 			components.add(lbl);
 			components.add(btn);
@@ -101,15 +101,15 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 	@Override
 	public void writeNBT(NBTTagCompound out, boolean updatePacket) {
 		writeToItemNBT(out, false);
-		out.setInteger("facing", components.facing.getHorizontalIndex());
-		out.setInteger("top", components.top.getIndex());
+		out.setInteger("facing", components.getFacing().getHorizontalIndex());
+		out.setInteger("top", components.getTop().getIndex());
 	}
 
 	@Override
 	public void readNBT(NBTTagCompound in, boolean updatePacket) {
 		readFromItemNBT(in);
-		components.facing = EnumFacing.getHorizontal(in.getInteger("facing"));
-		components.top = EnumFacing.getFront(in.getInteger("top"));
+		components.setFacing(EnumFacing.getHorizontal(in.getInteger("facing")));
+		components.setTop(EnumFacing.getFront(in.getInteger("top")));
 	}
 
 	@Override
@@ -133,8 +133,8 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		if (nbt != null) {
 			NBTTagList l = nbt.getTagList("components", 10);
 			PanelUtils.readListFromNBT(l, components);
-			components.height = nbt.getFloat("height");
-			components.angle = nbt.getFloat("angle");
+			components.setHeight(nbt.getFloat("height"));
+			components.setAngle(nbt.getFloat("angle"));
 		}
 		defAABB = null;
 	}
@@ -147,19 +147,19 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 			comps.appendTag(nbtInner);
 		}
 		nbt.setTag("components", comps);
-		nbt.setFloat("height", components.height);
-		nbt.setFloat("angle", components.angle);
+		nbt.setFloat("height", components.getHeight());
+		nbt.setFloat("angle", components.getAngle());
 	}
 
 	@Nonnull
 	@Override
 	public EnumFacing getFacing() {
-		return components.facing;
+		return components.getFacing();
 	}
 
 	@Override
 	public void setFacing(@Nonnull EnumFacing facing) {
-		this.components.facing = facing;
+		this.components.setFacing(facing);
 	}
 
 	@Override
@@ -172,19 +172,19 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 	public EnumFacing getFacingForPlacement(@Nonnull EntityLivingBase placer, @Nonnull BlockPos pos, @Nonnull EnumFacing side, float hitX, float hitY, float hitZ) {
 		switch (side) {
 		case UP:
-			components.top = EnumFacing.UP;
+			components.setTop(EnumFacing.UP);
 			return EnumFacing.fromAngle(placer.rotationYaw);
 		case DOWN:
-			components.top = EnumFacing.DOWN;
-			return EnumFacing.fromAngle(placer.rotationYaw);
+			components.setTop(EnumFacing.DOWN);
+			return EnumFacing.fromAngle(-placer.rotationYaw);
 		case NORTH:
 		case SOUTH:
 		case WEST:
 		case EAST:
-			components.top = side;
+			components.setTop(side);
 			return EnumFacing.SOUTH;//Should not matter
 		}
-		return components.facing;
+		return components.getFacing();
 	}
 
 	@Override
@@ -227,8 +227,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 	@Nullable
 	public Pair<PanelComponent, RayTraceResult> getSelectedComponent(EntityPlayer player, Vec3d hit, boolean hitAbs) {
 		//TODO prevent clicking through the back of the panel
-		Matrix4 mat = components.getPanelTopTransform();
-		mat.invert();
+		Matrix4 mat = components.getPanelTopTransformInverse();
 		PanelComponent retPc = null;
 		RayTraceResult retRay = null;
 		Vec3d playerPosRelative = player.getPositionVector().addVector(-pos.getX(), player.getEyeHeight() - pos.getY(), -pos.getZ());

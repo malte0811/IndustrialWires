@@ -94,8 +94,8 @@ public final class PanelUtils {
 		baseNorm.transpose();
 
 		List<RawQuad> rawOut = new ArrayList<>();
-		float height1 = getLocalHeightFromZ(1, components.height, components.angle);
-		float height0 = getLocalHeightFromZ(0, components.height, components.angle);
+		float height1 = getLocalHeightFromZ(1, components.getHeight(), components.getAngle());
+		float height0 = getLocalHeightFromZ(0, components.getHeight(), components.getAngle());
 		float vMax1 = 16 * height1;
 		float vMax0 = 16 * height0;
 		//TOP
