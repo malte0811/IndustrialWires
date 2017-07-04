@@ -33,6 +33,8 @@ import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.relauncher.Side;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -87,10 +89,14 @@ public class Label extends PanelComponent implements IConfigurableComponent {
 	@Override
 	public AxisAlignedBB getBlockRelativeAABB() {
 		if (aabb == null) {
-			RawModelFontRenderer fr = fontRenderer();
-			float width = fr.getStringWidth(text) * fr.scale;
-			float height = fr.FONT_HEIGHT * fr.scale;
-			aabb = new AxisAlignedBB(getX(), 0, getY(), getX() + width, 0, getY() + height);
+			if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT) {
+				RawModelFontRenderer fr = fontRenderer();
+				float width = fr.getStringWidth(text) * fr.scale;
+				float height = fr.FONT_HEIGHT * fr.scale;
+				aabb = new AxisAlignedBB(getX(), 0, getY(), getX() + width, 0, getY() + height);
+			} else {
+				aabb = new AxisAlignedBB(getX(), 0, getY(), getX() + .001, 0, getY() + .001);
+			}
 		}
 		return aabb;
 	}
@@ -184,5 +190,25 @@ public class Label extends PanelComponent implements IConfigurableComponent {
 				new FloatConfig("green", 0, 50, color[1], 60),
 				new FloatConfig("blue", 0, 70, color[2], 60)
 		};
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		if (!super.equals(o)) return false;
+
+		Label label = (Label) o;
+
+		if (color != label.color) return false;
+		return text.equals(label.text);
+	}
+
+	@Override
+	public int hashCode() {
+		int result = super.hashCode();
+		result = 31 * result + text.hashCode();
+		result = 31 * result + color;
+		return result;
 	}
 }
