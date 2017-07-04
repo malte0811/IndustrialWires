@@ -1,3 +1,6 @@
+#####Version 1.5-13
+ - Labels no longer break the model cache and cause lag
+ - Labels don't break on dedicated servers any more
 #####Version 1.5-12
  - Added tilted control panels
    - Panels are no longer created from machine casings, there is a dedicated item for that now, the Unfinished Control Panel

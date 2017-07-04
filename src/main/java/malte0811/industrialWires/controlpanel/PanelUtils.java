@@ -80,6 +80,7 @@ public final class PanelUtils {
 		m4RotOnly.invert();
 		m4RotOnly.transpose();
 		//Intentionally not a for-each to help with CME's
+		//noinspection ForLoopReplaceableByForEach
 		for (int i = 0; i < components.size(); i++) {
 			PanelComponent pc = components.get(i);
 			Matrix4 m4Here = m4.copy().translate(pc.getX(), .0001, pc.getY());
