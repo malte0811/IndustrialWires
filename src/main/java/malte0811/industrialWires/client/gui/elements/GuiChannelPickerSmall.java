@@ -36,16 +36,16 @@ public class GuiChannelPickerSmall extends GuiChannelPicker {
 	}
 
 	@Override
-	public void drawButton(@Nonnull Minecraft mc, int mouseX, int mouseY) {
+	public void drawButton(@Nonnull Minecraft mc, int mouseX, int mouseY, float partialTicks) {
 		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 		GlStateManager.enableBlend();
 		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 		GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 		if (open) {
-			super.drawButton(mc, mouseX, mouseY);
+			super.drawButton(mc, mouseX, mouseY, partialTicks);
 		} else {
 			EnumDyeColor color = EnumDyeColor.byMetadata(selected);
-			int colorVal = color.getMapColor().colorValue | 0xff000000;
+			int colorVal = color.getColorValue() | 0xff000000;
 			drawRect(x, y, x + width, y + height, colorVal);
 		}
 	}

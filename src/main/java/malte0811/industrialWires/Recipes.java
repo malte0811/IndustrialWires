@@ -45,16 +45,16 @@ import static malte0811.industrialWires.IndustrialWires.*;
 
 public class Recipes {
 	public static void addRecipes() {
-		addCustomRecipes();
+		/*addCustomRecipes();
 		addConnectors();
 		if (mechConv != null) {
 			addMechConverters();
 		}
 		addJacobs();
-		registerPanels();
+		registerPanels();*/
 	}
 
-	private static void addConnectors() {
+/*	private static void addConnectors() {
 		ItemStack glassCable = IC2Items.getItem("cable", "type:glass,insulation:0");
 		//CONNECTORS
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(ic2conn, 4, 0), " t ", "rtr", "rtr", 't', "ingotTin", 'r', "itemRubber"));
@@ -176,5 +176,5 @@ public class Recipes {
 		public AssemblerHandler.RecipeQuery[] getQueriedInputs(T arg0) {
 			return new AssemblerHandler.RecipeQuery[0];
 		}
-	}
+	}*/
 }

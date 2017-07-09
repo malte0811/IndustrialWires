@@ -22,6 +22,7 @@ import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.items.ItemPanelComponent;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 
@@ -29,8 +30,8 @@ import javax.annotation.Nonnull;
 
 public class RecipeInitPC extends ShapedOreRecipe {
 
-	public RecipeInitPC(ItemStack result, Object... recipe) {
-		super(result, recipe);
+	public RecipeInitPC(ResourceLocation group, ItemStack result, Object... recipe) {
+		super(group, result, recipe);
 	}
 
 	@Nonnull

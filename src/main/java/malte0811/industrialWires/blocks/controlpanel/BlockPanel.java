@@ -32,7 +32,6 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -60,7 +59,7 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 	}
 
 	@Override
-	protected ItemBlock createItemBlock() {
+	public ItemBlock createItemBlock() {
 		return new ItemBlockPanel(this);
 	}
 
@@ -143,6 +142,7 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 		return state.getValue(type).ordinal();
 	}
 
+	@Nonnull
 	@Override
 	public IBlockState getStateFromMeta(int meta) {
 		return super.getStateFromMeta(meta).withProperty(type, BlockTypes_Panel.values()[meta]);
@@ -154,9 +154,11 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 	}
 
 	@Override
-	public void getSubBlocks(@Nonnull Item itemIn, CreativeTabs tab, NonNullList<ItemStack> list) {
-		for (int i = 0; i < BlockTypes_Panel.values().length; i++) {
-			list.add(new ItemStack(itemIn, 1, i));
+	public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> list) {
+		if (tab==IndustrialWires.creativeTab) {
+			for (int i = 0; i < BlockTypes_Panel.values().length; i++) {
+				list.add(new ItemStack(this, 1, i));
+			}
 		}
 	}
 

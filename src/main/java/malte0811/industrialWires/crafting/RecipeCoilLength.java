@@ -25,10 +25,11 @@ import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
 
-public class RecipeCoilLength implements IRecipe {
+public class RecipeCoilLength extends IForgeRegistryEntry.Impl<IRecipe> implements IRecipe {
 	public final ItemStack coil;
 	public final ItemStack cable;
 	private final int maxLength;
@@ -54,8 +55,8 @@ public class RecipeCoilLength implements IRecipe {
 	}
 
 	@Override
-	public int getRecipeSize() {
-		return 1;
+	public boolean canFit(int width, int height) {
+		return width>0 && height>0;
 	}
 
 	@Nonnull

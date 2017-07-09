@@ -66,6 +66,8 @@ import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.Locale;
 import java.util.Random;
@@ -109,44 +111,8 @@ public class ClientProxy extends CommonProxy {
 				IndustrialWires.MODID + ":blocks/ic2_relay_glass"));
 
 		ConnLoader.baseModels.put("rs_panel_conn", new ResourceLocation("industrialwires:block/rs_panel_conn.obj"));
-		for (int meta = 0; meta < ItemIC2Coil.subNames.length; meta++) {
-			ResourceLocation loc = new ResourceLocation(IndustrialWires.MODID, "ic2_wire_coil/" + ItemIC2Coil.subNames[meta]);
-			ModelBakery.registerItemVariants(IndustrialWires.coil, loc);
-			ModelLoader.setCustomModelResourceLocation(IndustrialWires.coil, meta, new ModelResourceLocation(loc, "inventory"));
-		}
-		for (int meta = 0; meta < ItemPanelComponent.types.length; meta++) {
-			ResourceLocation loc = new ResourceLocation(IndustrialWires.MODID, "panel_component/" + ItemPanelComponent.types[meta]);
-			ModelBakery.registerItemVariants(IndustrialWires.panelComponent, loc);
-			ModelLoader.setCustomModelResourceLocation(IndustrialWires.panelComponent, meta, new ModelResourceLocation(loc, "inventory"));
-		}
-		for (int meta = 0; meta < ItemKey.types.length; meta++) {
-			ResourceLocation loc = new ResourceLocation(IndustrialWires.MODID, "key/" + ItemKey.types[meta]);
-			ModelBakery.registerItemVariants(IndustrialWires.key, loc);
-			ModelLoader.setCustomModelResourceLocation(IndustrialWires.key, meta, new ModelResourceLocation(loc, "inventory"));
-		}
-
-		Block[] blocks = {IndustrialWires.ic2conn, IndustrialWires.mechConv, IndustrialWires.jacobsLadder, IndustrialWires.panel};
-		for (Block b : blocks) {
-			if (b != null) {
-				Item blockItem = Item.getItemFromBlock(b);
-				final ResourceLocation loc = b.getRegistryName();
-				assert loc != null;
-				ModelLoader.setCustomMeshDefinition(blockItem, stack -> new ModelResourceLocation(loc, "inventory"));
-				Object[] v = ((IMetaEnum) b).getValues();
-				for (int meta = 0; meta < v.length; meta++) {
-					String location = loc.toString();
-					String prop = "inventory,type=" + v[meta].toString().toLowerCase(Locale.US);
-					try {
-						ModelLoader.setCustomModelResourceLocation(blockItem, meta, new ModelResourceLocation(location, prop));
-					} catch (NullPointerException npe) {
-						throw new RuntimeException(b + " lacks an item!", npe);
-					}
-				}
-			}
-		}
 		OBJLoader.INSTANCE.addDomain(IndustrialWires.MODID);
 		ModelLoaderRegistry.registerLoader(new PanelModelLoader());
-		MinecraftForge.EVENT_BUS.register(new ClientEventHandler());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityJacobsLadder.class, new TileRenderJacobsLadder());
 	}
 

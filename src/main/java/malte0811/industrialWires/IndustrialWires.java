@@ -17,6 +17,7 @@
  */
 package malte0811.industrialWires;
 
+import malte0811.industrialWires.blocks.BlockIWBase;
 import malte0811.industrialWires.blocks.BlockJacobsLadder;
 import malte0811.industrialWires.blocks.TileEntityJacobsLadder;
 import malte0811.industrialWires.blocks.controlpanel.*;
@@ -25,6 +26,7 @@ import malte0811.industrialWires.blocks.converter.TileEntityIEMotor;
 import malte0811.industrialWires.blocks.converter.TileEntityMechICtoIE;
 import malte0811.industrialWires.blocks.converter.TileEntityMechIEtoIC;
 import malte0811.industrialWires.blocks.wire.*;
+import malte0811.industrialWires.controlpanel.PanelUtils;
 import malte0811.industrialWires.items.ItemIC2Coil;
 import malte0811.industrialWires.items.ItemKey;
 import malte0811.industrialWires.items.ItemPanelComponent;
@@ -33,33 +35,49 @@ import malte0811.industrialWires.network.MessageItemSync;
 import malte0811.industrialWires.network.MessagePanelInteract;
 import malte0811.industrialWires.network.MessageTileSyncIW;
 import malte0811.industrialWires.wires.IC2Wiretype;
+import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLMissingMappingsEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
+import org.apache.logging.log4j.Logger;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Mod(modid = IndustrialWires.MODID, version = IndustrialWires.VERSION, dependencies = "required-after:immersiveengineering@[0.10-58,);required-after:ic2")
+@Mod.EventBusSubscriber
 public class IndustrialWires {
 	public static final String MODID = "industrialwires";
 	public static final String VERSION = "${version}";
+
+	public static final List<BlockIWBase> blocks = new ArrayList<>();
+	public static final List<Item> items = new ArrayList<>();
+
 	public static BlockIC2Connector ic2conn;
 	public static BlockMechanicalConverter mechConv;
 	public static BlockJacobsLadder jacobsLadder;
 	public static BlockPanel panel;
-	public static ItemIC2Coil coil;
-	public static ItemPanelComponent panelComponent;
-	public static ItemKey key;
+
+
+	public static final ItemIC2Coil coil = new ItemIC2Coil();
+	public static final ItemPanelComponent panelComponent = new ItemPanelComponent();
+	public static final ItemKey key = new ItemKey();
 	public static final SimpleNetworkWrapper packetHandler = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
+
+	public static Logger logger;
 	@Mod.Instance(MODID)
 	public static IndustrialWires instance = new IndustrialWires();
 	public static CreativeTabs creativeTab = new CreativeTabs(MODID) {
@@ -74,16 +92,14 @@ public class IndustrialWires {
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent e) {
+		logger = e.getModLog();
 		new IWConfig();
-		ic2conn = new BlockIC2Connector();
-		if (IWConfig.enableConversion)
+		if (IWConfig.enableConversion) {
 			mechConv = new BlockMechanicalConverter();
+		}
+		ic2conn = new BlockIC2Connector();
 		jacobsLadder = new BlockJacobsLadder();
 		panel = new BlockPanel();
-
-		coil = new ItemIC2Coil();
-		panelComponent = new ItemPanelComponent();
-		key = new ItemKey();
 
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorTin.class, MODID + "ic2ConnectorTin");
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorCopper.class, MODID + "ic2ConnectorCopper");
@@ -95,15 +111,30 @@ public class IndustrialWires {
 		GameRegistry.registerTileEntity(TileEntityRSPanelConn.class, MODID + ":control_panel_rs");
 		GameRegistry.registerTileEntity(TileEntityPanelCreator.class, MODID + ":panel_creator");
 		GameRegistry.registerTileEntity(TileEntityUnfinishedPanel.class, MODID + ":unfinished_panel");
-		if (mechConv != null) {
+		if (IWConfig.enableConversion) {
 			GameRegistry.registerTileEntity(TileEntityIEMotor.class, MODID + ":ieMotor");
 			GameRegistry.registerTileEntity(TileEntityMechICtoIE.class, MODID + ":mechIcToIe");
 			GameRegistry.registerTileEntity(TileEntityMechIEtoIC.class, MODID + ":mechIeToIc");
 		}
-		if (IC2Wiretype.IC2_TYPES == null) {
-			throw new IllegalStateException("No IC2 wires registered");
-		}
 		proxy.preInit();
+	}
+
+	@SubscribeEvent
+	public static void registerBlocks(RegistryEvent.Register<Block> event) {
+		for (BlockIWBase b: blocks) {
+			logger.info(b.getRegistryName());
+			event.getRegistry().register(b);
+		}
+	}
+
+	@SubscribeEvent
+	public static void registerItems(RegistryEvent.Register<Item> event) {
+		for (BlockIWBase b:blocks) {
+			event.getRegistry().register(b.createItemBlock());
+		}
+		for (Item i:items) {
+			event.getRegistry().register(i);
+		}
 	}
 
 	@EventHandler
@@ -123,24 +154,6 @@ public class IndustrialWires {
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent e) {
 		proxy.postInit();
-	}
-
-	@EventHandler
-	public void remap(FMLMissingMappingsEvent ev) {
-		for (FMLMissingMappingsEvent.MissingMapping miss : ev.get()) {
-			String name = miss.resourceLocation.getResourcePath();
-			switch (name) {
-			case "ic2connector":
-				if (miss.type == GameRegistry.Type.ITEM) {
-					miss.remap(Item.getItemFromBlock(IndustrialWires.ic2conn));
-				} else {
-					miss.remap(IndustrialWires.ic2conn);
-				}
-				break;
-			case "ic2wirecoil":
-				miss.remap(IndustrialWires.coil);
-				break;
-			}
-		}
+		PanelUtils.PANEL_ITEM = Item.getItemFromBlock(panel);
 	}
 }

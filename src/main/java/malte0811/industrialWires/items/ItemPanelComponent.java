@@ -27,6 +27,7 @@ import malte0811.industrialWires.controlpanel.PanelUtils;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -35,7 +36,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.*;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -58,11 +58,11 @@ public class ItemPanelComponent extends Item implements INetGUIItem {
 		this.setCreativeTab(IndustrialWires.creativeTab);
 		setMaxStackSize(64);
 		setRegistryName(new ResourceLocation(IndustrialWires.MODID, "panel_component"));
-		GameRegistry.register(this);
+		IndustrialWires.items.add(this);
 	}
 
 	@Override
-	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean adv) {
+	public void addInformation(ItemStack stack, World world, List<String> list, ITooltipFlag flag) {
 		if (GuiScreen.isShiftKeyDown()) {
 			NBTTagCompound nbt = getTagCompound(stack);
 			NBTTagCompound data = nbt.getCompoundTag("data");
@@ -86,9 +86,11 @@ public class ItemPanelComponent extends Item implements INetGUIItem {
 	}
 
 	@Override
-	public void getSubItems(@Nonnull Item itemIn, CreativeTabs tab, NonNullList<ItemStack> subItems) {
-		for (int i = 0; i < types.length; i++) {
-			subItems.add(new ItemStack(itemIn, 1, i));
+	public void getSubItems(@Nonnull CreativeTabs tab, @Nonnull NonNullList<ItemStack> subItems) {
+		if (tab==IndustrialWires.creativeTab) {
+			for (int i = 0; i < types.length; i++) {
+				subItems.add(new ItemStack(this, 1, i));
+			}
 		}
 	}
 

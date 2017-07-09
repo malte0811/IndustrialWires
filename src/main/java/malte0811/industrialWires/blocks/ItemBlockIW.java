@@ -41,6 +41,7 @@ public class ItemBlockIW extends ItemBlock {
 			values = null;
 		}
 		hasSubtypes = true;
+		setRegistryName(b.getRegistryName());
 	}
 
 	@Nonnull

@@ -60,7 +60,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 
 	{
 		for (int i = 2; i < 14; i++) {
-			int color = EnumDyeColor.byMetadata(i - 2).getMapColor().colorValue;
+			int color = EnumDyeColor.byMetadata(i - 2).getColorValue();
 			IndicatorLight ind = new IndicatorLight(0, (byte) (i - 2), color);
 			LightedButton btn = new LightedButton(color, false, true, 1, i - 2);
 			Label lbl = new Label("->", color);

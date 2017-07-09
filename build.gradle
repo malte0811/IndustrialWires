@@ -11,7 +11,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
     }
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
@@ -30,11 +30,11 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 minecraft {
-    version = "13.20.0.2282"
+    version = "14.21.1.2404"
     runDir = "run"
 
     replace '${version}', project.version
-    mappings = "snapshot_20170612"
+    mappings = "snapshot_20170628"
 }
 
 repositories {
@@ -49,8 +49,8 @@ repositories {
 }
 
 dependencies {
-    compile "net.industrial-craft:industrialcraft-2:2.7.+"
-    deobfCompile "blusunrize:ImmersiveEngineering:0.11-+:deobf"
+    compile "net.industrial-craft:industrialcraft-2:2.8.+"
+    deobfCompile "blusunrize:ImmersiveEngineering:0.12-+:deobf"
 }
 
 jar {

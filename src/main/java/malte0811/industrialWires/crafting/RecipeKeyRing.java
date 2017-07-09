@@ -26,13 +26,14 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import static malte0811.industrialWires.items.ItemKey.*;
 
-public class RecipeKeyRing implements IRecipe {
+public class RecipeKeyRing extends IForgeRegistryEntry.Impl<IRecipe> implements IRecipe {
 
 	@Override
 	public boolean matches(@Nonnull InventoryCrafting inv, @Nonnull World worldIn) {
@@ -82,9 +83,10 @@ public class RecipeKeyRing implements IRecipe {
 	}
 
 	@Override
-	public int getRecipeSize() {
-		return 2;
+	public boolean canFit(int width, int height) {
+		return width>0&&height>0;
 	}
+
 
 	@Nonnull
 	@Override

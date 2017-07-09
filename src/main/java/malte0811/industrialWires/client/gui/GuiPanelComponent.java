@@ -191,10 +191,10 @@ public class GuiPanelComponent extends GuiContainer {
 		GlStateManager.color(1, 1, 1, 1);
 		RenderHelper.disableStandardItemLighting();
 		for (GuiChannelPicker pick : rsChannelChoosers) {
-			pick.drawButton(mc, mouseX, mouseY);
+			pick.drawButton(mc, mouseX, mouseY, partialTicks);
 		}
 		for (GuiButtonCheckbox box : boolButtons) {
-			box.drawButton(mc, mouseX, mouseY);
+			box.drawButton(mc, mouseX, mouseY, partialTicks);
 		}
 		for (GuiTextField field : stringTexts) {
 			field.drawTextBox();
@@ -203,7 +203,7 @@ public class GuiPanelComponent extends GuiContainer {
 			choose.drawChooser();
 		}
 		for (GuiSliderIE choose : floatSliders) {
-			choose.drawButton(mc, mouseX, mouseY);
+			choose.drawButton(mc, mouseX, mouseY, partialTicks);
 		}
 		//TOOLTIPS
 		for (int i = 0; i < rsChannelChoosers.size(); i++) {

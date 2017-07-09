@@ -46,7 +46,7 @@ public class ItemKey extends Item implements INetGUIItem {
 		this.setCreativeTab(IndustrialWires.creativeTab);
 		setMaxStackSize(64);
 		setRegistryName(new ResourceLocation(IndustrialWires.MODID, "key"));
-		GameRegistry.register(this);
+		IndustrialWires.items.add(this);
 	}
 
 	@Nonnull
@@ -60,15 +60,16 @@ public class ItemKey extends Item implements INetGUIItem {
 	}
 
 	@Override
-	public void getSubItems(Item itemIn, CreativeTabs tab, NonNullList<ItemStack> subItems) {
-		subItems.add(new ItemStack(this, 1, 0));
-		subItems.add(new ItemStack(this, 1, 2));
+	public void getSubItems(@Nonnull CreativeTabs tab, @Nonnull NonNullList<ItemStack> subItems) {
+		if (tab==IndustrialWires.creativeTab) {
+			subItems.add(new ItemStack(this, 1, 0));
+			subItems.add(new ItemStack(this, 1, 2));
+		}
 	}
 
 	@Nonnull
 	@Override
 	public String getUnlocalizedName(ItemStack stack) {
-		NBTTagCompound nbt = stack.getTagCompound();
 		return "item."+IndustrialWires.MODID+".key."+types[stack.getMetadata()];
 	}
 

@@ -17,7 +17,7 @@ public class GuiChannelPicker extends GuiButton {
 	}
 
 	@Override
-	public void drawButton(@Nonnull Minecraft mc, int mouseX, int mouseY) {
+	public void drawButton(@Nonnull Minecraft mc, int mouseX, int mouseY, float patrtialTicks) {
 		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 		GlStateManager.enableBlend();
 		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
@@ -31,7 +31,7 @@ public class GuiChannelPicker extends GuiButton {
 			int xMax = xMin + width / 4;
 			int yMax = yMin + height / 4;
 			EnumDyeColor color = EnumDyeColor.byMetadata(i);
-			int colorVal = color.getMapColor().colorValue | 0xff000000;
+			int colorVal = color.getColorValue() | 0xff000000;
 			if (mouseX >= xMin && mouseX < xMax && mouseY >= yMin && mouseY < yMax) {
 				currHovered = i;
 			}

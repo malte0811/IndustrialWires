@@ -19,6 +19,7 @@
 package malte0811.industrialWires.blocks;
 
 import blusunrize.immersiveengineering.api.IEProperties;
+import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.TileEntityJacobsLadder.LadderSize;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -79,9 +80,11 @@ public class BlockJacobsLadder extends BlockIWBase implements IMetaEnum, IPlacem
 	}
 
 	@Override
-	public void getSubBlocks(@Nonnull Item itemIn, CreativeTabs tab, NonNullList<ItemStack> list) {
-		for (int i = 0; i < LadderSize.values().length; i++) {
-			list.add(new ItemStack(this, 1, i));
+	public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> list) {
+		if (tab== IndustrialWires.creativeTab) {
+			for (int i = 0; i < LadderSize.values().length; i++) {
+				list.add(new ItemStack(this, 1, i));
+			}
 		}
 	}
 

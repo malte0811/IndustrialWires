@@ -28,6 +28,7 @@ import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -43,6 +44,7 @@ import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 
@@ -54,7 +56,6 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 		setHardness(3.0F);
 		setResistance(15.0F);
 		lightOpacity = 0;
-		this.setCreativeTab(IndustrialWires.creativeTab);
 	}
 
 	@Override
@@ -70,9 +71,11 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 	}
 
 	@Override
-	public void getSubBlocks(@Nonnull Item itemIn, CreativeTabs tab, NonNullList<ItemStack> list) {
-		for (int i = 0; i < type.getAllowedValues().size(); i++) {
-			list.add(new ItemStack(itemIn, 1, i));
+	public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> list) {
+		if (tab==IndustrialWires.creativeTab) {
+			for (int i = 0; i < type.getAllowedValues().size(); i++) {
+				list.add(new ItemStack(this, 1, i));
+			}
 		}
 	}
 
@@ -146,8 +149,8 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 	}
 
 	@Override
-	public void addInformation(ItemStack stack, EntityPlayer player, List<String> tooltip, boolean advanced) {
-		super.addInformation(stack, player, tooltip, advanced);
+	public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag advanced) {
+		super.addInformation(stack, world, tooltip, advanced);
 		if (!stack.isEmpty() && stack.getMetadata() % 2 == 0) {
 			int type = stack.getMetadata() / 2;
 			tooltip.add(I18n.format(IndustrialWires.MODID + ".tooltip.power_tier", type + 1));

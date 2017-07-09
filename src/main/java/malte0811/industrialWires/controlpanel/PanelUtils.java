@@ -63,7 +63,7 @@ import static malte0811.industrialWires.util.MiscUtils.discoverLocal;
 
 public final class PanelUtils {
 	public static TextureAtlasSprite PANEL_TEXTURE;
-	public static final Item PANEL_ITEM = new ItemStack(IndustrialWires.panel).getItem();
+	public static Item PANEL_ITEM;
 	private static ItemStack panelBase;
 
 	private PanelUtils() {
@@ -320,7 +320,7 @@ public final class PanelUtils {
 		}
 		if (rs && data.hasKey(RS_CHANNEL)) {
 			EnumDyeColor channColor = EnumDyeColor.byMetadata(data.getInteger(RS_CHANNEL));
-			String hexCol = Integer.toHexString(channColor.getMapColor().colorValue);
+			String hexCol = Integer.toHexString(channColor.getColorValue());
 			list.add(I18n.format("desc.immersiveengineering.info.redstoneChannel", "<hexcol=" + hexCol + ":" + channColor.getUnlocalizedName() + ">"));
 		}
 		if (rs && data.hasKey(RS_ID)) {
