@@ -68,7 +68,7 @@ public class ItemIC2Coil extends Item implements IWireCoil {
 
 	@Override
 	public void getSubItems(@Nonnull CreativeTabs tab, @Nonnull NonNullList<ItemStack> subItems) {
-		if (tab==IndustrialWires.creativeTab) {
+		if (isInCreativeTab(tab)) {
 			for (int i = 0; i < subNames.length; i++) {
 				ItemStack tmp = new ItemStack(this, 1, i);
 				setLength(tmp, getMaxWireLength(tmp));
@@ -227,22 +227,5 @@ public class ItemIC2Coil extends Item implements IWireCoil {
 
 	public static int getMaxWireLength(ItemStack i) {
 		return IWConfig.maxLengthOnCoil[i.getItemDamage()];
-	}
-
-	public static ItemStack getUninsulatedCable(String name) {
-		return IC2Items.getItem("cable", "type:"+name+",insulation:0");
-		/*switch (i.getMetadata()) {
-		case 0:
-			return IC2Items.getItem("cable", "type:tin,insulation:0");
-		case 1:
-			return IC2Items.getItem("cable", "type:copper,insulation:0");
-		case 2:
-			return IC2Items.getItem("cable", "type:gold,insulation:0");
-		case 3:
-			return IC2Items.getItem("cable", "type:iron,insulation:0");
-		case 4:
-			return IC2Items.getItem("cable", "type:glass,insulation:0");
-		}
-		return null;*/
 	}
 }

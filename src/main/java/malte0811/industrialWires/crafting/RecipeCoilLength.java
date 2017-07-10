@@ -82,7 +82,7 @@ public class RecipeCoilLength extends IForgeRegistryEntry.Impl<IRecipe> implemen
 			if (OreDictionary.itemMatches(curr, coil, false)) {
 				length -= ItemIC2Coil.getLength(curr);
 				if (length < 0) {
-					ItemStack currStack = new ItemStack(IndustrialWires.coil, 1);
+					ItemStack currStack = coil.copy();
 					ret.set(i, currStack);
 					ItemIC2Coil.setLength(currStack, -length);
 				}
@@ -145,7 +145,6 @@ public class RecipeCoilLength extends IForgeRegistryEntry.Impl<IRecipe> implemen
 		}
 		@Override
 		public boolean apply(@Nullable ItemStack input) {
-			IndustrialWires.logger.info(input);
 			if (input == null)
 				return false;
 			for (ItemStack stack:getMatchingStacks()) {

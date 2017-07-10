@@ -61,7 +61,7 @@ public class ItemKey extends Item implements INetGUIItem {
 
 	@Override
 	public void getSubItems(@Nonnull CreativeTabs tab, @Nonnull NonNullList<ItemStack> subItems) {
-		if (tab==IndustrialWires.creativeTab) {
+		if (isInCreativeTab(tab)) {
 			subItems.add(new ItemStack(this, 1, 0));
 			subItems.add(new ItemStack(this, 1, 2));
 		}

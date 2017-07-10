@@ -155,10 +155,8 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 
 	@Override
 	public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> list) {
-		if (tab==IndustrialWires.creativeTab) {
-			for (int i = 0; i < BlockTypes_Panel.values().length; i++) {
-				list.add(new ItemStack(this, 1, i));
-			}
+		for (int i = 0; i < BlockTypes_Panel.values().length; i++) {
+			list.add(new ItemStack(this, 1, i));
 		}
 	}
 

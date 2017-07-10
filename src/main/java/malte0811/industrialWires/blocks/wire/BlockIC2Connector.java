@@ -72,10 +72,8 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 
 	@Override
 	public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> list) {
-		if (tab==IndustrialWires.creativeTab) {
-			for (int i = 0; i < type.getAllowedValues().size(); i++) {
-				list.add(new ItemStack(this, 1, i));
-			}
+		for (int i = 0; i < type.getAllowedValues().size(); i++) {
+			list.add(new ItemStack(this, 1, i));
 		}
 	}
 

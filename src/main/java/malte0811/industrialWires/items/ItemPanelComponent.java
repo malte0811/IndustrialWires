@@ -87,7 +87,7 @@ public class ItemPanelComponent extends Item implements INetGUIItem {
 
 	@Override
 	public void getSubItems(@Nonnull CreativeTabs tab, @Nonnull NonNullList<ItemStack> subItems) {
-		if (tab==IndustrialWires.creativeTab) {
+		if (isInCreativeTab(tab)) {
 			for (int i = 0; i < types.length; i++) {
 				subItems.add(new ItemStack(this, 1, i));
 			}

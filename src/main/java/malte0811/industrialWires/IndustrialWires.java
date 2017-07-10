@@ -72,9 +72,9 @@ public class IndustrialWires {
 	public static BlockPanel panel;
 
 
-	public static final ItemIC2Coil coil = new ItemIC2Coil();
-	public static final ItemPanelComponent panelComponent = new ItemPanelComponent();
-	public static final ItemKey key = new ItemKey();
+	public static ItemIC2Coil coil;
+	public static ItemPanelComponent panelComponent;
+	public static ItemKey key;
 	public static final SimpleNetworkWrapper packetHandler = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
 
 	public static Logger logger;
@@ -101,6 +101,10 @@ public class IndustrialWires {
 		jacobsLadder = new BlockJacobsLadder();
 		panel = new BlockPanel();
 
+		coil = new ItemIC2Coil();
+		panelComponent = new ItemPanelComponent();
+		key = new ItemKey();
+
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorTin.class, MODID + "ic2ConnectorTin");
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorCopper.class, MODID + "ic2ConnectorCopper");
 		GameRegistry.registerTileEntity(TileEntityIC2ConnectorGold.class, MODID + "ic2ConnectorGold");
@@ -122,7 +126,6 @@ public class IndustrialWires {
 	@SubscribeEvent
 	public static void registerBlocks(RegistryEvent.Register<Block> event) {
 		for (BlockIWBase b: blocks) {
-			logger.info(b.getRegistryName());
 			event.getRegistry().register(b);
 		}
 	}
