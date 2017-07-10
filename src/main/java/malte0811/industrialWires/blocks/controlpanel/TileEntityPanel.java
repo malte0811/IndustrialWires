@@ -303,7 +303,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 
 	public void removeAllRSCons() {
 		for (TileEntityRSPanelConn rs : rsPorts) {
-			rs.unregisterPanel(this, true);
+			rs.unregisterPanel(this, true, false);
 		}
 		rsPorts.clear();
 		firstTick = true;
