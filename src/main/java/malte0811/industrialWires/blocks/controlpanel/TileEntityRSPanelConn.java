@@ -166,7 +166,7 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 			Consumer<byte[]> listener = pc.getRSInputHandler(id, panel);
 			if (listener != null) {
 				changeListeners.add(listener);
-				listener.accept(out);
+				listener.accept(network.channelValues);
 			}
 			pc.registerRSOutput(id, rsOut);
 		}
@@ -174,19 +174,21 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 		connectedPanels.add(panel);
 	}
 
-	public void unregisterPanel(TileEntityPanel panel, boolean remove) {
+	public void unregisterPanel(TileEntityPanel panel, boolean remove, boolean callPanel) {
 		out = new byte[16];
 		PropertyComponents.PanelRenderProperties p = panel.getComponents();
 		for (PanelComponent pc : p) {
 			Consumer<byte[]> listener = pc.getRSInputHandler(id, panel);
 			if (listener != null) {
-				listener.accept(out);
+				listener.accept(new byte[16]);
 				changeListeners.remove(listener);
 			}
 			pc.unregisterRSOutput(id, rsOut);
 			outputs.remove(new PCWrapper(pc));
 		}
-		panel.unregisterRS(this);
+		if (callPanel) {
+			panel.unregisterRS(this);
+		}
 		if (remove) {
 			connectedPanels.remove(panel);
 		}
@@ -282,7 +284,7 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 	public void onChunkUnload() {
 		super.onChunkUnload();
 		for (TileEntityPanel panel : connectedPanels) {
-			unregisterPanel(panel, false);
+			unregisterPanel(panel, false, true);
 		}
 	}
 
@@ -290,7 +292,7 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 	public void invalidate() {
 		super.invalidate();
 		for (TileEntityPanel panel : connectedPanels) {
-			unregisterPanel(panel, false);
+			unregisterPanel(panel, false, true);
 		}
 	}
 
@@ -303,7 +305,7 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 				TileEntity te = world.getTileEntity(bp);
 				if (te instanceof TileEntityPanel) {
 					tes.add((TileEntityPanel) te);
-					unregisterPanel((TileEntityPanel) te, true);
+					unregisterPanel((TileEntityPanel) te, true, true);
 				}
 			}
 			id = nbt.getInteger("rsId");
