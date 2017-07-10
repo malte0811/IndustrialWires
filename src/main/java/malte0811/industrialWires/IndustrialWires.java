@@ -27,6 +27,7 @@ import malte0811.industrialWires.blocks.converter.TileEntityMechICtoIE;
 import malte0811.industrialWires.blocks.converter.TileEntityMechIEtoIC;
 import malte0811.industrialWires.blocks.wire.*;
 import malte0811.industrialWires.controlpanel.PanelUtils;
+import malte0811.industrialWires.crafting.Recipes;
 import malte0811.industrialWires.items.ItemIC2Coil;
 import malte0811.industrialWires.items.ItemKey;
 import malte0811.industrialWires.items.ItemPanelComponent;
@@ -34,12 +35,11 @@ import malte0811.industrialWires.network.MessageGUIInteract;
 import malte0811.industrialWires.network.MessageItemSync;
 import malte0811.industrialWires.network.MessagePanelInteract;
 import malte0811.industrialWires.network.MessageTileSyncIW;
-import malte0811.industrialWires.wires.IC2Wiretype;
 import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.common.MinecraftForge;
+import net.minecraft.item.crafting.IRecipe;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -137,9 +137,13 @@ public class IndustrialWires {
 		}
 	}
 
+	@SubscribeEvent
+	public static void registerRecipes(RegistryEvent.Register<IRecipe> event) {
+		Recipes.addRecipes(event.getRegistry());
+	}
+
 	@EventHandler
 	public void init(FMLInitializationEvent e) {
-		Recipes.addRecipes();
 
 		ExtraIC2Compat.addToolConmpat();
 

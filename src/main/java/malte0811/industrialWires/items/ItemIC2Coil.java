@@ -229,8 +229,9 @@ public class ItemIC2Coil extends Item implements IWireCoil {
 		return IWConfig.maxLengthOnCoil[i.getItemDamage()];
 	}
 
-	public static ItemStack getUninsulatedCable(ItemStack i) {
-		switch (i.getMetadata()) {
+	public static ItemStack getUninsulatedCable(String name) {
+		return IC2Items.getItem("cable", "type:"+name+",insulation:0");
+		/*switch (i.getMetadata()) {
 		case 0:
 			return IC2Items.getItem("cable", "type:tin,insulation:0");
 		case 1:
@@ -242,6 +243,6 @@ public class ItemIC2Coil extends Item implements IWireCoil {
 		case 4:
 			return IC2Items.getItem("cable", "type:glass,insulation:0");
 		}
-		return null;
+		return null;*/
 	}
 }

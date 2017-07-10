@@ -1,0 +1,21 @@
+{
+  "result": {
+    "item": "industrialwires:panel_component",
+    "data": 6
+  },
+  "pattern": [
+    "aaa",
+    "asa"
+  ],
+  "type": "forge:ore_shaped",
+  "key": {
+    "a": {
+      "type": "forge:ore_dict", "ore": "plateAluminum"
+    },
+    "s": {
+      "item": "industrialwires:panel_component",
+      "data": 5,
+      "count": 2
+    }
+  }
+}

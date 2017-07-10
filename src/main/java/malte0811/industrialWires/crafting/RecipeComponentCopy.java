@@ -107,4 +107,9 @@ public class RecipeComponentCopy extends IForgeRegistryEntry.Impl<IRecipe> imple
 		}
 		return null;
 	}
+
+	@Override
+	public boolean isHidden() {
+		return true;
+	}
 }

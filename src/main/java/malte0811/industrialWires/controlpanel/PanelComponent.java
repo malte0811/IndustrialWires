@@ -30,7 +30,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
-import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.Level;
@@ -153,7 +152,7 @@ public abstract class PanelComponent {
 			ret.readFromNBT(nbt);
 			return ret;
 		} else {
-			FMLLog.log(IndustrialWires.MODID, Level.WARN, "Unknown panel component: " + type);
+			IndustrialWires.logger.warn("Unknown panel component: " + type);
 			return null;
 		}
 	}

@@ -1,0 +1,23 @@
+{
+  "result": {
+    "item": "industrialwires:ic2_connector",
+    "data": 8,
+    "count": 4
+  },
+  "pattern": [
+    " c ",
+    "rcr",
+    "rcr"
+  ],
+  "type": "forge:ore_shaped",
+  "key": {
+    "r": {
+      "type": "forge:ore_dict", "ore": "itemRubber"
+    },
+    "c": {
+      "type": "industrialwires:ic2_item",
+      "name": "cable",
+      "variant": "type:glass,insulation:0"
+    }
+  }
+}

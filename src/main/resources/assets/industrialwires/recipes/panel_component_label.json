@@ -1,0 +1,16 @@
+{
+  "result": {
+    "item": "industrialwires:panel_component",
+    "data": 1,
+    "count": 4
+  },
+  "ingredients": [
+    {
+      "type": "forge:ore_dict", "ore": "paper"
+    },
+    {
+      "type": "forge:ore_dict", "ore": "plateIron"
+    }
+  ],
+  "type": "forge:ore_shapeless"
+}

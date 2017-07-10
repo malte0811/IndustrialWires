@@ -18,7 +18,6 @@
 
 package malte0811.industrialWires.blocks.controlpanel;
 
-import blusunrize.immersiveengineering.common.util.IELogger;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.IBlockBoundsIW;
 import malte0811.industrialWires.blocks.INetGUI;
@@ -94,7 +93,7 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements INetGUI,
 					p.inventory.markDirty();
 				}
 			} else {
-				IELogger.info("(IndustrialWires) Failed to load panel component send by " + p.getDisplayNameString());
+				IndustrialWires.logger.info("(IndustrialWires) Failed to load panel component send by " + p.getDisplayNameString());
 			}
 			break;
 		case REMOVE:

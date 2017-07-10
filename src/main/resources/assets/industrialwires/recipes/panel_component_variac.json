@@ -1,0 +1,26 @@
+{
+  "result": {
+    "item": "industrialwires:panel_component",
+    "data": 4
+  },
+  "pattern": [
+    "r",
+    "g",
+    "c"
+  ],
+  "type": "forge:ore_shaped",
+  "key": {
+    "r": {
+      "type": "forge:ore_dict", "ore": "itemRubber"
+    },
+    "c": {
+      "type": "industrialwires:ic2_item",
+      "name": "crafting",
+      "variant": "coil"
+    },
+    "g": {
+      "type": "forge:ore_dict",
+      "ore": "ingotHOPGraphite"
+    }
+  }
+}

@@ -24,14 +24,16 @@ import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.common.crafting.CraftingHelper;
+import net.minecraftforge.common.crafting.CraftingHelper.ShapedPrimer;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 
 import javax.annotation.Nonnull;
 
 public class RecipeInitPC extends ShapedOreRecipe {
 
-	public RecipeInitPC(ResourceLocation group, ItemStack result, Object... recipe) {
-		super(group, result, recipe);
+	public RecipeInitPC(ShapedOreRecipe factory) {
+		super(factory.getRegistryName(), factory.getRecipeOutput(), primerFromRecipe(factory));
 	}
 
 	@Nonnull
@@ -45,8 +47,12 @@ public class RecipeInitPC extends ShapedOreRecipe {
 		return ret;
 	}
 
-	@Override
-	public boolean matches(InventoryCrafting inv, World world) {
-		return super.matches(inv, world);
+	private static ShapedPrimer primerFromRecipe(ShapedOreRecipe recipe) {
+		ShapedPrimer ret = new ShapedPrimer();
+		ret.height = recipe.getHeight();
+		ret.width = recipe.getWidth();
+		ret.input = recipe.getIngredients();
+		ret.mirrored = true;
+		return ret;
 	}
 }

@@ -1,0 +1,31 @@
+{
+  "result": {
+    "item": "industrialwires:control_panel",
+    "data": 3
+  },
+  "pattern": [
+    "rmr",
+    "rdr",
+    "rar"
+  ],
+  "type": "forge:ore_shaped",
+  "key": {
+    "a": {
+      "type": "industrialwires:ic2_item",
+      "name": "crafting",
+      "variant": "alloy"
+    },
+    "r": {
+      "type": "forge:ore_dict", "ore": "stickSteel"
+    },
+    "d": {
+      "item": "immersiveengineering:drillhead",
+      "data": 1
+    },
+    "m": {
+      "type": "industrialwires:ic2_item",
+      "name": "crafting",
+      "variant": "electric_motor"
+    }
+  }
+}

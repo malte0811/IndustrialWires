@@ -1,0 +1,22 @@
+{
+  "result": {
+    "item": "industrialwires:ic2_connector",
+    "data": 7,
+    "count": 4
+  },
+  "pattern": [
+    " i ",
+    "gig",
+    "gig"
+  ],
+  "type": "forge:ore_shaped",
+  "key": {
+    "g": {
+      "item": "immersiveengineering:stone_decoration",
+      "data": 8
+    },
+    "i": {
+      "type": "forge:ore_dict", "ore": "ingotIron"
+    }
+  }
+}

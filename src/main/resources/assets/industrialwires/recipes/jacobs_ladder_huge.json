@@ -1,0 +1,27 @@
+{
+  "result": {
+    "item": "industrialwires:jacobs_ladder",
+    "data": 2
+  },
+  "pattern": [
+    "c c",
+    "hhh",
+    "sts"
+  ],
+  "type": "forge:ore_shaped",
+  "key": {
+    "c": {
+      "type": "forge:ore_dict", "ore": "blockCopper"
+    },
+    "s": {
+      "type": "forge:ore_dict", "ore": "ingotSteel"
+    },
+    "t": {
+      "item": "immersiveengineering:connector",
+      "data": 8
+    },
+    "h": {
+      "item": "minecraft:hardened_clay"
+    }
+  }
+}

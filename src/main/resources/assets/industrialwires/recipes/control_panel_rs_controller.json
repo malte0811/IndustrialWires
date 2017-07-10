@@ -1,0 +1,21 @@
+{
+  "result": {
+    "item": "industrialwires:control_panel",
+    "data": 1
+  },
+  "pattern": [
+    "c",
+    "d"
+  ],
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "c": {
+      "item": "immersiveengineering:connector",
+      "data": 12
+    },
+    "d": {
+      "item": "industrialwires:control_panel",
+      "data": 2
+    }
+  }
+}

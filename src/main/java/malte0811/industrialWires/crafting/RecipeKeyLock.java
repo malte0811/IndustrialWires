@@ -26,6 +26,7 @@ import malte0811.industrialWires.items.ItemPanelComponent;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 import net.minecraftforge.registries.IForgeRegistryEntry;
@@ -109,5 +110,14 @@ public class RecipeKeyLock extends IForgeRegistryEntry.Impl<IRecipe> implements 
 			}
 		}
 		return ItemStack.EMPTY;
+	}
+
+	@Nonnull
+	@Override
+	public NonNullList<Ingredient> getIngredients() {
+		NonNullList<Ingredient> ret = NonNullList.withSize(2, Ingredient.EMPTY);
+		ret.set(0, Ingredient.fromStacks(new ItemStack(IndustrialWires.key, 1, 0)));
+		ret.set(1, Ingredient.fromStacks(new ItemStack(IndustrialWires.panelComponent, 1, 7)));
+		return ret;
 	}
 }

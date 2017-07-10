@@ -1,0 +1,12 @@
+{
+  "type": "industrialwires:wire_coil",
+  "cable": {
+    "type": "industrialwires:ic2_item",
+    "name": "cable",
+    "variant": "type:copper,insulation:0"
+  },
+  "coil": {
+    "item": "industrialwires:ic2_wire_coil",
+    "data": 1
+  }
+}

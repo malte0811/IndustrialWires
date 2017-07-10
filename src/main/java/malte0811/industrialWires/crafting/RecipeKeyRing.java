@@ -22,6 +22,7 @@ import malte0811.industrialWires.IndustrialWires;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.NonNullList;
@@ -29,53 +30,58 @@ import net.minecraft.world.World;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static malte0811.industrialWires.items.ItemKey.*;
 
 public class RecipeKeyRing extends IForgeRegistryEntry.Impl<IRecipe> implements IRecipe {
 
+	private final boolean addToRing;
+	public RecipeKeyRing(boolean add) {
+		addToRing = add;
+	}
+
 	@Override
 	public boolean matches(@Nonnull InventoryCrafting inv, @Nonnull World worldIn) {
-		return getType(inv) != null;
+		return isValid(inv);
 	}
 
 	@Nonnull
 	@Override
 	public ItemStack getCraftingResult(@Nonnull InventoryCrafting inv) {
-		Boolean recipeType = getType(inv);
-		if (recipeType==Boolean.TRUE) {//add key to ring
-			ItemStack ring = inv.getStackInSlot(getRingPos(inv)).copy();
-			NBTTagCompound nbt = ring.getTagCompound();
-			ItemStack key = inv.getStackInSlot(getKeyPos(inv));
-			NBTTagCompound keyNBT = key.getTagCompound();
-			if (nbt==null) {
-				nbt = new NBTTagCompound();
-				ring.setTagCompound(nbt);
-			}
-			if (!nbt.hasKey(RING_KEYS)) {
-				nbt.setTag(RING_KEYS, new NBTTagList());
-			}
-			if (keyNBT!=null) {
-				NBTTagList keys = nbt.getTagList(RING_KEYS, 10);
-				if (keys.tagCount()>= IWConfig.maxKeysOnRing) {
-					return ItemStack.EMPTY;
+		if (isValid(inv)) {
+			if (addToRing) {//add key to ring
+				ItemStack ring = inv.getStackInSlot(getRingPos(inv)).copy();
+				NBTTagCompound nbt = ring.getTagCompound();
+				ItemStack key = inv.getStackInSlot(getKeyPos(inv));
+				NBTTagCompound keyNBT = key.getTagCompound();
+				if (nbt == null) {
+					nbt = new NBTTagCompound();
+					ring.setTagCompound(nbt);
 				}
-				keys.appendTag(keyNBT.copy());
-				nbt.setInteger(LOCK_ID, keyNBT.getInteger(LOCK_ID));
-				nbt.setString(NAME, keyNBT.getString(NAME));
-			}
-			return ring;
-		} else {//remove key from ring
-			ItemStack ring = inv.getStackInSlot(getRingPos(inv)).copy();
-			NBTTagCompound nbt = ring.getTagCompound();
-			ItemStack key = new ItemStack(IndustrialWires.key, 1, 1);
-			if (nbt!=null) {
-				NBTTagList keys = nbt.getTagList(RING_KEYS, 10);
-				if (keys.tagCount()>0) {
-					NBTTagCompound first = keys.getCompoundTagAt(keys.tagCount()-1);
-					key.setTagCompound(first);
-					return key;
+				if (!nbt.hasKey(RING_KEYS)) {
+					nbt.setTag(RING_KEYS, new NBTTagList());
+				}
+				if (keyNBT != null) {
+					NBTTagList keys = nbt.getTagList(RING_KEYS, 10);
+					if (keys.tagCount() >= IWConfig.maxKeysOnRing) {
+						return ItemStack.EMPTY;
+					}
+					keys.appendTag(keyNBT.copy());
+					nbt.setInteger(LOCK_ID, keyNBT.getInteger(LOCK_ID));
+					nbt.setString(NAME, keyNBT.getString(NAME));
+				}
+				return ring;
+			} else {//remove key from ring
+				ItemStack ring = inv.getStackInSlot(getRingPos(inv)).copy();
+				NBTTagCompound nbt = ring.getTagCompound();
+				ItemStack key = new ItemStack(IndustrialWires.key, 1, 1);
+				if (nbt != null) {
+					NBTTagList keys = nbt.getTagList(RING_KEYS, 10);
+					if (keys.tagCount() > 0) {
+						NBTTagCompound first = keys.getCompoundTagAt(keys.tagCount() - 1);
+						key.setTagCompound(first);
+						return key;
+					}
 				}
 			}
 		}
@@ -91,14 +97,14 @@ public class RecipeKeyRing extends IForgeRegistryEntry.Impl<IRecipe> implements 
 	@Nonnull
 	@Override
 	public ItemStack getRecipeOutput() {
-		return ItemStack.EMPTY;
+		return new ItemStack(IndustrialWires.key, 1, addToRing?2:1);
 	}
 
 	@Nonnull
 	@Override
 	public NonNullList<ItemStack> getRemainingItems(@Nonnull InventoryCrafting inv) {
 		NonNullList<ItemStack> ret = NonNullList.withSize(inv.getSizeInventory(), ItemStack.EMPTY);
-		if (getType(inv)==Boolean.FALSE) {
+		if (!addToRing) {
 			int ringId = getRingPos(inv);
 			ItemStack ring = inv.getStackInSlot(ringId).copy();
 			NBTTagCompound nbt = ring.getTagCompound();
@@ -119,8 +125,7 @@ public class RecipeKeyRing extends IForgeRegistryEntry.Impl<IRecipe> implements 
 		return ret;
 	}
 
-	@Nullable
-	private Boolean getType(@Nonnull InventoryCrafting inv) {
+	private boolean isValid(@Nonnull InventoryCrafting inv) {
 		boolean hasRing = false;
 		boolean hasKey = false;
 		for (int i = 0;i<inv.getSizeInventory();i++) {
@@ -133,12 +138,16 @@ public class RecipeKeyRing extends IForgeRegistryEntry.Impl<IRecipe> implements 
 					hasRing = true;
 					continue;
 				}
-				return null;
+				return false;
 			} else if (!here.isEmpty()) {
-				return null;
+				return false;
 			}
 		}
-		return hasRing?hasKey:null;
+		if (addToRing) {
+			return hasKey&&hasRing;
+		} else {
+			return hasKey&&!hasRing;
+		}
 	}
 
 	private int getRingPos(@Nonnull InventoryCrafting inv) {
@@ -158,5 +167,17 @@ public class RecipeKeyRing extends IForgeRegistryEntry.Impl<IRecipe> implements 
 			}
 		}
 		return -1;
+	}
+
+	@Nonnull
+	@Override
+	public NonNullList<Ingredient> getIngredients() {
+		if (addToRing) {
+			NonNullList<Ingredient> ret = NonNullList.withSize(2, Ingredient.fromStacks(new ItemStack(IndustrialWires.key, 1, 1)));;
+			ret.set(1, Ingredient.fromStacks(new ItemStack(IndustrialWires.key, 1, 2)));
+			return ret;
+		} else {
+			return NonNullList.withSize(1, Ingredient.fromStacks(new ItemStack(IndustrialWires.key, 1, 2)));
+		}
 	}
 }

@@ -1,0 +1,22 @@
+{
+  "result": {
+    "item": "industrialwires:panel_component",
+    "data": 7
+  },
+  "pattern": [
+    "rdr",
+    " w "
+  ],
+  "type": "industrialwires:component_init",
+  "key": {
+    "r": {
+      "type": "forge:ore_dict", "ore": "stickSteel"
+    },
+    "d": {
+      "item": "minecraft:iron_door"
+    },
+    "w": {
+      "type": "forge:ore_dict", "ore": "wireCopper"
+    }
+  }
+}

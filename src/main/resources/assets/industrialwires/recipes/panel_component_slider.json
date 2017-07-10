@@ -1,0 +1,19 @@
+{
+  "result": {
+    "item": "industrialwires:panel_component",
+    "data": 3
+  },
+  "ingredients": [
+    {
+      "item": "minecraft:stone_button"
+    },
+    {
+      "item": "immersiveengineering:wirecoil",
+      "data": 2
+    },
+    {
+      "type": "forge:ore_dict", "ore": "wireCopper"
+    }
+  ],
+  "type": "forge:ore_shapeless"
+}

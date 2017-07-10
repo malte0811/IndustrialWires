@@ -1,0 +1,20 @@
+{
+  "result": {
+    "item": "industrialwires:control_panel",
+    "data": 4
+  },
+  "pattern": [
+    "ppp",
+    "www",
+    "ppp"
+  ],
+  "type": "forge:ore_shaped",
+  "key": {
+    "p": {
+      "type": "forge:ore_dict", "ore": "plateIron"
+    },
+    "w": {
+      "type": "forge:ore_dict", "ore": "wireCopper"
+    }
+  }
+}
