@@ -1,3 +1,9 @@
+#####Version 1.5-14
+ - Updated to Minecraft 1.12
+ - Added a recipe for the key ring. Kind of forgot about adding one when I added the ring itself...
+ - Fixed wire length crafting leaving wrong coils when the output has maximum length
+ - Fixed some more connection issues with control panels
+
 #####Version 1.5-13
  - Labels no longer break the model cache and cause lag
  - Labels don't break on dedicated servers any more
