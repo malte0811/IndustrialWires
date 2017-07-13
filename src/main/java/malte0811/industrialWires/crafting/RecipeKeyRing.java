@@ -113,6 +113,8 @@ public class RecipeKeyRing extends IForgeRegistryEntry.Impl<IRecipe> implements 
 				keys.removeTag(keys.tagCount()-1);
 				if (keys.tagCount() > 0) {
 					NBTTagCompound first = keys.getCompoundTagAt(0);
+					keys.removeTag(0);
+					keys.appendTag(first);
 					nbt.setInteger(LOCK_ID, first.getInteger(LOCK_ID));
 					nbt.setString(NAME, first.getString(NAME));
 				} else {
@@ -146,7 +148,7 @@ public class RecipeKeyRing extends IForgeRegistryEntry.Impl<IRecipe> implements 
 		if (addToRing) {
 			return hasKey&&hasRing;
 		} else {
-			return hasKey&&!hasRing;
+			return !hasKey&&hasRing;
 		}
 	}
 
