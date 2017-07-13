@@ -161,17 +161,19 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 	}
 
 	public void registerPanel(TileEntityPanel panel) {
-		PropertyComponents.PanelRenderProperties p = panel.getComponents();
-		for (PanelComponent pc : p) {
-			Consumer<byte[]> listener = pc.getRSInputHandler(id, panel);
-			if (listener != null) {
-				changeListeners.add(listener);
-				listener.accept(network.channelValues);
+		if (panel.interactsWithRSWires()) {
+			PropertyComponents.PanelRenderProperties p = panel.getComponents();
+			for (PanelComponent pc : p) {
+				Consumer<byte[]> listener = pc.getRSInputHandler(id, panel);
+				if (listener != null) {
+					changeListeners.add(listener);
+					listener.accept(network.channelValues);
+				}
+				pc.registerRSOutput(id, rsOut);
 			}
-			pc.registerRSOutput(id, rsOut);
+			panel.registerRS(this);
+			connectedPanels.add(panel);
 		}
-		panel.registerRS(this);
-		connectedPanels.add(panel);
 	}
 
 	public void unregisterPanel(TileEntityPanel panel, boolean remove, boolean callPanel) {

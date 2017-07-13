@@ -159,7 +159,7 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 
 	@Override
 	public void registerRSOutput(int id, @Nonnull TriConsumer<Integer, Byte, PanelComponent> out) {
-		if (id == rsId) {
+		if (matchesId(rsId, id)) {
 			super.registerRSOutput(id, out);
 			out.accept((int) rsChannel, this.out, this);
 		}

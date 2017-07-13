@@ -25,6 +25,7 @@ import malte0811.industrialWires.blocks.IMetaEnum;
 import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.controlpanel.PanelUtils;
 import malte0811.industrialWires.controlpanel.PropertyComponents;
+import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
@@ -48,6 +49,7 @@ import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
 public class BlockPanel extends BlockIWBase implements IMetaEnum {
@@ -67,6 +69,7 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 	public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer) {
 		switch (state.getValue(type)) {
 		case TOP:
+		case SINGLE_COMP:
 			return layer == BlockRenderLayer.CUTOUT;
 		case RS_WIRE:
 			return layer == BlockRenderLayer.TRANSLUCENT || layer == BlockRenderLayer.SOLID;
@@ -117,10 +120,11 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 	public IBlockState getActualState(@Nonnull IBlockState state, IBlockAccess worldIn, BlockPos pos) {
 		state = super.getActualState(state, worldIn, pos);
 		TileEntity te = worldIn.getTileEntity(pos);
-		if (te instanceof TileEntityPanel) {
+		if (te instanceof TileEntityComponentPanel) {
+			state.withProperty(type, BlockTypes_Panel.SINGLE_COMP);
+		} else if (te instanceof TileEntityPanel) {
 			state.withProperty(type, BlockTypes_Panel.TOP);
-		}
-		if (te instanceof TileEntityRSPanelConn) {
+		} else if (te instanceof TileEntityRSPanelConn) {
 			state.withProperty(type, BlockTypes_Panel.RS_WIRE);
 		}
 		return state;
@@ -203,7 +207,7 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 			}
 			return false;
 		}
-		return state.getValue(type) == BlockTypes_Panel.TOP;
+		return state.getValue(type) == BlockTypes_Panel.TOP||state.getValue(type) == BlockTypes_Panel.SINGLE_COMP;
 	}
 
 	@Override
@@ -253,5 +257,50 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 				}
 			}
 		}
+	}
+
+	@Override
+	public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn, BlockPos fromPos) {
+		super.neighborChanged(state, world, pos, blockIn, fromPos);
+		IBlockState blockState = world.getBlockState(pos);
+		if (blockState.getValue(type)==BlockTypes_Panel.SINGLE_COMP) {
+			TileEntity te = world.getTileEntity(pos);
+			if (te instanceof TileEntityComponentPanel) {
+				((TileEntityComponentPanel)te).updateRS();
+			}
+		}
+	}
+
+	@Override
+	public boolean canProvidePower(IBlockState state) {
+		return state.getValue(type)==BlockTypes_Panel.SINGLE_COMP;
+	}
+
+	@Override
+	public boolean canConnectRedstone(IBlockState state, IBlockAccess world, BlockPos pos, @Nullable EnumFacing side) {
+		return state.getValue(type)==BlockTypes_Panel.SINGLE_COMP;
+	}
+
+	@Override
+	public int getStrongPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
+		if (blockState.getValue(type)==BlockTypes_Panel.SINGLE_COMP) {
+			TileEntity te = blockAccess.getTileEntity(pos);
+			if (te instanceof TileEntityComponentPanel&&side==((TileEntityComponentPanel) te).getComponents().getTop()) {
+				return ((TileEntityComponentPanel)te).getRSOutput();
+			}
+		}
+		return 0;
+	}
+
+
+	@Override
+	public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
+		if (blockState.getValue(type)==BlockTypes_Panel.SINGLE_COMP) {
+			TileEntity te = blockAccess.getTileEntity(pos);
+			if (te instanceof TileEntityComponentPanel) {
+				return ((TileEntityComponentPanel)te).getRSOutput();
+			}
+		}
+		return 0;
 	}
 }

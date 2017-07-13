@@ -26,6 +26,7 @@ import malte0811.industrialWires.blocks.controlpanel.BlockTypes_Panel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.panelmodel.SmartLightingQuadIW;
 import malte0811.industrialWires.controlpanel.PropertyComponents.PanelRenderProperties;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -99,36 +100,49 @@ public final class PanelUtils {
 		float height0 = getLocalHeightFromZ(0, components.getHeight(), components.getAngle());
 		float vMax1 = 16 * height1;
 		float vMax0 = 16 * height0;
+		float xMin = 0;
+		float xMax = 1;
+		float zMin = 0;
+		float zMax = 1;
+		if (components instanceof PropertyComponents.AABBPanelProperties) {
+			AxisAlignedBB xzAABB = ((PropertyComponents.AABBPanelProperties) components).getPanelBoundingBox();
+			xMin = (float) xzAABB.minX;
+			zMin = (float) xzAABB.minZ;
+			xMax = (float) xzAABB.maxX;
+			zMax = (float) xzAABB.maxZ;
+		}
+		float uMaxX = 16*(xMax-xMin);
+		float uMaxZ = 16*(zMax-zMin);
 		//TOP
-		rawOut.add(new RawQuad(new Vector3f(0, height0, 0), new Vector3f(0, height1, 1),
-				new Vector3f(1, height1, 1), new Vector3f(1, height0, 0),
-				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, UV_FULL, -1));
+		rawOut.add(new RawQuad(new Vector3f(xMin, height0, zMin), new Vector3f(xMin, height1, zMax),
+				new Vector3f(xMax, height1, zMax), new Vector3f(xMax, height0, zMin),
+				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, new float[]{0, 0, uMaxX, uMaxZ}, -1));
 		//BOTTOM
-		rawOut.add(new RawQuad(new Vector3f(0, 0, 0), new Vector3f(1, 0, 0),
-				new Vector3f(1, 0, 1), new Vector3f(0, 0, 1),
+		rawOut.add(new RawQuad(new Vector3f(xMin, 0, zMin), new Vector3f(xMax, 0, zMin),
+				new Vector3f(xMax, 0, zMax), new Vector3f(xMin, 0, zMax),
 				EnumFacing.DOWN, PANEL_TEXTURE, WHITE, null, UV_FULL, -1));
 		//LEFT
-		rawOut.add(new RawQuad(new Vector3f(0, 0, 0), new Vector3f(0, 0, 1),
-				new Vector3f(0, height1, 1), new Vector3f(0, height0, 0),
+		rawOut.add(new RawQuad(new Vector3f(xMin, 0, zMin), new Vector3f(xMin, 0, zMax),
+				new Vector3f(xMin, height1, zMax), new Vector3f(xMin, height0, zMin),
 				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, new float[][]{
-				{0, 0}, {0, 16},
-				{vMax1, 16}, {vMax0, 0}
+				{0, 0}, {0, uMaxZ},
+				{vMax1, uMaxZ}, {vMax0, 0}
 		}, -1));
 		//RIGHT
-		rawOut.add(new RawQuad(new Vector3f(1, 0, 0), new Vector3f(1, height0, 0),
-				new Vector3f(1, height1, 1), new Vector3f(1, 0, 1),
+		rawOut.add(new RawQuad(new Vector3f(xMax, 0, zMin), new Vector3f(xMax, height0, zMin),
+				new Vector3f(xMax, height1, zMax), new Vector3f(xMax, 0, zMax),
 				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, new float[][]{
 				{0, 0}, {vMax0, 0},
-				{vMax1, 16}, {0, 16}
+				{vMax1, uMaxZ}, {0, uMaxZ}
 		}, -1));
 		//BACK
-		rawOut.add(new RawQuad(new Vector3f(1, 0, 0), new Vector3f(0, 0, 0),
-				new Vector3f(0, height0, 0), new Vector3f(1, height0, 0),
-				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, new float[]{0, 0, vMax0, 16}, -1));
+		rawOut.add(new RawQuad(new Vector3f(xMax, 0, zMin), new Vector3f(xMin, 0, zMin),
+				new Vector3f(xMin, height0, zMin), new Vector3f(xMax, height0, zMin),
+				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, new float[]{0, 0, vMax0, uMaxX}, -1));
 		//FRONT
-		rawOut.add(new RawQuad(new Vector3f(0, 0, 1), new Vector3f(1, 0, 1),
-				new Vector3f(1, height1, 1), new Vector3f(0, height1, 1),
-				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, new float[]{0, 0, vMax1, 16}, -1));
+		rawOut.add(new RawQuad(new Vector3f(xMin, 0, zMax), new Vector3f(xMax, 0, zMax),
+				new Vector3f(xMax, height1, zMax), new Vector3f(xMin, height1, zMax),
+				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, new float[]{0, 0, vMax1, uMaxX}, -1));
 		for (RawQuad bq : rawOut) {
 			ret.add(bakeQuad(bq, baseTrans, baseNorm));
 		}

@@ -53,7 +53,7 @@ import java.util.List;
 import java.util.Set;
 
 public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTile, IBlockBoundsIW, IPlayerInteraction, ITickable, IEBlockInterfaces.ITileDrop {
-	private PropertyComponents.PanelRenderProperties components = new PropertyComponents.PanelRenderProperties();
+	protected PropertyComponents.PanelRenderProperties components = new PropertyComponents.PanelRenderProperties();
 	public boolean firstTick = true;
 	// non-rendered properties
 	private Set<TileEntityRSPanelConn> rsPorts = new HashSet<>();
@@ -202,7 +202,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		return false;
 	}
 
-	private AxisAlignedBB defAABB;
+	protected AxisAlignedBB defAABB;
 
 	@Override
 	public AxisAlignedBB getBoundingBox() {
@@ -316,5 +316,9 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 			pc.invalidate(this);
 		}
 		removeAllRSCons();
+	}
+
+	public boolean interactsWithRSWires() {
+		return true;
 	}
 }

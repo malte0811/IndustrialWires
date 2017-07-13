@@ -107,6 +107,10 @@ public abstract class PanelComponent {
 		outputs.remove(out);
 	}
 
+	protected boolean matchesId(int myId, int theirId) {
+		return myId==theirId||theirId<0;
+	}
+
 	public void dropItems(TileEntityPanel te) {
 	}
 

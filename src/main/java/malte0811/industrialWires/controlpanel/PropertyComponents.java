@@ -19,10 +19,13 @@
 package malte0811.industrialWires.controlpanel;
 
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
+import net.minecraft.block.Block;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -87,7 +90,7 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 		@Nonnull
 		public Matrix4 getPanelTopTransform() {
 			if (topTransform == null) {
-				topTransform = getPanelBaseTransform().copy().translate(0, height, .5)
+				topTransform = getPanelBaseTransform().copy().translate(0, getHeight(), .5)
 						.rotate(angle, 1, 0, 0).translate(0, 0, -.5);
 			}
 			return topTransform;
@@ -125,7 +128,7 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 					GlStateManager.rotate(top.getHorizontalAngle(), 0, 0, 1);
 					break;
 			}
-			GlStateManager.translate(-.5, height - .5, 0);
+			GlStateManager.translate(-.5, getHeight() - .5, 0);
 			GlStateManager.rotate((float) (angle * 180 / Math.PI), 1, 0, 0);
 			GlStateManager.translate(0, 0, -.5);
 
@@ -158,7 +161,7 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 		public float getMaxHeight() {
 			float max = getPanelMaxHeight();
 			for (PanelComponent pc : this) {
-				float h = PanelUtils.getHeightWithComponent(pc, angle, height);
+				float h = PanelUtils.getHeightWithComponent(pc, angle, getHeight());
 				if (h > max) {
 					max = h;
 				}
@@ -178,7 +181,7 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 		}
 
 		public float getPanelMaxHeight() {
-			return (float) (height + Math.abs(Math.tan(angle) / 2));
+			return (float) (getHeight() + Math.abs(Math.tan(angle) / 2));
 		}
 
 		private void resetMatrixes() {
@@ -254,6 +257,56 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 			result = 31 * result + top.hashCode();
 			result = 31 * result + (angle != +0.0f ? Float.floatToIntBits(angle) : 0);
 			return result;
+		}
+	}
+	public static class AABBPanelProperties extends PanelRenderProperties {
+		private AxisAlignedBB aabb;
+		private int lastHash;
+		public AABBPanelProperties() {
+			super(1);
+		}
+
+		public AxisAlignedBB getPanelBoundingBox() {
+			if (size()<1) {
+				aabb = Block.FULL_BLOCK_AABB;
+			} else if (aabb!=null||get(0).hashCode()!=lastHash) {
+				aabb = getPanelBoundingBox(get(0));
+				lastHash = get(0).hashCode();
+			}
+			return aabb;
+		}
+
+		@Override
+		public PanelComponent set(int index, PanelComponent pc) {
+			AxisAlignedBB aabb = pc.getBlockRelativeAABB();
+			pc.setX((float) ((1-aabb.maxX+aabb.minX)/2));
+			pc.setY((float) ((1-aabb.maxZ+aabb.minZ)/2));
+			return super.set(index, pc);
+		}
+
+		@Override
+		public boolean add(PanelComponent pc) {
+			AxisAlignedBB aabb = pc.getBlockRelativeAABB();
+			pc.setX((float) ((1-aabb.maxX+aabb.minX)/2));
+			pc.setY((float) ((1-aabb.maxZ+aabb.minZ)/2));
+			return super.add(pc);
+		}
+
+		private AxisAlignedBB getPanelBoundingBox(PanelComponent element) {
+			AxisAlignedBB compAABB = element.getBlockRelativeAABB();
+			float height = 6/16F;
+			double width = 3*(compAABB.maxX-compAABB.minX);
+			double length = 3*(compAABB.maxZ-compAABB.minZ);
+			width = MathHelper.clamp(width, 7/16F, 1);
+			length = MathHelper.clamp(length, 7/16F, 1);
+			double minX = (1-width)/2;
+			double minZ = (1-length)/2;
+			return new AxisAlignedBB(minX, 0, minZ, minX+width, height, minZ+length);
+		}
+
+		@Override
+		public float getHeight() {
+			return (float) getPanelBoundingBox().maxY;
 		}
 	}
 }

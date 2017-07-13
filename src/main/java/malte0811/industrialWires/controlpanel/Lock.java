@@ -217,7 +217,7 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 
 	@Override
 	public void registerRSOutput(int id, @Nonnull TriConsumer<Integer, Byte, PanelComponent> out) {
-		if (id == rsOutputId) {
+		if (matchesId(rsOutputId, id)) {
 			super.registerRSOutput(id, out);
 			out.accept(rsOutputChannel, (byte) (turned ? 15 : 0), this);
 		}
