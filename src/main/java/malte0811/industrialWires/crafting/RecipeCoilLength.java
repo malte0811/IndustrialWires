@@ -25,9 +25,11 @@ import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
 
+import javax.annotation.Nonnull;
+
 public class RecipeCoilLength implements IRecipe {
-	public final ItemStack coil;
-	public final ItemStack cable;
+	private final ItemStack coil;
+	private final ItemStack cable;
 	private final int maxLength;
 
 	public RecipeCoilLength(int meta) {
@@ -37,13 +39,13 @@ public class RecipeCoilLength implements IRecipe {
 	}
 
 	@Override
-	public boolean matches(InventoryCrafting inv, World worldIn) {
+	public boolean matches(@Nonnull InventoryCrafting inv, @Nonnull World worldIn) {
 		int l = getLength(inv);
 		return l > 0;
 	}
 
 	@Override
-	public ItemStack getCraftingResult(InventoryCrafting inv) {
+	public ItemStack getCraftingResult(@Nonnull InventoryCrafting inv) {
 		ItemStack ret = new ItemStack(IndustrialWires.coil, 1, coil.getItemDamage());
 		ItemIC2Coil.setLength(ret, Math.min(maxLength, getLength(inv)));
 		return ret;
@@ -59,8 +61,9 @@ public class RecipeCoilLength implements IRecipe {
 		return null;
 	}
 
+	@Nonnull
 	@Override
-	public ItemStack[] getRemainingItems(InventoryCrafting inv) {
+	public ItemStack[] getRemainingItems(@Nonnull InventoryCrafting inv) {
 		ItemStack[] ret = new ItemStack[inv.getSizeInventory()];
 		int length = Math.min(getLength(inv), maxLength);
 		for (int i = 0;i<ret.length&&length>0;i++) {
@@ -68,7 +71,7 @@ public class RecipeCoilLength implements IRecipe {
 			if (OreDictionary.itemMatches(curr, coil, false)) {
 				length-=ItemIC2Coil.getLength(curr);
 				if (length<0) {
-					ret[i] = new ItemStack(IndustrialWires.coil, 1);
+					ret[i] = coil.copy();
 					ItemIC2Coil.setLength(ret[i], -length);
 				}
 			} else if (OreDictionary.itemMatches(curr, cable, false)) {

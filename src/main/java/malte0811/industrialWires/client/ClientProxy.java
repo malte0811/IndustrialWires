@@ -212,9 +212,10 @@ public class ClientProxy extends CommonProxy {
 			);
 		}
 		Config.manual_doubleA.put("iwJacobsUsage", IWConfig.HVStuff.jacobsUsageEU);
-		m.addEntry("industrialWires.jacobs", "industrialWires",
-				new ManualPages.CraftingMulti(m, "industrialWires.jacobs0", new ItemStack(IndustrialWires.jacobsLadder, 1, 0), new ItemStack(IndustrialWires.jacobsLadder, 1, 1), new ItemStack(IndustrialWires.jacobsLadder, 1, 2)),
-				new ManualPages.Text(m, "industrialWires.jacobs1"));
+		Config.manual_int.put("iwKeysOnRing", IWConfig.maxKeysOnRing);
+		m.addEntry("industrialwires.jacobs", "industrialwires",
+				new ManualPages.CraftingMulti(m, "industrialwires.jacobs0", new ItemStack(IndustrialWires.jacobsLadder, 1, 0), new ItemStack(IndustrialWires.jacobsLadder, 1, 1), new ItemStack(IndustrialWires.jacobsLadder, 1, 2)),
+				new ManualPages.Text(m, "industrialwires.jacobs1"));
 
 
 		m.addEntry("industrialWires.intro", "control_panels",
@@ -241,7 +242,8 @@ public class ClientProxy extends CommonProxy {
 				new ManualPages.CraftingMulti(m, "industrialwires.toggle_switch", new ItemStack(IndustrialWires.panelComponent, 1, 5), new ItemStack(IndustrialWires.panelComponent, 1, 6)),
 				new ManualPages.Text(m, "industrialwires.toggle_switch1"),
 				new ManualPages.Crafting(m, "industrialwires.variac", new ItemStack(IndustrialWires.panelComponent, 1, 4)),
-				new ManualPages.CraftingMulti(m, "industrialwires.lock", new ItemStack(IndustrialWires.panelComponent, 1, 7), new ItemStack(IndustrialWires.key))
+				new ManualPages.CraftingMulti(m, "industrialwires.lock", new ItemStack(IndustrialWires.panelComponent, 1, 7), new ItemStack(IndustrialWires.key)),
+				new ManualPages.Crafting(m, "industrialwires.lock1", new ItemStack(IndustrialWires.key, 1, 2))
 		);
 	}
 

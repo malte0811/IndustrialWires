@@ -27,52 +27,57 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static malte0811.industrialWires.items.ItemKey.*;
 
 public class RecipeKeyRing implements IRecipe {
 
+	private final boolean addToRing;
+	public RecipeKeyRing(boolean add) {
+		addToRing = add;
+	}
+
 	@Override
 	public boolean matches(@Nonnull InventoryCrafting inv, @Nonnull World worldIn) {
-		return getType(inv) != null;
+		return isValid(inv);
 	}
 
 	@Override
 	public ItemStack getCraftingResult(@Nonnull InventoryCrafting inv) {
-		Boolean recipeType = getType(inv);
-		if (recipeType==Boolean.TRUE) {//add key to ring
-			ItemStack ring = inv.getStackInSlot(getRingPos(inv)).copy();
-			NBTTagCompound nbt = ring.getTagCompound();
-			ItemStack key = inv.getStackInSlot(getKeyPos(inv));
-			NBTTagCompound keyNBT = key.getTagCompound();
-			if (nbt==null) {
-				nbt = new NBTTagCompound();
-				ring.setTagCompound(nbt);
-			}
-			if (!nbt.hasKey(RING_KEYS)) {
-				nbt.setTag(RING_KEYS, new NBTTagList());
-			}
-			if (keyNBT!=null) {
-				NBTTagList keys = nbt.getTagList(RING_KEYS, 10);
-				if (keys.tagCount()>= IWConfig.maxKeysOnRing) {
-					return null;
+		if (isValid(inv)) {
+			if (addToRing) {//add key to ring
+				ItemStack ring = inv.getStackInSlot(getRingPos(inv)).copy();
+				NBTTagCompound nbt = ring.getTagCompound();
+				ItemStack key = inv.getStackInSlot(getKeyPos(inv));
+				NBTTagCompound keyNBT = key.getTagCompound();
+				if (nbt == null) {
+					nbt = new NBTTagCompound();
+					ring.setTagCompound(nbt);
 				}
-				keys.appendTag(keyNBT.copy());
-				nbt.setInteger(LOCK_ID, keyNBT.getInteger(LOCK_ID));
-				nbt.setString(NAME, keyNBT.getString(NAME));
-			}
-			return ring;
-		} else {//remove key from ring
-			ItemStack ring = inv.getStackInSlot(getRingPos(inv)).copy();
-			NBTTagCompound nbt = ring.getTagCompound();
-			ItemStack key = new ItemStack(IndustrialWires.key, 1, 1);
-			if (nbt!=null) {
-				NBTTagList keys = nbt.getTagList(RING_KEYS, 10);
-				if (keys.tagCount()>0) {
-					NBTTagCompound first = keys.getCompoundTagAt(keys.tagCount()-1);
-					key.setTagCompound(first);
-					return key;
+				if (!nbt.hasKey(RING_KEYS)) {
+					nbt.setTag(RING_KEYS, new NBTTagList());
+				}
+				if (keyNBT != null) {
+					NBTTagList keys = nbt.getTagList(RING_KEYS, 10);
+					if (keys.tagCount() >= IWConfig.maxKeysOnRing) {
+						return null;
+					}
+					keys.appendTag(keyNBT.copy());
+					nbt.setInteger(LOCK_ID, keyNBT.getInteger(LOCK_ID));
+					nbt.setString(NAME, keyNBT.getString(NAME));
+				}
+				return ring;
+			} else {//remove key from ring
+				ItemStack ring = inv.getStackInSlot(getRingPos(inv)).copy();
+				NBTTagCompound nbt = ring.getTagCompound();
+				ItemStack key = new ItemStack(IndustrialWires.key, 1, 1);
+				if (nbt != null) {
+					NBTTagList keys = nbt.getTagList(RING_KEYS, 10);
+					if (keys.tagCount() > 0) {
+						NBTTagCompound first = keys.getCompoundTagAt(keys.tagCount() - 1);
+						key.setTagCompound(first);
+						return key;
+					}
 				}
 			}
 		}
@@ -81,19 +86,20 @@ public class RecipeKeyRing implements IRecipe {
 
 	@Override
 	public int getRecipeSize() {
-		return 2;
+		return 1;
 	}
 
+	@Nonnull
 	@Override
 	public ItemStack getRecipeOutput() {
-		return null;
+		return new ItemStack(IndustrialWires.key, 1, addToRing?2:1);
 	}
 
 	@Nonnull
 	@Override
 	public ItemStack[] getRemainingItems(@Nonnull InventoryCrafting inv) {
 		ItemStack[] ret = new ItemStack[inv.getSizeInventory()];
-		if (getType(inv)==Boolean.FALSE) {
+		if (!addToRing) {
 			int ringId = getRingPos(inv);
 			ItemStack ring = inv.getStackInSlot(ringId).copy();
 			NBTTagCompound nbt = ring.getTagCompound();
@@ -102,6 +108,8 @@ public class RecipeKeyRing implements IRecipe {
 				keys.removeTag(keys.tagCount()-1);
 				if (keys.tagCount() > 0) {
 					NBTTagCompound first = keys.getCompoundTagAt(0);
+					keys.removeTag(0);
+					keys.appendTag(first);
 					nbt.setInteger(LOCK_ID, first.getInteger(LOCK_ID));
 					nbt.setString(NAME, first.getString(NAME));
 				} else {
@@ -114,8 +122,7 @@ public class RecipeKeyRing implements IRecipe {
 		return ret;
 	}
 
-	@Nullable
-	private Boolean getType(@Nonnull InventoryCrafting inv) {
+	private boolean isValid(@Nonnull InventoryCrafting inv) {
 		boolean hasRing = false;
 		boolean hasKey = false;
 		for (int i = 0;i<inv.getSizeInventory();i++) {
@@ -128,18 +135,22 @@ public class RecipeKeyRing implements IRecipe {
 					hasRing = true;
 					continue;
 				}
-				return null;
+				return false;
 			} else if (here!=null) {
-				return null;
+				return false;
 			}
 		}
-		return hasRing?hasKey:null;
+		if (addToRing) {
+			return hasKey&&hasRing;
+		} else {
+			return !hasKey&&hasRing;
+		}
 	}
 
 	private int getRingPos(@Nonnull InventoryCrafting inv) {
 		for (int i = 0;i<inv.getSizeInventory();i++) {
 			ItemStack here = inv.getStackInSlot(i);
-			if (here!=null&& here.getItem()==IndustrialWires.key&&here.getMetadata()==2) {
+			if (here!=null&&here.getItem()==IndustrialWires.key&&here.getMetadata()==2) {
 				return i;
 			}
 		}
@@ -148,7 +159,7 @@ public class RecipeKeyRing implements IRecipe {
 	private int getKeyPos(@Nonnull InventoryCrafting inv) {
 		for (int i = 0;i<inv.getSizeInventory();i++) {
 			ItemStack here = inv.getStackInSlot(i);
-			if (here!=null && here.getItem()==IndustrialWires.key&&here.getMetadata()==1) {
+			if (here!=null&&here.getItem()==IndustrialWires.key&&here.getMetadata()==1) {
 				return i;
 			}
 		}

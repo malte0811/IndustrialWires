@@ -67,10 +67,20 @@ public class ItemKey extends Item implements INetGUIItem {
 		subItems.add(new ItemStack(this, 1, 2));
 	}
 
+	@Override
+	public void addInformation(ItemStack stack, EntityPlayer player, List<String> tooltip, boolean advanced) {
+		super.addInformation(stack, player, tooltip, advanced);
+		if (stack.getMetadata()==2&&stack.getTagCompound()!=null) {
+			NBTTagList keys = stack.getTagCompound().getTagList(RING_KEYS, 10);
+			for (int i = 0;i< keys.tagCount()-1;i++) {
+				tooltip.add(I18n.format("item."+IndustrialWires.MODID+".key.key_named.name")+" "+keys.getCompoundTagAt(i).getString(NAME));
+			}
+		}
+	}
+
 	@Nonnull
 	@Override
 	public String getUnlocalizedName(ItemStack stack) {
-		NBTTagCompound nbt = stack.getTagCompound();
 		return "item."+IndustrialWires.MODID+".key."+types[stack.getMetadata()];
 	}
 
