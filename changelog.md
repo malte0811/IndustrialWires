@@ -1,3 +1,9 @@
+#####Version 1.5-15
+ - Components can be placed in the world now to use the as conventional levers/etc.
+ - Added documentation on the key ring. It also shows all attached keys on the tooltip now
+ - Fixed some bugs with key ring crafting
+ - Fixed control panels causing disconnects on servers
+
 #####Version 1.5-14
  - Updated to Minecraft 1.12
  - Added a recipe for the key ring. Kind of forgot about adding one when I added the ring itself...

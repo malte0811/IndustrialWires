@@ -59,8 +59,12 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 	private Set<TileEntityRSPanelConn> rsPorts = new HashSet<>();
 
 	{
+		int[] colors = {
+				16383998, 16351261, 13061821, 3847130, 16701501, 8439583, 15961002,
+				4673362, 10329495, 1481884, 8991416, 3949738, 8606770, 6192150
+		};
 		for (int i = 2; i < 14; i++) {
-			int color = EnumDyeColor.byMetadata(i - 2).getColorValue();
+			int color = colors[i];
 			IndicatorLight ind = new IndicatorLight(0, (byte) (i - 2), color);
 			LightedButton btn = new LightedButton(color, false, true, 1, i - 2);
 			Label lbl = new Label("->", color);
