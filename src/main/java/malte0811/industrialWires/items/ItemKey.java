@@ -33,6 +33,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 
 public class ItemKey extends Item implements INetGUIItem {
 	public static final String LOCK_ID = "lockId";
@@ -60,15 +61,25 @@ public class ItemKey extends Item implements INetGUIItem {
 	}
 
 	@Override
-	public void getSubItems(Item itemIn, CreativeTabs tab, NonNullList<ItemStack> subItems) {
+	public void getSubItems(@Nonnull Item itemIn, CreativeTabs tab, NonNullList<ItemStack> subItems) {
 		subItems.add(new ItemStack(this, 1, 0));
 		subItems.add(new ItemStack(this, 1, 2));
+	}
+
+	@Override
+	public void addInformation(ItemStack stack, EntityPlayer player, List<String> tooltip, boolean advanced) {
+		super.addInformation(stack, player, tooltip, advanced);
+		if (stack.getMetadata()==2&&stack.getTagCompound()!=null) {
+			NBTTagList keys = stack.getTagCompound().getTagList(RING_KEYS, 10);
+			for (int i = 0;i< keys.tagCount()-1;i++) {
+				tooltip.add(I18n.format("item."+IndustrialWires.MODID+".key.key_named.name")+" "+keys.getCompoundTagAt(i).getString(NAME));
+			}
+		}
 	}
 
 	@Nonnull
 	@Override
 	public String getUnlocalizedName(ItemStack stack) {
-		NBTTagCompound nbt = stack.getTagCompound();
 		return "item."+IndustrialWires.MODID+".key."+types[stack.getMetadata()];
 	}
 

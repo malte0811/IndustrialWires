@@ -95,7 +95,8 @@ public class Recipes {
 		RecipeSorter.register("industrialwires:coilLength", RecipeCoilLength.class, RecipeSorter.Category.SHAPELESS, "after:forge:shapelessore");
 		RecipeSorter.register("industrialwires:init_pc", RecipeInitPC.class, RecipeSorter.Category.SHAPED, "after:forge:shapedore");
 		GameRegistry.addRecipe(new RecipeKeyLock());
-		GameRegistry.addRecipe(new RecipeKeyRing());
+		GameRegistry.addRecipe(new RecipeKeyRing(true));
+		GameRegistry.addRecipe(new RecipeKeyRing(false));
 		GameRegistry.addRecipe(new RecipeComponentCopy());
 		for (int i = 0; i < IC2Wiretype.IC2_TYPES.length; i++) {
 			GameRegistry.addRecipe(new RecipeCoilLength(i));
@@ -141,6 +142,7 @@ public class Recipes {
 				"rrp", 'r', "stickSteel", 'p', "plateSteel"));
 		GameRegistry.addRecipe(new ShapelessOreRecipe(new ItemStack(panelComponent, 1, 8),
 				"wireCopper", new ItemStack(IEContent.itemTool, 1, 2)));
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(key, 1, 2), " r ", "r r", " r ", 'r', "stickSteel"));
 	}
 	private static void addJacobs() {
 		ItemStack mvTransformer = IC2Items.getItem("te", "mv_transformer");
