@@ -79,7 +79,9 @@ public class GuiPanelCreator extends GuiContainer {
 
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+		this.drawDefaultBackground();
 		super.drawScreen(mouseX, mouseY, partialTicks);
+		this.renderHoveredToolTip(mouseX, mouseY);
 		String tooltip = null;
 		if (buttonList.get(0).isMouseOver()) {
 			tooltip = I18n.format(IndustrialWires.MODID + ".desc.create_panel");
