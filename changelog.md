@@ -1,3 +1,6 @@
+#####Version 1.5-17
+ - Backported some fixes from 1.12
+
 #####Version 1.5-13
  - Labels no longer break the model cache and cause lag
  - Labels don't break on dedicated servers any more
