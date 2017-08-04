@@ -1,3 +1,5 @@
+#####Version 1.4-16
+ - Backported a lot of fixes from 1.11 and 1.12
 
 #####Version 1.4-10
  - added lock switches for control panels (backport from 1.11)
