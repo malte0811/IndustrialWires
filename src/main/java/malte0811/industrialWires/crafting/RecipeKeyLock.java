@@ -26,12 +26,14 @@ import malte0811.industrialWires.items.ItemPanelComponent;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
 
-public class RecipeKeyLock implements IRecipe {
+public class RecipeKeyLock extends IForgeRegistryEntry.Impl<IRecipe> implements IRecipe {
 
 	@Override
 	public boolean matches(@Nonnull InventoryCrafting inv, @Nonnull World worldIn) {
@@ -47,8 +49,8 @@ public class RecipeKeyLock implements IRecipe {
 	}
 
 	@Override
-	public int getRecipeSize() {
-		return 2;
+	public boolean canFit(int width, int height) {
+		return width*height>=2;
 	}
 
 	@Nonnull
@@ -108,5 +110,14 @@ public class RecipeKeyLock implements IRecipe {
 			}
 		}
 		return ItemStack.EMPTY;
+	}
+
+	@Nonnull
+	@Override
+	public NonNullList<Ingredient> getIngredients() {
+		NonNullList<Ingredient> ret = NonNullList.withSize(2, Ingredient.EMPTY);
+		ret.set(0, Ingredient.fromStacks(new ItemStack(IndustrialWires.key, 1, 0)));
+		ret.set(1, Ingredient.fromStacks(new ItemStack(IndustrialWires.panelComponent, 1, 7)));
+		return ret;
 	}
 }

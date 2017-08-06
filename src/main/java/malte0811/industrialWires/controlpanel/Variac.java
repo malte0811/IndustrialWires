@@ -129,8 +129,8 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 
 	@Override
 	public void interactWith(Vec3d hitRelative, TileEntityPanel tile, EntityPlayerMP player) {
-		double xRel = hitRelative.xCoord - SIZE / 2;
-		double yRel = -(hitRelative.zCoord - SIZE / 2);
+		double xRel = hitRelative.x - SIZE / 2;
+		double yRel = -(hitRelative.z - SIZE / 2);
 		double angle = 1.5 * Math.PI - Math.atan2(yRel, xRel);
 		if (angle < 0) {
 			angle += 2 * Math.PI;
@@ -159,7 +159,7 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 
 	@Override
 	public void registerRSOutput(int id, @Nonnull TriConsumer<Integer, Byte, PanelComponent> out) {
-		if (id == rsId) {
+		if (matchesId(rsId, id)) {
 			super.registerRSOutput(id, out);
 			out.accept((int) rsChannel, this.out, this);
 		}
@@ -177,6 +177,7 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 
 	@Override
 	public void renderInGUI(GuiPanelCreator gui) {
+		AxisAlignedBB aabb = getBlockRelativeAABB();
 		int left = (int) Math.ceil(gui.getX0() + (offset + aabb.minX) * gui.panelSize);
 		int top = (int) Math.ceil(gui.getY0() + (offset + aabb.minZ) * gui.panelSize);
 		int right = (int) Math.floor(gui.getX0() + (aabb.maxX - offset) * gui.panelSize);

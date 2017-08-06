@@ -28,7 +28,6 @@ import malte0811.industrialWires.blocks.TileEntityIWBase;
 import malte0811.industrialWires.controlpanel.*;
 import malte0811.industrialWires.network.MessagePanelInteract;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -56,26 +55,30 @@ import java.util.Set;
 import static malte0811.industrialWires.util.MiscUtils.apply;
 
 public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTile, IBlockBoundsIW, IPlayerInteraction, ITickable, IEBlockInterfaces.ITileDrop {
-	private PropertyComponents.PanelRenderProperties components = new PropertyComponents.PanelRenderProperties();
-	private boolean firstTick = true;
+	protected PropertyComponents.PanelRenderProperties components = new PropertyComponents.PanelRenderProperties();
+	public boolean firstTick = true;
 	// non-rendered properties
 	private Set<TileEntityRSPanelConn> rsPorts = new HashSet<>();
 
 	{
+		int[] colors = {
+				16383998, 16351261, 13061821, 3847130, 16701501, 8439583, 15961002,
+				4673362, 10329495, 1481884, 8991416, 3949738, 8606770, 6192150
+		};
 		for (int i = 2; i < 14; i++) {
-			int color = EnumDyeColor.byMetadata(i - 2).getMapColor().colorValue;
+			int color = colors[i];
 			IndicatorLight ind = new IndicatorLight(0, (byte) (i - 2), color);
 			LightedButton btn = new LightedButton(color, false, true, 1, i - 2);
 			Label lbl = new Label("->", color);
 			ind.setX(0);
 			ind.setY(i / 16F);
-			ind.setPanelHeight(components.height);
+			ind.setPanelHeight(components.getHeight());
 			lbl.setX(2 / 16F);
 			lbl.setY(i / 16F);
-			lbl.setPanelHeight(components.height);
+			lbl.setPanelHeight(components.getHeight());
 			btn.setX(5 / 16F);
 			btn.setY(i / 16F);
-			btn.setPanelHeight(components.height);
+			btn.setPanelHeight(components.getHeight());
 			components.add(ind);
 			components.add(lbl);
 			components.add(btn);
@@ -89,7 +92,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		}
 		if (!world.isRemote) {
 			if (firstTick) {
-				List<BlockPos> parts = PanelUtils.discoverPanelParts(world, pos);
+				List<BlockPos> parts = PanelUtils.discoverPanelParts(world, pos, 100);
 				for (BlockPos bp : parts) {
 					TileEntity te = world.getTileEntity(bp);
 					if (te instanceof TileEntityRSPanelConn && !rsPorts.contains(te)) {
@@ -104,15 +107,15 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 	@Override
 	public void writeNBT(NBTTagCompound out, boolean updatePacket) {
 		writeToItemNBT(out, false);
-		out.setInteger("facing", components.facing.getHorizontalIndex());
-		out.setInteger("top", components.top.getIndex());
+		out.setInteger("facing", components.getFacing().getHorizontalIndex());
+		out.setInteger("top", components.getTop().getIndex());
 	}
 
 	@Override
 	public void readNBT(NBTTagCompound in, boolean updatePacket) {
 		readFromItemNBT(in);
-		components.facing = EnumFacing.getHorizontal(in.getInteger("facing"));
-		components.top = EnumFacing.getFront(in.getInteger("top"));
+		components.setFacing(EnumFacing.getHorizontal(in.getInteger("facing")));
+		components.setTop(EnumFacing.getFront(in.getInteger("top")));
 	}
 
 	@Override
@@ -136,7 +139,8 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		if (nbt != null) {
 			NBTTagList l = nbt.getTagList("components", 10);
 			PanelUtils.readListFromNBT(l, components);
-			components.height = nbt.getFloat("height");
+			components.setHeight(nbt.getFloat("height"));
+			components.setAngle(nbt.getFloat("angle"));
 		}
 		defAABB = null;
 	}
@@ -149,18 +153,19 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 			comps.appendTag(nbtInner);
 		}
 		nbt.setTag("components", comps);
-		nbt.setFloat("height", components.height);
+		nbt.setFloat("height", components.getHeight());
+		nbt.setFloat("angle", components.getAngle());
 	}
 
 	@Nonnull
 	@Override
 	public EnumFacing getFacing() {
-		return components.facing;
+		return components.getFacing();
 	}
 
 	@Override
 	public void setFacing(@Nonnull EnumFacing facing) {
-		this.components.facing = facing;
+		this.components.setFacing(facing);
 	}
 
 	@Override
@@ -173,19 +178,19 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 	public EnumFacing getFacingForPlacement(@Nonnull EntityLivingBase placer, @Nonnull BlockPos pos, @Nonnull EnumFacing side, float hitX, float hitY, float hitZ) {
 		switch (side) {
 		case UP:
-			components.top = EnumFacing.UP;
+			components.setTop(EnumFacing.UP);
 			return EnumFacing.fromAngle(placer.rotationYaw);
 		case DOWN:
-			components.top = EnumFacing.DOWN;
-			return EnumFacing.fromAngle(placer.rotationYaw);
+			components.setTop(EnumFacing.DOWN);
+			return EnumFacing.fromAngle(-placer.rotationYaw);
 		case NORTH:
 		case SOUTH:
 		case WEST:
 		case EAST:
-			components.top = side;
+			components.setTop(side);
 			return EnumFacing.SOUTH;//Should not matter
 		}
-		return components.facing;
+		return components.getFacing();
 	}
 
 	@Override
@@ -203,7 +208,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		return false;
 	}
 
-	private AxisAlignedBB defAABB;
+	protected AxisAlignedBB defAABB;
 
 	@Override
 	public AxisAlignedBB getBoundingBox() {
@@ -217,28 +222,39 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		return components;
 	}
 
+	public AxisAlignedBB apply(Matrix4 mat, AxisAlignedBB in) {
+		Vec3d min = new Vec3d(in.minX, in.minY, in.minZ);
+		Vec3d max = new Vec3d(in.maxX, in.maxY, in.maxZ);
+		min = mat.apply(min);
+		max = mat.apply(max);
+		return new AxisAlignedBB(min.x, min.y, min.z, max.x, max.y, max.z);
+	}
 
 	@Nullable
 	public Pair<PanelComponent, RayTraceResult> getSelectedComponent(EntityPlayer player, Vec3d hit, boolean hitAbs) {
-		Matrix4 mat = components.getPanelTopTransform();
+		//TODO prevent clicking through the back of the panel
+		Matrix4 mat = components.getPanelTopTransformInverse();
 		PanelComponent retPc = null;
 		RayTraceResult retRay = null;
-		Vec3d playerPos = Minecraft.getMinecraft().player.getPositionVector().addVector(-pos.getX(), player.getEyeHeight() - pos.getY(), -pos.getZ());
+		Vec3d playerPosRelative = player.getPositionVector().addVector(-pos.getX(), player.getEyeHeight() - pos.getY(), -pos.getZ());
+		Vec3d playerPosTransformed = mat.apply(playerPosRelative);
 		for (PanelComponent pc : components) {
 			AxisAlignedBB box = pc.getBlockRelativeAABB();
 			if (box.maxY > box.minY) {
-				box = apply(mat, box.expandXyz(.002));
+				box = box.grow(.002);
 				Vec3d hitVec = hitAbs ? hit.addVector(-pos.getX(), -pos.getY(), -pos.getZ()) : hit;
-				hitVec = hitVec.scale(2).subtract(playerPos);
-				RayTraceResult ray = box.calculateIntercept(playerPos, hitVec);
+				hitVec = hitVec.subtract(playerPosRelative.subtract(hitVec).scale(10));
+				RayTraceResult ray = box.calculateIntercept(playerPosTransformed, mat.apply(hitVec));
 				if (ray != null) {
 					if (retPc == null) {
+						ray.hitVec = ray.hitVec.subtract(pc.getX(), 0, pc.getY());
 						retPc = pc;
 						retRay = ray;
 					} else {
-						double oldDist = retRay.hitVec.subtract(playerPos).lengthSquared();
-						double newDist = ray.hitVec.subtract(playerPos).lengthSquared();
+						double oldDist = retRay.hitVec.subtract(playerPosRelative).lengthSquared();
+						double newDist = ray.hitVec.subtract(playerPosRelative).lengthSquared();
 						if (newDist < oldDist) {
+							ray.hitVec = ray.hitVec.subtract(pc.getX(), 0, pc.getY());
 							retPc = pc;
 							retRay = ray;
 						}
@@ -254,12 +270,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		if (world.isRemote) {
 			Pair<PanelComponent, RayTraceResult> pc = getSelectedComponent(player, new Vec3d(hitX, hitY, hitZ), false);
 			if (pc != null) {
-				Matrix4 inv = components.getPanelTopTransform();
-				inv.translate(pc.getLeft().getX(), 0, pc.getLeft().getY());
-				inv.invert();
-				Vec3d hitVec = inv.apply(pc.getRight().hitVec);
-				hitVec.subtract(pc.getLeft().getX(), 0, -pc.getLeft().getY());
-				IndustrialWires.packetHandler.sendToServer(new MessagePanelInteract(this, components.indexOf(pc.getKey()), hitVec));
+				IndustrialWires.packetHandler.sendToServer(new MessagePanelInteract(this, components.indexOf(pc.getKey()), pc.getRight().hitVec));
 			}
 		}
 		return true;
@@ -293,9 +304,15 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		for (PanelComponent pc : components) {
 			pc.invalidate(this);
 		}
+		removeAllRSCons();
+	}
+
+	public void removeAllRSCons() {
 		for (TileEntityRSPanelConn rs : rsPorts) {
-			rs.unregisterPanel(this, true);
+			rs.unregisterPanel(this, true, false);
 		}
+		rsPorts.clear();
+		firstTick = true;
 	}
 
 	@Override
@@ -304,8 +321,10 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		for (PanelComponent pc : components) {
 			pc.invalidate(this);
 		}
-		for (TileEntityRSPanelConn rs : rsPorts) {
-			rs.unregisterPanel(this, true);
-		}
+		removeAllRSCons();
+	}
+
+	public boolean interactsWithRSWires() {
+		return true;
 	}
 }

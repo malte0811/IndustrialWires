@@ -130,7 +130,7 @@ public class ToggleSwitch extends PanelComponent implements IConfigurableCompone
 
 	@Override
 	public void registerRSOutput(int id, @Nonnull TriConsumer<Integer, Byte, PanelComponent> out) {
-		if (id == rsOutputId) {
+		if (matchesId(rsOutputId, id)) {
 			super.registerRSOutput(id, out);
 			out.accept((int) rsOutputChannel, (byte) (active ? 15 : 0), this);
 		}

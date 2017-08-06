@@ -1,23 +1,5 @@
 def mainVersion = "1.5"
-def buildNumber = "11"
-
-/*
- * This file is part of Industrial Wires.
- * Copyright (C) 2016-2017 malte0811
- *
- * Industrial Wires is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Industrial Wires is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
- */
+def buildNumber = "15"
 
 // For those who want the bleeding edge
 buildscript {
@@ -29,7 +11,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
     }
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
@@ -48,11 +30,11 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 minecraft {
-    version = "13.20.0.2282"
+    version = "14.21.1.2404"
     runDir = "run"
 
     replace '${version}', project.version
-    mappings = "snapshot_20170323"
+    mappings = "snapshot_20170628"
 }
 
 repositories {
@@ -67,8 +49,8 @@ repositories {
 }
 
 dependencies {
-    compile "net.industrial-craft:industrialcraft-2:2.7.+"
-    deobfCompile "blusunrize:ImmersiveEngineering:0.11-+:deobf"
+    compile "net.industrial-craft:industrialcraft-2:2.8.+"
+    deobfCompile "blusunrize:ImmersiveEngineering:0.12-+:deobf"
 }
 
 jar {

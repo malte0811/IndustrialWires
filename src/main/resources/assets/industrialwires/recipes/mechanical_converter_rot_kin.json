@@ -1,0 +1,41 @@
+{
+  "result": {
+    "item": "industrialwires:mechanical_converter",
+    "data": 1
+  },
+  "pattern": [
+    "mrm",
+    "sbS",
+    "iIi"
+  ],
+  "type": "forge:ore_shaped",
+  "key": {
+    "b": {
+      "type": "forge:ore_dict", "ore": "ingotBronze"
+    },
+    "r": {
+      "type": "forge:ore_dict", "ore": "stickIron"
+    },
+    "s": {
+      "type": "forge:ore_dict", "ore": "blockSheetmetalIron"
+    },
+    "S": {
+      "type": "forge:ore_dict", "ore": "blockSheetmetalSteel"
+    },
+    "i": {
+      "type": "forge:ore_dict", "ore": "plateSteel"
+    },
+    "I": {
+      "type": "industrialwires:ic2_item",
+      "name": "crafting",
+      "variant": "steel_shaft"
+    },
+    "m": {
+      "item": "immersiveengineering:material",
+      "data": 8
+    }
+  },
+  "conditions": [{
+    "type": "industrialwires:conversion"
+  }]
+}

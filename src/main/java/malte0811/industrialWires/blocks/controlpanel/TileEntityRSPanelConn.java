@@ -30,6 +30,7 @@ import malte0811.industrialWires.blocks.IBlockBoundsIW;
 import malte0811.industrialWires.blocks.INetGUI;
 import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.controlpanel.PanelUtils;
+import malte0811.industrialWires.controlpanel.PropertyComponents;
 import malte0811.industrialWires.util.TriConsumer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
@@ -76,7 +77,7 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 				loaded = true;
 				// completely reload the network
 				network.removeFromNetwork(null);
-				List<BlockPos> parts = PanelUtils.discoverPanelParts(world, pos);
+				List<BlockPos> parts = PanelUtils.discoverPanelParts(world, pos, 100);
 				for (BlockPos bp : parts) {
 					TileEntity te = world.getTileEntity(bp);
 					if (te instanceof TileEntityPanel) {
@@ -160,31 +161,45 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 	}
 
 	public void registerPanel(TileEntityPanel panel) {
-		PropertyComponents.PanelRenderProperties p = panel.getComponents();
-		for (PanelComponent pc : p) {
-			Consumer<byte[]> listener = pc.getRSInputHandler(id, panel);
-			if (listener != null) {
-				changeListeners.add(listener);
+		if (panel.interactsWithRSWires()) {
+			PropertyComponents.PanelRenderProperties p = panel.getComponents();
+			for (PanelComponent pc : p) {
+				Consumer<byte[]> listener = pc.getRSInputHandler(id, panel);
+				if (listener != null) {
+					changeListeners.add(listener);
+					listener.accept(network.channelValues);
+				}
+				pc.registerRSOutput(id, rsOut);
 			}
-			pc.registerRSOutput(id, rsOut);
+			panel.registerRS(this);
+			connectedPanels.add(panel);
 		}
-		panel.registerRS(this);
-		connectedPanels.add(panel);
 	}
 
-	public void unregisterPanel(TileEntityPanel panel, boolean remove) {
+	public void unregisterPanel(TileEntityPanel panel, boolean remove, boolean callPanel) {
+		out = new byte[16];
 		PropertyComponents.PanelRenderProperties p = panel.getComponents();
 		for (PanelComponent pc : p) {
 			Consumer<byte[]> listener = pc.getRSInputHandler(id, panel);
 			if (listener != null) {
+				listener.accept(new byte[16]);
 				changeListeners.remove(listener);
 			}
 			pc.unregisterRSOutput(id, rsOut);
+			outputs.remove(new PCWrapper(pc));
 		}
-		panel.unregisterRS(this);
+		if (callPanel) {
+			panel.unregisterRS(this);
+		}
 		if (remove) {
 			connectedPanels.remove(panel);
 		}
+		for (TileEntityPanel te : connectedPanels) {
+			for (PanelComponent pc : te.getComponents()) {
+				pc.registerRSOutput(id, rsOut);
+			}
+		}
+		network.updateValues();
 	}
 
 	@Override
@@ -271,7 +286,7 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 	public void onChunkUnload() {
 		super.onChunkUnload();
 		for (TileEntityPanel panel : connectedPanels) {
-			unregisterPanel(panel, false);
+			unregisterPanel(panel, false, true);
 		}
 	}
 
@@ -279,20 +294,20 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 	public void invalidate() {
 		super.invalidate();
 		for (TileEntityPanel panel : connectedPanels) {
-			unregisterPanel(panel, false);
+			unregisterPanel(panel, false, true);
 		}
 	}
 
 	@Override
 	public void onChange(NBTTagCompound nbt, EntityPlayer p) {
 		if (nbt.hasKey("rsId")) {
-			List<BlockPos> parts = PanelUtils.discoverPanelParts(world, pos);
+			List<BlockPos> parts = PanelUtils.discoverPanelParts(world, pos, 100);
 			List<TileEntityPanel> tes = new ArrayList<>(parts.size());
 			for (BlockPos bp : parts) {
 				TileEntity te = world.getTileEntity(bp);
 				if (te instanceof TileEntityPanel) {
 					tes.add((TileEntityPanel) te);
-					unregisterPanel((TileEntityPanel) te, true);
+					unregisterPanel((TileEntityPanel) te, true, true);
 				}
 			}
 			id = nbt.getInteger("rsId");

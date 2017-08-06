@@ -1,0 +1,18 @@
+{
+  "result": {
+    "item": "industrialwires:panel_component",
+    "data": 0
+  },
+  "ingredients": [
+    {
+      "type": "forge:ore_dict", "ore": "dustGlowstone"
+    },
+    {
+      "item": "minecraft:stone_button"
+    },
+    {
+      "type": "forge:ore_dict", "ore": "wireCopper"
+    }
+  ],
+  "type": "forge:ore_shapeless"
+}

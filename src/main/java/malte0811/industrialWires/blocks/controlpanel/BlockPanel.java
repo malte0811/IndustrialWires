@@ -23,6 +23,9 @@ import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.BlockIWBase;
 import malte0811.industrialWires.blocks.IMetaEnum;
 import malte0811.industrialWires.controlpanel.PanelComponent;
+import malte0811.industrialWires.controlpanel.PanelUtils;
+import malte0811.industrialWires.controlpanel.PropertyComponents;
+import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
@@ -30,7 +33,7 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
@@ -46,6 +49,8 @@ import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.List;
 
 public class BlockPanel extends BlockIWBase implements IMetaEnum {
 	public static final PropertyEnum<BlockTypes_Panel> type = PropertyEnum.create("type", BlockTypes_Panel.class);
@@ -56,9 +61,15 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 	}
 
 	@Override
+	public ItemBlock createItemBlock() {
+		return new ItemBlockPanel(this);
+	}
+
+	@Override
 	public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer) {
 		switch (state.getValue(type)) {
 		case TOP:
+		case SINGLE_COMP:
 			return layer == BlockRenderLayer.CUTOUT;
 		case RS_WIRE:
 			return layer == BlockRenderLayer.TRANSLUCENT || layer == BlockRenderLayer.SOLID;
@@ -70,14 +81,18 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 	@Override
 	public TileEntity createTileEntity(@Nonnull World world, @Nonnull IBlockState state) {
 		switch (state.getValue(type)) {
-		case TOP:
-			return new TileEntityPanel();
-		case RS_WIRE:
-			return new TileEntityRSPanelConn();
-		case CREATOR:
-			return new TileEntityPanelCreator();
-		default:
-			return null;
+			case TOP:
+				return new TileEntityPanel();
+			case RS_WIRE:
+				return new TileEntityRSPanelConn();
+			case CREATOR:
+				return new TileEntityPanelCreator();
+			case UNFINISHED:
+				return new TileEntityUnfinishedPanel();
+			case SINGLE_COMP:
+				return new TileEntityComponentPanel();
+			default:
+				return null;
 		}
 	}
 
@@ -105,10 +120,11 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 	public IBlockState getActualState(@Nonnull IBlockState state, IBlockAccess worldIn, BlockPos pos) {
 		state = super.getActualState(state, worldIn, pos);
 		TileEntity te = worldIn.getTileEntity(pos);
-		if (te instanceof TileEntityPanel) {
+		if (te instanceof TileEntityComponentPanel) {
+			state.withProperty(type, BlockTypes_Panel.SINGLE_COMP);
+		} else if (te instanceof TileEntityPanel) {
 			state.withProperty(type, BlockTypes_Panel.TOP);
-		}
-		if (te instanceof TileEntityRSPanelConn) {
+		} else if (te instanceof TileEntityRSPanelConn) {
 			state.withProperty(type, BlockTypes_Panel.RS_WIRE);
 		}
 		return state;
@@ -132,6 +148,7 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 		return state.getValue(type).ordinal();
 	}
 
+	@Nonnull
 	@Override
 	public IBlockState getStateFromMeta(int meta) {
 		return super.getStateFromMeta(meta).withProperty(type, BlockTypes_Panel.values()[meta]);
@@ -143,11 +160,13 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 	}
 
 	@Override
-	public void getSubBlocks(@Nonnull Item itemIn, CreativeTabs tab, NonNullList<ItemStack> list) {
-		list.add(new ItemStack(itemIn, 1, 0));
-		list.add(new ItemStack(itemIn, 1, 1));
-		list.add(new ItemStack(itemIn, 1, 2));
-		list.add(new ItemStack(itemIn, 1, 3));
+	public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> list) {
+		BlockTypes_Panel[] values = BlockTypes_Panel.values();
+		for (int i = 0; i < values.length; i++) {
+			if (values[i].showInCreative()) {
+				list.add(new ItemStack(this, 1, i));
+			}
+		}
 	}
 
 	@Override
@@ -188,17 +207,15 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 			}
 			return false;
 		}
-		return state.getValue(type) == BlockTypes_Panel.TOP;
+		return state.getValue(type) == BlockTypes_Panel.TOP||state.getValue(type) == BlockTypes_Panel.SINGLE_COMP;
 	}
 
 	@Override
 	@Nonnull
 	public ItemStack getPickBlock(@Nonnull IBlockState state, RayTraceResult target, @Nonnull World world, @Nonnull BlockPos pos, EntityPlayer player) {
-		if (state.getValue(type) == BlockTypes_Panel.TOP) {
-			TileEntity te = world.getTileEntity(pos);
-			if (te instanceof TileEntityPanel) {
-				return ((TileEntityPanel) te).getTileDrop(player, state);
-			}
+		TileEntity te = world.getTileEntity(pos);
+		if (te instanceof TileEntityPanel) {
+			return ((TileEntityPanel) te).getTileDrop(player, state);
 		}
 		return super.getPickBlock(state, target, world, pos, player);
 	}
@@ -211,5 +228,79 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 				pc.dropItems((TileEntityPanel)te);
 			}
 		}
+	}
+
+	@Override
+	public void breakBlock(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
+		super.breakBlock(worldIn, pos, state);
+		//break connections
+		List<BlockPos> panels = PanelUtils.discoverPanelParts(worldIn, pos, 11 * 11 * 11);
+		for (BlockPos p : panels) {
+			if (!p.equals(pos)) {
+				TileEntity panelPart = worldIn.getTileEntity(p);
+				if (panelPart instanceof TileEntityPanel) {
+					((TileEntityPanel) panelPart).removeAllRSCons();
+				}
+			}
+		}
+	}
+
+	@Override
+	public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state) {
+		super.onBlockAdded(worldIn, pos, state);
+		List<BlockPos> panels = PanelUtils.discoverPanelParts(worldIn, pos, 11 * 11 * 11);
+		for (BlockPos p : panels) {
+			if (!p.equals(pos)) {
+				TileEntity panelPart = worldIn.getTileEntity(p);
+				if (panelPart instanceof TileEntityPanel) {
+					((TileEntityPanel) panelPart).firstTick = true;
+				}
+			}
+		}
+	}
+
+	@Override
+	public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn, BlockPos fromPos) {
+		super.neighborChanged(state, world, pos, blockIn, fromPos);
+		IBlockState blockState = world.getBlockState(pos);
+		if (blockState.getValue(type)==BlockTypes_Panel.SINGLE_COMP) {
+			TileEntity te = world.getTileEntity(pos);
+			if (te instanceof TileEntityComponentPanel) {
+				((TileEntityComponentPanel)te).updateRS();
+			}
+		}
+	}
+
+	@Override
+	public boolean canProvidePower(IBlockState state) {
+		return state.getValue(type)==BlockTypes_Panel.SINGLE_COMP;
+	}
+
+	@Override
+	public boolean canConnectRedstone(IBlockState state, IBlockAccess world, BlockPos pos, @Nullable EnumFacing side) {
+		return state.getValue(type)==BlockTypes_Panel.SINGLE_COMP;
+	}
+
+	@Override
+	public int getStrongPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
+		if (blockState.getValue(type)==BlockTypes_Panel.SINGLE_COMP) {
+			TileEntity te = blockAccess.getTileEntity(pos);
+			if (te instanceof TileEntityComponentPanel&&side==((TileEntityComponentPanel) te).getComponents().getTop()) {
+				return ((TileEntityComponentPanel)te).getRSOutput();
+			}
+		}
+		return 0;
+	}
+
+
+	@Override
+	public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
+		if (blockState.getValue(type)==BlockTypes_Panel.SINGLE_COMP) {
+			TileEntity te = blockAccess.getTileEntity(pos);
+			if (te instanceof TileEntityComponentPanel) {
+				return ((TileEntityComponentPanel)te).getRSOutput();
+			}
+		}
+		return 0;
 	}
 }

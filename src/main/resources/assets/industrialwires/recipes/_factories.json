@@ -1,0 +1,12 @@
+{
+  "conditions" : {
+    "conversion": "malte0811.industrialWires.crafting.factories.IsConversionEnabled"
+  },
+  "recipes": {
+    "component_init": "malte0811.industrialWires.crafting.factories.InitPCFactory",
+    "wire_coil": "malte0811.industrialWires.crafting.factories.WireCoilFactory"
+  },
+  "ingredients": {
+    "ic2_item": "malte0811.industrialWires.crafting.factories.IC2ItemFactory"
+  }
+}

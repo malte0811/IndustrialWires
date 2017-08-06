@@ -18,6 +18,7 @@
 package malte0811.industrialWires.blocks;
 
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
+import malte0811.industrialWires.IndustrialWires;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -41,6 +42,8 @@ public class ItemBlockIW extends ItemBlock {
 			values = null;
 		}
 		hasSubtypes = true;
+		setRegistryName(b.getRegistryName());
+		setCreativeTab(IndustrialWires.creativeTab);
 	}
 
 	@Nonnull

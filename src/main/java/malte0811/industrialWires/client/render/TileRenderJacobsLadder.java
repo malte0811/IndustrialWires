@@ -21,6 +21,7 @@ package malte0811.industrialWires.client.render;
 import malte0811.industrialWires.blocks.hv.TileEntityJacobsLadder;
 import malte0811.industrialWires.blocks.hv.TileEntityJacobsLadder.LadderSize;
 import malte0811.industrialWires.util.Beziers;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
@@ -32,8 +33,8 @@ import org.lwjgl.opengl.GL11;
 
 public class TileRenderJacobsLadder extends TileEntitySpecialRenderer<TileEntityJacobsLadder> {
 	@Override
-	public void renderTileEntityAt(TileEntityJacobsLadder tile, double x, double y, double z, float partialTicks, int destroyStage) {
-		super.renderTileEntityAt(tile, x, y, z, partialTicks, destroyStage);
+	public void render(TileEntityJacobsLadder tile, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
+		super.render(tile, x, y, z, partialTicks, destroyStage, alpha);
 		if (!tile.isDummy() && tile.timeTillActive == 0 && tile.controls[0] != null) {
 
 			GlStateManager.pushMatrix();
@@ -50,7 +51,7 @@ public class TileRenderJacobsLadder extends TileEntitySpecialRenderer<TileEntity
 			Vec3d[] controls = new Vec3d[tile.size.arcPoints];
 			for (int i = 0; i < tile.size.arcPoints; i++) {
 				Vec3d speed = tile.controlMovement[i];
-				controls[i] = tile.controls[i].addVector(speed.xCoord * partialTicks, speed.yCoord * partialTicks, speed.zCoord * partialTicks);
+				controls[i] = tile.controls[i].addVector(speed.x * partialTicks, speed.y * partialTicks, speed.z * partialTicks);
 			}
 			drawBezier(controls, tile.salt, tile.size);
 			//DEBUG CODE
@@ -84,7 +85,7 @@ public class TileRenderJacobsLadder extends TileEntitySpecialRenderer<TileEntity
 		Vec3d radY = new Vec3d(0, diameter / 2, 0);
 		Vec3d radZ = new Vec3d(0, 0, diameter / 2);
 		Tessellator tes = Tessellator.getInstance();
-		VertexBuffer vertBuffer = tes.getBuffer();
+		BufferBuilder vertBuffer = tes.getBuffer();
 		float[][] colors = new float[steps + 1][];
 		vertBuffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 		Vec3d last = Beziers.getPoint(0, controls);
@@ -133,19 +134,19 @@ public class TileRenderJacobsLadder extends TileEntitySpecialRenderer<TileEntity
 		return ret;
 	}
 
-	private void drawQuad(Vec3d v0, Vec3d v1, Vec3d rad, float[] color0, float[] color1, VertexBuffer vertexBuffer) {
-		color(color1, vertexBuffer.pos(v1.xCoord - rad.xCoord, v1.yCoord - rad.yCoord, v1.zCoord - rad.zCoord)).endVertex();
-		color(color0, vertexBuffer.pos(v0.xCoord - rad.xCoord, v0.yCoord - rad.yCoord, v0.zCoord - rad.zCoord)).endVertex();
-		color(color0, vertexBuffer.pos(v0.xCoord + rad.xCoord, v0.yCoord + rad.yCoord, v0.zCoord + rad.zCoord)).endVertex();
-		color(color1, vertexBuffer.pos(v1.xCoord + rad.xCoord, v1.yCoord + rad.yCoord, v1.zCoord + rad.zCoord)).endVertex();
+	private void drawQuad(Vec3d v0, Vec3d v1, Vec3d rad, float[] color0, float[] color1, BufferBuilder vertexBuffer) {
+		color(color1, vertexBuffer.pos(v1.x - rad.x, v1.y - rad.y, v1.z - rad.z)).endVertex();
+		color(color0, vertexBuffer.pos(v0.x - rad.x, v0.y - rad.y, v0.z - rad.z)).endVertex();
+		color(color0, vertexBuffer.pos(v0.x + rad.x, v0.y + rad.y, v0.z + rad.z)).endVertex();
+		color(color1, vertexBuffer.pos(v1.x + rad.x, v1.y + rad.y, v1.z + rad.z)).endVertex();
 
-		color(color1, vertexBuffer.pos(v1.xCoord + rad.xCoord, v1.yCoord + rad.yCoord, v1.zCoord + rad.zCoord)).endVertex();
-		color(color0, vertexBuffer.pos(v0.xCoord + rad.xCoord, v0.yCoord + rad.yCoord, v0.zCoord + rad.zCoord)).endVertex();
-		color(color0, vertexBuffer.pos(v0.xCoord - rad.xCoord, v0.yCoord - rad.yCoord, v0.zCoord - rad.zCoord)).endVertex();
-		color(color1, vertexBuffer.pos(v1.xCoord - rad.xCoord, v1.yCoord - rad.yCoord, v1.zCoord - rad.zCoord)).endVertex();
+		color(color1, vertexBuffer.pos(v1.x + rad.x, v1.y + rad.y, v1.z + rad.z)).endVertex();
+		color(color0, vertexBuffer.pos(v0.x + rad.x, v0.y + rad.y, v0.z + rad.z)).endVertex();
+		color(color0, vertexBuffer.pos(v0.x - rad.x, v0.y - rad.y, v0.z - rad.z)).endVertex();
+		color(color1, vertexBuffer.pos(v1.x - rad.x, v1.y - rad.y, v1.z - rad.z)).endVertex();
 	}
 
-	private VertexBuffer color(float[] color, VertexBuffer vb) {
+	private BufferBuilder color(float[] color, BufferBuilder vb) {
 		vb.color(color[0], color[1], color[2], 1);
 		return vb;
 	}

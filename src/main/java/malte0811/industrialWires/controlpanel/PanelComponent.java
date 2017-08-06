@@ -18,7 +18,7 @@
 
 package malte0811.industrialWires.controlpanel;
 
-import blusunrize.immersiveengineering.common.util.IELogger;
+import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
@@ -27,11 +27,13 @@ import malte0811.industrialWires.util.TriConsumer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import org.apache.logging.log4j.Level;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -106,6 +108,10 @@ public abstract class PanelComponent {
 		outputs.remove(out);
 	}
 
+	protected boolean matchesId(int myId, int theirId) {
+		return myId==theirId||theirId<0;
+	}
+
 	public void dropItems(TileEntityPanel te) {
 	}
 
@@ -148,31 +154,36 @@ public abstract class PanelComponent {
 		String type = nbt.getString("type");
 		if (baseCreaters.containsKey(type)) {
 			PanelComponent ret = baseCreaters.get(type).get();
-			ret.readCustomNBT(nbt);
-			ret.setX(nbt.getFloat("x"));
-			ret.setY(nbt.getFloat("y"));
-			ret.setPanelHeight(nbt.getFloat("panelHeight"));
+			ret.readFromNBT(nbt);
 			return ret;
 		} else {
-			IELogger.info("(IndustrialWires) Unknown panel component: " + type);//TODO own logger?
+			IndustrialWires.logger.warn("Unknown panel component: " + type);
 			return null;
 		}
 	}
 
+	public final void readFromNBT(NBTTagCompound nbt) {
+		readCustomNBT(nbt);
+		setX(nbt.getFloat("x"));
+		setY(nbt.getFloat("y"));
+		setPanelHeight(nbt.getFloat("panelHeight"));
+	}
+
+	@SideOnly(Side.CLIENT)
 	public void renderBox(TileEntityPanel te) {
+		GlStateManager.pushMatrix();
 		GlStateManager.enableBlend();
 		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 		GlStateManager.glLineWidth(2.0F);
 		GlStateManager.disableTexture2D();
 		GlStateManager.depthMask(false);
-		double px = te.getPos().getX() - TileEntityRendererDispatcher.staticPlayerX;
-		double py = te.getPos().getY() - TileEntityRendererDispatcher.staticPlayerY;
-		double pz = te.getPos().getZ() - TileEntityRendererDispatcher.staticPlayerZ;
-		RenderGlobal.drawSelectionBoundingBox(MiscUtils.apply(te.getComponents().getPanelTopTransform(), getBlockRelativeAABB()).expandXyz(0.002).offset(px, py, pz),
+		te.getComponents().transformGLForTop(te.getPos());
+		RenderGlobal.drawSelectionBoundingBox(getBlockRelativeAABB().grow(0.002),
 				0.0F, 0.0F, 0.0F, 0.4F);
 		GlStateManager.depthMask(true);
 		GlStateManager.enableTexture2D();
 		GlStateManager.disableBlend();
+		GlStateManager.popMatrix();
 	}
 
 	public abstract void renderInGUI(GuiPanelCreator gui);
@@ -188,18 +199,20 @@ public abstract class PanelComponent {
 	}
 
 
-	public boolean isValidPos(List<PanelComponent> components) {
-		AxisAlignedBB aabb = getBlockRelativeAABB().offset(0, panelHeight, 0);
-		if (aabb.minX < 0 || aabb.maxX > 1) {
+	public boolean isValidPos(List<PanelComponent> components, float height, float angle) {
+		float h = PanelUtils.getHeightWithComponent(this, angle, height);
+		if (h < 0 || h > 1) {
 			return false;
 		}
-		if (aabb.minY < 0 || aabb.maxY > 1) {
+
+		AxisAlignedBB aabb = getBlockRelativeAABB();
+		if (aabb.minX < 0 || aabb.maxX > 1) {
 			return false;
 		}
 		if (aabb.minZ < 0 || aabb.maxZ > 1) {
 			return false;
 		}
-		aabb = getBlockRelativeAABB();
+
 		for (PanelComponent pc : components) {
 			if (pc == this) {
 				continue;

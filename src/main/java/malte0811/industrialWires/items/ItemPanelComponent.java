@@ -20,22 +20,31 @@ package malte0811.industrialWires.items;
 
 import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.client.ClientProxy;
+import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
 import malte0811.industrialWires.IndustrialWires;
+import malte0811.industrialWires.blocks.controlpanel.BlockTypes_Panel;
+import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.controlpanel.IConfigurableComponent;
 import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.controlpanel.PanelUtils;
+import net.minecraft.block.Block;
+import net.minecraft.block.SoundType;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -58,11 +67,11 @@ public class ItemPanelComponent extends Item implements INetGUIItem {
 		this.setCreativeTab(IndustrialWires.creativeTab);
 		setMaxStackSize(64);
 		setRegistryName(new ResourceLocation(IndustrialWires.MODID, "panel_component"));
-		GameRegistry.register(this);
+		IndustrialWires.items.add(this);
 	}
 
 	@Override
-	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean adv) {
+	public void addInformation(ItemStack stack, World world, List<String> list, ITooltipFlag flag) {
 		if (GuiScreen.isShiftKeyDown()) {
 			NBTTagCompound nbt = getTagCompound(stack);
 			NBTTagCompound data = nbt.getCompoundTag("data");
@@ -86,9 +95,11 @@ public class ItemPanelComponent extends Item implements INetGUIItem {
 	}
 
 	@Override
-	public void getSubItems(@Nonnull Item itemIn, CreativeTabs tab, NonNullList<ItemStack> subItems) {
-		for (int i = 0; i < types.length; i++) {
-			subItems.add(new ItemStack(itemIn, 1, i));
+	public void getSubItems(@Nonnull CreativeTabs tab, @Nonnull NonNullList<ItemStack> subItems) {
+		if (isInCreativeTab(tab)) {
+			for (int i = 0; i < types.length; i++) {
+				subItems.add(new ItemStack(this, 1, i));
+			}
 		}
 	}
 
@@ -160,6 +171,49 @@ public class ItemPanelComponent extends Item implements INetGUIItem {
 			playerIn.openGui(IndustrialWires.MODID, 1, worldIn, 0, 0, hand == EnumHand.MAIN_HAND ? 1 : 0);
 		}
 		return new ActionResult<>(EnumActionResult.SUCCESS, playerIn.getHeldItem(hand));
+	}
+
+	/**
+	 * mostly copied from {@link net.minecraft.item.ItemBlock}
+	 */
+	@Nonnull
+	public EnumActionResult onItemUse(EntityPlayer player, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+		IBlockState iblockstate = worldIn.getBlockState(pos);
+		Block block = iblockstate.getBlock();
+
+		if (!block.isReplaceable(worldIn, pos)) {
+			pos = pos.offset(facing);
+		}
+
+		ItemStack itemstack = player.getHeldItem(hand);
+
+		if (!itemstack.isEmpty() && player.canPlayerEdit(pos, facing, itemstack) && worldIn.mayPlace(IndustrialWires.panel, pos, false, facing, (Entity) null)) {
+			placeBlockAt(itemstack, player, worldIn, pos, facing, hitX, hitY, hitZ);
+			SoundType soundtype = worldIn.getBlockState(pos).getBlock().getSoundType(worldIn.getBlockState(pos), worldIn, pos, player);
+			worldIn.playSound(player, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+			itemstack.shrink(1);
+
+			return EnumActionResult.SUCCESS;
+		} else {
+			return EnumActionResult.FAIL;
+		}
+	}
+
+	private void placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ) {
+		IBlockState state = IndustrialWires.panel.getStateFromMeta(BlockTypes_Panel.SINGLE_COMP.ordinal());
+		world.setBlockState(pos, state);
+		TileEntity te = world.getTileEntity(pos);
+		if (te instanceof IEBlockInterfaces.IDirectionalTile) {
+			EnumFacing dir = ((IEBlockInterfaces.IDirectionalTile) te).getFacingForPlacement(player, pos, side, hitX, hitY, hitZ);
+			((IEBlockInterfaces.IDirectionalTile) te).setFacing(dir);
+		}
+		if (te instanceof IEBlockInterfaces.ITileDrop) {
+			((IEBlockInterfaces.ITileDrop) te).readOnPlacement(player, stack);
+		}
+		if (te instanceof TileEntityPanel) {
+			((TileEntityPanel) te).getComponents().clear();
+			((TileEntityPanel) te).getComponents().add(componentFromStack(stack));
+		}
 	}
 
 	@Override

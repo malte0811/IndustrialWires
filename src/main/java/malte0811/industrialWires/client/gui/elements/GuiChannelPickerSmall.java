@@ -36,24 +36,24 @@ public class GuiChannelPickerSmall extends GuiChannelPicker {
 	}
 
 	@Override
-	public void drawButton(@Nonnull Minecraft mc, int mouseX, int mouseY) {
+	public void drawButton(@Nonnull Minecraft mc, int mouseX, int mouseY, float partialTicks) {
 		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 		GlStateManager.enableBlend();
 		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 		GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 		if (open) {
-			super.drawButton(mc, mouseX, mouseY);
+			super.drawButton(mc, mouseX, mouseY, partialTicks);
 		} else {
 			EnumDyeColor color = EnumDyeColor.byMetadata(selected);
-			int colorVal = color.getMapColor().colorValue | 0xff000000;
-			drawRect(xPosition, yPosition, xPosition + width, yPosition + height, colorVal);
+			int colorVal = color.getColorValue() | 0xff000000;
+			drawRect(x, y, x + width, y + height, colorVal);
 		}
 	}
 
 	@Override
-	public boolean click(int x, int y) {
+	public boolean click(int xMouse, int yMouse) {
 		if (!open) {
-			if (xPosition <= x && xPosition + width >= x && yPosition <= y && yPosition + height >= y) {
+			if (x <= xMouse && x + width >= xMouse && y <= yMouse && y + height >= yMouse) {
 				open = true;
 				width = onSize;
 				height = onSize;
@@ -62,7 +62,7 @@ public class GuiChannelPickerSmall extends GuiChannelPicker {
 			return false;
 		} else {
 			boolean ret = false;
-			if (xPosition <= x && xPosition + width >= x && yPosition <= y && yPosition + height >= y) {
+			if (x <= xMouse && x + width >= xMouse && y <= yMouse && y + height >= yMouse) {
 				select();
 				ret = true;
 			}

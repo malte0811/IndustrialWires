@@ -17,13 +17,13 @@ public class GuiChannelPicker extends GuiButton {
 	}
 
 	@Override
-	public void drawButton(@Nonnull Minecraft mc, int mouseX, int mouseY) {
+	public void drawButton(@Nonnull Minecraft mc, int mouseX, int mouseY, float patrtialTicks) {
 		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 		GlStateManager.enableBlend();
 		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 		GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-		mouseX -= xPosition;
-		mouseY -= yPosition;
+		mouseX -= x;
+		mouseY -= y;
 		currHovered = -1;
 		for (byte i = 0; i < 16; i++) {
 			int xMin = width / 4 * (i % 4);
@@ -31,24 +31,24 @@ public class GuiChannelPicker extends GuiButton {
 			int xMax = xMin + width / 4;
 			int yMax = yMin + height / 4;
 			EnumDyeColor color = EnumDyeColor.byMetadata(i);
-			int colorVal = color.getMapColor().colorValue | 0xff000000;
+			int colorVal = color.getColorValue() | 0xff000000;
 			if (mouseX >= xMin && mouseX < xMax && mouseY >= yMin && mouseY < yMax) {
 				currHovered = i;
 			}
 			if (selected == i) {
-				drawRect(xMin + xPosition, yMin + yPosition, xMax + xPosition, yMax + yPosition, 0xff000000 | ~colorVal);
+				drawRect(xMin + x, yMin + y, xMax + x, yMax + y, 0xff000000 | ~colorVal);
 			}
 			if (currHovered == i) {
-				drawRect(xMin + xPosition, yMin + yPosition, xMax + xPosition, yMax + yPosition, colorVal);
+				drawRect(xMin + x, yMin + y, xMax + x, yMax + y, colorVal);
 			} else {
 				final int offset = width / 20;
-				drawRect(xMin + offset + xPosition, yMin + offset + yPosition, xMax - offset + xPosition, yMax - offset + yPosition, colorVal);
+				drawRect(xMin + offset + x, yMin + offset + y, xMax - offset + x, yMax - offset + y, colorVal);
 			}
 		}
 	}
 
-	public boolean click(int x, int y) {
-		if (xPosition <= x && xPosition + width >= x && yPosition <= y && yPosition + height >= y) {
+	public boolean click(int xMouse, int yMouse) {
+		if (x <= xMouse && x + width >= xMouse && y <= yMouse && y + height >= yMouse) {
 			select();
 			return true;
 		}
@@ -65,7 +65,7 @@ public class GuiChannelPicker extends GuiButton {
 		return selected;
 	}
 
-	public boolean isHovered(int x, int y) {
-		return xPosition <= x && xPosition + width >= x && yPosition <= y && yPosition + height >= y;
+	public boolean isHovered(int xMouse, int yMouse) {
+		return x <= xMouse && x + width >= xMouse && y <= yMouse && y + height >= yMouse;
 	}
 }

@@ -1,3 +1,27 @@
+#####Version 1.5-15
+ - Components can be placed in the world now to use the as conventional levers/etc.
+ - Added documentation on the key ring. It also shows all attached keys on the tooltip now
+ - Fixed some bugs with key ring crafting
+ - Fixed control panels causing disconnects on servers
+
+#####Version 1.5-14
+ - Updated to Minecraft 1.12
+ - Added a recipe for the key ring. Kind of forgot about adding one when I added the ring itself...
+ - Fixed wire length crafting leaving wrong coils when the output has maximum length
+ - Fixed some more connection issues with control panels
+
+#####Version 1.5-13
+ - Labels no longer break the model cache and cause lag
+ - Labels don't break on dedicated servers any more
+
+#####Version 1.5-12
+ - Added tilted control panels
+   - Panels are no longer created from machine casings, there is a dedicated item for that now, the Unfinished Control Panel
+   - Angle and height can be configured in the Engineer's Workbench
+ - Fixed a CME when multi-threaded chunk rendering is enabled
+ - Fixed control panels not connecting or disconnecting properly when a panel connector between the panel and the RS controller is broken/placed
+ - Improved the performance of the control panel hitbox rendering
+
 #####Version 1.5-11
  - Updated to Minecraft 1.11.2
  - Added Panel Meters to monitor a redstone signal with reasonable accuracy

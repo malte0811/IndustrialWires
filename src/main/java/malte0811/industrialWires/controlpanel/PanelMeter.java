@@ -41,6 +41,7 @@ import org.lwjgl.util.vector.Vector3f;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -116,7 +117,8 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 				new Vector3f(wHalf, 0, length), EnumFacing.UP, BLACK, mat);
 		return ret;
 	}
-	private static RawModelFontRenderer renderer;
+
+	private RawModelFontRenderer renderer;
 	private RawModelFontRenderer fontRenderer() {
 		if (renderer == null) {
 			renderer = new RawModelFontRenderer(Minecraft.getMinecraft().gameSettings, Label.FONT, Minecraft.getMinecraft().getTextureManager(),
@@ -198,7 +200,7 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 	@Nullable
 	@Override
 	public Consumer<byte[]> getRSInputHandler(int id, TileEntityPanel panel) {
-		if (id == rsInputId) {
+		if (matchesId(rsInputId, id)) {
 			this.panel = panel;
 			return handler;
 		}

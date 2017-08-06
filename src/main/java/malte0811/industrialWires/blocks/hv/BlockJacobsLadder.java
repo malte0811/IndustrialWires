@@ -22,6 +22,8 @@ import blusunrize.immersiveengineering.api.IEProperties;
 import malte0811.industrialWires.blocks.BlockIWBase;
 import malte0811.industrialWires.blocks.IMetaEnum;
 import malte0811.industrialWires.blocks.IPlacementCheck;
+import malte0811.industrialWires.IndustrialWires;
+import malte0811.industrialWires.blocks.TileEntityJacobsLadder.LadderSize;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
@@ -45,7 +47,7 @@ import net.minecraft.world.World;
 import javax.annotation.Nonnull;
 
 public class BlockJacobsLadder extends BlockIWBase implements IMetaEnum, IPlacementCheck {
-	private static PropertyEnum<TileEntityJacobsLadder.LadderSize> size_property = PropertyEnum.create("size", TileEntityJacobsLadder.LadderSize.class);
+	private static PropertyEnum<LadderSize> size_property = PropertyEnum.create("size", LadderSize.class);
 
 	public BlockJacobsLadder() {
 		super(Material.IRON, "jacobs_ladder");
@@ -81,15 +83,15 @@ public class BlockJacobsLadder extends BlockIWBase implements IMetaEnum, IPlacem
 	}
 
 	@Override
-	public void getSubBlocks(@Nonnull Item itemIn, CreativeTabs tab, NonNullList<ItemStack> list) {
-		for (int i = 0; i < TileEntityJacobsLadder.LadderSize.values().length; i++) {
+	public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> list) {
+		for (int i = 0; i < LadderSize.values().length; i++) {
 			list.add(new ItemStack(this, 1, i));
 		}
 	}
 
 	@Override
 	public Object[] getValues() {
-		return TileEntityJacobsLadder.LadderSize.values();
+		return LadderSize.values();
 	}
 
 	@Override
@@ -103,7 +105,7 @@ public class BlockJacobsLadder extends BlockIWBase implements IMetaEnum, IPlacem
 	}
 
 	@Override
-	public boolean isFullyOpaque(IBlockState state) {
+	public boolean isTopSolid(IBlockState state) {
 		return false;
 	}
 
@@ -165,7 +167,7 @@ public class BlockJacobsLadder extends BlockIWBase implements IMetaEnum, IPlacem
 
 	@Override
 	public boolean canPlaceBlockAt(World w, BlockPos pos, ItemStack stack) {
-		int dummyCount = TileEntityJacobsLadder.LadderSize.values()[stack.getMetadata()].dummyCount;
+		int dummyCount = LadderSize.values()[stack.getMetadata()].dummyCount;
 		for (int i = 1; i <= dummyCount; i++) {
 			if (!w.isAirBlock(pos.up(i))) {
 				return false;

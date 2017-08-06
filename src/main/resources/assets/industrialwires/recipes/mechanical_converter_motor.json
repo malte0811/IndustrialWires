@@ -1,0 +1,37 @@
+{
+  "result": {
+    "item": "industrialwires:mechanical_converter",
+    "data": 0
+  },
+  "pattern": [
+    " s ",
+    "ici",
+    "mum"
+  ],
+  "type": "forge:ore_shaped",
+  "key": {
+    "s": {
+      "type": "forge:ore_dict",
+      "ore": "stickIron"
+    },
+    "c": {
+      "item": "immersiveengineering:metal_decoration0",
+      "data": 0
+    },
+    "u": {
+      "type": "forge:ore_dict",
+      "ore": "ingotCopper"
+    },
+    "i": {
+      "type": "forge:ore_dict",
+      "ore": "ingotIron"
+    },
+    "m": {
+      "item": "immersiveengineering:material",
+      "data": 8
+    }
+  },
+  "conditions": [{
+    "type": "industrialwires:conversion"
+  }]
+}

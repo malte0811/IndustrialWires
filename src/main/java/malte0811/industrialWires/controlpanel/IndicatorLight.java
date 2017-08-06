@@ -132,7 +132,7 @@ public class IndicatorLight extends PanelComponent implements IConfigurableCompo
 	@Nullable
 	@Override
 	public Consumer<byte[]> getRSInputHandler(int id, TileEntityPanel panel) {
-		if (id == rsInputId) {
+		if (matchesId(rsInputId, id)) {
 			this.panel = panel;
 			return handler;
 		}

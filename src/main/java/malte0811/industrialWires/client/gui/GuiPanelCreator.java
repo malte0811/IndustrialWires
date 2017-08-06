@@ -25,8 +25,10 @@ import malte0811.industrialWires.blocks.controlpanel.TileEntityPanelCreator;
 import malte0811.industrialWires.containers.ContainerPanelCreator;
 import malte0811.industrialWires.controlpanel.MessageType;
 import malte0811.industrialWires.controlpanel.PanelComponent;
+import malte0811.industrialWires.controlpanel.PanelUtils;
 import malte0811.industrialWires.items.ItemPanelComponent;
 import malte0811.industrialWires.network.MessageGUIInteract;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -77,7 +79,9 @@ public class GuiPanelCreator extends GuiContainer {
 
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+		this.drawDefaultBackground();
 		super.drawScreen(mouseX, mouseY, partialTicks);
+		this.renderHoveredToolTip(mouseX, mouseY);
 		String tooltip = null;
 		if (buttonList.get(0).isMouseOver()) {
 			tooltip = I18n.format(IndustrialWires.MODID + ".desc.create_panel");
@@ -103,7 +107,9 @@ public class GuiPanelCreator extends GuiContainer {
 			pc.setX(x / (float) panelSize);
 			pc.setY(y / (float) panelSize);
 		}
-		if (!pc.isValidPos(container.tile.components)) {
+		ItemStack unfinishedPanel = container.getInventory().get(0);
+		boolean red = (512 & (Minecraft.getSystemTime())) != 0;
+		if (red && !pc.isValidPos(container.tile.components, PanelUtils.getHeight(unfinishedPanel), PanelUtils.getAngle(unfinishedPanel))) {
 			AxisAlignedBB aabb = pc.getBlockRelativeAABB();
 			int left = (int) (getX0() + aabb.minX * panelSize) - 1;
 			int top = (int) (getY0() + aabb.minZ * panelSize) - 1;
@@ -137,7 +143,8 @@ public class GuiPanelCreator extends GuiContainer {
 		if (0 <= xRel && xRel <= panelSize && 0 <= yRel && yRel <= panelSize) {
 			List<PanelComponent> components = container.tile.components;
 			if (curr != null) {
-				if (curr.isValidPos(components)) {
+				ItemStack unfinishedPanel = container.getInventory().get(0);
+				if (curr.isValidPos(components, PanelUtils.getHeight(unfinishedPanel), PanelUtils.getAngle(unfinishedPanel))) {
 					NBTTagCompound nbt = new NBTTagCompound();
 					nbt.setFloat("x", curr.getX());
 					nbt.setFloat("y", curr.getY());

@@ -26,10 +26,20 @@ public enum BlockTypes_Panel implements IStringSerializable {
 	TOP,
 	RS_WIRE,
 	DUMMY,
-	CREATOR;
+	CREATOR,
+	UNFINISHED,
+	SINGLE_COMP;
 
 	@Override
 	public String getName() {
 		return toString().toLowerCase(Locale.ENGLISH);
+	}
+
+	public boolean isPanelConnector() {
+		return this != CREATOR && this != UNFINISHED;
+	}
+
+	public boolean showInCreative() {
+		return this != SINGLE_COMP;
 	}
 }

@@ -116,11 +116,12 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 	@Override
 	public void interactWith(Vec3d hitRel, TileEntityPanel tile, EntityPlayerMP player) {
 		if (!latching && active) {
-			return;
-		}
-		setOut(!active, tile);
-		if (!latching) {
 			ticksTillOff = 10;
+		} else {
+			setOut(!active, tile);
+			if (!latching) {
+				ticksTillOff = 10;
+			}
 		}
 		tile.markDirty();
 		tile.triggerRenderUpdate();
@@ -139,7 +140,7 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 
 	@Override
 	public void registerRSOutput(int id, @Nonnull TriConsumer<Integer, Byte, PanelComponent> out) {
-		if (id == rsOutputId) {
+		if (matchesId(rsOutputId, id)) {
 			super.registerRSOutput(id, out);
 			out.accept(rsOutputChannel, (byte) (active ? 15 : 0), this);
 		}

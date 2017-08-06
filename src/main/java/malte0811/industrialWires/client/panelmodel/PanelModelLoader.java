@@ -18,7 +18,6 @@
 
 package malte0811.industrialWires.client.panelmodel;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.controlpanel.PanelUtils;
@@ -37,6 +36,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 
 public class PanelModelLoader implements ICustomModelLoader {
 	public static final String RESOURCE_BASE = "models/block/";
@@ -49,12 +49,13 @@ public class PanelModelLoader implements ICustomModelLoader {
 	}
 
 	@Override
-	public boolean accepts(ResourceLocation modelLocation) {
+	public boolean accepts(@Nonnull ResourceLocation modelLocation) {
 		return modelLocation.getResourcePath().contains(RESOURCE_BASE + RESOURCE_LOCATION);
 	}
 
+	@Nonnull
 	@Override
-	public IModel loadModel(ResourceLocation modelLocation) throws IOException {
+	public IModel loadModel(@Nonnull ResourceLocation modelLocation) throws IOException {
 		String resourcePath = modelLocation.getResourcePath();
 		int pos = resourcePath.indexOf(RESOURCE_LOCATION);
 		if (pos >= 0) {
@@ -65,11 +66,13 @@ public class PanelModelLoader implements ICustomModelLoader {
 
 	private class PanelModelBase implements IModel {
 
+		@Nonnull
 		@Override
 		public Collection<ResourceLocation> getDependencies() {
 			return ImmutableList.of();
 		}
 
+		@Nonnull
 		@Override
 		public Collection<ResourceLocation> getTextures() {
 			try {
@@ -82,18 +85,14 @@ public class PanelModelLoader implements ICustomModelLoader {
 			}
 		}
 
+		@Nonnull
 		@Override
-		public IBakedModel bake(IModelState state, VertexFormat format, Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter) {
+		public IBakedModel bake(@Nonnull IModelState state, @Nonnull VertexFormat format, @Nonnull Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter) {
 			try {
 				return new PanelModel();
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
-		}
-
-		@Override
-		public IModelState getDefaultState() {
-			return null;
 		}
 
 	}

@@ -20,13 +20,13 @@ package malte0811.industrialWires.controlpanel;
 
 import blusunrize.immersiveengineering.api.Lib;
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
-import ic2.api.item.IC2Items;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.controlpanel.BlockPanel;
 import malte0811.industrialWires.blocks.controlpanel.BlockTypes_Panel;
-import malte0811.industrialWires.blocks.controlpanel.PropertyComponents.PanelRenderProperties;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.panelmodel.SmartLightingQuadIW;
+import malte0811.industrialWires.controlpanel.PropertyComponents.PanelRenderProperties;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -64,7 +64,7 @@ import static malte0811.industrialWires.util.MiscUtils.discoverLocal;
 
 public final class PanelUtils {
 	public static TextureAtlasSprite PANEL_TEXTURE;
-	public static final Item PANEL_ITEM = new ItemStack(IndustrialWires.panel).getItem();
+	public static Item PANEL_ITEM;
 	private static ItemStack panelBase;
 
 	private PanelUtils() {
@@ -80,11 +80,14 @@ public final class PanelUtils {
 		Matrix4 m4RotOnly = m4.copy();
 		m4RotOnly.invert();
 		m4RotOnly.transpose();
-		for (PanelComponent pc : components) {
+		//Intentionally not a for-each to help with CME's
+		//noinspection ForLoopReplaceableByForEach
+		for (int i = 0; i < components.size(); i++) {
+			PanelComponent pc = components.get(i);
 			Matrix4 m4Here = m4.copy().translate(pc.getX(), .0001, pc.getY());
 			List<RawQuad> compQuads = pc.getQuads();
 			for (RawQuad bq : compQuads) {
-				ret.add(bakeQuad(bq, m4Here, m4RotOnly, false));
+				ret.add(bakeQuad(bq, m4Here, m4RotOnly));
 			}
 		}
 		Matrix4 baseTrans = components.getPanelBaseTransform();
@@ -93,51 +96,74 @@ public final class PanelUtils {
 		baseNorm.transpose();
 
 		List<RawQuad> rawOut = new ArrayList<>();
-		//addTexturedBox(new Vector3f(0, 0, 0), new Vector3f(1, components.height, 1), rawOut, UV_FULL, PANEL_TEXTURE);
-		float vMax = 16 * components.height;
-		addQuad(rawOut, new Vector3f(0, components.height, 0), new Vector3f(0, components.height, 1),
-				new Vector3f(1, components.height, 1), new Vector3f(1, components.height, 0),
-				EnumFacing.UP, WHITE, PANEL_TEXTURE, UV_FULL, null, false);
-		addQuad(rawOut, new Vector3f(0, 0, 0), new Vector3f(1, 0, 0),
-				new Vector3f(1, 0, 1), new Vector3f(0, 0, 1),
-				EnumFacing.DOWN, WHITE, PANEL_TEXTURE, new float[]{0, 16, 16, 0}, null, false);
-		addQuad(rawOut, new Vector3f(0, 0, 0), new Vector3f(0, 0, 1),
-				new Vector3f(0, components.height, 1), new Vector3f(0, components.height, 0),
-				EnumFacing.WEST, WHITE, PANEL_TEXTURE, new float[]{0, vMax, 16, 0}, null, false);
-		addQuad(rawOut, new Vector3f(1, 0, 0), new Vector3f(1, components.height, 0),
-				new Vector3f(1, components.height, 1), new Vector3f(1, 0, 1),
-				EnumFacing.EAST, WHITE, PANEL_TEXTURE, new float[]{16, vMax, 0, 0}, null, false);
-		addQuad(rawOut, new Vector3f(1, 0, 0), new Vector3f(0, 0, 0),
-				new Vector3f(0, components.height, 0), new Vector3f(1, components.height, 0),
-				EnumFacing.NORTH, WHITE, PANEL_TEXTURE, new float[]{0, vMax, 16, 0}, null, false);
-		addQuad(rawOut, new Vector3f(0, 0, 1), new Vector3f(1, 0, 1),
-				new Vector3f(1, components.height, 1), new Vector3f(0, components.height, 1),
-				EnumFacing.SOUTH, WHITE, PANEL_TEXTURE, new float[]{0, vMax, 16, 0}, null, false);
+		float height1 = getLocalHeightFromZ(1, components.getHeight(), components.getAngle());
+		float height0 = getLocalHeightFromZ(0, components.getHeight(), components.getAngle());
+		float vMax1 = 16 * height1;
+		float vMax0 = 16 * height0;
+		float xMin = 0;
+		float xMax = 1;
+		float zMin = 0;
+		float zMax = 1;
+		if (components instanceof PropertyComponents.AABBPanelProperties) {
+			AxisAlignedBB xzAABB = ((PropertyComponents.AABBPanelProperties) components).getPanelBoundingBox();
+			xMin = (float) xzAABB.minX;
+			zMin = (float) xzAABB.minZ;
+			xMax = (float) xzAABB.maxX;
+			zMax = (float) xzAABB.maxZ;
+		}
+		float uMaxX = 16*(xMax-xMin);
+		float uMaxZ = 16*(zMax-zMin);
+		//TOP
+		rawOut.add(new RawQuad(new Vector3f(xMin, height0, zMin), new Vector3f(xMin, height1, zMax),
+				new Vector3f(xMax, height1, zMax), new Vector3f(xMax, height0, zMin),
+				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, new float[]{0, 0, uMaxX, uMaxZ}, -1));
+		//BOTTOM
+		rawOut.add(new RawQuad(new Vector3f(xMin, 0, zMin), new Vector3f(xMax, 0, zMin),
+				new Vector3f(xMax, 0, zMax), new Vector3f(xMin, 0, zMax),
+				EnumFacing.DOWN, PANEL_TEXTURE, WHITE, null, UV_FULL, -1));
+		//LEFT
+		rawOut.add(new RawQuad(new Vector3f(xMin, 0, zMin), new Vector3f(xMin, 0, zMax),
+				new Vector3f(xMin, height1, zMax), new Vector3f(xMin, height0, zMin),
+				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, new float[][]{
+				{0, 0}, {0, uMaxZ},
+				{vMax1, uMaxZ}, {vMax0, 0}
+		}, -1));
+		//RIGHT
+		rawOut.add(new RawQuad(new Vector3f(xMax, 0, zMin), new Vector3f(xMax, height0, zMin),
+				new Vector3f(xMax, height1, zMax), new Vector3f(xMax, 0, zMax),
+				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, new float[][]{
+				{0, 0}, {vMax0, 0},
+				{vMax1, uMaxZ}, {0, uMaxZ}
+		}, -1));
+		//BACK
+		rawOut.add(new RawQuad(new Vector3f(xMax, 0, zMin), new Vector3f(xMin, 0, zMin),
+				new Vector3f(xMin, height0, zMin), new Vector3f(xMax, height0, zMin),
+				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, new float[]{0, 0, vMax0, uMaxX}, -1));
+		//FRONT
+		rawOut.add(new RawQuad(new Vector3f(xMin, 0, zMax), new Vector3f(xMax, 0, zMax),
+				new Vector3f(xMax, height1, zMax), new Vector3f(xMin, height1, zMax),
+				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, new float[]{0, 0, vMax1, uMaxX}, -1));
 		for (RawQuad bq : rawOut) {
-			ret.add(bakeQuad(bq, baseTrans, baseNorm, bq.facing != EnumFacing.EAST && bq.facing != EnumFacing.UP));//flip south and west
+			ret.add(bakeQuad(bq, baseTrans, baseNorm));
 		}
 
 		return ret;
 	}
 
 	@SideOnly(Side.CLIENT)
-	public static BakedQuad bakeQuad(RawQuad raw, Matrix4 transform, Matrix4 transfNormal, boolean flip) {
+	public static BakedQuad bakeQuad(RawQuad raw, Matrix4 transform, Matrix4 transfNormal) {
 		VertexFormat format = DefaultVertexFormats.ITEM;
 		UnpackedBakedQuad.Builder builder = new UnpackedBakedQuad.Builder(format);
 		builder.setQuadOrientation(raw.facing);
 		builder.setTexture(raw.tex);
 		Vector3f[] vertices = raw.vertices;
-		float[] uvs = raw.uvs;
+		float[][] uvs = raw.uvs;
 		Vector3f normal = transfNormal.apply(raw.normal);
 		OBJModel.Normal faceNormal = new OBJModel.Normal(normal.x, normal.y, normal.z);
-		putVertexData(format, builder, transform.apply(vertices[0]), faceNormal, uvs[0], uvs[1], raw.tex,
-				raw.colorA);
-		putVertexData(format, builder, transform.apply(vertices[1]), faceNormal, uvs[flip ? 2 : 0], uvs[flip ? 1 : 3], raw.tex,
-				raw.colorA);
-		putVertexData(format, builder, transform.apply(vertices[2]), faceNormal, uvs[2], uvs[3], raw.tex,
-				raw.colorA);
-		putVertexData(format, builder, transform.apply(vertices[3]), faceNormal, uvs[flip ? 0 : 2], uvs[flip ? 3 : 1], raw.tex,
-				raw.colorA);
+		for (int i = 0; i < 4; i++) {
+			putVertexData(format, builder, transform.apply(vertices[i]), faceNormal, uvs[i][0], uvs[i][1], raw.tex,
+					raw.colorA);
+		}
 		BakedQuad ret = builder.build();
 		if (raw.light>0) {
 			ret = new SmartLightingQuadIW(ret, raw.light);
@@ -308,7 +334,7 @@ public final class PanelUtils {
 		}
 		if (rs && data.hasKey(RS_CHANNEL)) {
 			EnumDyeColor channColor = EnumDyeColor.byMetadata(data.getInteger(RS_CHANNEL));
-			String hexCol = Integer.toHexString(channColor.getMapColor().colorValue);
+			String hexCol = Integer.toHexString(channColor.getColorValue());
 			list.add(I18n.format("desc.immersiveengineering.info.redstoneChannel", "<hexcol=" + hexCol + ":" + channColor.getUnlocalizedName() + ">"));
 		}
 		if (rs && data.hasKey(RS_ID)) {
@@ -337,37 +363,89 @@ public final class PanelUtils {
 	}
 
 	public static void readListFromNBT(NBTTagList list, @Nonnull List<PanelComponent> base) {
-		base.clear();
+		boolean allNew = list.tagCount() != base.size();
+		if (allNew) {
+			base.clear();
+		}
 		for (int i = 0; i < list.tagCount(); i++) {
-			PanelComponent pc = PanelComponent.read(list.getCompoundTagAt(i));
+			NBTTagCompound nbt = list.getCompoundTagAt(i);
+			PanelComponent pc = PanelComponent.read(nbt);
 			if (pc != null) {
-				base.add(pc);
+				if (allNew) {
+					base.add(pc);
+				} else {
+					PanelComponent oldPc = base.get(i);
+					if (pc.getClass() != oldPc.getClass()) {
+						base.set(i, pc);
+					} else {
+						oldPc.readFromNBT(nbt);
+					}
+				}
 			}
 		}
 	}
 
 	public static ItemStack getPanelBase() {
 		if (panelBase == null) {
-			panelBase = IC2Items.getItem("resource", "machine");
+			panelBase = new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.UNFINISHED.ordinal());
 		}
 		return panelBase;
 	}
 
-	public static List<BlockPos> discoverPanelParts(World w, BlockPos here) {
+	public static List<BlockPos> discoverPanelParts(World w, BlockPos here, int maxCount) {
 		BiPredicate<BlockPos, Integer> isValid = (pos, count) -> {
-			if (here.distanceSq(pos) > 25 || count > 100 || !w.isBlockLoaded(pos)) {
+			if (pos.equals(here)) {
+				return true;
+			}
+			if (here.distanceSq(pos) > 25 || count > maxCount || !w.isBlockLoaded(pos)) {
 				return false;
 			}
 			IBlockState state = w.getBlockState(pos);
-			return state.getBlock() == IndustrialWires.panel && state.getValue(BlockPanel.type) != BlockTypes_Panel.CREATOR;
+			return state.getBlock() == IndustrialWires.panel && state.getValue(BlockPanel.type).isPanelConnector();
 		};
 		List<BlockPos> all = discoverLocal(w, here, isValid);
 		List<BlockPos> ret = new ArrayList<>();
 		for (BlockPos pos : all) {
-			if (w.getBlockState(pos).getValue(BlockPanel.type) != BlockTypes_Panel.DUMMY) {
+			if (w.getBlockState(pos).getBlock() == IndustrialWires.panel && w.getBlockState(pos).getValue(BlockPanel.type) != BlockTypes_Panel.DUMMY) {
 				ret.add(pos);
 			}
 		}
 		return ret;
+	}
+
+	public static float getAngle(ItemStack inv) {
+		float angle = 0;
+		NBTTagCompound nbt = inv.getTagCompound();
+		if (nbt != null && nbt.hasKey("angle")) {
+			angle = nbt.getFloat("angle");
+		}
+		return angle;
+	}
+
+	public static float getHeight(ItemStack inv) {
+		float height = .5F;
+		NBTTagCompound nbt = inv.getTagCompound();
+		if (nbt != null && nbt.hasKey("height")) {
+			height = nbt.getFloat("height");
+		}
+		return height;
+	}
+
+	public static float getHeightWithComponent(PanelComponent pc, float angle, float height) {
+		AxisAlignedBB aabb = pc.getBlockRelativeAABB();
+		double y = angle > 0 ? aabb.minZ : aabb.maxZ;
+		float hComp = (float) (pc.getHeight() * Math.cos(angle));
+		float localPanelHeight = getLocalHeight(y, angle, height);
+		return hComp + localPanelHeight;
+	}
+
+	public static float getLocalHeight(double y, float angle, float height) {
+		double centerOffset = .5 * (1 / Math.cos(angle) - 1);
+		y += centerOffset;
+		return getLocalHeightFromZ(Math.cos(angle) * y, height, angle);
+	}
+
+	public static float getLocalHeightFromZ(double z, float height, float angle) {
+		return (float) (height + (.5 - z) * Math.tan(angle));
 	}
 }

@@ -1,0 +1,30 @@
+{
+  "result": {
+    "item": "industrialwires:jacobs_ladder",
+    "data": 0
+  },
+  "pattern": [
+    "c c",
+    " h ",
+    "sts"
+  ],
+  "type": "forge:ore_shaped",
+  "key": {
+    "c": {
+      "type": "industrialwires:ic2_item",
+      "name": "cable",
+      "variant": "type:copper,insulation:0"
+    },
+    "s": {
+      "type": "forge:ore_dict", "ore": "ingotSteel"
+    },
+    "t": {
+      "type": "industrialwires:ic2_item",
+      "name": "te",
+      "variant": "mv_transformer"
+    },
+    "h": {
+      "item": "minecraft:hardened_clay"
+    }
+  }
+}

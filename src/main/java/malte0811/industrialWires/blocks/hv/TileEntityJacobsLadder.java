@@ -44,10 +44,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.IStringSerializable;
-import net.minecraft.util.ITickable;
+import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -266,9 +263,9 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 		NBTTagList ret = new NBTTagList();
 		for (Vec3d point : array) {
 			NBTTagCompound vec = new NBTTagCompound();
-			vec.setDouble("x", point.xCoord);
-			vec.setDouble("y", point.yCoord);
-			vec.setDouble("z", point.zCoord);
+			vec.setDouble("x", point.x);
+			vec.setDouble("y", point.y);
+			vec.setDouble("z", point.z);
 			ret.appendTag(vec);
 		}
 		return ret;
@@ -478,7 +475,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 				min = new Vec3d(distZ, 0, distX);
 				max = new Vec3d(1 - distZ, h, 1 - distX);
 			}
-			return new AxisAlignedBB(min.xCoord, min.yCoord, min.zCoord, max.xCoord, max.yCoord, max.zCoord);
+			return new AxisAlignedBB(min.x, min.y, min.z, max.x, max.y, max.z);
 		}
 	}
 

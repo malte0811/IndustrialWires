@@ -1,0 +1,18 @@
+{
+  "result": {
+    "item": "industrialwires:key",
+    "data": 0
+  },
+  "pattern": [
+    "rrp"
+  ],
+  "type": "forge:ore_shaped",
+  "key": {
+    "p": {
+      "type": "forge:ore_dict", "ore": "plateSteel"
+    },
+    "r": {
+      "type": "forge:ore_dict", "ore": "stickSteel"
+    }
+  }
+}

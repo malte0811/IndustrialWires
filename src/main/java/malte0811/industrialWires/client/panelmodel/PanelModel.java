@@ -22,11 +22,13 @@ import blusunrize.immersiveengineering.api.IEApi;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
+import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.controlpanel.BlockTypes_Panel;
-import malte0811.industrialWires.blocks.controlpanel.PropertyComponents;
-import malte0811.industrialWires.blocks.controlpanel.PropertyComponents.PanelRenderProperties;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
+import malte0811.industrialWires.blocks.controlpanel.TileEntityUnfinishedPanel;
 import malte0811.industrialWires.controlpanel.PanelUtils;
+import malte0811.industrialWires.controlpanel.PropertyComponents;
+import malte0811.industrialWires.controlpanel.PropertyComponents.PanelRenderProperties;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.*;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -188,10 +190,10 @@ public class PanelModel implements IBakedModel {
 		@Nonnull
 		@Override
 		public IBakedModel handleItemState(@Nonnull IBakedModel originalModel, ItemStack stack, World world, EntityLivingBase entity) {
-			if (stack != null && stack.getItem() == PanelUtils.PANEL_ITEM && stack.getMetadata() == BlockTypes_Panel.TOP.ordinal()) {
+			if (stack != null && stack.getItem() == PanelUtils.PANEL_ITEM) {
 				try {
 					return ITEM_MODEL_CACHE.get(stack, () -> {
-						TileEntityPanel te = new TileEntityPanel();
+						TileEntityPanel te = stack.getMetadata() == BlockTypes_Panel.TOP.ordinal() ? new TileEntityPanel() : new TileEntityUnfinishedPanel();
 						te.readFromItemNBT(stack.getTagCompound());
 						return new AssembledBakedModel(te.getComponents());
 					});

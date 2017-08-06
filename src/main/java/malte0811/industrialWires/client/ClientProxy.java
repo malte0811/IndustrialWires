@@ -71,6 +71,8 @@ import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -115,47 +117,8 @@ public class ClientProxy extends CommonProxy {
 				IndustrialWires.MODID + ":blocks/ic2_relay_glass"));
 
 		ConnLoader.baseModels.put("rs_panel_conn", new ResourceLocation("industrialwires:block/rs_panel_conn.obj"));
-
-
-		ConnLoader.baseModels.put("empty", new ResourceLocation("builtin/generated"));
-		for (int meta = 0; meta < ItemIC2Coil.subNames.length; meta++) {
-			ResourceLocation loc = new ResourceLocation(IndustrialWires.MODID, "ic2_wire_coil/" + ItemIC2Coil.subNames[meta]);
-			ModelBakery.registerItemVariants(IndustrialWires.coil, loc);
-			ModelLoader.setCustomModelResourceLocation(IndustrialWires.coil, meta, new ModelResourceLocation(loc, "inventory"));
-		}
-		for (int meta = 0; meta < ItemPanelComponent.types.length; meta++) {
-			ResourceLocation loc = new ResourceLocation(IndustrialWires.MODID, "panel_component/" + ItemPanelComponent.types[meta]);
-			ModelBakery.registerItemVariants(IndustrialWires.panelComponent, loc);
-			ModelLoader.setCustomModelResourceLocation(IndustrialWires.panelComponent, meta, new ModelResourceLocation(loc, "inventory"));
-		}
-		for (int meta = 0; meta < ItemKey.types.length; meta++) {
-			ResourceLocation loc = new ResourceLocation(IndustrialWires.MODID, "key/" + ItemKey.types[meta]);
-			ModelBakery.registerItemVariants(IndustrialWires.key, loc);
-			ModelLoader.setCustomModelResourceLocation(IndustrialWires.key, meta, new ModelResourceLocation(loc, "inventory"));
-		}
-
-		Block[] blocks = {IndustrialWires.ic2conn, IndustrialWires.mechConv, IndustrialWires.jacobsLadder, IndustrialWires.panel};
-		for (Block b : blocks) {
-			if (b != null) {
-				Item blockItem = Item.getItemFromBlock(b);
-				final ResourceLocation loc = b.getRegistryName();
-				assert loc != null;
-				ModelLoader.setCustomMeshDefinition(blockItem, stack -> new ModelResourceLocation(loc, "inventory"));
-				Object[] v = ((IMetaEnum) b).getValues();
-				for (int meta = 0; meta < v.length; meta++) {
-					String location = loc.toString();
-					String prop = "inventory,type=" + v[meta].toString().toLowerCase(Locale.US);
-					try {
-						ModelLoader.setCustomModelResourceLocation(blockItem, meta, new ModelResourceLocation(location, prop));
-					} catch (NullPointerException npe) {
-						throw new RuntimeException(b + " lacks an item!", npe);
-					}
-				}
-			}
-		}
 		OBJLoader.INSTANCE.addDomain(IndustrialWires.MODID);
 		ModelLoaderRegistry.registerLoader(new PanelModelLoader());
-		MinecraftForge.EVENT_BUS.register(new ClientEventHandler());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityJacobsLadder.class, new TileRenderJacobsLadder());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMarx.class, new TileRenderMarx());
 	}
@@ -223,6 +186,7 @@ public class ClientProxy extends CommonProxy {
 			);
 		}
 		Config.manual_doubleA.put("iwJacobsUsage", IWConfig.HVStuff.jacobsUsageEU);
+		Config.manual_int.put("iwKeysOnRing", IWConfig.maxKeysOnRing);
 		m.addEntry("industrialwires.jacobs", "industrialwires",
 				new ManualPages.CraftingMulti(m, "industrialwires.jacobs0", new ItemStack(IndustrialWires.jacobsLadder, 1, 0), new ItemStack(IndustrialWires.jacobsLadder, 1, 1), new ItemStack(IndustrialWires.jacobsLadder, 1, 2)),
 				new ManualPages.Text(m, "industrialwires.jacobs1"));
@@ -232,7 +196,9 @@ public class ClientProxy extends CommonProxy {
 				new ManualPages.Text(m, "industrialwires.intro0"),
 				new ManualPages.Text(m, "industrialwires.intro1"),
 				new ManualPages.Crafting(m, "industrialwires.intro2", new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.DUMMY.ordinal())),
-				new ManualPages.Text(m, "industrialwires.intro3")
+				new ManualPages.Text(m, "industrialwires.intro3"),
+				new ManualPages.Crafting(m, "industrialwires.intro4", new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.UNFINISHED.ordinal())),
+				new ManualPages.Text(m, "industrialwires.intro5")
 		);
 		m.addEntry("industrialwires.panel_creator", "control_panels",
 				new ManualPages.Crafting(m, "industrialwires.panel_creator0", new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.CREATOR.ordinal())),
@@ -253,6 +219,7 @@ public class ClientProxy extends CommonProxy {
 				new ManualPages.Text(m, "industrialwires.toggle_switch1"),
 				new ManualPages.Crafting(m, "industrialwires.variac", new ItemStack(IndustrialWires.panelComponent, 1, 4)),
 				new ManualPages.CraftingMulti(m, "industrialwires.lock", new ItemStack(IndustrialWires.panelComponent, 1, 7), new ItemStack(IndustrialWires.key)),
+				new ManualPages.Crafting(m, "industrialwires.lock1", new ItemStack(IndustrialWires.key, 1, 2)),
 				new ManualPages.Crafting(m, "industrialwires.panel_meter", new ItemStack(IndustrialWires.panelComponent, 1, 8))
 		);
 	}
@@ -336,7 +303,7 @@ public class ClientProxy extends CommonProxy {
 		default:
 			return;
 		}
-		PositionedSoundRecord sound = new PositionedSoundRecord(event, SoundCategory.BLOCKS, te.size.soundVolume, 1, false, 0, ISound.AttenuationType.LINEAR, (float) soundPos.xCoord, (float) soundPos.yCoord, (float) soundPos.zCoord);
+		PositionedSoundRecord sound = new PositionedSoundRecord(event, SoundCategory.BLOCKS, te.size.soundVolume, 1, false, 0, ISound.AttenuationType.LINEAR, (float) soundPos.x, (float) soundPos.y, (float) soundPos.z);
 		ClientUtils.mc().getSoundHandler().playSound(sound);
 		playingSounds.put(te.getPos(), sound);
 	}
@@ -371,5 +338,4 @@ public class ClientProxy extends CommonProxy {
 		}
 		return null;
 	}
-
 }

@@ -20,6 +20,7 @@ package malte0811.industrialWires.items;
 
 import malte0811.industrialWires.IndustrialWires;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -33,6 +34,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.List;
 
 public class ItemKey extends Item implements INetGUIItem {
 	public static final String LOCK_ID = "lockId";
@@ -46,7 +49,7 @@ public class ItemKey extends Item implements INetGUIItem {
 		this.setCreativeTab(IndustrialWires.creativeTab);
 		setMaxStackSize(64);
 		setRegistryName(new ResourceLocation(IndustrialWires.MODID, "key"));
-		GameRegistry.register(this);
+		IndustrialWires.items.add(this);
 	}
 
 	@Nonnull
@@ -60,15 +63,27 @@ public class ItemKey extends Item implements INetGUIItem {
 	}
 
 	@Override
-	public void getSubItems(Item itemIn, CreativeTabs tab, NonNullList<ItemStack> subItems) {
-		subItems.add(new ItemStack(this, 1, 0));
-		subItems.add(new ItemStack(this, 1, 2));
+	public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+		super.addInformation(stack, worldIn, tooltip, flagIn);
+		if (stack.getMetadata()==2&&stack.getTagCompound()!=null) {
+			NBTTagList keys = stack.getTagCompound().getTagList(RING_KEYS, 10);
+			for (int i = 0;i< keys.tagCount()-1;i++) {
+				tooltip.add(I18n.format("item."+IndustrialWires.MODID+".key.key_named.name")+" "+keys.getCompoundTagAt(i).getString(NAME));
+			}
+		}
+	}
+
+	@Override
+	public void getSubItems(@Nonnull CreativeTabs tab, @Nonnull NonNullList<ItemStack> subItems) {
+		if (isInCreativeTab(tab)) {
+			subItems.add(new ItemStack(this, 1, 0));
+			subItems.add(new ItemStack(this, 1, 2));
+		}
 	}
 
 	@Nonnull
 	@Override
 	public String getUnlocalizedName(ItemStack stack) {
-		NBTTagCompound nbt = stack.getTagCompound();
 		return "item."+IndustrialWires.MODID+".key."+types[stack.getMetadata()];
 	}
 

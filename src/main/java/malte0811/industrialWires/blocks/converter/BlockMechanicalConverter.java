@@ -18,6 +18,7 @@
 package malte0811.industrialWires.blocks.converter;
 
 import blusunrize.immersiveengineering.api.IEProperties;
+import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.BlockIWBase;
 import malte0811.industrialWires.blocks.IMetaEnum;
 import net.minecraft.block.material.Material;
@@ -47,9 +48,9 @@ public class BlockMechanicalConverter extends BlockIWBase implements IMetaEnum {
 	}
 
 	@Override
-	public void getSubBlocks(@Nonnull Item itemIn, CreativeTabs tab, NonNullList<ItemStack> list) {
+	public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> list) {
 		for (int i = 0; i < 3; i++) {
-			list.add(new ItemStack(itemIn, 1, i));
+			list.add(new ItemStack(this, 1, i));
 		}
 	}
 

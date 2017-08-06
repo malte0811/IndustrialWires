@@ -1,0 +1,21 @@
+{
+  "result": {
+    "item": "industrialwires:ic2_connector",
+    "data": 6,
+    "count": 4
+  },
+  "pattern": [
+    " i ",
+    "rir",
+    "rir"
+  ],
+  "type": "forge:ore_shaped",
+  "key": {
+    "r": {
+      "type": "forge:ore_dict", "ore": "itemRubber"
+    },
+    "i": {
+      "type": "forge:ore_dict", "ore": "ingotIron"
+    }
+  }
+}
