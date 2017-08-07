@@ -18,13 +18,7 @@
 package malte0811.industrialWires;
 
 import blusunrize.immersiveengineering.api.MultiblockHandler;
-import malte0811.industrialWires.blocks.controlpanel.BlockPanel;
-import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
-import malte0811.industrialWires.blocks.controlpanel.TileEntityPanelCreator;
-import malte0811.industrialWires.blocks.controlpanel.TileEntityRSPanelConn;
 import malte0811.industrialWires.blocks.BlockIWBase;
-import malte0811.industrialWires.blocks.BlockJacobsLadder;
-import malte0811.industrialWires.blocks.TileEntityJacobsLadder;
 import malte0811.industrialWires.blocks.controlpanel.*;
 import malte0811.industrialWires.blocks.converter.BlockMechanicalConverter;
 import malte0811.industrialWires.blocks.converter.TileEntityIEMotor;
@@ -51,7 +45,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLMissingMappingsEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -132,7 +125,6 @@ public class IndustrialWires {
 			GameRegistry.registerTileEntity(TileEntityMechIEtoIC.class, MODID + ":mechIeToIc");
 		}
 		MultiblockHandler.registerMultiblock(new MultiblockMarx());
-		IWPotions.init();
 
 		proxy.preInit();
 	}
@@ -176,24 +168,5 @@ public class IndustrialWires {
 	public void postInit(FMLPostInitializationEvent e) {
         PanelUtils.PANEL_ITEM = Item.getItemFromBlock(panel);
         proxy.postInit();
-	}
-
-	@EventHandler
-	public void remap(FMLMissingMappingsEvent ev) {
-		for (FMLMissingMappingsEvent.MissingMapping miss : ev.get()) {
-			String name = miss.resourceLocation.getResourcePath();
-			switch (name) {
-			case "ic2connector":
-				if (miss.type == GameRegistry.Type.ITEM) {
-					miss.remap(Item.getItemFromBlock(IndustrialWires.ic2conn));
-				} else {
-					miss.remap(IndustrialWires.ic2conn);
-				}
-				break;
-			case "ic2wirecoil":
-				miss.remap(IndustrialWires.coil);
-				break;
-			}
-		}
 	}
 }

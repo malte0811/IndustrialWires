@@ -36,6 +36,7 @@ import malte0811.industrialWires.blocks.ISyncReceiver;
 import malte0811.industrialWires.blocks.IWProperties;
 import malte0811.industrialWires.blocks.TileEntityIWMultiblock;
 import malte0811.industrialWires.client.render.TileRenderMarx;
+import malte0811.industrialWires.hv.MarxOreHandler;
 import malte0811.industrialWires.network.MessageTileSyncIW;
 import malte0811.industrialWires.util.DualEnergyStorage;
 import malte0811.industrialWires.util.MiscUtils;
@@ -45,6 +46,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagDouble;
@@ -246,6 +248,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	}
 
 	private void fire() {
+		IndustrialWires.logger.info(MarxOreHandler.getYield(new ItemStack(Blocks.IRON_ORE), 37_500));
 		if (!world.isRemote) {
 			//calculate energy
 			double energyStored = 0;
@@ -261,7 +264,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 			AxisAlignedBB aabb = new AxisAlignedBB(v0, v0);
 			aabb = aabb.expand(0, stageCount/2-1,0);
 			final double sqrtStages = Math.sqrt(stageCount);
-			aabb = aabb.expandXyz(5*sqrtStages);
+			aabb = aabb.grow(5*sqrtStages);
 			List<Entity> fools = world.getEntitiesWithinAABB(Entity.class, aabb);
 			double energyNormed = energyStored/(stageCount*250*250);
 			double damageDistSqu = energyNormed * sqrtStages;
@@ -281,7 +284,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 				} else {
 					y = entity.posY;
 				}
-				double distSqu = entity.getDistanceSq(v0.xCoord, y, v0.zCoord);
+				double distSqu = entity.getDistanceSq(v0.x, y, v0.z);
 				if (distSqu<=damageDistSqu) {
 					float dmg = (float) (10*stageCount*(1-distSqu/damageDistSqu));
 					entity.attackEntityFrom(IWDamageSources.dmg_marx, dmg);

@@ -38,8 +38,9 @@ public abstract class BlockIWMultiblock extends BlockIWBase {
 		super.breakBlock(world, pos, state);
 	}
 
+
 	@Override
-	public boolean isFullyOpaque(IBlockState state) {
+	public boolean isTopSolid(IBlockState state) {
 		return false;
 	}
 

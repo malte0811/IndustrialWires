@@ -20,13 +20,18 @@ package malte0811.industrialWires;
 
 import malte0811.industrialWires.hv.MarxOreHandler;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.WorldSavedData;
+import net.minecraft.world.World;
+import net.minecraft.world.storage.WorldSavedData;
+import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import javax.annotation.Nonnull;
 
-//TODO register
+@Mod.EventBusSubscriber
 public class IWSaveData extends WorldSavedData {
 	private final static String MARX_ORES = "marxOres";
+	public static IWSaveData INSTANCE = new IWSaveData();
 
 	public IWSaveData() {
 		super(IndustrialWires.MODID);
@@ -43,5 +48,19 @@ public class IWSaveData extends WorldSavedData {
 	public NBTTagCompound writeToNBT(@Nonnull NBTTagCompound compound) {
 		compound.setTag(MARX_ORES, MarxOreHandler.save());
 		return compound;
+	}
+
+	@SubscribeEvent
+	public static void onWorldLoad(WorldEvent.Load event) {
+		World w = event.getWorld();
+		if (!w.isRemote) {
+			MarxOreHandler.reset();
+			INSTANCE = (IWSaveData) w.loadData(IWSaveData.class, IndustrialWires.MODID);
+			if (INSTANCE==null) {
+				INSTANCE = new IWSaveData();
+				w.setData(IndustrialWires.MODID, INSTANCE);
+				MarxOreHandler.load(new NBTTagCompound());
+			}
+		}
 	}
 }

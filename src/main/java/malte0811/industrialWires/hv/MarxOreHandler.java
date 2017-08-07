@@ -55,6 +55,10 @@ public class MarxOreHandler {
 		// TODO Uranium: IC2 output since IE has no useful ones
 	}
 
+	public static void reset() {
+		oreEnergies.clear();
+	}
+
 	public static void load(NBTTagCompound nbt) {
 		if (!defaultOreData.containsKey("oreIron")) {
 			init();
@@ -65,23 +69,27 @@ public class MarxOreHandler {
 			}
 		}
 		for (String ore : OreDictionary.getOreNames()) {
+			if (oreEnergies.containsKey(ore)) {
+				continue;
+			}
 			double energy = 0;
 			if (defaultOreData.containsKey(ore)) {
 				energy = defaultOreData.get(ore).avgEnergy;
-			}//TODO auto-add other ores?
+			}
+			//TODO auto-add other ores?
 			if (energy > 0) {
 				double sigma = defaultEnergy * energy / 4;
 				double mu = defaultEnergy * energy;
-				double basicGauss = new Random().nextGaussian();
-				basicGauss *= sigma;
-				basicGauss = MathHelper.clamp(basicGauss, -sigma, sigma);
-				basicGauss += mu;
-				oreEnergies.put(ore, basicGauss);
+				double avg = new Random().nextGaussian();
+				avg *= sigma;
+				avg = MathHelper.clamp(avg, -sigma, sigma);
+				avg += mu;
+				oreEnergies.put(ore, avg);
 			}
 		}
 	}
 
-	public ItemStack getYield(ItemStack in, double energy) {
+	public static ItemStack getYield(ItemStack in, double energy) {
 		int[] ores = OreDictionary.getOreIDs(in);
 		for (int id : ores) {
 			String name = OreDictionary.getOreName(id);
@@ -92,18 +100,32 @@ public class MarxOreHandler {
 				double sigma = idealE / 6;
 				double dist = getNormalizedNormalDist(ln, sigma, idealE);
 				int yield = (int) Math.round(dist * info.maxYield);
+				//TODO
 			}
 		}
 		return ItemStack.EMPTY;
 	}
 
-	private double getNormalizedNormalDist(double x, double sigma, double mu) {
+	private static double getNormalizedNormalDist(double x, double sigma, double mu) {
 		return Math.exp(-(x - mu) * (x - mu) / (2 * sigma * sigma));
 	}
+/*
 
+		for (String ore : nbt.getKeySet()) {
+			if (defaultOreData.containsKey(ore)) {
+				oreEnergies.put(ore, nbt.getDouble(ore));
+			}
+		}
+ */
 	public static NBTBase save() {
-		//TODO
-		return null;
+		NBTTagCompound ret = new NBTTagCompound();
+		if (oreEnergies.isEmpty()) {
+			load(new NBTTagCompound());
+		}
+		for (String name:oreEnergies.keySet()) {
+			ret.setDouble(name, oreEnergies.get(name));
+		}
+		return ret;
 	}
 
 	public static class OreInfo {

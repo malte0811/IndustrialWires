@@ -104,6 +104,6 @@ public final class MiscUtils {
 		Vec3d max = new Vec3d(in.maxX, in.maxY, in.maxZ);
 		min = mat.apply(min);
 		max = mat.apply(max);
-		return new AxisAlignedBB(min.xCoord, min.yCoord, min.zCoord, max.xCoord, max.yCoord, max.zCoord);
+		return new AxisAlignedBB(min.x, min.y, min.z, max.x, max.y, max.z);
 	}
 }

@@ -23,9 +23,9 @@ import malte0811.industrialWires.blocks.IWProperties;
 import malte0811.industrialWires.blocks.hv.TileEntityMarx;
 import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.BlockPos;
@@ -36,13 +36,13 @@ import org.lwjgl.util.vector.Vector3f;
 
 public class TileRenderMarx extends TileEntitySpecialRenderer<TileEntityMarx> {
 	@Override
-	public void renderTileEntityAt(TileEntityMarx te, double x, double y, double z, float partialTicks, int destroyStage) {
+	public void render(TileEntityMarx te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
 		final boolean debug = false;
 		//noinspection ConstantConditions,PointlessBooleanExpression
 		if (te.type== IWProperties.MarxType.BOTTOM&&(debug||te.state== TileEntityMarx.FiringState.FIRE)) {
 			prepare(x, y, z, te);
 			Tessellator tes = Tessellator.getInstance();
-			VertexBuffer vb = tes.getBuffer();
+			BufferBuilder vb = tes.getBuffer();
 
 			drawDischarge(te.dischargeData, vb, tes);
 			GlStateManager.popMatrix();
@@ -90,7 +90,7 @@ public class TileRenderMarx extends TileEntitySpecialRenderer<TileEntityMarx> {
 	}
 	private static final float[] WHITE = {1, 1, 1, 1};
 	private static final float[] WHITE_TRANSPARENT = {1, 1, 1, 0};
-	private void drawDischarge(Discharge d, VertexBuffer vb, Tessellator tes) {
+	private void drawDischarge(Discharge d, BufferBuilder vb, Tessellator tes) {
 		if (d!=null&&d.vertices!=null) {
 			vb.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 			for (int i = 0;i<d.vertices.length-1;i++) {
@@ -99,12 +99,12 @@ public class TileRenderMarx extends TileEntitySpecialRenderer<TileEntityMarx> {
 			tes.draw();
 		}
 	}
-	private void drawDischargeSection(Vector3f start, Vector3f end, float diameter, VertexBuffer vb) {
+	private void drawDischargeSection(Vector3f start, Vector3f end, float diameter, BufferBuilder vb) {
 		drawPart(start, end, diameter/3, diameter/3, WHITE_TRANSPARENT, WHITE, vb);
 		drawPart(start, end, 0, diameter/3, WHITE, WHITE, vb);
 		drawPart(start, end, -diameter/3, diameter/3, WHITE, WHITE_TRANSPARENT, vb);
 	}
-	private void drawPart(Vector3f start, Vector3f end, float offset, float width, float[] color1, float[] color2, VertexBuffer vb) {
+	private void drawPart(Vector3f start, Vector3f end, float offset, float width, float[] color1, float[] color2, BufferBuilder vb) {
 		vb.setTranslation(-offset-width/2, 0, 0);
 		vb.pos(start.x, start.y, start.z).color(color1[0], color1[1], color1[2], color1[3]).endVertex();
 		vb.pos(start.x+width, start.y, start.z).color(color2[0], color2[1], color2[2], color2[3]).endVertex();

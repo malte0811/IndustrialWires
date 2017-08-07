@@ -148,7 +148,7 @@ public abstract class BlockIWBase extends Block {
 	public void addCollisionBoxToList(IBlockState state, @Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull AxisAlignedBB entityBox,
 									  @Nonnull List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean p_185477_7_) {
 		AxisAlignedBB aabb = getBoundingBox(state, worldIn, pos).offset(pos);
-		if (entityBox.intersectsWith(aabb)) {
+		if (entityBox.intersects(aabb)) {
 			collidingBoxes.add(aabb);
 		}
 	}

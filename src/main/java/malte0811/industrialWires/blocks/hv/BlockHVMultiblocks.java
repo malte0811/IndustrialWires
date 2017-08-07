@@ -47,7 +47,7 @@ public class BlockHVMultiblocks extends BlockIWMultiblock {
 	}
 
 	@Override
-	public void getSubBlocks(@Nonnull Item itemIn, CreativeTabs tab, NonNullList<ItemStack> list) {
+	public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> list) {
 		// No MB's in the creative inventory!
 	}
 
