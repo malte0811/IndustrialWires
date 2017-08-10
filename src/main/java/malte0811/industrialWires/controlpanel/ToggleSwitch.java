@@ -161,7 +161,7 @@ public class ToggleSwitch extends PanelComponent implements IConfigurableCompone
 
 	@Override
 	public void invalidate(TileEntityPanel te) {
-		setOut(false, te);
+		setOut(rsOutputChannel, 0);
 	}
 
 	protected void setOut(boolean on, TileEntityPanel tile) {
