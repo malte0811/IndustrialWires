@@ -134,7 +134,6 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 		if (newLevel != out) {
 			setOut(rsChannel, newLevel);
 			out = newLevel;
-			tile.markDirty();
 			tile.triggerRenderUpdate();
 		}
 	}

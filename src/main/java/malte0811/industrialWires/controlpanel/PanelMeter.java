@@ -192,7 +192,6 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 	private Consumer<byte[]> handler = (input) -> {
 		if (input[rsInputChannel] != rsInput) {
 			rsInput = input[rsInputChannel];
-			panel.markDirty();
 			panel.triggerRenderUpdate();
 		}
 	};
