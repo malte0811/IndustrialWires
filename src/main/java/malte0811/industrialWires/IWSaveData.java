@@ -37,9 +37,14 @@ public class IWSaveData extends WorldSavedData {
 		super(IndustrialWires.MODID);
 	}
 
+	public IWSaveData(String name) {
+		super(name);
+	}
+
 	@Override
 	public void readFromNBT(@Nonnull NBTTagCompound nbt) {
 		NBTTagCompound ores = nbt.getCompoundTag(MARX_ORES);
+		MarxOreHandler.reset();
 		MarxOreHandler.load(ores);
 	}
 
@@ -54,12 +59,13 @@ public class IWSaveData extends WorldSavedData {
 	public static void onWorldLoad(WorldEvent.Load event) {
 		World w = event.getWorld();
 		if (!w.isRemote) {
-			MarxOreHandler.reset();
 			INSTANCE = (IWSaveData) w.loadData(IWSaveData.class, IndustrialWires.MODID);
 			if (INSTANCE==null) {
 				INSTANCE = new IWSaveData();
-				w.setData(IndustrialWires.MODID, INSTANCE);
+				MarxOreHandler.reset();
 				MarxOreHandler.load(new NBTTagCompound());
+				w.setData(IndustrialWires.MODID, INSTANCE);
+				INSTANCE.setDirty(true);
 			}
 		}
 	}

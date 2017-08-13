@@ -22,6 +22,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 
@@ -33,7 +34,8 @@ public class IWPotions {
 	static class PotionTinnitus extends Potion {
 		protected PotionTinnitus() {
 			super(true, 0xffff0000);
-			REGISTRY.register(-1, new ResourceLocation(IndustrialWires.MODID, "tinnitus"), this);
+			this.setRegistryName(new ResourceLocation(IndustrialWires.MODID, "tinnitus"));
+			ForgeRegistries.POTIONS.register(this);
 		}
 
 		@Override

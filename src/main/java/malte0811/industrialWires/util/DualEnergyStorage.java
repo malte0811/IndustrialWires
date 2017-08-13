@@ -75,7 +75,10 @@ public class DualEnergyStorage {
 	}
 
 	public double insertEU(double insertMax, boolean doInsert) {
-		double ins = Math.min(insertMax, maxEU - storedEU);
+		return insertEU(insertMax, maxInEU, doInsert);
+	}
+	public double insertEU(double insertMax, double leftover, boolean doInsert) {
+		double ins = Math.min(Math.min(insertMax, maxEU - storedEU), leftover);
 		if (doInsert) {
 			storedEU += ins;
 		}
@@ -83,8 +86,12 @@ public class DualEnergyStorage {
 	}
 
 	public double insertIF(int insertMax, boolean doInsert) {
+		return insertIF(insertMax, ConversionUtil.ifPerEuIdeal()*maxInEU, doInsert);
+	}
+	public double insertIF(int insertMax, double leftover, boolean doInsert) {
 		double eu = insertMax * ConversionUtil.euPerIfIdeal();
-		return ConversionUtil.ifPerEuIdeal() * insertEU(eu, doInsert);
+		double euMax = leftover* ConversionUtil.euPerIfIdeal();
+		return ConversionUtil.ifPerEuIdeal() * insertEU(eu, euMax, doInsert);
 	}
 
 	public double getEnergyStoredEU() {
@@ -120,5 +127,9 @@ public class DualEnergyStorage {
 
 	public void readFromNBT(NBTTagCompound nbt) {
 		storedEU = nbt.getDouble("stored");
+	}
+
+	public double getMaxInputIF() {
+		return maxInEU*ConversionUtil.ifPerEuIdeal();
 	}
 }

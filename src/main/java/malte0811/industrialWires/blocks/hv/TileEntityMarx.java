@@ -27,7 +27,11 @@ import blusunrize.immersiveengineering.api.energy.wires.redstone.IRedstoneConnec
 import blusunrize.immersiveengineering.api.energy.wires.redstone.RedstoneWireNetwork;
 import blusunrize.immersiveengineering.common.IEContent;
 import blusunrize.immersiveengineering.common.blocks.BlockTypes_MetalsIE;
+import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
+import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDirectionalTile;
 import blusunrize.immersiveengineering.common.blocks.metal.*;
+import blusunrize.immersiveengineering.common.blocks.wooden.TileEntityWallmount;
+import blusunrize.immersiveengineering.common.util.Utils;
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import ic2.api.item.IC2Items;
 import malte0811.industrialWires.*;
@@ -46,7 +50,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagDouble;
@@ -56,18 +59,18 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.*;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
+import java.util.*;
 import java.util.function.BiConsumer;
+
+import static malte0811.industrialWires.util.MiscUtils.getOffset;
+import static malte0811.industrialWires.util.MiscUtils.offset;
 
 public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable, ISyncReceiver, IBlockBoundsIW, IImmersiveConnectable, IIC2Connector,
 		IRedstoneConnector{
@@ -79,8 +82,8 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	private double rcTimeConst;
 	private double timeFactor;
 	private double timeFactorBottom;
-	private double cReciproke = 1_000_000;
-	private double maxVoltage = 250_000;
+	private final static double CAPACITANCE = 0.00_000_5;
+	private final static double MAX_VOLTAGE = 250_000;
 	private boolean allowSlowDischarge = true;
 
 	public IWProperties.MarxType type = IWProperties.MarxType.NO_MODEL;
@@ -89,12 +92,13 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	@SideOnly(Side.CLIENT)
 	public TileRenderMarx.Discharge dischargeData;
 	// Voltage=100*storedEU
-	private DualEnergyStorage storage = new DualEnergyStorage(50_000, 50_000);
+	private DualEnergyStorage storage = new DualEnergyStorage(50_000, 32_000);
 	private boolean hasConnection;
 	private double[] capVoltages;
 	//RS channel 1/white
 	private int voltageControl = 0;
 	private boolean loaded = false;
+	private double leftover;
 
 	public TileEntityMarx(EnumFacing facing, IWProperties.MarxType type, boolean mirrored) {
 		this.facing = facing;
@@ -131,7 +135,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		}
 		storage.readFromNBT(in.getCompoundTag(ENERGY_TAG));
 		hasConnection = in.getBoolean(HAS_CONN);
-		boundingAabb = null;
+		collisionAabb = null;
 		renderAabb = null;
 	}
 
@@ -156,7 +160,12 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		} else if (forward==4&&up==0&&right==1) {
 			return IEContent.blockStorage.getDefaultState().withProperty(IEContent.blockStorage.property, BlockTypes_MetalsIE.STEEL);
 		} else if (forward>0) {
-			//NOP. handled by getOriginalBlockPlacer
+			if ((right==0&&up==0)||(right==1&&up==stageCount-1)) {
+				return IEContent.blockMetalDecoration1.getDefaultState().withProperty(IEContent.blockMetalDecoration1.property, BlockTypes_MetalDecoration1.STEEL_FENCE);
+			} else {
+				return IEContent.blockMetalDecoration2.getDefaultState().withProperty(IEContent.blockMetalDecoration2.property, BlockTypes_MetalDecoration2.STEEL_WALLMOUNT)
+						.withProperty(IEProperties.INT_4, 1-right).withProperty(IEProperties.FACING_ALL, facing.getOpposite());
+			}
 		} else if (forward==-2) {
 			return IEContent.blockMetalDecoration0.getDefaultState().withProperty(IEContent.blockMetalDecoration0.property, BlockTypes_MetalDecoration0.HEAVY_ENGINEERING);
 		} else if (right==0) {
@@ -166,36 +175,25 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 			return IEContent.blockConnectors.getDefaultState().withProperty(IEContent.blockConnectors.property, BlockTypes_Connector.CONNECTOR_HV)
 					.withProperty(IEProperties.FACING_ALL, facing);
 		}
-		return null;
 	}
 
 	@Override
 	public BiConsumer<World, BlockPos> getOriginalBlockPlacer() {
 		IBlockState original = getOriginalBlock();
 		if (original!=null) {
-			if (original.getBlock()==IEContent.blockConnectors) {
-				return (w, p)->{
-					w.setBlockState(p, original);
-					TileEntity te = w.getTileEntity(p);
-					if (te instanceof TileEntityConnectorLV) {
-						((TileEntityConnectorLV) te).facing = original.getValue(IEProperties.FACING_ALL);
-						te.markDirty();
-					} else if (te instanceof TileEntityConnectorRedstone) {
-						((TileEntityConnectorRedstone) te).facing = original.getValue(IEProperties.FACING_ALL);
-						te.markDirty();
-					}
-				};
-			} else {
-				return (w, p)->w.setBlockState(p, original);
-			}
-		} else {
-			ItemStack hv = IC2Items.getItem("cable", "type:iron,insulation:0");
-			return (w, p)->{
-				w.setBlockToAir(p);
-				EntityItem item = new EntityItem(w, p.getX(), p.getY(), p.getZ(), hv.copy());
-				w.spawnEntity(item);
+			return (w, p) -> {
+				w.setBlockState(p, original);
+				TileEntity te = w.getTileEntity(p);
+				if (te instanceof IDirectionalTile&&original.getProperties().containsKey(IEProperties.FACING_ALL)) {
+					((IDirectionalTile) te).setFacing(original.getValue(IEProperties.FACING_ALL));
+					te.markDirty();
+				}
+				if (te instanceof TileEntityWallmount) {
+					((TileEntityWallmount) te).orientation = original.getValue(IEProperties.INT_4);
+				}
 			};
 		}
+		return (a, b)->IndustrialWires.logger.warn(a+", "+b+" wasn't found");//NOP
 	}
 
 	@Override
@@ -205,16 +203,17 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		} else if (state==FiringState.NEXT_TICK) {
 			state = FiringState.FIRE;
 			if (world.isRemote) {
-				IndustrialWires.proxy.playMarxBang(this, getMiddle(), dischargeData.energy/(stageCount*250*250));
+				IndustrialWires.proxy.playMarxBang(this, getMiddle(), (float) getNormedEnergy(dischargeData.energy));
 			} else {
 				fire();
 			}
 		}
 		if (!world.isRemote&&type== IWProperties.MarxType.BOTTOM) {
 			if (capVoltages==null||capVoltages.length!=stageCount) {
-				capVoltages = new double[stageCount];//TODO save to NBT
+				capVoltages = new double[stageCount];
 			}
 			double oldTopVoltage = capVoltages[stageCount-1];
+			double oldBottomVoltage = capVoltages[0];
 			for (int i = stageCount-1;i>0;i--) {
 				double oldVoltage = capVoltages[i];
 				double u0 = capVoltages[i-1];
@@ -222,91 +221,152 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 				capVoltages[i-1] -= capVoltages[i]-oldVoltage;
 			}
 			//charge bottom cap from storage
-			double setVoltage = 250_000 * voltageControl / 15D;
+			double setVoltage = MAX_VOLTAGE * voltageControl / 15D;
 			double u0 = Math.min(setVoltage, 100 * storage.getEnergyStoredEU());
+			if (u0<0) {
+				u0 = 0;
+			}
 			if (u0 < capVoltages[0] && setVoltage > capVoltages[0]) {
 				u0 = capVoltages[0];
 			}
-			if (u0 > 0 && (allowSlowDischarge || setVoltage > capVoltages[0])) {
-				double oldVoltage = capVoltages[0];
-				capVoltages[0] = u0 - (u0 - oldVoltage) * timeFactor / 2;
-				double energyUsed = (capVoltages[0] * capVoltages[0] - oldVoltage * oldVoltage)/cReciproke;
-				if (energyUsed > 0) {// energyUsed can be negative when discharging the caps
-					storage.extractEURaw(energyUsed);
+			if (allowSlowDischarge || u0 > capVoltages[0]) {
+				if (u0<0) {
+					IndustrialWires.logger.info("VOLTAGE: "+u0+", "+voltageControl);
 				}
-				double vMax = 250_000;
-				if (Math.round(15*oldVoltage/vMax)!=Math.round(15*capVoltages[0]/vMax)) {
+				double tmp = u0 - (u0 - oldBottomVoltage) * timeFactorBottom;
+				double energyUsed = .5*(tmp * tmp - oldBottomVoltage * oldBottomVoltage)*CAPACITANCE;
+				if (energyUsed > 0 && storage.extractEU(energyUsed, false)==energyUsed) {// energyUsed can be negative when discharging the caps
+					storage.extractEU(energyUsed, true);
+					capVoltages[0] = tmp;
+				}
+				if (Math.round(15*oldBottomVoltage/MAX_VOLTAGE)!=Math.round(15*capVoltages[0]/MAX_VOLTAGE)) {
 					net.updateValues();
-				} else if (Math.round(15*oldTopVoltage/vMax)!=Math.round(15*capVoltages[stageCount-1]/vMax)) {
+				} else if (Math.round(15*oldTopVoltage/MAX_VOLTAGE)!=Math.round(15*capVoltages[stageCount-1]/MAX_VOLTAGE)) {
 					net.updateValues();
 				}
-				if (capVoltages[0] > 250_000 * 14 / 15) {
+				if (capVoltages[0] > MAX_VOLTAGE * 14 / 15) {
 					state = FiringState.NEXT_TICK;
 				}
 			}
 		}
+		leftover = storage.getMaxInputIF();
 	}
 
 	private void fire() {
-		IndustrialWires.logger.info(MarxOreHandler.getYield(new ItemStack(Blocks.IRON_ORE), 37_500));
 		if (!world.isRemote) {
 			//calculate energy
 			double energyStored = 0;
 			for (int i = 0;i<stageCount;i++) {
-				energyStored += capVoltages[i]*capVoltages[i]/cReciproke;
+				energyStored += .5*capVoltages[i]*capVoltages[i]*CAPACITANCE;
 				capVoltages[i] = 0;
 			}
 			net.updateValues();
 			NBTTagCompound data = new NBTTagCompound();
 			data.setDouble("energy", energyStored);
 			IndustrialWires.packetHandler.sendToDimension(new MessageTileSyncIW(this, data), world.provider.getDimension());
-			Vec3d v0 = getMiddle();
-			AxisAlignedBB aabb = new AxisAlignedBB(v0, v0);
-			aabb = aabb.expand(0, stageCount/2-1,0);
-			final double sqrtStages = Math.sqrt(stageCount);
-			aabb = aabb.grow(5*sqrtStages);
-			List<Entity> fools = world.getEntitiesWithinAABB(Entity.class, aabb);
-			double energyNormed = energyStored/(stageCount*250*250);
-			double damageDistSqu = energyNormed * sqrtStages;
-			double tinnitusDistSqu = 5 * energyNormed * sqrtStages;
-			damageDistSqu *= damageDistSqu;
-			tinnitusDistSqu *= tinnitusDistSqu;
-			if (IWConfig.HVStuff.marxSoundDamage == 2) {
-				damageDistSqu = tinnitusDistSqu;
-				tinnitusDistSqu = -1;
+			handleEntities(energyStored);
+			handleOreProcessing(energyStored);//After entities to prevent killing the newly dropped items
+		}
+	}
+
+	public void handleOreProcessing(double energyStored) {
+		BlockPos bottom = getBottomElectrode();
+		List<BlockPos> toBreak = new ArrayList<>(2*stageCount-2);
+		int ores = 0;
+		for (int i = 1;i<stageCount-1;i++) {
+			BlockPos here = bottom.up(i);
+			if (!world.isAirBlock(here)) {
+				toBreak.add(here);
+				ores++;
 			}
-			for (Entity entity : fools) {
-				double y;
-				if (entity.posY<pos.getY()+1) {
-					y = pos.getY()+1;
-				} else if (entity.posY>pos.getY()+stageCount-2) {
-					y = pos.getY()+stageCount-2;
-				} else {
-					y = entity.posY;
+			double radius = Utils.RAND.nextDouble()*Math.abs(.5-i/(double)stageCount)*Math.sqrt(stageCount)*.5;
+			double angle = Utils.RAND.nextDouble()*Math.PI*2;
+			Vec3d offset = new Vec3d(Math.cos(angle)*radius, 0, Math.sin(angle)*radius);
+			BlockPos outside = here.add(new BlockPos(offset));
+			if (!outside.equals(here)&&canBreak(outside)) {
+				toBreak.add(outside);
+			}
+		}
+		if (ores>0) {
+			double energyPerOre = energyStored / ores;
+			for (BlockPos here:toBreak) {
+				IBlockState state = world.getBlockState(here);
+				if (state.getBlockHardness(world, here) < 0) {
+					continue;
 				}
-				double distSqu = entity.getDistanceSq(v0.x, y, v0.z);
-				if (distSqu<=damageDistSqu) {
-					float dmg = (float) (10*stageCount*(1-distSqu/damageDistSqu));
-					entity.attackEntityFrom(IWDamageSources.dmg_marx, dmg);
-				}
-				if (distSqu<=tinnitusDistSqu && entity instanceof EntityPlayer) {
-					ItemStack helmet = ((EntityPlayer) entity).inventory.armorInventory.get(3);
-					boolean earMuff = helmet.getItem()==IEContent.itemEarmuffs;
-					if (!earMuff&&helmet.hasTagCompound()) {
-						earMuff = helmet.getTagCompound().hasKey("IE:Earmuffs");
-					}
-					if (!earMuff) {
-						double multipl = Math.min(5, Math.sqrt(stageCount));
-						int duration = (int) (20*20*(1+multipl*(1-distSqu/tinnitusDistSqu)));
-						if (IWConfig.HVStuff.marxSoundDamage == 0) {
-							((EntityPlayer) entity).addPotionEffect(new PotionEffect(IWPotions.tinnitus, duration));
-						} else {
-							((EntityPlayer) entity).addPotionEffect(new PotionEffect(Potion.getPotionFromResourceLocation("nausea"), duration));
+				if (!world.isAirBlock(here)) {
+					ItemStack input = state.getBlock().getPickBlock(state, null, world, here, null);
+					if (!input.isEmpty()) {
+						ItemStack[] out = MarxOreHandler.getYield(input, energyPerOre);
+						for (ItemStack stack : out) {
+							EntityItem item = new EntityItem(world, here.getX() + .5, here.getY() + .5, here.getZ() + .5, stack);
+							final double maxMotion = .3;
+							item.motionX = 2*maxMotion*(Utils.RAND.nextDouble()-.5);
+							item.motionY = 2*maxMotion*(Utils.RAND.nextDouble()-.5);
+							item.motionZ = 2*maxMotion*(Utils.RAND.nextDouble()-.5);
+							world.spawnEntity(item);
 						}
+					}
+					world.setBlockToAir(here);
+				}
+			}
+		}
+	}
+
+	public void handleEntities(double energyStored) {
+		Vec3d v0 = getMiddle();
+		AxisAlignedBB aabb = new AxisAlignedBB(v0, v0);
+		aabb = aabb.expand(0, stageCount/2-1,0);
+		final double sqrtStages = Math.sqrt(stageCount);
+		aabb = aabb.grow(5*sqrtStages);
+		List<Entity> fools = world.getEntitiesWithinAABB(Entity.class, aabb);
+		double energyNormed = getNormedEnergy(energyStored);
+		double damageDistSqu = energyNormed * sqrtStages;
+		double tinnitusDistSqu = 5 * energyNormed * sqrtStages;
+		damageDistSqu *= damageDistSqu;
+		tinnitusDistSqu *= tinnitusDistSqu;
+		if (IWConfig.HVStuff.marxSoundDamage == 2) {
+			damageDistSqu = tinnitusDistSqu;
+			tinnitusDistSqu = -1;
+		}
+		for (Entity entity : fools) {
+			double y;
+			if (entity.posY<pos.getY()+1) {
+				y = pos.getY()+1;
+			} else if (entity.posY>pos.getY()+stageCount-2) {
+				y = pos.getY()+stageCount-2;
+			} else {
+				y = entity.posY;
+			}
+			double distSqu = entity.getDistanceSq(v0.x, y, v0.z);
+			if (distSqu<=damageDistSqu) {
+				float dmg = (float) (10*stageCount*(1-distSqu/damageDistSqu));
+				entity.attackEntityFrom(IWDamageSources.dmg_marx, dmg);
+			}
+			if (distSqu<=tinnitusDistSqu && entity instanceof EntityPlayer) {
+				ItemStack helmet = ((EntityPlayer) entity).inventory.armorInventory.get(3);
+				boolean earMuff = helmet.getItem()==IEContent.itemEarmuffs;
+				if (!earMuff&&helmet.hasTagCompound()) {
+					earMuff = helmet.getTagCompound().hasKey("IE:Earmuffs");
+				}
+				if (!earMuff) {
+					double multipl = Math.min(5, Math.sqrt(stageCount));
+					int duration = (int) (20*20*(1+multipl*(1-distSqu/tinnitusDistSqu)));
+					if (IWConfig.HVStuff.marxSoundDamage == 0) {
+						((EntityPlayer) entity).addPotionEffect(new PotionEffect(IWPotions.tinnitus, duration));
+					} else {
+						((EntityPlayer) entity).addPotionEffect(new PotionEffect(Potion.getPotionFromResourceLocation("nausea"), duration));
 					}
 				}
 			}
 		}
+	}
+
+	//checks whether the given pos can't be broken because it is part of the generator
+	public boolean canBreak(BlockPos pos) {
+		BlockPos dischargePos = offset(pos, facing, mirrored, 1, 3, 0);
+		Vec3i offset = getOffset(dischargePos, facing, mirrored, pos);
+		return Math.abs(offset.getX())>Math.abs(offset.getY());
 	}
 
 	@Override
@@ -321,28 +381,32 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 			dischargeData = new TileRenderMarx.Discharge(stageCount);
 		}
 		dischargeData.energy = nbt.getFloat("energy");
-		dischargeData.diameter = dischargeData.energy/(stageCount*250*250);
+		dischargeData.diameter = (float) getNormedEnergy(dischargeData.energy);
 		dischargeData.genMarxPoint(0, dischargeData.vertices.length-1);
 	}
 
-	private AxisAlignedBB renderAabb = null;
+	public double getNormedEnergy(double total) {
+		return total*2/(stageCount*MAX_VOLTAGE*MAX_VOLTAGE*CAPACITANCE);
+	}
+
+	AxisAlignedBB renderAabb = null;
 	@Nonnull
 	@Override
 	public AxisAlignedBB getRenderBoundingBox() {
 		if (renderAabb ==null) {
 			if (type== IWProperties.MarxType.BOTTOM) {
 				renderAabb = new AxisAlignedBB(pos,
-						MiscUtils.offset(pos, facing, mirrored, 2, 4, stageCount));
+						offset(pos, facing, mirrored, 2, 4, stageCount));
 			} else {
 				renderAabb = new AxisAlignedBB(pos, pos);
 			}
 		}
 		return renderAabb;
 	}
-	private AxisAlignedBB boundingAabb = null;
+	AxisAlignedBB collisionAabb = null;
 	@Override
 	public AxisAlignedBB getBoundingBox() {
-		if (boundingAabb==null) {
+		if (collisionAabb ==null) {
 			int forward = getForward();
 			int right = getRight();
 			int up = offset.getY();
@@ -403,9 +467,9 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 					}
 				}
 			}
-			boundingAabb = MiscUtils.apply(getBaseTransform(), ret);
+			collisionAabb = MiscUtils.apply(getBaseTransform(), ret);
 		}
-		return boundingAabb;
+		return collisionAabb;
 	}
 
 	private Matrix4 getBaseTransform() {
@@ -432,8 +496,10 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	@Override
 	public int outputEnergy(int amount, boolean simulate, int energyType) {
 		TileEntityMarx master = master(this);
-		if (master!=null) {
-			return (int) master.storage.insertIF(amount, !simulate);
+		if (master!=null && amount>0) {
+			double ret = master.storage.insertIF(amount, leftover, !simulate);
+			leftover -= ret;
+			return (int) ret;
 		} else {
 			return 0;
 		}
@@ -443,7 +509,9 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	public double insertEnergy(double eu, boolean simulate) {
 		TileEntityMarx master = master(this);
 		if (master!=null) {
-			return eu-master.storage.insertEU(eu, !simulate);
+			double ret = master.storage.insertEU(eu, leftover, !simulate);
+			leftover -= ret;
+			return eu-ret;
 		} else {
 			return 0;
 		}
@@ -533,7 +601,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		master.allowSlowDischarge = master.net.channelValues[4] == 0;
 	}
 	public void tryTriggeredDischarge() {
-		if (capVoltages[0]>=8/15D*maxVoltage) {
+		if (capVoltages[0]>=8/15D* MAX_VOLTAGE) {
 			state = FiringState.NEXT_TICK;
 		} else {
 			for (int i = 0;i<stageCount;i++) {
@@ -554,8 +622,10 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		if (master.capVoltages!=null&&master.capVoltages.length==stageCount) {
 			//1/orange is voltage measurement from the top cap
 			//2/magenta is for the bottom one
-			signals[1] = (byte)(Math.round(15*master.capVoltages[stageCount-1]/maxVoltage));
-			signals[2] = (byte)(Math.round(15*master.capVoltages[0]/maxVoltage));
+			byte signal1 = (byte)(Math.round(15*master.capVoltages[stageCount-1]/ MAX_VOLTAGE));
+			byte signal2 = (byte)(Math.round(15*master.capVoltages[0]/ MAX_VOLTAGE));
+			signals[1] = (byte) Math.max(signals[1], signal1);
+			signals[2] = (byte) Math.max(signals[2], signal2);
 		}
 	}
 
@@ -564,6 +634,8 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		rcTimeConst = 5D/stageCount;
 		timeFactor = Math.exp(-1/(20*rcTimeConst));
 		timeFactorBottom = Math.exp(-1 / (20 * rcTimeConst * 2 / 3));
+		collisionAabb = null;
+		renderAabb = null;
 	}
 
 	public int getStageCount() {
@@ -572,8 +644,12 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 
 	public Vec3d getMiddle() {
 		double middleY = pos.getY()+(stageCount)/2D;
-		Vec3i electrodXZ = MiscUtils.offset(pos, facing, mirrored, 1, 4, 0);
+		Vec3i electrodXZ = getBottomElectrode();
 		return new Vec3d(electrodXZ.getX()+.5, middleY, electrodXZ.getZ()+.5);
+	}
+
+	public BlockPos getBottomElectrode() {
+		return offset(pos, facing, mirrored, 1, 4, 0);
 	}
 
 	public enum FiringState {

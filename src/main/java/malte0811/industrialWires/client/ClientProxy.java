@@ -30,7 +30,6 @@ import malte0811.industrialWires.CommonProxy;
 import malte0811.industrialWires.IWConfig;
 import malte0811.industrialWires.IWPotions;
 import malte0811.industrialWires.IndustrialWires;
-import malte0811.industrialWires.blocks.IMetaEnum;
 import malte0811.industrialWires.blocks.controlpanel.BlockTypes_Panel;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanelCreator;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityRSPanelConn;
@@ -45,18 +44,13 @@ import malte0811.industrialWires.client.render.TileRenderJacobsLadder;
 import malte0811.industrialWires.client.render.TileRenderMarx;
 import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.items.ItemIC2Coil;
-import malte0811.industrialWires.items.ItemKey;
 import malte0811.industrialWires.items.ItemPanelComponent;
-import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.MovingSound;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.renderer.block.model.ModelBakery;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumHand;
@@ -66,16 +60,11 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.client.model.obj.OBJLoader;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.Arrays;
-import java.util.Locale;
 import java.util.Random;
 import java.util.WeakHashMap;
 
@@ -117,6 +106,9 @@ public class ClientProxy extends CommonProxy {
 				IndustrialWires.MODID + ":blocks/ic2_relay_glass"));
 
 		ConnLoader.baseModels.put("rs_panel_conn", new ResourceLocation("industrialwires:block/rs_panel_conn.obj"));
+
+		ConnLoader.baseModels.put("empty", new ResourceLocation("builtin/generated"));
+
 		OBJLoader.INSTANCE.addDomain(IndustrialWires.MODID);
 		ModelLoaderRegistry.registerLoader(new PanelModelLoader());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityJacobsLadder.class, new TileRenderJacobsLadder());
@@ -172,6 +164,11 @@ public class ClientProxy extends CommonProxy {
 			return ~0;
 		}, IndustrialWires.panelComponent);
 
+		int oldLength = Config.IEConfig.Tools.earDefenders_SoundBlacklist.length;
+		Config.IEConfig.Tools.earDefenders_SoundBlacklist =
+				Arrays.copyOf(Config.IEConfig.Tools.earDefenders_SoundBlacklist, oldLength+1);
+		Config.IEConfig.Tools.earDefenders_SoundBlacklist[oldLength] = TINNITUS_LOC.toString();
+
 		m.addEntry("industrialwires.wires", "industrialwires",
 				new ManualPages.CraftingMulti(m, "industrialwires.wires0", new ItemStack(IndustrialWires.ic2conn, 1, 0), new ItemStack(IndustrialWires.ic2conn, 1, 1), new ItemStack(IndustrialWires.ic2conn, 1, 2), new ItemStack(IndustrialWires.ic2conn, 1, 3),
 						new ItemStack(IndustrialWires.ic2conn, 1, 4), new ItemStack(IndustrialWires.ic2conn, 1, 5), new ItemStack(IndustrialWires.ic2conn, 1, 6), new ItemStack(IndustrialWires.ic2conn, 1, 7)),
@@ -224,52 +221,53 @@ public class ClientProxy extends CommonProxy {
 		);
 	}
 
-	private static ISound tinnitus;
+	private static final ResourceLocation TINNITUS_LOC = new ResourceLocation(IndustrialWires.MODID, "tinnitus");
+	private static ISound playingTinnitus = null;
 	@Override
 	public void startTinnitus() {
 		final Minecraft mc = Minecraft.getMinecraft();
-		if (tinnitus==null) {
-			tinnitus = new MovingSound(new SoundEvent(new ResourceLocation(IndustrialWires.MODID, "tinnitus")), SoundCategory.PLAYERS) {
-				@Override
-				public void update() {
-					if (mc.player.getActivePotionEffect(IWPotions.tinnitus)==null) {
-						donePlaying = true;
-					}
-				}
-
-				@Override
-				public float getVolume() {
-					return .25F;
-				}
-
-				@Override
-				public float getXPosF() {
-					return (float) mc.player.posX;
-				}
-
-				@Override
-				public float getYPosF() {
-					return (float) mc.player.posY;
-				}
-
-				@Override
-				public float getZPosF() {
-					return (float) mc.player.posZ;
-				}
-
-				@Override
-				public boolean canRepeat() {
-					return true;
-				}
-			};
-			int oldLength = Config.IEConfig.Tools.earDefenders_SoundBlacklist.length;
-			Config.IEConfig.Tools.earDefenders_SoundBlacklist =
-					Arrays.copyOf(Config.IEConfig.Tools.earDefenders_SoundBlacklist, oldLength+1);
-			Config.IEConfig.Tools.earDefenders_SoundBlacklist[oldLength] = tinnitus.getSoundLocation().toString();
+		if (playingTinnitus==null) {
+			playingTinnitus = getTinnitus();
+			mc.getSoundHandler().playSound(playingTinnitus);
 		}
-		if (!mc.getSoundHandler().isSoundPlaying(tinnitus)) {
-			mc.getSoundHandler().playSound(tinnitus);
-		}
+	}
+
+	private ISound getTinnitus() {
+		final Minecraft mc = Minecraft.getMinecraft();
+		return  new MovingSound(new SoundEvent(TINNITUS_LOC), SoundCategory.PLAYERS) {
+			@Override
+			public void update() {
+				if (mc.player.getActivePotionEffect(IWPotions.tinnitus)==null) {
+					donePlaying = true;
+					playingTinnitus = null;
+				}
+			}
+
+			@Override
+			public float getVolume() {
+				return .25F;
+			}
+
+			@Override
+			public float getXPosF() {
+				return (float) mc.player.posX;
+			}
+
+			@Override
+			public float getYPosF() {
+				return (float) mc.player.posY;
+			}
+
+			@Override
+			public float getZPosF() {
+				return (float) mc.player.posZ;
+			}
+
+			@Override
+			public boolean canRepeat() {
+				return true;
+			}
+		};
 	}
 
 	@Override

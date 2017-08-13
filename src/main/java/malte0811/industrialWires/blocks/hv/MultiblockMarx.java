@@ -27,8 +27,8 @@ import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler.Conn
 import blusunrize.immersiveengineering.common.IEContent;
 import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_Connector;
 import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0;
+import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration2;
 import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDevice0;
-import ic2.api.item.IC2Items;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.IWProperties;
 import net.minecraft.block.state.IBlockState;
@@ -68,7 +68,6 @@ public class MultiblockMarx implements IMultiblock {
 	@Override
 	public boolean createStructure(World world, BlockPos pos, EnumFacing side, EntityPlayer player) {
 		facing = side.rotateY();
-		ItemStack hvCableStack = IC2Items.getItem("cable", "type:iron,insulation:0");
 		boolean mirrored = false;
 		Predicate<BlockPos> hvCap = (local) -> {
 			IBlockState b = world.getBlockState(local);
@@ -85,9 +84,22 @@ public class MultiblockMarx implements IMultiblock {
 			ItemStack stack = new ItemStack(b.getBlock(), 1, b.getBlock().getMetaFromState(b));
 			return ApiUtils.compareToOreName(stack, "blockSteel");
 		};
-		Predicate<BlockPos> uninsHCCable = (local) -> {
+		BiPredicate<BlockPos, Boolean> wallmount = (local, up) -> {
 			IBlockState b = world.getBlockState(local);
-			return ItemStack.areItemStacksEqual(b.getBlock().getPickBlock(b, null, world, local, player), hvCableStack);
+			if (b.getBlock()==IEContent.blockMetalDecoration2) {
+				b = b.getBlock().getActualState(b, world, local);
+				if (b.getValue(IEContent.blockMetalDecoration2.property)== BlockTypes_MetalDecoration2.STEEL_WALLMOUNT) {
+					int int_4_wanted = up ? 0 : 1;
+					return b.getValue(IEProperties.INT_4)==int_4_wanted;
+				}
+			}
+			return false;
+		};
+		Predicate<BlockPos> steelFence = (local) -> {
+			IBlockState b = world.getBlockState(local);
+			b = b.getBlock().getActualState(b, world, local);
+			ItemStack stack = new ItemStack(b.getBlock(), 1, b.getBlock().getMetaFromState(b));
+			return ApiUtils.compareToOreName(stack, "fenceSteel");
 		};
 		Function<BlockPos, Byte> hvRelayWith = (local) -> {
 			IBlockState state = world.getBlockState(local);
@@ -148,8 +160,8 @@ public class MultiblockMarx implements IMultiblock {
 				}
 			}
 			//Ground discharge electrode
-			for (int i = 0;i<3;i++) {
-				if (!uninsHCCable.test(offset(pos, facing, mirrored, 0, i+2, 0))) {
+			for (int i = 0;i<4;i++) {
+				if (!steelFence.test(offset(pos, facing, mirrored, 0, i+1, 0))) {
 					continue mirrorLoop;
 				}
 			}
@@ -161,15 +173,21 @@ public class MultiblockMarx implements IMultiblock {
 			while (pos.getY()+stages<=255) {
 				boolean end = false;
 				byte other = -1;
-				for (int i = 0;i<2;i++) {
-					if (!hvCap.test(offset(pos, facing, mirrored, i, 0, stages))) {
+				for (int right = 0;right<2;right++) {
+					if (!hvCap.test(offset(pos, facing, mirrored, right, 0, stages))) {
 						continue mirrorLoop;
 					}
-					if (!uninsHCCable.test(offset(pos, facing, mirrored, i, 1, stages))) {
-						continue mirrorLoop;
+					if (!wallmount.test(offset(pos, facing, mirrored, right, 1, stages), right!=0)) {
+						if (right==0) {
+							if (stages!=0) {
+								continue mirrorLoop;
+							}
+						} else {
+							end = true;
+						}
 					}
-					byte here = hvRelayWith.apply(offset(pos, facing, mirrored, i, -1, stages));
-					if (i==1&&here!=other) {
+					byte here = hvRelayWith.apply(offset(pos, facing, mirrored, right, -1, stages));
+					if (right==1&&here!=other) {
 						continue mirrorLoop;
 					}
 					if (stages!=0&&(here&2)==0) {
@@ -193,8 +211,8 @@ public class MultiblockMarx implements IMultiblock {
 				}
 			}
 			// Top electrode
-			for (int i = 0;i<3;i++) {
-				if (!uninsHCCable.test(offset(pos, facing, mirrored, 1, i+2, stages-1))) {
+			for (int i = 0;i<4;i++) {
+				if (!steelFence.test(offset(pos, facing, mirrored, 1, i+1, stages-1))) {
 					continue mirrorLoop;
 				}
 			}
@@ -223,7 +241,7 @@ public class MultiblockMarx implements IMultiblock {
 					}
 				}
 				//conns
-				for (int i = 0;i<2;i++) {
+				for (int i = 0; i < 2; i++) {
 					set(world, offset(pos, facing, mirrored, i, -3, 0), connModel, stages, pos);
 				}
 				//bottom electrode
@@ -253,9 +271,9 @@ public class MultiblockMarx implements IMultiblock {
 		TileEntity te = world.getTileEntity(p);
 		if (te instanceof TileEntityMarx) {
 			TileEntityMarx marx = (TileEntityMarx) te;
-			marx.setStageCount(stages);
 			marx.offset = p.subtract(origin);
 			marx.formed = true;
+			marx.setStageCount(stages);
 			marx.markDirty();
 		}
 	}

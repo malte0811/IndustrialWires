@@ -18,7 +18,9 @@
 
 package malte0811.industrialWires.hv;
 
+import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.api.crafting.IngredientStack;
+import malte0811.industrialWires.IndustrialWires;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -35,16 +37,16 @@ import java.util.Random;
 public class MarxOreHandler {
 	private static final Map<String, Double> oreEnergies = new HashMap<>();
 	private static final Map<String, OreInfo> defaultOreData = new HashMap<>();
-	private static double defaultEnergy = 75_000;
+	private static double defaultEnergy = 100_000;
 
 	private static void init() {
 		// Vanilla ores
 		defaultOreData.put("oreIron", new OreInfo(.5, 5, "dustIron", "nuggetIron"));
 		defaultOreData.put("oreGold", new OreInfo(1, 5, "dustGold", "nuggetGold"));
-		defaultOreData.put("oreDiamond", new OreInfo(3, 6, "gemDiamond"));
-		defaultOreData.put("oreEmerald", new OreInfo(3, 6, "gemEmerald"));
+		defaultOreData.put("oreDiamond", new OreInfo(2, 5, "gemDiamond"));
+		defaultOreData.put("oreEmerald", new OreInfo(3, 5, "gemEmerald"));
 		defaultOreData.put("oreLapis", new OreInfo(.75, 10, "gemLapis"));
-		defaultOreData.put("oreCoal", new OreInfo(.75, 10, Items.COAL, 0));
+		defaultOreData.put("oreCoal", new OreInfo(.75, 6, Items.COAL, 0));
 		defaultOreData.put("oreRedstone", new OreInfo(1, 10, "dustRedstone"));
 		defaultOreData.put("oreQuartz", new OreInfo(1, 5, "gemQuartz"));
 		// IE ores
@@ -78,7 +80,7 @@ public class MarxOreHandler {
 			}
 			//TODO auto-add other ores?
 			if (energy > 0) {
-				double sigma = defaultEnergy * energy / 4;
+				double sigma = defaultEnergy * energy / 20;
 				double mu = defaultEnergy * energy;
 				double avg = new Random().nextGaussian();
 				avg *= sigma;
@@ -89,34 +91,50 @@ public class MarxOreHandler {
 		}
 	}
 
-	public static ItemStack getYield(ItemStack in, double energy) {
+	public static ItemStack[] getYield(ItemStack in, double energy) {
+		if (oreEnergies.isEmpty()) {
+			IndustrialWires.logger.error("The energy-ore map for Marx generators wasn't loaded correctly. The energy values will be reset.");
+			load(new NBTTagCompound());
+		}
 		int[] ores = OreDictionary.getOreIDs(in);
 		for (int id : ores) {
 			String name = OreDictionary.getOreName(id);
-			if (oreEnergies.containsKey(name) && energy <= .75 * oreEnergies.get(name)) {
+			if (oreEnergies.containsKey(name) && energy >= .75 * oreEnergies.get(name)) {
 				OreInfo info = defaultOreData.get(name);
 				double idealE = oreEnergies.get(name);
-				double ln = Math.log(energy);
-				double sigma = idealE / 6;
-				double dist = getNormalizedNormalDist(ln, sigma, idealE);
-				int yield = (int) Math.round(dist * info.maxYield);
-				//TODO
+				double sigma = idealE / 18;
+				double dist = getNormalizedNormalDist(energy, sigma, idealE);
+				double out = dist * info.maxYield;
+				int yield = (int) Math.floor(out);
+				out -= yield;
+				int yieldNuggets = (int) Math.round(out*9);
+				if (yieldNuggets>=9||(info.outputSmall==null&&yieldNuggets>=5)) {
+					yield++;
+					yieldNuggets = 0;
+				}
+				if (yield>0&&yieldNuggets>0&&info.outputSmall!=null) {
+					return new ItemStack[] {
+							ApiUtils.copyStackWithAmount(info.output.getExampleStack(), yield),
+							ApiUtils.copyStackWithAmount(info.outputSmall.getExampleStack(), yieldNuggets)
+					};
+				} else if (yield>0) {
+					return new ItemStack[] {
+							ApiUtils.copyStackWithAmount(info.output.getExampleStack(), yield)
+					};
+				} else if (yieldNuggets>0&&info.outputSmall!=null) {
+					return new ItemStack[] {
+							ApiUtils.copyStackWithAmount(info.outputSmall.getExampleStack(), yieldNuggets)
+					};
+				}
 			}
 		}
-		return ItemStack.EMPTY;
+		return new ItemStack[0];
 	}
 
 	private static double getNormalizedNormalDist(double x, double sigma, double mu) {
 		return Math.exp(-(x - mu) * (x - mu) / (2 * sigma * sigma));
 	}
-/*
 
-		for (String ore : nbt.getKeySet()) {
-			if (defaultOreData.containsKey(ore)) {
-				oreEnergies.put(ore, nbt.getDouble(ore));
-			}
-		}
- */
 	public static NBTBase save() {
 		NBTTagCompound ret = new NBTTagCompound();
 		if (oreEnergies.isEmpty()) {

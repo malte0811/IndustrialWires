@@ -15,23 +15,6 @@
 				
 			}
 		},
-		"marx_type": {
-					"bottom": {
-						"model": "industrialwires:marx_bottom.obj"
-					},
-					"stage": {
-						"model": "industrialwires:marx_stage.obj"
-					},
-					"top": {
-						"model": "industrialwires:marx_top.obj"
-					},
-					"no_model": {
-						"model": "builtin/generated"
-					},
-					"connector": {
-						"model": "immersiveengineering:smartmodel/conn_empty"
-					}
-				},
 		"facing": {
 			"north": {
 				"transform": {
@@ -60,6 +43,23 @@
 						"y": -90
 					}
 				}
+			}
+		},
+		"marx_type": {
+			"bottom": {
+				"model": "industrialwires:marx_bottom.obj"
+			},
+			"stage": {
+				"model": "industrialwires:marx_stage.obj"
+			},
+			"top": {
+				"model": "industrialwires:marx_top.obj"
+			},
+			"no_model": {
+				"model": "builtin/generated"
+			},
+			"connector": {
+				"model": "immersiveengineering:smartmodel/conn_empty"
 			}
 		},
 		"boolean0": //Mirror

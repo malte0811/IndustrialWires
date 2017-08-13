@@ -18,10 +18,17 @@
 
 package malte0811.industrialWires.blocks;
 
+import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
@@ -33,11 +40,16 @@ public abstract class BlockIWMultiblock extends BlockIWBase {
 	@Override
 	public void breakBlock(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
 		TileEntity te = world.getTileEntity(pos);
-		if(te instanceof TileEntityIWMultiblock)
+		if(te instanceof TileEntityIWMultiblock) {
 			((TileEntityIWMultiblock)te).disassemble();
+		}
 		super.breakBlock(world, pos, state);
 	}
 
+	@Override
+	public void getDrops(@Nonnull NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, @Nonnull IBlockState state, int fortune) {
+		//NOP
+	}
 
 	@Override
 	public boolean isTopSolid(IBlockState state) {
@@ -57,5 +69,15 @@ public abstract class BlockIWMultiblock extends BlockIWBase {
 	@Override
 	public boolean isFullCube(IBlockState state) {
 		return false;
+	}
+
+	@Nonnull
+	@Override
+	public ItemStack getPickBlock(@Nonnull IBlockState state, RayTraceResult target, @Nonnull World world, @Nonnull BlockPos pos, EntityPlayer player) {
+		TileEntity te = world.getTileEntity(pos);
+		if (te instanceof TileEntityIWMultiblock) {
+			return MiscUtils.getItemStack(((TileEntityIWMultiblock) te).getOriginalBlock(), world, pos);
+		}
+		return ItemStack.EMPTY;
 	}
 }

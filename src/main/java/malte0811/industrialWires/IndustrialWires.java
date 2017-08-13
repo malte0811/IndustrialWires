@@ -40,6 +40,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.potion.Potion;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -162,6 +163,7 @@ public class IndustrialWires {
 		packetHandler.registerMessage(MessageItemSync.HandlerServer.class, MessageItemSync.class, 3, Side.SERVER);
 
 		NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
+		IWPotions.init();
 	}
 
 	@EventHandler

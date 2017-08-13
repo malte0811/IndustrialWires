@@ -20,6 +20,8 @@ package malte0811.industrialWires.blocks;
 
 import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -65,31 +67,33 @@ public abstract class TileEntityIWMultiblock extends TileEntityIWBase {
 		T master = master(here);
 		return master!=null?master:def;
 	}
-	public void disassemble()
-	{
-		if(formed && !world.isRemote)
-		{
+	public void disassemble() {
+		if (formed && !world.isRemote) {
 			BlockPos startPos = getOrigin();
 			BlockPos masterPos = getPos().subtract(offset);
 			long time = world.getTotalWorldTime();
 			Vec3i size = getSize();
-			for(int up=0;up<size.getX();up++)
-				for(int forward=0;forward<size.getY();forward++)
-					for(int right=0;right<size.getZ();right++)
-					{
+			for (int up = 0; up < size.getX(); up++) {
+				for (int forward = 0; forward < size.getY(); forward++) {
+					for (int right = 0; right < size.getZ(); right++) {
 						BlockPos pos = MiscUtils.offset(startPos, facing, mirrored, right, forward, up);
 						TileEntity te = world.getTileEntity(pos);
-						if(te instanceof TileEntityIWMultiblock)
-						{
+						if (te instanceof TileEntityIWMultiblock) {
 							TileEntityIWMultiblock part = (TileEntityIWMultiblock) te;
 							Vec3i diff = pos.subtract(masterPos);
-							if (part.offset.equals(diff)&&time!=part.onlyLocalDissassembly)
-							{
+							if (part.offset.equals(diff) && time != part.onlyLocalDissassembly) {
 								part.formed = false;
-								part.getOriginalBlockPlacer().accept(world, pos);
+								if (!pos.equals(this.pos)) {
+									part.getOriginalBlockPlacer().accept(world, pos);
+								} else if (part.getOriginalBlock()!=null) {
+									ItemStack drop = MiscUtils.getItemStack(part.getOriginalBlock(), world, pos);
+									world.spawnEntity(new EntityItem(world, pos.getX()+.5,pos.getY()+.5,pos.getZ()+.5, drop));
+								}
 							}
 						}
 					}
+				}
+			}
 		}
 	}
 
