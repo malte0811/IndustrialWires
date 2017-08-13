@@ -57,6 +57,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 	public boolean firstTick = true;
 	// non-rendered properties
 	private Set<TileEntityRSPanelConn> rsPorts = new HashSet<>();
+	private boolean renderUpdate;
 
 	{
 		for (int i = 2; i < 14; i++) {
@@ -99,6 +100,13 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 					}
 				}
 				firstTick = false;
+			}
+			if (renderUpdate) {
+				IBlockState state = worldObj.getBlockState(pos);
+				worldObj.notifyBlockUpdate(pos, state, state, 3);
+				worldObj.addBlockEvent(pos, state.getBlock(), 255, 0);
+				markDirty();
+				renderUpdate = false;
 			}
 		}
 	}
@@ -278,9 +286,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 	}
 
 	public void triggerRenderUpdate() {
-		IBlockState state = worldObj.getBlockState(pos);
-		worldObj.notifyBlockUpdate(pos, state, state, 3);
-		worldObj.addBlockEvent(pos, state.getBlock(), 255, 0);
+		renderUpdate = true;
 	}
 
 	public void registerRS(TileEntityRSPanelConn te) {
