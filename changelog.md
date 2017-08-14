@@ -1,3 +1,7 @@
+#####Version 1.4-17
+ - Fixed a crash with SpongeForge, chunk loading issues without
+ - Fixed some components resetting on chunk unload
+
 #####Version 1.4-16
  - Backported a lot of fixes from 1.11 and 1.12
 
