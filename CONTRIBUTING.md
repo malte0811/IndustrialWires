@@ -18,7 +18,7 @@ Some mods are not officially supported by IndustrialWires. They will probably wo
 
 - **Fastcraft**: same as Optifine.
 
-- **(K)Cauldron** and similar server software: While the source code of some of these is available on GitHub or similar platforms, it would require a lot of extra work to test everything with every server software.
+- **Sponge(Forge)** and similar server software: While the source code of some of these is available on GitHub or similar platforms, it would require a lot of extra work to test everything with every server software.
 
 - **Any version of IndustrialCraft2 that is not made by the official IC2 team** (more specifically, any IC2 version not available for download [here](http://jenkins.ic2.player.to/) or [here](https://minecraft.curseforge.com/projects/industrial-craft))
 

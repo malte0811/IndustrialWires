@@ -1,3 +1,8 @@
+#####Version 1.5-20 (UNRELEASED)
+ - Fixed GUI background and item tooltips
+ - Fixed some components resetting when the chunk is unloaded
+ - Chunks with control panels properly unload now
+
 #####Version 1.5-15
  - Components can be placed in the world now to use the as conventional levers/etc.
  - Added documentation on the key ring. It also shows all attached keys on the tooltip now
