@@ -48,7 +48,8 @@ import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 
-@Mod(modid = IndustrialWires.MODID, version = IndustrialWires.VERSION, dependencies = "required-after:immersiveengineering@[0.10-58,);required-after:ic2")
+@Mod(modid = IndustrialWires.MODID, version = IndustrialWires.VERSION, dependencies = "required-after:immersiveengineering@[0.10-58,);required-after:ic2",
+		certificateFingerprint = "7e11c175d1e24007afec7498a1616bef0000027d")
 public class IndustrialWires {
 	public static final String MODID = "industrialwires";
 	public static final String VERSION = "${version}";

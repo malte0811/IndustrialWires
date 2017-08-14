@@ -1,5 +1,5 @@
 def mainVersion = "1.5"
-def buildNumber = "17"
+def buildNumber = "19"
 
 // For those who want the bleeding edge
 buildscript {
@@ -59,6 +59,23 @@ jar {
         
     }
 }
+
+task signMain(type: SignJar) {
+    onlyIf {
+        project.hasProperty('keyStore')
+    }
+    dependsOn reobfJar
+    if (project.hasProperty('keyStore')) {
+        keyStore = project.keyStore
+        alias = project.storeAlias
+        storePass = project.storePass
+        keyPass = project.storePass
+        inputFile = jar.archivePath
+        outputFile = jar.archivePath
+    }
+}
+
+build.dependsOn signMain
 
 processResources
 {

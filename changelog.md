@@ -1,3 +1,7 @@
+#####Version 1.4-19
+ - Fixed a crash with SpongeForge, chunk loading issues without
+ - Fixed some components resetting on chunk unload 
+
 #####Version 1.5-17
  - Backported some fixes from 1.12
 
