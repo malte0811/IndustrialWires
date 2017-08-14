@@ -30,7 +30,7 @@ import javax.annotation.Nonnull;
 
 @Mod.EventBusSubscriber
 public class IWSaveData extends WorldSavedData {
-	private final static String MARX_ORES = "marxOres";
+	private final static String MARX_MOD = "marxOreModifier";
 	public static IWSaveData INSTANCE = new IWSaveData();
 
 	public IWSaveData() {
@@ -43,15 +43,17 @@ public class IWSaveData extends WorldSavedData {
 
 	@Override
 	public void readFromNBT(@Nonnull NBTTagCompound nbt) {
-		NBTTagCompound ores = nbt.getCompoundTag(MARX_ORES);
-		MarxOreHandler.reset();
-		MarxOreHandler.load(ores);
+		if (nbt.hasKey(MARX_MOD)) {
+			MarxOreHandler.modifier = nbt.getDouble(MARX_MOD);
+		} else {
+			MarxOreHandler.resetModifier();
+		}
 	}
 
 	@Nonnull
 	@Override
 	public NBTTagCompound writeToNBT(@Nonnull NBTTagCompound compound) {
-		compound.setTag(MARX_ORES, MarxOreHandler.save());
+		compound.setDouble(MARX_MOD, MarxOreHandler.modifier);
 		return compound;
 	}
 
@@ -62,8 +64,7 @@ public class IWSaveData extends WorldSavedData {
 			INSTANCE = (IWSaveData) w.loadData(IWSaveData.class, IndustrialWires.MODID);
 			if (INSTANCE==null) {
 				INSTANCE = new IWSaveData();
-				MarxOreHandler.reset();
-				MarxOreHandler.load(new NBTTagCompound());
+				MarxOreHandler.resetModifier();
 				w.setData(IndustrialWires.MODID, INSTANCE);
 				INSTANCE.setDirty(true);
 			}

@@ -67,6 +67,9 @@ public class MultiblockMarx implements IMultiblock {
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean createStructure(World world, BlockPos pos, EnumFacing side, EntityPlayer player) {
+		if (side.getAxis().isVertical()) {
+			return false;
+		}
 		facing = side.rotateY();
 		boolean mirrored = false;
 		Predicate<BlockPos> hvCap = (local) -> {

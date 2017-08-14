@@ -27,13 +27,11 @@ import blusunrize.immersiveengineering.api.energy.wires.redstone.IRedstoneConnec
 import blusunrize.immersiveengineering.api.energy.wires.redstone.RedstoneWireNetwork;
 import blusunrize.immersiveengineering.common.IEContent;
 import blusunrize.immersiveengineering.common.blocks.BlockTypes_MetalsIE;
-import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDirectionalTile;
 import blusunrize.immersiveengineering.common.blocks.metal.*;
 import blusunrize.immersiveengineering.common.blocks.wooden.TileEntityWallmount;
 import blusunrize.immersiveengineering.common.util.Utils;
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
-import ic2.api.item.IC2Items;
 import malte0811.industrialWires.*;
 import malte0811.industrialWires.blocks.IBlockBoundsIW;
 import malte0811.industrialWires.blocks.ISyncReceiver;
@@ -59,14 +57,19 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.BiConsumer;
 
 import static malte0811.industrialWires.util.MiscUtils.getOffset;
@@ -82,7 +85,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	private double rcTimeConst;
 	private double timeFactor;
 	private double timeFactorBottom;
-	private final static double CAPACITANCE = 0.00_000_5;
+	private final static double CAPACITANCE = 0.000_001_6;
 	private final static double MAX_VOLTAGE = 250_000;
 	private boolean allowSlowDischarge = true;
 
@@ -212,8 +215,8 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 			if (capVoltages==null||capVoltages.length!=stageCount) {
 				capVoltages = new double[stageCount];
 			}
-			double oldTopVoltage = capVoltages[stageCount-1];
-			double oldBottomVoltage = capVoltages[0];
+			final double oldTopVoltage = capVoltages[stageCount-1];
+			final double oldBottomVoltage = capVoltages[0];
 			for (int i = stageCount-1;i>0;i--) {
 				double oldVoltage = capVoltages[i];
 				double u0 = capVoltages[i-1];
@@ -230,13 +233,12 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 				u0 = capVoltages[0];
 			}
 			if (allowSlowDischarge || u0 > capVoltages[0]) {
-				if (u0<0) {
-					IndustrialWires.logger.info("VOLTAGE: "+u0+", "+voltageControl);
-				}
 				double tmp = u0 - (u0 - oldBottomVoltage) * timeFactorBottom;
 				double energyUsed = .5*(tmp * tmp - oldBottomVoltage * oldBottomVoltage)*CAPACITANCE;
 				if (energyUsed > 0 && storage.extractEU(energyUsed, false)==energyUsed) {// energyUsed can be negative when discharging the caps
 					storage.extractEU(energyUsed, true);
+					capVoltages[0] = tmp;
+				} else if (energyUsed<=0) {
 					capVoltages[0] = tmp;
 				}
 				if (Math.round(15*oldBottomVoltage/MAX_VOLTAGE)!=Math.round(15*capVoltages[0]/MAX_VOLTAGE)) {
@@ -316,13 +318,13 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	public void handleEntities(double energyStored) {
 		Vec3d v0 = getMiddle();
 		AxisAlignedBB aabb = new AxisAlignedBB(v0, v0);
-		aabb = aabb.expand(0, stageCount/2-1,0);
+		aabb = aabb.grow(0, stageCount/2-1,0);
 		final double sqrtStages = Math.sqrt(stageCount);
 		aabb = aabb.grow(5*sqrtStages);
 		List<Entity> fools = world.getEntitiesWithinAABB(Entity.class, aabb);
 		double energyNormed = getNormedEnergy(energyStored);
-		double damageDistSqu = energyNormed * sqrtStages;
-		double tinnitusDistSqu = 5 * energyNormed * sqrtStages;
+		double damageDistSqu = energyNormed * stageCount;
+		double tinnitusDistSqu = 5 * energyNormed * stageCount;
 		damageDistSqu *= damageDistSqu;
 		tinnitusDistSqu *= tinnitusDistSqu;
 		if (IWConfig.HVStuff.marxSoundDamage == 2) {

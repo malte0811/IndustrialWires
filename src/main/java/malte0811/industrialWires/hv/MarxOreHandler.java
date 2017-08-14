@@ -20,111 +20,84 @@ package malte0811.industrialWires.hv;
 
 import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.api.crafting.IngredientStack;
+import blusunrize.immersiveengineering.common.util.Utils;
 import malte0811.industrialWires.IndustrialWires;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 public class MarxOreHandler {
-	private static final Map<String, Double> oreEnergies = new HashMap<>();
-	private static final Map<String, OreInfo> defaultOreData = new HashMap<>();
+	private static final Map<String, OreInfo> oreData = new HashMap<>();
 	private static double defaultEnergy = 100_000;
+	public static double modifier;
 
 	private static void init() {
 		// Vanilla ores
-		defaultOreData.put("oreIron", new OreInfo(.5, 5, "dustIron", "nuggetIron"));
-		defaultOreData.put("oreGold", new OreInfo(1, 5, "dustGold", "nuggetGold"));
-		defaultOreData.put("oreDiamond", new OreInfo(2, 5, "gemDiamond"));
-		defaultOreData.put("oreEmerald", new OreInfo(3, 5, "gemEmerald"));
-		defaultOreData.put("oreLapis", new OreInfo(.75, 10, "gemLapis"));
-		defaultOreData.put("oreCoal", new OreInfo(.75, 6, Items.COAL, 0));
-		defaultOreData.put("oreRedstone", new OreInfo(1, 10, "dustRedstone"));
-		defaultOreData.put("oreQuartz", new OreInfo(1, 5, "gemQuartz"));
+		oreData.put("oreIron", new OreInfo(.5, 4, "dustIron", "nuggetIron"));
+		oreData.put("oreGold", new OreInfo(1, 4, "dustGold", "nuggetGold"));
+		oreData.put("oreDiamond", new OreInfo(2, 4, "gemDiamond"));
+		oreData.put("oreEmerald", new OreInfo(3, 4, "gemEmerald"));
+		oreData.put("oreLapis", new OreInfo(.75, 10, "gemLapis"));
+		oreData.put("oreCoal", new OreInfo(.75, 8, Items.COAL, 0));
+		oreData.put("oreRedstone", new OreInfo(1, 12, "dustRedstone"));
+		oreData.put("oreQuartz", new OreInfo(1, 6, "gemQuartz"));
 		// IE ores
-		String[] ores = {"Copper", "Aluminium"/*TODO um or ium?*/, "Lead", "Silver", "Nickel"};
+		String[] ores = {"Copper", "Aluminum", "Lead", "Silver", "Nickel", "Tin"};
 		for (String ore : ores) {
-			defaultOreData.put("ore" + ore, new OreInfo(.75, 5, "ingot" + ore, "nugget" + ore));
+			oreData.put("ore" + ore, new OreInfo(.75, 4, "ingot" + ore, "nugget" + ore));
 		}
-		// TODO Uranium: IC2 output since IE has no useful ones
+		oreData.put("oreUranium", new OreInfo(1.25, 4, "crushedUranium", "nuggetUranium"));
 	}
 
-	public static void reset() {
-		oreEnergies.clear();
-	}
-
-	public static void load(NBTTagCompound nbt) {
-		if (!defaultOreData.containsKey("oreIron")) {
-			init();
-		}
-		for (String ore : nbt.getKeySet()) {
-			if (defaultOreData.containsKey(ore)) {
-				oreEnergies.put(ore, nbt.getDouble(ore));
-			}
-		}
-		for (String ore : OreDictionary.getOreNames()) {
-			if (oreEnergies.containsKey(ore)) {
-				continue;
-			}
-			double energy = 0;
-			if (defaultOreData.containsKey(ore)) {
-				energy = defaultOreData.get(ore).avgEnergy;
-			}
-			//TODO auto-add other ores?
-			if (energy > 0) {
-				double sigma = defaultEnergy * energy / 20;
-				double mu = defaultEnergy * energy;
-				double avg = new Random().nextGaussian();
-				avg *= sigma;
-				avg = MathHelper.clamp(avg, -sigma, sigma);
-				avg += mu;
-				oreEnergies.put(ore, avg);
-			}
-		}
+	public static void resetModifier() {
+		modifier = MathHelper.clamp(Utils.RAND.nextGaussian()*.1+1, .9, 1.1);
 	}
 
 	public static ItemStack[] getYield(ItemStack in, double energy) {
-		if (oreEnergies.isEmpty()) {
-			IndustrialWires.logger.error("The energy-ore map for Marx generators wasn't loaded correctly. The energy values will be reset.");
-			load(new NBTTagCompound());
+		if (oreData.isEmpty()) {
+			init();
+		}
+		if (modifier<.89||modifier>1.11) {
+			IndustrialWires.logger.error("The energy-modifier for Marx generators wasn't loaded correctly. It will be reset.");
+			resetModifier();
 		}
 		int[] ores = OreDictionary.getOreIDs(in);
 		for (int id : ores) {
 			String name = OreDictionary.getOreName(id);
-			if (oreEnergies.containsKey(name) && energy >= .75 * oreEnergies.get(name)) {
-				OreInfo info = defaultOreData.get(name);
-				double idealE = oreEnergies.get(name);
-				double sigma = idealE / 18;
-				double dist = getNormalizedNormalDist(energy, sigma, idealE);
-				double out = dist * info.maxYield;
-				int yield = (int) Math.floor(out);
-				out -= yield;
-				int yieldNuggets = (int) Math.round(out*9);
-				if (yieldNuggets>=9||(info.outputSmall==null&&yieldNuggets>=5)) {
-					yield++;
-					yieldNuggets = 0;
-				}
-				if (yield>0&&yieldNuggets>0&&info.outputSmall!=null) {
-					return new ItemStack[] {
-							ApiUtils.copyStackWithAmount(info.output.getExampleStack(), yield),
-							ApiUtils.copyStackWithAmount(info.outputSmall.getExampleStack(), yieldNuggets)
-					};
-				} else if (yield>0) {
-					return new ItemStack[] {
-							ApiUtils.copyStackWithAmount(info.output.getExampleStack(), yield)
-					};
-				} else if (yieldNuggets>0&&info.outputSmall!=null) {
-					return new ItemStack[] {
-							ApiUtils.copyStackWithAmount(info.outputSmall.getExampleStack(), yieldNuggets)
-					};
+			if (oreData.containsKey(name)) {
+				OreInfo info = oreData.get(name);
+				double idealE = modifier * info.avgEnergy * defaultEnergy;
+				if (energy >= .75 * idealE) {
+					double sigma = idealE / 9;
+					double dist = getNormalizedNormalDist(energy, sigma, idealE);
+					double out = dist * info.maxYield;
+					int yield = (int) Math.floor(out);
+					out -= yield;
+					int yieldNuggets = (int) Math.round(out * 9);
+					if (yieldNuggets >= 9 || (info.outputSmall == null && yieldNuggets >= 5)) {
+						yield++;
+						yieldNuggets = 0;
+					}
+					if (yield > 0 && yieldNuggets > 0 && info.outputSmall != null) {
+						return new ItemStack[]{
+								ApiUtils.copyStackWithAmount(info.output.getExampleStack(), yield),
+								ApiUtils.copyStackWithAmount(info.outputSmall.getExampleStack(), yieldNuggets)
+						};
+					} else if (yield > 0) {
+						return new ItemStack[]{
+								ApiUtils.copyStackWithAmount(info.output.getExampleStack(), yield)
+						};
+					} else if (yieldNuggets > 0 && info.outputSmall != null) {
+						return new ItemStack[]{
+								ApiUtils.copyStackWithAmount(info.outputSmall.getExampleStack(), yieldNuggets)
+						};
+					}
 				}
 			}
 		}
@@ -133,17 +106,6 @@ public class MarxOreHandler {
 
 	private static double getNormalizedNormalDist(double x, double sigma, double mu) {
 		return Math.exp(-(x - mu) * (x - mu) / (2 * sigma * sigma));
-	}
-
-	public static NBTBase save() {
-		NBTTagCompound ret = new NBTTagCompound();
-		if (oreEnergies.isEmpty()) {
-			load(new NBTTagCompound());
-		}
-		for (String name:oreEnergies.keySet()) {
-			ret.setDouble(name, oreEnergies.get(name));
-		}
-		return ret;
 	}
 
 	public static class OreInfo {
