@@ -30,7 +30,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 minecraft {
-    version = "14.22.0.2453"
+    version = "14.21.1.2420"
     runDir = "run"
 
     replace '${version}', project.version
@@ -43,14 +43,18 @@ repositories {
         url 'http://maven.ic2.player.to/'
     }
     maven {
-    	name 'jared maven'
-    	url 'http://blamejared.com/maven'
+        name 'jared maven'
+        url 'http://blamejared.com/maven'
+    }
+    maven { // Albedo Lights
+        url 'https://repo.elytradev.com/'
     }
 }
 
 dependencies {
     compile "net.industrial-craft:industrialcraft-2:2.8.+"
     deobfCompile "blusunrize:ImmersiveEngineering:0.12-+:deobf"
+    deobfCompile 'elucent:albedo:2.0-SNAPSHOT'
 }
 
 jar {

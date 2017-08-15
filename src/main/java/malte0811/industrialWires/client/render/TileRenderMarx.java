@@ -18,9 +18,9 @@
 
 package malte0811.industrialWires.client.render;
 
-import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import malte0811.industrialWires.blocks.IWProperties;
 import malte0811.industrialWires.blocks.hv.TileEntityMarx;
+import malte0811.industrialWires.blocks.hv.TileEntityMarx.Discharge;
 import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -29,44 +29,52 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.vector.Vector3f;
+
+import static malte0811.industrialWires.blocks.hv.TileEntityMarx.FiringState.FIRE;
 
 public class TileRenderMarx extends TileEntitySpecialRenderer<TileEntityMarx> {
 	@Override
 	public void render(TileEntityMarx te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
 		final boolean debug = false;
 		//noinspection ConstantConditions,PointlessBooleanExpression
-		if (te.type== IWProperties.MarxType.BOTTOM&&(debug||te.state== TileEntityMarx.FiringState.FIRE)) {
-			prepare(x, y, z, te);
+		if (te.type == IWProperties.MarxType.BOTTOM && (debug || te.state == FIRE)) {
 			Tessellator tes = Tessellator.getInstance();
 			BufferBuilder vb = tes.getBuffer();
-
-			drawDischarge(te.dischargeData, vb, tes);
+			prepare(x, y, z, te);
+			if (te.dischargeData.energy>0) {
+				drawDischarge(te.dischargeData, vb, tes);
+			}
 			GlStateManager.popMatrix();
 			GlStateManager.pushMatrix();
 			Vec3i offset = MiscUtils.offset(BlockPos.ORIGIN, te.facing, te.mirrored, 1, 1, 0);
-			GlStateManager.translate(x+offset.getX(), y+offset.getY()+.75, z+offset.getZ());
+			GlStateManager.translate(x + offset.getX(), y + offset.getY() + .75, z + offset.getZ());
 			Vec3i facing = te.facing.getDirectionVec();
 			final float pos = .6875F;
-			GlStateManager.translate(-facing.getX()*pos, 0, -facing.getZ()*pos);
+			GlStateManager.translate(-facing.getX() * pos, 0, -facing.getZ() * pos);
 			//draw firing spark gaps
-			for (int i = 0;i<te.getStageCount()-1;i++) {
-				GlStateManager.pushMatrix();
-				GlStateManager.translate(0, i, 0);
-				GlStateManager.rotate(-45, facing.getX(), facing.getY(), facing.getZ());
-				GlStateManager.rotate(-Minecraft.getMinecraft().player.rotationYaw+180, 0, 1, 0);
-				vb.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-				drawDischargeSection(new Vector3f(0, -.2F, 0), new Vector3f(0, .2F, 0), .25F, vb);
-				tes.draw();
-				GlStateManager.popMatrix();
+			for (int i = 0; i < te.getStageCount() - 1; i++) {
+				renderGap(i, facing, vb, tes);
 			}
 			cleanUp();
 			te.state = TileEntityMarx.FiringState.CHARGING;
 		}
 	}
+
+	private void renderGap(int i, Vec3i facing, BufferBuilder vb, Tessellator tes) {
+		GlStateManager.pushMatrix();
+		GlStateManager.translate(0, i, 0);
+		GlStateManager.rotate(-45, facing.getX(), facing.getY(), facing.getZ());
+		//TODO fix
+		GlStateManager.rotate(-Minecraft.getMinecraft().player.rotationYaw + 180, 0, 1, 0);
+		vb.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+		drawDischargeSection(new Vec3d(0, -.2F, 0), new Vec3d(0, .2F, 0), .25F, vb);
+		tes.draw();
+		GlStateManager.popMatrix();
+	}
+
 	private void prepare(double x, double y, double z, TileEntityMarx te) {
 		setLightmapDisabled(true);
 		GlStateManager.pushMatrix();
@@ -99,77 +107,17 @@ public class TileRenderMarx extends TileEntitySpecialRenderer<TileEntityMarx> {
 			tes.draw();
 		}
 	}
-	private void drawDischargeSection(Vector3f start, Vector3f end, float diameter, BufferBuilder vb) {
+	private void drawDischargeSection(Vec3d start, Vec3d end, float diameter, BufferBuilder vb) {
 		drawPart(start, end, diameter/3, diameter/3, WHITE_TRANSPARENT, WHITE, vb);
 		drawPart(start, end, 0, diameter/3, WHITE, WHITE, vb);
 		drawPart(start, end, -diameter/3, diameter/3, WHITE, WHITE_TRANSPARENT, vb);
 	}
-	private void drawPart(Vector3f start, Vector3f end, float offset, float width, float[] color1, float[] color2, BufferBuilder vb) {
+	private void drawPart(Vec3d start, Vec3d end, float offset, float width, float[] color1, float[] color2, BufferBuilder vb) {
 		vb.setTranslation(-offset-width/2, 0, 0);
 		vb.pos(start.x, start.y, start.z).color(color1[0], color1[1], color1[2], color1[3]).endVertex();
 		vb.pos(start.x+width, start.y, start.z).color(color2[0], color2[1], color2[2], color2[3]).endVertex();
 		vb.pos(end.x+width, end.y, end.z).color(color2[0], color2[1], color2[2], color2[3]).endVertex();
 		vb.pos(end.x, end.y, end.z).color(color1[0], color1[1], color1[2], color1[3]).endVertex();
 		vb.setTranslation(0, 0, 0);
-	}
-	public static final class Discharge {
-		public float energy;
-		public Vector3f[] vertices;
-		public float diameter = .25F;
-		public final int stageCount;
-		public Discharge(int stages) {
-			stageCount = stages;
-			int count = 1;
-			while (count<stageCount) {
-				count <<= 1;
-			}
-			count = 8;
-			vertices = new Vector3f[2*count];
-			vertices[0] = new Vector3f(0, -.5F, 0);
-			for (int i = 1;i<vertices.length;i++) {
-				vertices[i] = new Vector3f();
-			}
-			vertices[vertices.length-1] = new Vector3f(0, stageCount-1.9375F, 0);
-
-		}
-
-		// Meant to be const
-		private final Vector3f up = new Vector3f(0, 1, 0);
-		private final Vector3f side = new Vector3f(0, 0, 1);
-		//used for calculation buffering
-		private final Vector3f diff = new Vector3f();
-		private final Vector3f center = new Vector3f();
-		private final Vector3f v0 = new Vector3f();
-		private final Matrix4 transform = new Matrix4();
-		/**
-		 * @param min The first point of the discharge section to be generated. has to be pre-populated
-		 * @param max The last point of the discharge section to be generated. has to be pre-populated
-		 */
-		public void genMarxPoint(int min, int max) {
-			World world = Minecraft.getMinecraft().world;
-			int toGenerate = (min+max)/2;
-			Vector3f.sub(vertices[max], vertices[min], diff);
-			Vector3f.cross(diff, side, v0);
-			transform.setIdentity();
-			double noise = Math.sqrt(diff.length())*world.rand.nextDouble()*1/(1+Math.abs(stageCount/2.0-toGenerate))*.75;
-			if ((max-min)%2==1) {
-				noise *= (toGenerate-min)/(double)(max-min);
-			}
-			v0.scale((float) (noise/v0.length()));
-			diff.scale(1/diff.length());
-			transform.rotate(Math.PI*2*world.rand.nextDouble(), diff.x, diff.y, diff.z);
-			Vector3f.add(vertices[max], vertices[min], center);
-			center.scale(.5F);
-			vertices[toGenerate] = transform.apply(v0);
-			//IELogger.info(toGenerate+" with noise "+noise+" shift-to-noise "+vertices[toGenerate].length()/noise);
-			Vector3f.add(vertices[toGenerate], center, vertices[toGenerate]);
-
-			if (toGenerate-min>1) {
-				genMarxPoint(min, toGenerate);
-			}
-			if (max-toGenerate>1) {
-				genMarxPoint(toGenerate, max);
-			}
-		}
 	}
 }

@@ -245,7 +245,7 @@ public class ClientProxy extends CommonProxy {
 
 			@Override
 			public float getVolume() {
-				return .25F;
+				return .1F;
 			}
 
 			@Override
@@ -308,6 +308,9 @@ public class ClientProxy extends CommonProxy {
 
 	@Override
 	public void playMarxBang(TileEntityMarx te, Vec3d pos, float energy) {
+		if (energy<0) {
+			energy = .05F;
+		}
 		PositionedSoundRecord sound = new PositionedSoundRecord(marxBang, SoundCategory.BLOCKS, 5*energy, 1, false, 0, ISound.AttenuationType.LINEAR, (float) pos.x, (float) pos.y, (float) pos.z);
 		ClientUtils.mc().getSoundHandler().playSound(sound);
 		playingSounds.put(te.getPos(), sound);
