@@ -77,7 +77,18 @@ import java.util.function.BiConsumer;
 import static malte0811.industrialWires.blocks.hv.TileEntityMarx.FiringState.FIRE;
 import static malte0811.industrialWires.util.MiscUtils.getOffset;
 import static malte0811.industrialWires.util.MiscUtils.offset;
+import static net.minecraft.item.EnumDyeColor.*;
 
+/**
+ * Channel:	Purpose
+ * White:	Coarse Vcharge
+ * Orange:	Coarse bottom cap voltage
+ * Magenta:	Coarse top voltage
+ * LBlue:	Firing trigger
+ * Yellow:	Fine Vcharge
+ * Lime:	Fine bottom cap voltage
+ * Pink:	Fine top cap voltage
+ */
 @Mod.EventBusSubscriber
 public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable, ISyncReceiver, IBlockBoundsIW, IImmersiveConnectable, IIC2Connector,
 		IRedstoneConnector {
@@ -93,7 +104,6 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	private double timeFactorBottom;
 	private final static double CAPACITANCE = 0.000_001_6;
 	private final static double MAX_VOLTAGE = 250_000;
-	private boolean allowSlowDischarge = true;
 
 	public IWProperties.MarxType type = IWProperties.MarxType.NO_MODEL;
 	private int stageCount = 0;
@@ -104,10 +114,10 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	private DualEnergyStorage storage = new DualEnergyStorage(50_000, 32_000);
 	private boolean hasConnection;
 	private double[] capVoltages;
-	//RS channel 1/white
 	private int voltageControl = 0;
 	private boolean loaded = false;
 	private double leftover;
+	private long lastUpdate = -1;
 
 	TileEntityMarx(EnumFacing facing, IWProperties.MarxType type, boolean mirrored) {
 		this.facing = facing;
@@ -223,43 +233,42 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 				break;
 		}
 		if (!world.isRemote&&type== IWProperties.MarxType.BOTTOM) {
-			if (capVoltages==null||capVoltages.length!=stageCount) {
+			if (capVoltages == null || capVoltages.length != stageCount) {
 				capVoltages = new double[stageCount];
 			}
-			final double oldTopVoltage = capVoltages[stageCount-1];
+			final double oldTopVoltage = capVoltages[stageCount - 1];
 			final double oldBottomVoltage = capVoltages[0];
-			for (int i = stageCount-1;i>0;i--) {
+			for (int i = stageCount - 1; i > 0; i--) {
 				double oldVoltage = capVoltages[i];
-				double u0 = capVoltages[i-1];
-				capVoltages[i] = u0-(u0-oldVoltage)*timeFactor;
-				capVoltages[i-1] -= capVoltages[i]-oldVoltage;
+				double u0 = capVoltages[i - 1];
+				capVoltages[i] = u0 - (u0 - oldVoltage) * timeFactor;
+				capVoltages[i - 1] -= capVoltages[i] - oldVoltage;
 			}
 			//charge bottom cap from storage
-			double setVoltage = MAX_VOLTAGE * voltageControl / 15D;
+			double setVoltage = MAX_VOLTAGE * voltageControl / 255F;
 			double u0 = Math.min(setVoltage, 100 * storage.getEnergyStoredEU());
-			if (u0<0) {
+			if (u0 < 0) {
 				u0 = 0;
 			}
 			if (u0 < capVoltages[0] && setVoltage > capVoltages[0]) {
 				u0 = capVoltages[0];
 			}
-			if (allowSlowDischarge || u0 > capVoltages[0]) {
-				double tmp = u0 - (u0 - oldBottomVoltage) * timeFactorBottom;
-				double energyUsed = .5*(tmp * tmp - oldBottomVoltage * oldBottomVoltage)*CAPACITANCE;
-				if (energyUsed > 0 && storage.extractEU(energyUsed, false)==energyUsed) {// energyUsed can be negative when discharging the caps
-					storage.extractEU(energyUsed, true);
-					capVoltages[0] = tmp;
-				} else if (energyUsed<=0) {
-					capVoltages[0] = tmp;
-				}
-				if (Math.round(15*oldBottomVoltage/MAX_VOLTAGE)!=Math.round(15*capVoltages[0]/MAX_VOLTAGE)) {
-					net.updateValues();
-				} else if (Math.round(15*oldTopVoltage/MAX_VOLTAGE)!=Math.round(15*capVoltages[stageCount-1]/MAX_VOLTAGE)) {
-					net.updateValues();
-				}
-				if (capVoltages[0] > MAX_VOLTAGE * 14 / 15) {
-					state = FiringState.NEXT_TICK;
-				}
+			double tmp = u0 - (u0 - oldBottomVoltage) * timeFactorBottom;
+			double energyUsed = .5 * (tmp * tmp - oldBottomVoltage * oldBottomVoltage) * CAPACITANCE;
+			if (energyUsed > 0 && storage.extractEU(energyUsed, false) == energyUsed) {// energyUsed can be negative when discharging the caps
+				storage.extractEU(energyUsed, true);
+				capVoltages[0] = tmp;
+			} else if (energyUsed <= 0) {
+				capVoltages[0] = tmp;
+			}
+			int delta = (int) (lastUpdate+15-world.getTotalWorldTime());
+			if (Math.abs(getRSSignalFromVoltage(oldBottomVoltage)-getRSSignalFromVoltage(capVoltages[0]))>delta) {
+				net.updateValues();
+			} else if (Math.abs(getRSSignalFromVoltage(oldTopVoltage)-getRSSignalFromVoltage(capVoltages[stageCount-1]))>delta) {
+				net.updateValues();
+			}
+			if (capVoltages[0] > MAX_VOLTAGE * 14.5 / 15) {
+				state = FiringState.NEXT_TICK;
 			}
 		}
 		leftover = storage.getMaxInputIF();
@@ -392,6 +401,10 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 			return false;
 		}
 		return Math.abs(offset.getX())>Math.abs(offset.getY());
+	}
+
+	private int getRSSignalFromVoltage(double voltage) {
+		return (int) (Math.round(255 * voltage / MAX_VOLTAGE)&0xff);
 	}
 
 	@Override
@@ -630,12 +643,11 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	@Override
 	public void onChange() {
 		TileEntityMarx master = masterOr(this, this);
-		master.voltageControl = master.net.channelValues[0];
-		if (master.net.channelValues[3]!=0) {//light blue is firing trigger
+		master.voltageControl = (master.net.channelValues[WHITE.getMetadata()]<<4)|master.net.channelValues[YELLOW.getMetadata()];
+		if (master.net.channelValues[LIGHT_BLUE.getMetadata()]!=0) {
 			master.tryTriggeredDischarge();
 		}
-		//yellow determines whether a lower charge- than cap0-voltage will discharge the generator
-		master.allowSlowDischarge = master.net.channelValues[4] == 0;
+		master.lastUpdate = world.getTotalWorldTime();
 	}
 	private void tryTriggeredDischarge() {
 		state = FiringState.NEXT_TICK;
@@ -650,13 +662,17 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	public void updateInput(byte[] signals) {
 		TileEntityMarx master = masterOr(this, this);
 		if (master.capVoltages!=null&&master.capVoltages.length==stageCount) {
-			//1/orange is voltage measurement from the top cap
-			//2/magenta is for the bottom one
-			byte signal1 = (byte)(Math.round(15*master.capVoltages[stageCount-1]/ MAX_VOLTAGE));
-			byte signal2 = (byte)(Math.round(15*master.capVoltages[0]/ MAX_VOLTAGE));
-			signals[1] = (byte) Math.max(signals[1], signal1);
-			signals[2] = (byte) Math.max(signals[2], signal2);
+			int signalTop = getRSSignalFromVoltage(master.capVoltages[stageCount-1]);
+			int signalBottom = getRSSignalFromVoltage(master.capVoltages[0]);
+			setSignal(ORANGE.getMetadata(), (signalBottom>>4)&0xf, signals);
+			setSignal(MAGENTA.getMetadata(), (signalTop>>4)&0xf, signals);
+			setSignal(LIME.getMetadata(), signalBottom&0xf, signals);
+			setSignal(PINK.getMetadata(), signalTop&0xf, signals);
 		}
+	}
+
+	private void setSignal(int channel, int value, byte[] signals) {
+		signals[channel] = (byte) Math.max(value, signals[channel]);
 	}
 
 	void setStageCount(int stageCount) {
