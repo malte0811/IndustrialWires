@@ -18,6 +18,7 @@
 
 package malte0811.industrialWires.client.render;
 
+import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import malte0811.industrialWires.blocks.IWProperties;
 import malte0811.industrialWires.blocks.hv.TileEntityMarx;
 import malte0811.industrialWires.blocks.hv.TileEntityMarx.Discharge;
@@ -40,53 +41,67 @@ public class TileRenderMarx extends TileEntitySpecialRenderer<TileEntityMarx> {
 	public void render(TileEntityMarx te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
 		final boolean debug = false;
 		//noinspection ConstantConditions,PointlessBooleanExpression
-		if (te.type == IWProperties.MarxType.BOTTOM && (debug || te.state == FIRE)) {
+		if (te.type == IWProperties.MarxType.BOTTOM && (debug || te.state == FIRE) && te.dischargeData!=null) {
+			Vec3d player = Minecraft.getMinecraft().player.getPositionEyes(partialTicks);
 			Tessellator tes = Tessellator.getInstance();
 			BufferBuilder vb = tes.getBuffer();
-			prepare(x, y, z, te);
+			Matrix4 mat = prepare(x, y, z, te, player);
 			if (te.dischargeData.energy>0) {
-				drawDischarge(te.dischargeData, vb, tes);
+				drawDischarge(te.dischargeData, vb, tes, mat);
 			}
 			GlStateManager.popMatrix();
-			GlStateManager.pushMatrix();
-			Vec3i offset = MiscUtils.offset(BlockPos.ORIGIN, te.facing, te.mirrored, 1, 1, 0);
-			GlStateManager.translate(x + offset.getX(), y + offset.getY() + .75, z + offset.getZ());
-			Vec3i facing = te.facing.getDirectionVec();
-			final float pos = .6875F;
-			GlStateManager.translate(-facing.getX() * pos, 0, -facing.getZ() * pos);
 			//draw firing spark gaps
+			Vec3i offset = MiscUtils.offset(BlockPos.ORIGIN, te.facing, te.mirrored, 1, 1, 0);
+			final float pos = .6875F;
+			Vec3i facing = te.facing.getDirectionVec();
+			Vec3d gapDir = new Vec3d(facing.getZ(), 1, facing.getX());
+			Vec3d up = new Vec3d(-facing.getZ(), 1, -facing.getX());
+			Vec3d bottomGap = new Vec3d(offset.getX()-facing.getX()*pos, offset.getY()+.75, offset.getZ()-facing.getZ() * pos);
+			GlStateManager.pushMatrix();
+			GlStateManager.translate(x + bottomGap.x, y + bottomGap.y, z + bottomGap.z);
+			bottomGap = bottomGap.addVector(te.getPos().getX(), te.getPos().getY(), te.getPos().getZ());
 			for (int i = 0; i < te.getStageCount() - 1; i++) {
-				renderGap(i, facing, vb, tes);
+				renderGap(i, facing, vb, tes, player, gapDir, up, bottomGap);
 			}
 			cleanUp();
 			te.state = TileEntityMarx.FiringState.CHARGING;
 		}
 	}
 
-	private void renderGap(int i, Vec3i facing, BufferBuilder vb, Tessellator tes) {
+	private void renderGap(int i, Vec3i facing, BufferBuilder vb, Tessellator tes, Vec3d player, Vec3d gapDir, Vec3d up, Vec3d bottomGap) {
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(0, i, 0);
 		GlStateManager.rotate(-45, facing.getX(), facing.getY(), facing.getZ());
-		//TODO fix
-		GlStateManager.rotate(-Minecraft.getMinecraft().player.rotationYaw + 180, 0, 1, 0);
+		player = player.subtract(bottomGap.x, bottomGap.y+i, bottomGap.z);
+		double t = player.dotProduct(gapDir)/2;
+		Vec3d playerToLine = player.subtract(gapDir.scale(t));
+		double angleRad = Math.acos(up.dotProduct(playerToLine)/(up.lengthVector()*playerToLine.lengthVector()));
+		angleRad *= Math.signum(playerToLine.dotProduct(new Vec3d(facing)));
+		GlStateManager.rotate((float) Math.toDegrees(angleRad)+90, 0, 1, 0);
 		vb.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 		drawDischargeSection(new Vec3d(0, -.2F, 0), new Vec3d(0, .2F, 0), .25F, vb);
 		tes.draw();
 		GlStateManager.popMatrix();
 	}
 
-	private void prepare(double x, double y, double z, TileEntityMarx te) {
+	private Matrix4 prepare(double x, double y, double z, TileEntityMarx te, Vec3d player) {
 		setLightmapDisabled(true);
 		GlStateManager.pushMatrix();
 		Vec3i offset = MiscUtils.offset(BlockPos.ORIGIN, te.facing, te.mirrored, 1, 4, 1);
-		GlStateManager.translate(x+offset.getX()+.5, y+offset.getY(), z+offset.getZ()+.5);
+		Vec3d bottom = new Vec3d(offset.getX()+.5, offset.getY(), offset.getZ()+.5);
+		GlStateManager.translate(x+bottom.x, y+bottom.y, z+bottom.z);
 		GlStateManager.disableTexture2D();
 		GlStateManager.disableLighting();
 		GlStateManager.shadeModel(GL11.GL_SMOOTH);
 		GlStateManager.color(1, 1, 1, 1);
 		GlStateManager.enableBlend();
 		GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		GlStateManager.rotate(-Minecraft.getMinecraft().player.rotationYaw+180, 0, 1, 0);
+		player = player.subtract(bottom.add(new Vec3d(te.getPos())));
+		double angle = Math.atan2(player.x, player.z);
+		Matrix4 ret = new Matrix4();
+		ret.rotate(-angle, 0, 1, 0);
+		GlStateManager.rotate((float) Math.toDegrees(angle), 0, 1, 0);
+		return ret;
 	}
 	private void cleanUp() {
 		setLightmapDisabled(false);
@@ -98,11 +113,11 @@ public class TileRenderMarx extends TileEntitySpecialRenderer<TileEntityMarx> {
 	}
 	private static final float[] WHITE = {1, 1, 1, 1};
 	private static final float[] WHITE_TRANSPARENT = {1, 1, 1, 0};
-	private void drawDischarge(Discharge d, BufferBuilder vb, Tessellator tes) {
+	private void drawDischarge(Discharge d, BufferBuilder vb, Tessellator tes, Matrix4 mat) {
 		if (d!=null&&d.vertices!=null) {
 			vb.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 			for (int i = 0;i<d.vertices.length-1;i++) {
-				drawDischargeSection(d.vertices[i], d.vertices[i+1], d.diameter, vb);
+				drawDischargeSection(mat.apply(d.vertices[i]), mat.apply(d.vertices[i+1]), d.diameter, vb);
 			}
 			tes.draw();
 		}
