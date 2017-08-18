@@ -24,13 +24,23 @@ public class GuiIntChooser extends Gui {
 
 	public void drawChooser() {
 		int color = 0xE0E0E0;
-		String val = String.format(format, Integer.toString(value)).replace(' ', '0');
-		if (value >= 0 && allowNegative) {
-			val = "+" + val;
+		String val = String.format(format, Integer.toString(Math.abs(value))).replace(' ', '0');
+		if (allowNegative) {
+			if (value > 0) {
+				val = "+" + val;
+			} else if (value < 0) {
+				val = "-" + val;
+			} else {
+				val = "0" + val;
+			}
 		}
-		mc.fontRenderer.drawStringWithShadow(val, xPos + mc.fontRenderer.getCharWidth('-') + 1, yPos, color);
 		mc.fontRenderer.drawStringWithShadow("-", xPos, yPos, color);
 		mc.fontRenderer.drawStringWithShadow("+", xPlus, yPos, color);
+		color = 0x9999ff;
+		if (allowNegative&&value!=0) {
+			color = value<0?0xff9999:0x99ff99;
+		}
+		mc.fontRenderer.drawStringWithShadow(val, xPos + mc.fontRenderer.getCharWidth('-') + 1, yPos, color);
 	}
 
 	public void click(int x, int y) {
@@ -41,7 +51,7 @@ public class GuiIntChooser extends Gui {
 					value++;
 				}
 			} else if (x >= xPos && x <= xPos + mc.fontRenderer.getCharWidth('-')) {
-				if (value > (allowNegative ? -value : 0)) {
+				if (value > (allowNegative ? -1 : 0)) {
 					value--;
 				}
 			}

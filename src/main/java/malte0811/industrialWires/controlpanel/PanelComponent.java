@@ -58,6 +58,9 @@ public abstract class PanelComponent {
 	public final static String COLOR = "color";
 	public final static String RS_CHANNEL = "rsChannel";
 	public final static String RS_ID = "rsId";
+	public final static String HAS_SECOND_CHANNEL = "has2ndChannel";
+	public final static String RS_CHANNEL2 = "rsChannel2";
+	public final static String RS_ID2 = "rsId2";
 	public final static String TEXT = "text";
 	public static final String HORIZONTAL = "horizontal";
 	public static final String LENGTH = "length";

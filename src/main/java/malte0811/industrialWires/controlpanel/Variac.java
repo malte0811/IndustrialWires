@@ -39,7 +39,9 @@ import org.lwjgl.util.vector.Vector3f;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Variac extends PanelComponent implements IConfigurableComponent {
 	private static final float SIZE = 3 / 16F;
@@ -51,14 +53,21 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 	private static final float rodOffset = (SIZE - rodDia) / 2;
 	private static final float arrowSize = .0625F / 2;
 
-	private byte out;
+	private int out;
 	private byte rsChannel;
 	private int rsId;
+	private boolean hasSecond;
+	private byte rsChannel2;
+	private int rsId2 = -1;
+	private Set<TriConsumer<Integer, Byte, PanelComponent>> secOutputs = new HashSet<>();
 
-	public Variac(int rsId, byte rsChannel) {
+	public Variac(int rsId, byte rsChannel, int rsId2, byte rsChannel2, boolean hasSecond) {
 		this();
 		this.rsChannel = rsChannel;
 		this.rsId = rsId;
+		this.hasSecond = hasSecond;
+		this.rsChannel2 = rsChannel2;
+		this.rsId2 = rsId2;
 	}
 
 	public Variac() {
@@ -68,23 +77,29 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 	@Override
 	protected void writeCustomNBT(NBTTagCompound nbt, boolean toItem) {
 		if (!toItem) {
-			nbt.setByte("output", out);
+			nbt.setInteger("output", out);
 		}
 		nbt.setByte(RS_CHANNEL, rsChannel);
 		nbt.setInteger(RS_ID, rsId);
+		nbt.setByte(RS_CHANNEL2, rsChannel2);
+		nbt.setInteger(RS_ID2, rsId2);
+		nbt.setBoolean(HAS_SECOND_CHANNEL, hasSecond);
 	}
 
 	@Override
 	protected void readCustomNBT(NBTTagCompound nbt) {
-		out = nbt.getByte("output");
+		out = nbt.getInteger("output");
 		rsChannel = nbt.getByte(RS_CHANNEL);
 		rsId = nbt.getInteger(RS_ID);
+		rsChannel2 = nbt.getByte(RS_CHANNEL2);
+		rsId2 = nbt.getInteger(RS_ID2);
+		hasSecond = nbt.getBoolean(HAS_SECOND_CHANNEL);
 	}
 
 	@Override
 	public List<RawQuad> getQuads() {
 		List<RawQuad> ret = new ArrayList<>();
-		float angle = -(float) (2 * Math.PI * (.5 + out) / 17F);
+		float angle = -(float) (2 * Math.PI * (8.5 + out) / (17F*16F));
 		Matrix4 mat = new Matrix4();
 		mat.translate(SIZE / 2, 0, SIZE / 2);
 		mat.rotate(angle, 0, 1, 0);
@@ -110,7 +125,7 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 	@Nonnull
 	@Override
 	public PanelComponent copyOf() {
-		Variac ret = new Variac(rsId, rsChannel);
+		Variac ret = new Variac(rsId, rsChannel, rsId2, rsChannel2, hasSecond);
 		ret.out = out;
 		ret.setX(x);
 		ret.setY(y);
@@ -137,20 +152,20 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 		} else if (angle > 2 * Math.PI) {
 			angle -= 2 * Math.PI;
 		}
-		angle -= .5 * Math.PI / 17;
 		angle /= 2 * Math.PI;
-		if (angle < 0 || angle >= 16 / 17D) {
-			return;
+		int step = (hasSecond&&player.isSneaking())?1:16;
+		int newLevel = (int) ((angle-1/34F) * 17 * 16);
+		int diff = Math.abs(newLevel-out);
+		if (diff>step) {
+			if (newLevel > out) {
+				newLevel = out + step;
+			} else if (newLevel < out) {
+				newLevel = out - step;
+			}
 		}
-		byte newLevel = (byte) (angle * 17);
-		if (newLevel > out) {
-			newLevel = (byte) (out + 1);
-		} else if (newLevel < out) {
-			newLevel = (byte) (out - 1);
-		}
-		newLevel = (byte) Math.max(0, Math.min(newLevel, 15));
+		newLevel = Math.max(0, Math.min(newLevel, 255));
 		if (newLevel != out) {
-			setOut(rsChannel, newLevel);
+			setOut(newLevel);
 			out = newLevel;
 			tile.markDirty();
 			tile.triggerRenderUpdate();
@@ -161,8 +176,18 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 	public void registerRSOutput(int id, @Nonnull TriConsumer<Integer, Byte, PanelComponent> out) {
 		if (matchesId(rsId, id)) {
 			super.registerRSOutput(id, out);
-			out.accept((int) rsChannel, this.out, this);
+			out.accept((int) rsChannel, (byte) (this.out>>4), this);
 		}
+		if (matchesId(rsId2, id)) {
+			secOutputs.add(out);
+			out.accept((int)rsChannel2, (byte) (this.out&0xf), this);
+		}
+	}
+
+	@Override
+	public void unregisterRSOutput(int id, @Nonnull TriConsumer<Integer, Byte, PanelComponent> out) {
+		super.unregisterRSOutput(id, out);
+		secOutputs.remove(out);
 	}
 
 	@Override
@@ -197,7 +222,16 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 
 	@Override
 	public void invalidate(TileEntityPanel te) {
-		setOut(rsChannel, 0);
+		setOut(0);
+	}
+
+	public void setOut(int level) {
+		if (hasSecond) {
+			for (TriConsumer<Integer, Byte, PanelComponent> cons:secOutputs) {
+				cons.accept((int)rsChannel2, (byte) (level&0xf), this);
+			}
+		}
+		super.setOut(rsChannel, (byte)(level>>4));
 	}
 
 	@Override
@@ -209,14 +243,22 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 		Variac variac = (Variac) o;
 
 		if (out != variac.out) return false;
-		return rsChannel == variac.rsChannel;
+		if (rsChannel != variac.rsChannel) return false;
+		if (rsId != variac.rsId) return false;
+		if (hasSecond != variac.hasSecond) return false;
+		if (rsChannel2 != variac.rsChannel2) return false;
+		return rsId2 == variac.rsId2;
 	}
 
 	@Override
 	public int hashCode() {
 		int result = super.hashCode();
-		result = 31 * result + (int) out;
+		result = 31 * result + out;
 		result = 31 * result + (int) rsChannel;
+		result = 31 * result + rsId;
+		result = 31 * result + (hasSecond ? 1 : 0);
+		result = 31 * result + (int) rsChannel2;
+		result = 31 * result + rsId2;
 		return result;
 	}
 
@@ -224,10 +266,19 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 	public void applyConfigOption(IConfigurableComponent.ConfigType type, int id, NBTBase value) {
 		switch (type) {
 		case RS_CHANNEL:
-			rsChannel = ((NBTTagByte) value).getByte();
+			if (id==0) {
+				rsChannel = ((NBTTagByte) value).getByte();
+			} else {
+				rsChannel2 = ((NBTTagByte) value).getByte();
+			}
 			break;
 		case INT:
-			rsId = ((NBTTagInt) value).getInt();
+			if (id==0) {
+				rsId = ((NBTTagInt) value).getInt();
+			} else {
+				rsId2 = ((NBTTagInt) value).getInt();
+				hasSecond = rsId2>=0;
+			}
 			break;
 		}
 	}
@@ -240,26 +291,28 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 	@Override
 	public String fomatConfigDescription(IConfigurableComponent.ConfigType type, int id) {
 		switch (type) {
-		case RS_CHANNEL:
-			return I18n.format(IndustrialWires.MODID + ".desc.rschannel_info");
-		case INT:
-			return I18n.format(IndustrialWires.MODID + ".desc.rsid_info");
-		default:
-			return "INVALID?";
+			case RS_CHANNEL:
+				return I18n.format(IndustrialWires.MODID + ".desc.rschannel_info" + (id == 1 ? "2" : ""));
+			case INT:
+				return I18n.format(IndustrialWires.MODID + ".desc.rsid_info" + (id == 1 ? "2" : ""));
+			default:
+				return "INVALID?";
 		}
 	}
 
 	@Override
 	public IConfigurableComponent.RSChannelConfig[] getRSChannelOptions() {
 		return new IConfigurableComponent.RSChannelConfig[]{
-				new IConfigurableComponent.RSChannelConfig("channel", 0, 0, rsChannel)
+				new IConfigurableComponent.RSChannelConfig("channel", 0, 0, rsChannel),
+				new IConfigurableComponent.RSChannelConfig("channel", 90, 0, rsChannel2)
 		};
 	}
 
 	@Override
 	public IConfigurableComponent.IntConfig[] getIntegerOptions() {
 		return new IConfigurableComponent.IntConfig[]{
-				new IConfigurableComponent.IntConfig("rsId", 0, 50, rsId, 2, false)
+				new IConfigurableComponent.IntConfig("rsId", 0, 50, rsId, 2, false),
+				new IConfigurableComponent.IntConfig("rsId", 90, 50, rsId2, 2, true)
 		};
 	}
 
