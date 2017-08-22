@@ -123,6 +123,7 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 				ticksTillOff = 10;
 			}
 		}
+		tile.markDirty();
 		tile.triggerRenderUpdate();
 	}
 
@@ -157,11 +158,12 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 
 	@Override
 	public void invalidate(TileEntityPanel te) {
-		setOut(rsOutputChannel, 0);
+		setOut(false, te);
 	}
 
 	private void setOut(boolean on, TileEntityPanel tile) {
 		active = on;
+		tile.markDirty();
 		tile.triggerRenderUpdate();
 		setOut(rsOutputChannel, active ? 15 : 0);
 	}

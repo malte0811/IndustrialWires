@@ -67,6 +67,7 @@ public class CoveredToggleSwitch extends ToggleSwitch {
 			state = state.next();
 		}
 		setOut(state.active, tile);
+		tile.markDirty();
 		tile.triggerRenderUpdate();
 	}
 

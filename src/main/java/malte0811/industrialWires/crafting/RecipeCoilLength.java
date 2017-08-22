@@ -48,8 +48,8 @@ public class RecipeCoilLength extends IForgeRegistryEntry.Impl<IRecipe> implemen
 	}
 
 	@Override
-	public boolean matches(@Nonnull InventoryCrafting inv, @Nonnull World worldIn) {
-		int l = getLength(inv);
+	public boolean matches(@Nonnull InventoryCrafting inv, World worldIn) {
+		int l = 0;//getLength(inv);
 		return l > 0;
 	}
 

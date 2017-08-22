@@ -26,6 +26,7 @@ import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler.Conn
 import blusunrize.immersiveengineering.api.energy.wires.TileEntityImmersiveConnectable;
 import blusunrize.immersiveengineering.api.energy.wires.WireType;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDirectionalTile;
+import blusunrize.immersiveengineering.common.util.Utils;
 import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergyAcceptor;
@@ -33,17 +34,22 @@ import ic2.api.energy.tile.IEnergyEmitter;
 import ic2.api.energy.tile.IEnergySink;
 import ic2.api.energy.tile.IEnergySource;
 import malte0811.industrialWires.IIC2Connector;
+import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.IBlockBoundsIW;
 import malte0811.industrialWires.wires.IC2Wiretype;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.Optional;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import reborncore.api.power.EnumPowerTier;
+import reborncore.api.power.IEnergyInterfaceTile;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -51,20 +57,25 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable implements IEnergySource, IEnergySink, IDirectionalTile, ITickable, IIC2Connector, IBlockBoundsIW {
-	EnumFacing f = EnumFacing.NORTH;
+@Optional.InterfaceList({
+		@Optional.Interface(iface = "ic2.api.energy.tile.IEnergySource", modid = "ic2"),
+		@Optional.Interface(iface = "ic2.api.energy.tile.IEnergySink", modid = "ic2")//TODO tech reborn
+})
+public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable implements IEnergySource, IEnergySink, IDirectionalTile,
+		ITickable, IIC2Connector, IBlockBoundsIW {
+	EnumFacing facing = EnumFacing.NORTH;
 	boolean relay;
 	private boolean first = true;
 	//IC2 net to IE net buffer
-	private double inBuffer = 0;
-	private double maxToNet = 0;
+	double inBuffer = 0;
+	double maxToNet = 0;
 	//IE net to IC2 net buffer
-	private double outBuffer = 0;
-	private double maxToMachine = 0;
-	protected double maxStored = IC2Wiretype.IC2_TYPES[0].getTransferRate() / 8;
+	double outBuffer = 0;
+	double maxToMachine = 0;
+	double maxStored = IC2Wiretype.IC2_TYPES[0].getTransferRate() / 8;
 	int tier = 1;
 
-	public TileEntityIC2ConnectorTin(boolean rel) {
+	TileEntityIC2ConnectorTin(boolean rel) {
 		relay = rel;
 	}
 
@@ -74,15 +85,27 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	@Override
 	public void update() {
 		if (first) {
-			if (!world.isRemote)
+			if (!world.isRemote&& IndustrialWires.hasIC2)
 				MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
 			first = false;
 		}
-		if (!world.isRemote && inBuffer > .1)
-			transferPower();
+		if (!world.isRemote) {
+			if (inBuffer > .1) {
+				transferPower();
+			}
+			if (outBuffer>.1&&IndustrialWires.hasTechReborn) {
+				TileEntity output = Utils.getExistingTileEntity(world, pos.offset(facing));
+				if (output instanceof IEnergyInterfaceTile) {
+					IEnergyInterfaceTile out = (IEnergyInterfaceTile) output;
+					if (out.canAcceptEnergy(facing.getOpposite())) {
+						outBuffer -= out.addEnergy(Math.min(outBuffer, maxToMachine));
+					}
+				}
+			}
+		}
 	}
 
-	public void transferPower() {
+	private void transferPower() {
 		Set<AbstractConnection> conns = new HashSet<>(ImmersiveNetHandler.INSTANCE.getIndirectEnergyConnections(pos, world));
 		Map<AbstractConnection, Pair<IIC2Connector, Double>> maxOutputs = new HashMap<>();
 		double outputMax = Math.min(inBuffer, maxToNet);
@@ -125,7 +148,7 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 		}
 	}
 
-	public double getAverageLossRate(AbstractConnection conn) {
+	private double getAverageLossRate(AbstractConnection conn) {
 		double f = 0;
 		for (Connection c : conn.subConnections) {
 			f += c.length * c.cableType.getLossRatio();
@@ -169,13 +192,13 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 
 	@Override
 	public Vec3d getRaytraceOffset(IImmersiveConnectable link) {
-		EnumFacing side = f.getOpposite();
+		EnumFacing side = facing.getOpposite();
 		return new Vec3d(.5 + side.getFrontOffsetX() * .0625, .5 + side.getFrontOffsetY() * .0625, .5 + side.getFrontOffsetZ() * .0625);
 	}
 
 	@Override
 	public Vec3d getConnectionOffset(Connection con) {
-		EnumFacing side = f.getOpposite();
+		EnumFacing side = facing.getOpposite();
 		double conRadius = con.cableType.getRenderDiameter() / 2;
 		return new Vec3d(.5 - conRadius * side.getFrontOffsetX(), .5 - conRadius * side.getFrontOffsetY(), .5 - conRadius * side.getFrontOffsetZ());
 	}
@@ -205,16 +228,19 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	}
 
 	@Override
+	@Optional.Method(modid="ic2")
 	public boolean emitsEnergyTo(IEnergyAcceptor receiver, EnumFacing side) {
-		return !relay && side == f;
+		return !relay && side == facing;
 	}
 
 	@Override
+	@Optional.Method(modid="ic2")
 	public boolean acceptsEnergyFrom(IEnergyEmitter emitter, EnumFacing side) {
-		return !relay && side == f;
+		return !relay && side == facing;
 	}
 
 	@Override
+	@Optional.Method(modid="ic2")
 	public double getDemandedEnergy() {
 		double ret = maxStored + .5 - inBuffer;
 		if (ret < .1)
@@ -223,20 +249,16 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	}
 
 	@Override
+	@Optional.Method(modid="ic2")
 	public int getSinkTier() {
 		return tier;
 	}
 
 	@Override
+	@Optional.Method(modid="ic2")
 	public double injectEnergy(EnumFacing directionFrom, double amount, double voltage) {
 		if (inBuffer < maxStored) {
-			if (inBuffer < maxToNet) {
-				maxToNet = inBuffer;
-			}
-			inBuffer += amount;
-			if (amount > maxToNet) {
-				maxToNet = amount;
-			}
+			addToIn(amount);
 			markDirty();
 			return 0;
 		}
@@ -244,25 +266,38 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	}
 
 	@Override
+	@Optional.Method(modid="ic2")
 	public double getOfferedEnergy() {
 		return Math.min(maxToMachine, outBuffer);
 	}
 
 	@Override
+	@Optional.Method(modid="ic2")
 	public void drawEnergy(double amount) {
 		outBuffer -= amount;
 		markDirty();
 	}
 
 	@Override
+	@Optional.Method(modid="ic2")
 	public int getSourceTier() {
 		return tier;
+	}
+
+	private void addToIn(double amount) {
+		if (inBuffer < maxToNet) {
+			maxToNet = inBuffer;
+		}
+		inBuffer += amount;
+		if (amount > maxToNet) {
+			maxToNet = amount;
+		}
 	}
 
 	@Override
 	public void readCustomNBT(NBTTagCompound nbt, boolean descPacket) {
 		super.readCustomNBT(nbt, descPacket);
-		f = EnumFacing.getFront(nbt.getInteger("facing"));
+		facing = EnumFacing.getFront(nbt.getInteger("facing"));
 		relay = nbt.getBoolean("relay");
 		inBuffer = nbt.getDouble("inBuffer");
 		outBuffer = nbt.getDouble("outBuffer");
@@ -281,7 +316,7 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	@Override
 	public void writeCustomNBT(NBTTagCompound nbt, boolean descPacket) {
 		super.writeCustomNBT(nbt, descPacket);
-		nbt.setInteger("facing", f.getIndex());
+		nbt.setInteger("facing", facing.getIndex());
 		nbt.setBoolean("relay", relay);
 		nbt.setDouble("inBuffer", inBuffer);
 		nbt.setDouble("outBuffer", outBuffer);
@@ -292,12 +327,12 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	@Nonnull
 	@Override
 	public EnumFacing getFacing() {
-		return f;
+		return facing;
 	}
 
 	@Override
 	public void setFacing(@Nonnull EnumFacing facing) {
-		f = facing;
+		this.facing = facing;
 	}
 
 	@Override
@@ -320,7 +355,7 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 		float length = this instanceof TileEntityIC2ConnectorHV ? (relay ? .875f : .75f) : this instanceof TileEntityIC2ConnectorGold ? .5625f : .5f;
 		float wMin = .3125f;
 		float wMax = .6875f;
-		switch (f.getOpposite()) {
+		switch (facing.getOpposite()) {
 		case UP:
 			return new AxisAlignedBB(wMin, 0, wMin, wMax, length, wMax);
 		case DOWN:

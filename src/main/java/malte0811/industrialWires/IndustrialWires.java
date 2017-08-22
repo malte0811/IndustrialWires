@@ -41,6 +41,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -57,7 +59,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
-@Mod(modid = IndustrialWires.MODID, version = IndustrialWires.VERSION, dependencies = "required-after:immersiveengineering@[0.10-58,);required-after:ic2")
+@Mod(modid = IndustrialWires.MODID, version = IndustrialWires.VERSION, dependencies = "required-after:immersiveengineering@[0.10-58,);after:ic2")
 @Mod.EventBusSubscriber
 public class IndustrialWires {
 	public static final String MODID = "industrialwires";
@@ -89,15 +91,21 @@ public class IndustrialWires {
 	};
 	@SidedProxy(clientSide = "malte0811.industrialWires.client.ClientProxy", serverSide = "malte0811.industrialWires.CommonProxy")
 	public static CommonProxy proxy;
+	public static boolean hasIC2;
+	public static boolean hasTechReborn;
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent e) {
+		hasIC2 = Loader.isModLoaded("ic2");
+		hasTechReborn = Loader.isModLoaded("techreborn");
 		logger = e.getModLog();
 		new IWConfig();
-		if (IWConfig.enableConversion) {
+		if (IWConfig.enableConversion&&hasIC2) {
 			mechConv = new BlockMechanicalConverter();
 		}
-		ic2conn = new BlockIC2Connector();
+		if (hasIC2||hasTechReborn) {
+			ic2conn = new BlockIC2Connector();
+		}
 		jacobsLadder = new BlockJacobsLadder();
 		panel = new BlockPanel();
 
@@ -105,22 +113,32 @@ public class IndustrialWires {
 		panelComponent = new ItemPanelComponent();
 		key = new ItemKey();
 
-		GameRegistry.registerTileEntity(TileEntityIC2ConnectorTin.class, MODID + "ic2ConnectorTin");
-		GameRegistry.registerTileEntity(TileEntityIC2ConnectorCopper.class, MODID + "ic2ConnectorCopper");
-		GameRegistry.registerTileEntity(TileEntityIC2ConnectorGold.class, MODID + "ic2ConnectorGold");
-		GameRegistry.registerTileEntity(TileEntityIC2ConnectorHV.class, MODID + "ic2ConnectorHV");
-		GameRegistry.registerTileEntity(TileEntityIC2ConnectorGlass.class, MODID + "ic2ConnectorGlass");
+		if (hasIC2) {
+			//TODO
+			GameRegistry.registerTileEntity(TileEntityIC2ConnectorTin.class, MODID + ":ic2ConnectorTin");
+			GameRegistry.registerTileEntity(TileEntityIC2ConnectorCopper.class, MODID + ":ic2ConnectorCopper");
+			GameRegistry.registerTileEntity(TileEntityIC2ConnectorGold.class, MODID + ":ic2ConnectorGold");
+			GameRegistry.registerTileEntity(TileEntityIC2ConnectorHV.class, MODID + ":ic2ConnectorHV");
+			GameRegistry.registerTileEntity(TileEntityIC2ConnectorGlass.class, MODID + ":ic2ConnectorGlass");
+			// Dummy TE's with bad names used to update old TE's to the proper names
+			GameRegistry.registerTileEntity(DummyTEs.TinDummy.class, MODID + "ic2ConnectorTin");
+			GameRegistry.registerTileEntity(DummyTEs.CopperDummy.class, MODID + "ic2ConnectorCopper");
+			GameRegistry.registerTileEntity(DummyTEs.GoldDummy.class, MODID + "ic2ConnectorGold");
+			GameRegistry.registerTileEntity(DummyTEs.HVDummy.class, MODID + "ic2ConnectorHV");
+			GameRegistry.registerTileEntity(DummyTEs.GlassDummy.class, MODID + "ic2ConnectorGlass");
+
+			if (IWConfig.enableConversion) {
+				GameRegistry.registerTileEntity(TileEntityIEMotor.class, MODID + ":ieMotor");
+				GameRegistry.registerTileEntity(TileEntityMechICtoIE.class, MODID + ":mechIcToIe");
+				GameRegistry.registerTileEntity(TileEntityMechIEtoIC.class, MODID + ":mechIeToIc");
+			}
+		}
 		GameRegistry.registerTileEntity(TileEntityJacobsLadder.class, MODID + ":jacobsLadder");
 		GameRegistry.registerTileEntity(TileEntityPanel.class, MODID + ":control_panel");
 		GameRegistry.registerTileEntity(TileEntityRSPanelConn.class, MODID + ":control_panel_rs");
 		GameRegistry.registerTileEntity(TileEntityPanelCreator.class, MODID + ":panel_creator");
 		GameRegistry.registerTileEntity(TileEntityUnfinishedPanel.class, MODID + ":unfinished_panel");
 		GameRegistry.registerTileEntity(TileEntityComponentPanel.class, MODID + ":single_component_panel");
-		if (IWConfig.enableConversion) {
-			GameRegistry.registerTileEntity(TileEntityIEMotor.class, MODID + ":ieMotor");
-			GameRegistry.registerTileEntity(TileEntityMechICtoIE.class, MODID + ":mechIcToIe");
-			GameRegistry.registerTileEntity(TileEntityMechIEtoIC.class, MODID + ":mechIeToIc");
-		}
 		proxy.preInit();
 	}
 
@@ -149,7 +167,9 @@ public class IndustrialWires {
 	@EventHandler
 	public void init(FMLInitializationEvent e) {
 
-		ExtraIC2Compat.addToolConmpat();
+		if (hasIC2) {
+			ExtraIC2Compat.addToolConmpat();
+		}
 
 		packetHandler.registerMessage(MessageTileSyncIW.HandlerClient.class, MessageTileSyncIW.class, 0, Side.CLIENT);
 		packetHandler.registerMessage(MessagePanelInteract.HandlerServer.class, MessagePanelInteract.class, 1, Side.SERVER);

@@ -41,7 +41,7 @@ public class RecipeKeyRing extends IForgeRegistryEntry.Impl<IRecipe> implements 
 	}
 
 	@Override
-	public boolean matches(@Nonnull InventoryCrafting inv, @Nonnull World worldIn) {
+	public boolean matches(@Nonnull InventoryCrafting inv, World worldIn) {
 		return isValid(inv);
 	}
 

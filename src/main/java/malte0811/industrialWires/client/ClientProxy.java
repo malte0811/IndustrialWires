@@ -41,6 +41,7 @@ import malte0811.industrialWires.client.gui.GuiRenameKey;
 import malte0811.industrialWires.client.panelmodel.PanelModelLoader;
 import malte0811.industrialWires.client.render.TileRenderJacobsLadder;
 import malte0811.industrialWires.controlpanel.PanelComponent;
+import malte0811.industrialWires.crafting.IC2TRHelper;
 import malte0811.industrialWires.items.ItemIC2Coil;
 import malte0811.industrialWires.items.ItemKey;
 import malte0811.industrialWires.items.ItemPanelComponent;
@@ -54,6 +55,7 @@ import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
@@ -69,9 +71,7 @@ import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.relauncher.Side;
 
-import java.util.Locale;
-import java.util.Random;
-import java.util.WeakHashMap;
+import java.util.*;
 
 public class ClientProxy extends CommonProxy {
 	@Override
@@ -122,10 +122,11 @@ public class ClientProxy extends CommonProxy {
 		ManualInstance m = ManualHelper.getManual();
 		PositionedItemStack[][] wireRecipes = new PositionedItemStack[3][10];
 		int xBase = 15;
-		ItemStack tinCable = IC2Items.getItem("cable", "type:tin,insulation:0");
+		Ingredient tinCable = IC2TRHelper.getStack("cable", "type:tin,insulation:0");
+		List<ItemStack> tinCableList = Arrays.asList(tinCable.getMatchingStacks());
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++) {
-				wireRecipes[0][3 * i + j] = new PositionedItemStack(tinCable.copy(), 18 * i + xBase, 18 * j);
+				wireRecipes[0][3 * i + j] = new PositionedItemStack(tinCableList, 18 * i + xBase, 18 * j);
 			}
 		}
 		ItemStack tmp = new ItemStack(IndustrialWires.coil);
@@ -139,7 +140,7 @@ public class ClientProxy extends CommonProxy {
 					if (r.nextBoolean()) {
 						// cable
 						lengthSum++;
-						wireRecipes[i][3 * j1 + j2] = new PositionedItemStack(tinCable.copy(), 18 * j1 + xBase, 18 * j2);
+						wireRecipes[i][3 * j1 + j2] = new PositionedItemStack(tinCableList, 18 * j1 + xBase, 18 * j2);
 					} else {
 						// wire coil
 						int length = r.nextInt(99) + 1;

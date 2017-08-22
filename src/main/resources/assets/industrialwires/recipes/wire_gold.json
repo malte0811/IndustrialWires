@@ -8,5 +8,20 @@
   "coil": {
     "item": "industrialwires:ic2_wire_coil",
     "data": 2
-  }
+  },
+  "conditions": [
+    {
+      "type": "forge:or",
+      "values": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "ic2"
+        },
+        {
+          "type": "forge:mod_loaded",
+          "modid": "techreborn"
+        }
+      ]
+    }
+  ]
 }

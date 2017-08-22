@@ -124,6 +124,7 @@ public class IndicatorLight extends PanelComponent implements IConfigurableCompo
 	private Consumer<byte[]> handler = (input) -> {
 		if (input[rsInputChannel] != rsInput) {
 			rsInput = input[rsInputChannel];
+			panel.markDirty();
 			panel.triggerRenderUpdate();
 		}
 	};

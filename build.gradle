@@ -30,7 +30,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 minecraft {
-    version = "14.21.1.2404"
+    version = "14.21.1.2443"
     runDir = "run"
 
     replace '${version}', project.version
@@ -43,14 +43,29 @@ repositories {
         url 'http://maven.ic2.player.to/'
     }
     maven {
+        name 'tr'
+        url 'http://maven.modmuss50.me'
+    }
+    maven {
     	name 'jared maven'
     	url 'http://blamejared.com/maven'
+    }
+    // dependencies of TR...
+    maven {
+        url 'http://maven.epoxide.xyz'
+    }
+    maven {
+        // HWYLA
+        name "TehNut"
+        url "http://tehnut.info/maven/"
     }
 }
 
 dependencies {
-    compile "net.industrial-craft:industrialcraft-2:2.8.+"
+    deobfCompile 'net.industrial-craft:industrialcraft-2:2.8.+'
     deobfCompile "blusunrize:ImmersiveEngineering:0.12-+:deobf"
+    compileOnly "TechReborn:TechReborn-1.12:2.6.+:dev"
+    compileOnly "RebornCore:RebornCore-1.12:3.2.+:dev"
 }
 
 jar {

@@ -11,19 +11,24 @@
   "type": "forge:ore_shaped",
   "key": {
     "b": {
-      "type": "forge:ore_dict", "ore": "ingotBronze"
+      "type": "forge:ore_dict",
+      "ore": "ingotBronze"
     },
     "r": {
-      "type": "forge:ore_dict", "ore": "stickIron"
+      "type": "forge:ore_dict",
+      "ore": "stickIron"
     },
     "s": {
-      "type": "forge:ore_dict", "ore": "blockSheetmetalIron"
+      "type": "forge:ore_dict",
+      "ore": "blockSheetmetalIron"
     },
     "S": {
-      "type": "forge:ore_dict", "ore": "blockSheetmetalSteel"
+      "type": "forge:ore_dict",
+      "ore": "blockSheetmetalSteel"
     },
     "i": {
-      "type": "forge:ore_dict", "ore": "plateSteel"
+      "type": "forge:ore_dict",
+      "ore": "plateSteel"
     },
     "I": {
       "type": "industrialwires:ic2_item",
@@ -35,7 +40,13 @@
       "data": 8
     }
   },
-  "conditions": [{
-    "type": "industrialwires:conversion"
-  }]
+  "conditions": [
+    {
+      "type": "industrialwires:conversion"
+    },
+    {
+      "type": "forge:mod_loaded",
+      "modid": "ic2"
+    }
+  ]
 }

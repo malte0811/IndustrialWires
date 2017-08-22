@@ -197,6 +197,7 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 				ticksTillOff = 10;
 			}
 		}
+		tile.markDirty();
 		tile.triggerRenderUpdate();
 	}
 
@@ -207,6 +208,7 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 			tile.markDirty();
 			if (ticksTillOff == 0) {
 				turned = false;
+				tile.markDirty();
 				tile.triggerRenderUpdate();
 				setOut(tile);
 			}
@@ -239,10 +241,11 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 
 	@Override
 	public void invalidate(TileEntityPanel te) {
-		setOut(rsOutputChannel, 0);
+		setOut(te);
 	}
 
 	private void setOut(TileEntityPanel tile) {
+		tile.markDirty();
 		tile.triggerRenderUpdate();
 		setOut(rsOutputChannel, turned ? 15 : 0);
 	}

@@ -36,7 +36,7 @@ import javax.annotation.Nonnull;
 public class RecipeKeyLock extends IForgeRegistryEntry.Impl<IRecipe> implements IRecipe {
 
 	@Override
-	public boolean matches(@Nonnull InventoryCrafting inv, @Nonnull World worldIn) {
+	public boolean matches(@Nonnull InventoryCrafting inv, World worldIn) {
 		return getLockId(inv) != 0;
 	}
 
