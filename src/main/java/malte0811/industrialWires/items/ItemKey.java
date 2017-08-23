@@ -42,13 +42,14 @@ public class ItemKey extends Item implements INetGUIItem {
 	public static final String RING_KEYS = "ringkeys";
 	public static final String NAME = "name";
 	public static final String[] types = {"blank_key", "key", "key_ring"};
+	public static final String ITEM_NAME = "key";
 
 	public ItemKey() {
-		setUnlocalizedName(IndustrialWires.MODID + ".key");
+		setUnlocalizedName(IndustrialWires.MODID + "."+ITEM_NAME);
 		setHasSubtypes(true);
 		this.setCreativeTab(IndustrialWires.creativeTab);
 		setMaxStackSize(64);
-		setRegistryName(new ResourceLocation(IndustrialWires.MODID, "key"));
+		setRegistryName(new ResourceLocation(IndustrialWires.MODID, ITEM_NAME));
 		IndustrialWires.items.add(this);
 	}
 

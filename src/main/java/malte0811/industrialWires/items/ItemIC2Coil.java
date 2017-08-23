@@ -55,13 +55,14 @@ import java.util.Set;
 public class ItemIC2Coil extends Item implements IWireCoil {
 	public final static String[] subNames = {"tin", "copper", "gold", "hv", "glass"};
 	public final static String lengthKey = "wireLength";
+	public final static String NAME = "ic2_wire_coil";
 
 	public ItemIC2Coil() {
-		setUnlocalizedName(IndustrialWires.MODID + ".ic2_wire_coil");
+		setUnlocalizedName(IndustrialWires.MODID + "."+NAME);
 		setHasSubtypes(true);
 		this.setCreativeTab(IndustrialWires.creativeTab);
 		setMaxStackSize(64);
-		setRegistryName(new ResourceLocation(IndustrialWires.MODID, "ic2_wire_coil"));
+		setRegistryName(new ResourceLocation(IndustrialWires.MODID, NAME));
 		IndustrialWires.items.add(this);
 	}
 

@@ -54,9 +54,10 @@ import java.util.List;
 
 public class BlockPanel extends BlockIWBase implements IMetaEnum {
 	public static final PropertyEnum<BlockTypes_Panel> type = PropertyEnum.create("type", BlockTypes_Panel.class);
+	public static final String NAME = "control_panel";
 
 	public BlockPanel() {
-		super(Material.IRON, "control_panel");
+		super(Material.IRON, NAME);
 		lightOpacity = 0;
 	}
 

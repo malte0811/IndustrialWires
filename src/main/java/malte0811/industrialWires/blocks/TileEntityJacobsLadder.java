@@ -49,10 +49,14 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.fml.common.Optional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import static malte0811.industrialWires.IndustrialWires.hasIC2;
+
+@Optional.Interface(modid = "ic2", iface = "ic2.api.energy.tile.IEnergySink")
 public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickable, IHasDummyBlocksIW, ISyncReceiver, IEnergySink, IBlockBoundsIW, IDirectionalTile {
 	public EnumFacing facing = EnumFacing.NORTH;
 	private DualEnergyStorage energy;
@@ -98,9 +102,8 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 			return;
 		}
 		if (!world.isRemote) {
-			if (!addedToIC2Net) {
-				MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
-				addedToIC2Net = true;
+			if (hasIC2&&!addedToIC2Net) {
+				addToIC2Net();
 			}
 			if ((controlControls[0][0] == null || timeTillActive == -1 || t >= 1) && energy.getEnergyStoredEU() >= 2 * consumtionEU) {
 				for (int j = 0; j < size.movementPoints; j++) {
@@ -165,6 +168,12 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 				salt = 0;
 			}
 		}
+	}
+
+	@Optional.Method(modid = "ic2")
+	private void addToIC2Net() {
+		MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
+		addedToIC2Net = true;
 	}
 
 	private void initArc(int delay) {
@@ -366,7 +375,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 		return false;
 	}
 
-	public boolean rotate(World world, BlockPos pos, EnumFacing axis) {
+	public boolean rotate(World world, BlockPos pos) {
 		if (isActive()) {
 			return false;
 		}
@@ -392,21 +401,25 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 
 	//ENERGY
 	@Override
+	@Optional.Method(modid = "ic2")
 	public double getDemandedEnergy() {
 		return energy.getEURequested();
 	}
 
 	@Override
+	@Optional.Method(modid = "ic2")
 	public int getSinkTier() {
 		return 4;
 	}
 
 	@Override
+	@Optional.Method(modid = "ic2")
 	public double injectEnergy(EnumFacing dir, double amount, double voltage) {
 		return amount - energy.insertEU(amount, true);
 	}
 
 	@Override
+	@Optional.Method(modid = "ic2")
 	public boolean acceptsEnergyFrom(IEnergyEmitter iEnergyEmitter, EnumFacing enumFacing) {
 		return !isDummy() && enumFacing == facing;
 	}
@@ -429,23 +442,32 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 
 	@Override
 	public void onChunkUnload() {
-		if (!world.isRemote && addedToIC2Net)
-			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
+		if (hasIC2) {
+			removeFromIC2Net();
+		}
 		addedToIC2Net = false;
 		super.onChunkUnload();
 	}
 
 	@Override
 	public void invalidate() {
-		if (!world.isRemote && addedToIC2Net) {
-			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
-		} else if (world.isRemote) {
+		if (hasIC2)
+			removeFromIC2Net();
+		if (world.isRemote) {
 			//stop sound
 			IndustrialWires.proxy.playJacobsLadderSound(this, -1, soundPos);
 		}
 		addedToIC2Net = false;
 		super.invalidate();
 	}
+
+	@Optional.Method(modid = "ic2")
+	private void removeFromIC2Net() {
+		if (!world.isRemote && addedToIC2Net) {
+			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
+		}
+	}
+
 
 	@Nonnull
 	@Override

@@ -19,7 +19,6 @@
 package malte0811.industrialWires.blocks;
 
 import blusunrize.immersiveengineering.api.IEProperties;
-import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.TileEntityJacobsLadder.LadderSize;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -29,7 +28,6 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -44,10 +42,11 @@ import net.minecraft.world.World;
 import javax.annotation.Nonnull;
 
 public class BlockJacobsLadder extends BlockIWBase implements IMetaEnum, IPlacementCheck {
+	public static final String NAME = "jacobs_ladder";
 	private static PropertyEnum<LadderSize> size_property = PropertyEnum.create("size", LadderSize.class);
 
 	public BlockJacobsLadder() {
-		super(Material.IRON, "jacobs_ladder");
+		super(Material.IRON, NAME);
 	}
 
 	@Nonnull
@@ -176,6 +175,6 @@ public class BlockJacobsLadder extends BlockIWBase implements IMetaEnum, IPlacem
 	@Override
 	public boolean rotateBlock(World world, @Nonnull BlockPos pos, @Nonnull EnumFacing axis) {
 		TileEntity te = world.getTileEntity(pos);
-		return te instanceof TileEntityJacobsLadder && ((TileEntityJacobsLadder) te).rotate(world, pos, axis);
+		return te instanceof TileEntityJacobsLadder && ((TileEntityJacobsLadder) te).rotate(world, pos);
 	}
 }

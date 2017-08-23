@@ -21,6 +21,7 @@ import blusunrize.immersiveengineering.api.Lib;
 import blusunrize.immersiveengineering.client.ClientUtils;
 import blusunrize.immersiveengineering.common.util.ItemNBTHelper;
 import malte0811.industrialWires.IndustrialWires;
+import malte0811.industrialWires.blocks.BlockIWBase;
 import malte0811.industrialWires.blocks.IMetaEnum;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.panelmodel.PanelModel;
@@ -116,10 +117,12 @@ public class ClientEventHandler {
 	}
 	@SubscribeEvent
 	public static void registerModels(ModelRegistryEvent evt) {
-		for (int meta = 0; meta < ItemIC2Coil.subNames.length; meta++) {
-			ResourceLocation loc = new ResourceLocation(IndustrialWires.MODID, "ic2_wire_coil/" + ItemIC2Coil.subNames[meta]);
-			ModelBakery.registerItemVariants(IndustrialWires.coil, loc);
-			ModelLoader.setCustomModelResourceLocation(IndustrialWires.coil, meta, new ModelResourceLocation(loc, "inventory"));
+		if (IndustrialWires.coil!=null) {
+			for (int meta = 0; meta < ItemIC2Coil.subNames.length; meta++) {
+				ResourceLocation loc = new ResourceLocation(IndustrialWires.MODID, "ic2_wire_coil/" + ItemIC2Coil.subNames[meta]);
+				ModelBakery.registerItemVariants(IndustrialWires.coil, loc);
+				ModelLoader.setCustomModelResourceLocation(IndustrialWires.coil, meta, new ModelResourceLocation(loc, "inventory"));
+			}
 		}
 		for (int meta = 0; meta < ItemPanelComponent.types.length; meta++) {
 			ResourceLocation loc = new ResourceLocation(IndustrialWires.MODID, "panel_component/" + ItemPanelComponent.types[meta]);
@@ -131,23 +134,19 @@ public class ClientEventHandler {
 			ModelBakery.registerItemVariants(IndustrialWires.key, loc);
 			ModelLoader.setCustomModelResourceLocation(IndustrialWires.key, meta, new ModelResourceLocation(loc, "inventory"));
 		}
-
-		Block[] blocks = {IndustrialWires.ic2conn, IndustrialWires.mechConv, IndustrialWires.jacobsLadder, IndustrialWires.panel};
-		for (Block b : blocks) {
-			if (b != null) {
-				Item blockItem = Item.getItemFromBlock(b);
-				final ResourceLocation loc = b.getRegistryName();
-				assert loc != null;
-				ModelLoader.setCustomMeshDefinition(blockItem, stack -> new ModelResourceLocation(loc, "inventory"));
-				Object[] v = ((IMetaEnum) b).getValues();
-				for (int meta = 0; meta < v.length; meta++) {
-					String location = loc.toString();
-					String prop = "inventory,type=" + v[meta].toString().toLowerCase(Locale.US);
-					try {
-						ModelLoader.setCustomModelResourceLocation(blockItem, meta, new ModelResourceLocation(location, prop));
-					} catch (NullPointerException npe) {
-						throw new RuntimeException(b + " lacks an item!", npe);
-					}
+		for (BlockIWBase b : IndustrialWires.blocks) {
+			Item blockItem = Item.getItemFromBlock(b);
+			final ResourceLocation loc = b.getRegistryName();
+			assert loc != null;
+			ModelLoader.setCustomMeshDefinition(blockItem, stack -> new ModelResourceLocation(loc, "inventory"));
+			Object[] v = ((IMetaEnum) b).getValues();
+			for (int meta = 0; meta < v.length; meta++) {
+				String location = loc.toString();
+				String prop = "inventory,type=" + v[meta].toString().toLowerCase(Locale.US);
+				try {
+					ModelLoader.setCustomModelResourceLocation(blockItem, meta, new ModelResourceLocation(location, prop));
+				} catch (NullPointerException npe) {
+					throw new RuntimeException(b + " lacks an item!", npe);
 				}
 			}
 		}

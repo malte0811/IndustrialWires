@@ -1,5 +1,6 @@
 package malte0811.industrialWires.crafting;
 
+import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.common.IEContent;
 import ic2.api.item.IC2Items;
 import malte0811.industrialWires.IndustrialWires;
@@ -17,21 +18,24 @@ import java.util.Set;
 public final class IC2TRHelper {
 	public static Ingredient getStack(String type, String variant) {
 		Set<ItemStack> stacks = new HashSet<>();
+		if (type.equals("crafting")&&variant.equals("rubber")) {
+			if (ApiUtils.isExistingOreName("itemRubber")) {
+				return new OreIngredient("itemRubber");
+			}
+		}
 		if (IndustrialWires.hasIC2) {
 			stacks.add(IC2Items.getItem(type, variant));
 		}
-		if (Loader.isModLoaded("techreborn")) {
+		if (IndustrialWires.hasTechReborn) {
 			switch (type) {
 				case "cable":
 					stacks.add(getTRCable(variant));
 					break;
 				case "crafting":
 					switch (variant) {
-						case "coil":
-							stacks.add(new ItemStack(IEContent.blockMetalDecoration0));
-							break;
 						case "alloy":
 							stacks.add(TechRebornAPI.subItemRetriever.getPlateByName("advanced_alloy"));
+							break;
 					}
 					break;
 				case "te":
@@ -47,10 +51,17 @@ public final class IC2TRHelper {
 					return getIECable(variant.substring("type:".length(), variant.indexOf(',')));
 				case "crafting":
 					switch (variant) {
+						case "coil":
+							stacks.add(new ItemStack(IEContent.blockMetalDecoration0));
+							break;
 						case "alloy":
 							return new OreIngredient("plateConstantan");
 						case "electric_motor":
 							stacks.add(new ItemStack(IEContent.itemMaterial, 1, 27));
+							break;
+						case "rubber":
+							stacks.add(new ItemStack(IEContent.itemMaterial, 1, 13));
+							break;
 					}
 					break;
 				case "te":
@@ -58,6 +69,9 @@ public final class IC2TRHelper {
 						stacks.add(new ItemStack(IEContent.blockConnectors, 1, 7));
 					}
 			}
+		}
+		if (stacks.size()==0) {
+			IndustrialWires.logger.info("No ingredient found for "+type+", "+variant);
 		}
 		return Ingredient.fromStacks(stacks.toArray(new ItemStack[stacks.size()]));
 	}

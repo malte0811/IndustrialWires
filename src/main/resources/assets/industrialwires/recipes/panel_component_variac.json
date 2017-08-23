@@ -11,7 +11,9 @@
   "type": "forge:ore_shaped",
   "key": {
     "r": {
-      "type": "forge:ore_dict", "ore": "itemRubber"
+      "type": "industrialwires:ic2_item",
+      "name": "crafting",
+      "variant": "rubber"
     },
     "c": {
       "type": "industrialwires:ic2_item",

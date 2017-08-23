@@ -41,10 +41,11 @@ import net.minecraft.world.World;
 import javax.annotation.Nonnull;
 
 public class BlockMechanicalConverter extends BlockIWBase implements IMetaEnum {
+	public static final String NAME = "mechanical_converter";
 	private static PropertyEnum<MechanicalBlockType> type = PropertyEnum.create("type", MechanicalBlockType.class);
 
 	public BlockMechanicalConverter() {
-		super(Material.IRON, "mechanical_converter");
+		super(Material.IRON, NAME);
 	}
 
 	@Override

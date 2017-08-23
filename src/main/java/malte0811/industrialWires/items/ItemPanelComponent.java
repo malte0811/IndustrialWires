@@ -60,13 +60,14 @@ public class ItemPanelComponent extends Item implements INetGUIItem {
 	public static final String TYPE = "type";
 	public static final String ID = "cfgId";
 	public static final String VALUE = "value";
+	public static final String NAME = "panel_component";
 
 	public ItemPanelComponent() {
-		setUnlocalizedName(IndustrialWires.MODID + ".panel_component");
+		setUnlocalizedName(IndustrialWires.MODID + "."+NAME);
 		setHasSubtypes(true);
 		this.setCreativeTab(IndustrialWires.creativeTab);
 		setMaxStackSize(64);
-		setRegistryName(new ResourceLocation(IndustrialWires.MODID, "panel_component"));
+		setRegistryName(new ResourceLocation(IndustrialWires.MODID, NAME));
 		IndustrialWires.items.add(this);
 	}
 

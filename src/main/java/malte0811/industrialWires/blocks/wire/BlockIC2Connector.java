@@ -47,10 +47,11 @@ import java.util.Arrays;
 import java.util.List;
 
 public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
-	private static PropertyEnum<BlockTypes_IC2_Connector> type = PropertyEnum.create("type", BlockTypes_IC2_Connector.class);
+	private static final PropertyEnum<BlockTypes_IC2_Connector> type = PropertyEnum.create("type", BlockTypes_IC2_Connector.class);
+	public static final String NAME = "ic2_connector";
 
 	public BlockIC2Connector() {
-		super(Material.IRON, "ic2_connector");
+		super(Material.IRON, NAME);
 		setHardness(3.0F);
 		setResistance(15.0F);
 		lightOpacity = 0;

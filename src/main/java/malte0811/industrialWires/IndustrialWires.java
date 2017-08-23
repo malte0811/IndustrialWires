@@ -68,15 +68,21 @@ public class IndustrialWires {
 	public static final List<BlockIWBase> blocks = new ArrayList<>();
 	public static final List<Item> items = new ArrayList<>();
 
-	public static BlockIC2Connector ic2conn;
-	public static BlockMechanicalConverter mechConv;
-	public static BlockJacobsLadder jacobsLadder;
-	public static BlockPanel panel;
+	@GameRegistry.ObjectHolder(MODID+":"+BlockIC2Connector.NAME)
+	public static BlockIC2Connector ic2conn = null;
+	@GameRegistry.ObjectHolder(MODID+":"+BlockMechanicalConverter.NAME)
+	public static BlockMechanicalConverter mechConv = null;
+	@GameRegistry.ObjectHolder(MODID+":"+BlockJacobsLadder.NAME)
+	public static BlockJacobsLadder jacobsLadder = null;
+	@GameRegistry.ObjectHolder(MODID+":"+BlockPanel.NAME)
+	public static BlockPanel panel = null;
 
-
-	public static ItemIC2Coil coil;
-	public static ItemPanelComponent panelComponent;
-	public static ItemKey key;
+	@GameRegistry.ObjectHolder(MODID+":"+ItemIC2Coil.NAME)
+	public static ItemIC2Coil coil = null;
+	@GameRegistry.ObjectHolder(MODID+":"+ItemPanelComponent.NAME)
+	public static ItemPanelComponent panelComponent = null;
+	@GameRegistry.ObjectHolder(MODID+":"+ItemKey.ITEM_NAME)
+	public static ItemKey key = null;
 	public static final SimpleNetworkWrapper packetHandler = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
 
 	public static Logger logger;
@@ -86,7 +92,11 @@ public class IndustrialWires {
 
 		@Override
 		public ItemStack getTabIconItem() {
-			return new ItemStack(coil, 1, 2);
+			if (coil!=null) {
+				return new ItemStack(coil, 1, 2);
+			} else {
+				return new ItemStack(panel, 1, 3);
+			}
 		}
 	};
 	@SidedProxy(clientSide = "malte0811.industrialWires.client.ClientProxy", serverSide = "malte0811.industrialWires.CommonProxy")
@@ -100,21 +110,8 @@ public class IndustrialWires {
 		hasTechReborn = Loader.isModLoaded("techreborn");
 		logger = e.getModLog();
 		new IWConfig();
-		if (IWConfig.enableConversion&&hasIC2) {
-			mechConv = new BlockMechanicalConverter();
-		}
-		if (hasIC2||hasTechReborn) {
-			ic2conn = new BlockIC2Connector();
-		}
-		jacobsLadder = new BlockJacobsLadder();
-		panel = new BlockPanel();
-
-		coil = new ItemIC2Coil();
-		panelComponent = new ItemPanelComponent();
-		key = new ItemKey();
 
 		if (hasIC2) {
-			//TODO
 			GameRegistry.registerTileEntity(TileEntityIC2ConnectorTin.class, MODID + ":ic2ConnectorTin");
 			GameRegistry.registerTileEntity(TileEntityIC2ConnectorCopper.class, MODID + ":ic2ConnectorCopper");
 			GameRegistry.registerTileEntity(TileEntityIC2ConnectorGold.class, MODID + ":ic2ConnectorGold");
@@ -144,9 +141,15 @@ public class IndustrialWires {
 
 	@SubscribeEvent
 	public static void registerBlocks(RegistryEvent.Register<Block> event) {
-		for (BlockIWBase b: blocks) {
-			event.getRegistry().register(b);
+
+		if (IWConfig.enableConversion&&hasIC2) {
+			event.getRegistry().register(new BlockMechanicalConverter());
 		}
+		if (hasIC2/*||hasTechReborn TODO talk to modmuss*/) {
+			event.getRegistry().register(new BlockIC2Connector());
+		}
+		event.getRegistry().register(new BlockJacobsLadder());
+		event.getRegistry().register(new BlockPanel());
 	}
 
 	@SubscribeEvent
@@ -154,9 +157,12 @@ public class IndustrialWires {
 		for (BlockIWBase b:blocks) {
 			event.getRegistry().register(b.createItemBlock());
 		}
-		for (Item i:items) {
-			event.getRegistry().register(i);
+
+		if (hasIC2/*||hasTechReborn TODO talk to modmuss*/) {
+			event.getRegistry().register(new ItemIC2Coil());
 		}
+		event.getRegistry().register(new ItemPanelComponent());
+		event.getRegistry().register(new ItemKey());
 	}
 
 	@SubscribeEvent
