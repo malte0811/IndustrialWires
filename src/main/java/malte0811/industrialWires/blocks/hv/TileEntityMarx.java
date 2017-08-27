@@ -326,17 +326,14 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 					continue;
 				}
 				if (!world.isAirBlock(here)) {
-					ItemStack input = state.getBlock().getPickBlock(state, null, world, here, null);
-					if (!input.isEmpty()) {
-						ItemStack[] out = MarxOreHandler.getYield(input, energyPerOre);
-						for (ItemStack stack : out) {
-							EntityItem item = new EntityItem(world, here.getX() + .5, here.getY() + .5, here.getZ() + .5, stack);
-							final double maxMotion = .3;
-							item.motionX = 2*maxMotion*(Utils.RAND.nextDouble()-.5);
-							item.motionY = 2*maxMotion*(Utils.RAND.nextDouble()-.5);
-							item.motionZ = 2*maxMotion*(Utils.RAND.nextDouble()-.5);
-							world.spawnEntity(item);
-						}
+					ItemStack[] out = MarxOreHandler.getYield(world, here, energyPerOre);
+					for (ItemStack stack : out) {
+						EntityItem item = new EntityItem(world, here.getX() + .5, here.getY() + .5, here.getZ() + .5, stack);
+						final double maxMotion = .3;
+						item.motionX = 2 * maxMotion * (Utils.RAND.nextDouble() - .5);
+						item.motionY = 2 * maxMotion * (Utils.RAND.nextDouble() - .5);
+						item.motionZ = 2 * maxMotion * (Utils.RAND.nextDouble() - .5);
+						world.spawnEntity(item);
 					}
 					world.setBlockToAir(here);
 				}

@@ -26,8 +26,10 @@ import malte0811.industrialWires.blocks.converter.TileEntityMechICtoIE;
 import malte0811.industrialWires.blocks.converter.TileEntityMechIEtoIC;
 import malte0811.industrialWires.blocks.hv.*;
 import malte0811.industrialWires.blocks.wire.*;
+import malte0811.industrialWires.compat.Compat;
 import malte0811.industrialWires.controlpanel.PanelUtils;
 import malte0811.industrialWires.crafting.Recipes;
+import malte0811.industrialWires.hv.MarxOreHandler;
 import malte0811.industrialWires.items.ItemIC2Coil;
 import malte0811.industrialWires.items.ItemKey;
 import malte0811.industrialWires.items.ItemPanelComponent;
@@ -40,7 +42,6 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.potion.Potion;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -128,6 +129,7 @@ public class IndustrialWires {
 		MultiblockHandler.registerMultiblock(new MultiblockMarx());
 
 		proxy.preInit();
+		Compat.preInit();
 	}
 
 	@SubscribeEvent
@@ -154,8 +156,7 @@ public class IndustrialWires {
 
 	@EventHandler
 	public void init(FMLInitializationEvent e) {
-
-		ExtraIC2Compat.addToolConmpat();
+		MarxOreHandler.init();
 
 		packetHandler.registerMessage(MessageTileSyncIW.HandlerClient.class, MessageTileSyncIW.class, 0, Side.CLIENT);
 		packetHandler.registerMessage(MessagePanelInteract.HandlerServer.class, MessagePanelInteract.class, 1, Side.SERVER);

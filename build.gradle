@@ -49,12 +49,18 @@ repositories {
     maven { // Albedo Lights
         url 'https://repo.elytradev.com/'
     }
+    maven { // JEI & Tinkers
+        name 'DVS1 Maven FS'
+        url 'http://dvs1.progwml6.com/files/maven'
+    }
 }
 
 dependencies {
     compile "net.industrial-craft:industrialcraft-2:2.8.+"
     deobfCompile "blusunrize:ImmersiveEngineering:0.12-+:deobf"
     deobfCompile 'elucent:albedo:2.0-SNAPSHOT'
+    deobfCompile "mezz.jei:jei_1.12:4.+"
+    deobfCompile "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.+"
 }
 
 jar {
