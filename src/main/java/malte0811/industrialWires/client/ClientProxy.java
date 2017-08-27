@@ -280,6 +280,7 @@ public class ClientProxy extends CommonProxy {
 	private static ResourceLocation jacobsMiddle = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_middle");
 	private static ResourceLocation jacobsEnd = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_end");//~210 ms ~= 4 ticks
 	private static ResourceLocation marxBang = new ResourceLocation(IndustrialWires.MODID, "marx_bang");
+	private static ResourceLocation marxPop = new ResourceLocation(IndustrialWires.MODID, "marx_pop");
 
 	@Override
 	public void playJacobsLadderSound(TileEntityJacobsLadder te, int phase, Vec3d soundPos) {
@@ -308,10 +309,12 @@ public class ClientProxy extends CommonProxy {
 
 	@Override
 	public void playMarxBang(TileEntityMarx te, Vec3d pos, float energy) {
+		ResourceLocation soundLoc = marxBang;
 		if (energy<0) {
-			energy = .05F;
+			energy = -energy;
+			soundLoc = marxPop;
 		}
-		PositionedSoundRecord sound = new PositionedSoundRecord(marxBang, SoundCategory.BLOCKS, 5*energy, 1, false, 0, ISound.AttenuationType.LINEAR, (float) pos.x, (float) pos.y, (float) pos.z);
+		PositionedSoundRecord sound = new PositionedSoundRecord(soundLoc, SoundCategory.BLOCKS, 5*energy, 1, false, 0, ISound.AttenuationType.LINEAR, (float) pos.x, (float) pos.y, (float) pos.z);
 		ClientUtils.mc().getSoundHandler().playSound(sound);
 		playingSounds.put(te.getPos(), sound);
 	}

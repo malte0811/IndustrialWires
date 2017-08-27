@@ -46,7 +46,7 @@ item.industrialwires.key.key_ring.name=Key Ring
 industrialwires.subtitle.tinnitus=You have a tinnitus
 industrialwires.subtitle.jacobs_ladder=Jacob's ladder hums
 industrialwires.subtitle.marx_bang=Marx generator discharges
-
+industrialwires.subtitle.marx_pop=Marx generator misfires
 
 industrialwires.desc.wireLength=Wire length: %1s block(s)
 industrialwires.desc.recipe=Please check the Engineer's manual for recipe details

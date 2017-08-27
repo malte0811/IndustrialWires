@@ -292,7 +292,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 			net.updateValues();
 			NBTTagCompound data = new NBTTagCompound();
 			if (failed) {
-				energyStored = -1;
+				energyStored = -energyStored;
 			} else {
 				int seed = Utils.RAND.nextInt();
 				genDischarge((float) energyStored, seed);//TODO test on a dedicated server
@@ -422,7 +422,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 			if (dischargeData==null) {
 				dischargeData = new Discharge(stageCount);
 			}
-			dischargeData.energy = -1;
+			dischargeData.energy = energy;
 		}
 	}
 

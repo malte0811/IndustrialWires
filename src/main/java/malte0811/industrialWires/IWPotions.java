@@ -23,6 +23,8 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 
@@ -32,8 +34,10 @@ public class IWPotions {
 		tinnitus = new PotionTinnitus();
 	}
 	static class PotionTinnitus extends Potion {
+		ResourceLocation tex = new ResourceLocation(IndustrialWires.MODID,"textures/gui/tinnitus.png");
 		protected PotionTinnitus() {
 			super(true, 0xffff0000);
+			setIconIndex(0, 0);
 			this.setRegistryName(new ResourceLocation(IndustrialWires.MODID, "tinnitus"));
 			ForgeRegistries.POTIONS.register(this);
 		}
@@ -51,6 +55,14 @@ public class IWPotions {
 					IndustrialWires.proxy.startTinnitus();
 				}
 			}
+		}
+
+		@Override
+		@SideOnly(Side.CLIENT)
+		public int getStatusIconIndex()
+		{
+			Minecraft.getMinecraft().getTextureManager().bindTexture(tex);
+			return super.getStatusIconIndex();
 		}
 	}
 }
