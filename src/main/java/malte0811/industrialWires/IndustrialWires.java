@@ -131,6 +131,7 @@ public class IndustrialWires {
 
 		proxy.preInit();
 		Compat.preInit();
+		MarxOreHandler.preInit();
 	}
 
 	@SubscribeEvent
@@ -157,7 +158,6 @@ public class IndustrialWires {
 
 	@EventHandler
 	public void init(FMLInitializationEvent e) {
-		MarxOreHandler.init();
 
 		packetHandler.registerMessage(MessageTileSyncIW.HandlerClient.class, MessageTileSyncIW.class, 0, Side.CLIENT);
 		packetHandler.registerMessage(MessagePanelInteract.HandlerServer.class, MessagePanelInteract.class, 1, Side.SERVER);

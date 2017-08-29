@@ -5,14 +5,18 @@ import blusunrize.immersiveengineering.api.tool.ToolboxHandler;
 import crafttweaker.CraftTweakerAPI;
 import ic2.api.item.IBoxable;
 import ic2.api.item.IC2Items;
+import malte0811.industrialWires.hv.MarxOreHandler;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.Optional;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.function.Consumer;
 
 public class Compat {
+	public static Consumer<MarxOreHandler.OreInfo> addMarx = (o)->{};
+	public static Consumer<MarxOreHandler.OreInfo> removeMarx = (o)->{};
 
 	public static void preInit() {
 		callAllForClass(PreInit.class);

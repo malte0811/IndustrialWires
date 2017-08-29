@@ -54,6 +54,8 @@ public class JEIMarx implements IModPlugin {
 
 	@Override
 	public void onRuntimeAvailable(IJeiRuntime jeiRuntime) {
+		Compat.addMarx = (o) -> jeiRuntime.getRecipeRegistry().addRecipe(new MarxRecipeWrapper(o), marx.getUid());
+		Compat.removeMarx = (o) -> jeiRuntime.getRecipeRegistry().removeRecipe(new MarxRecipeWrapper(o), marx.getUid());
 	}
 
 	private class MarxCategory implements IRecipeCategory<MarxRecipeWrapper> {
@@ -122,10 +124,8 @@ public class JEIMarx implements IModPlugin {
 			slot.draw(minecraft, 62, 4);
 			if (recipe.outputSmall!=null&&!recipe.outputSmall.get().isEmpty()) {
 				slot.draw(minecraft, 62, 29);
-				//TODO Localization
 				minecraft.fontRenderer.drawString("x"+ recipe.smallMax+I18n.format(IndustrialWires.MODID+".desc.jei.alt"), 85, 33, 0xff000000);
 			}
-			//TODO Localization
 			minecraft.fontRenderer.drawString("x"+ Utils.formatDouble(recipe.maxYield, "0.#") + I18n.format(IndustrialWires.MODID+".desc.jei.max"), 85, 8, 0xff000000);
 			minecraft.fontRenderer.drawString("~", 0, 3, 0xff000000);
 			minecraft.fontRenderer.drawString((int) (recipe.avgEnergy*MarxOreHandler.defaultEnergy/1000)+" kJ",

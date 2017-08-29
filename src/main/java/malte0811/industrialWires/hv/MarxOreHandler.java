@@ -47,7 +47,7 @@ public class MarxOreHandler {
 	public static double defaultEnergy = 100_000;
 	public static double modifier;
 
-	public static void init() {
+	public static void preInit() {
 		// Vanilla ores
 		putOre("oreIron", .5, 4, "dustIron", "nuggetIron");
 		putOre("oreGold", 1, 4, "dustGold", "nuggetGold");

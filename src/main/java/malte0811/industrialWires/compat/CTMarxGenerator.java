@@ -16,6 +16,8 @@ import stanhebben.zenscript.annotations.Optional;
 import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenMethod;
 
+import java.util.Iterator;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 @ZenClass("mods.industrialwires.MarxGenerator")
@@ -50,11 +52,61 @@ public class CTMarxGenerator {
 		@Override
 		public void apply() {
 			MarxOreHandler.put(recipe);
+			Compat.addMarx.accept(recipe);
 		}
 
 		@Override
 		public String describe() {
 			return "Adding Marx Generator Recipe for "+ recipe.output.get();
+		}
+	}
+	@ZenMethod
+	public static void removeRecipe(IIngredient input) {
+		if (input instanceof IItemStack) {
+				CraftTweakerAPI.apply(new Remove((o)-> input.matches(CraftTweakerMC.getIItemStack(o))));
+				return;
+		} else if (input instanceof IOreDictEntry) {
+			String oreName = ((IOreDictEntry) input).getName();
+			int mainId = OreDictionary.getOreID(oreName);
+			CraftTweakerAPI.apply(new Remove((i)->{
+				int[] ids = OreDictionary.getOreIDs(i);
+				for (int id:ids) {
+					if (id==mainId) {
+						return true;
+					}
+				}
+				return false;
+			}));
+			return;
+		}
+		throw new IllegalArgumentException("Invalid parameter "+input);
+	}
+
+	private static class Remove implements IAction {
+		private final Predicate<ItemStack> inputMatcher;
+
+		public Remove(Predicate<ItemStack> inputMatcher) {
+			this.inputMatcher = inputMatcher;
+		}
+
+		@Override
+		public void apply() {
+			Iterator<MarxOreHandler.OreInfo> ores = MarxOreHandler.getRecipes().iterator();
+			while (ores.hasNext()) {
+				MarxOreHandler.OreInfo curr = ores.next();
+				for (ItemStack input:curr.exampleInput) {
+					if (inputMatcher.test(input)) {
+						ores.remove();
+						Compat.removeMarx.accept(curr);
+						break;
+					}
+				}
+			}
+		}
+
+		@Override
+		public String describe() {
+			return "Removing Marx Generator Recipes";
 		}
 	}
 }
