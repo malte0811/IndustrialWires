@@ -20,6 +20,7 @@ package malte0811.industrialWires.blocks.hv;
 
 import blusunrize.immersiveengineering.api.IEProperties;
 import malte0811.industrialWires.blocks.BlockIWMultiblock;
+import malte0811.industrialWires.blocks.IMetaEnum;
 import malte0811.industrialWires.blocks.IWProperties;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -40,7 +41,7 @@ import net.minecraftforge.common.property.IUnlistedProperty;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class BlockHVMultiblocks extends BlockIWMultiblock {
+public class BlockHVMultiblocks extends BlockIWMultiblock implements IMetaEnum {
 	public static final PropertyEnum<BlockTypes_HVMultiblocks> type = PropertyEnum.create("type", BlockTypes_HVMultiblocks.class);
 	public BlockHVMultiblocks() {
 		super(Material.IRON, "hv_multiblock");
@@ -96,5 +97,10 @@ public class BlockHVMultiblocks extends BlockIWMultiblock {
 		return new ExtendedBlockState(this, base.getProperties().toArray(new IProperty[0]), new IUnlistedProperty[]{
 				IEProperties.CONNECTIONS
 		});
+	}
+
+	@Override
+	public Object[] getValues() {
+		return BlockTypes_HVMultiblocks.values();
 	}
 }

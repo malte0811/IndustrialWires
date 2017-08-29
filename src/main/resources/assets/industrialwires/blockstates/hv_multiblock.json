@@ -10,9 +10,27 @@
 		}
 	},
 	"variants": {
+		"inventory,type=marx": [
+			{
+				"model": "industrialwires:marx_stage.obj",
+				"transform": {
+					"scale": 0.375,
+					"rotation": [
+						{
+							"x": 20
+						},
+						{
+							"y": 135
+						}
+					],
+					"translation": [
+						0.15, 0, 0
+					]
+				}
+			}
+		],
 		"type": {
 			"marx": {
-				
 			}
 		},
 		"facing": {
@@ -62,7 +80,7 @@
 				"model": "immersiveengineering:smartmodel/conn_empty"
 			}
 		},
-		"boolean0": //Mirror
+		"boolean0":
 		{
 			"false": {},
 			"true": {

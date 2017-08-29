@@ -64,6 +64,7 @@ import java.util.List;
 public class IndustrialWires {
 	public static final String MODID = "industrialwires";
 	public static final String VERSION = "${version}";
+	public static final String MODNAME = "Industrial Wires";
 
 	public static final List<BlockIWBase> blocks = new ArrayList<>();
 	public static final List<Item> items = new ArrayList<>();
@@ -165,6 +166,7 @@ public class IndustrialWires {
 
 		NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
 		IWPotions.init();
+		Compat.init();
 	}
 
 	@EventHandler

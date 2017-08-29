@@ -21,6 +21,7 @@ import blusunrize.immersiveengineering.api.Lib;
 import blusunrize.immersiveengineering.client.ClientUtils;
 import blusunrize.immersiveengineering.common.util.ItemNBTHelper;
 import malte0811.industrialWires.IndustrialWires;
+import malte0811.industrialWires.blocks.BlockIWBase;
 import malte0811.industrialWires.blocks.IMetaEnum;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.panelmodel.PanelModel;
@@ -132,8 +133,7 @@ public class ClientEventHandler {
 			ModelLoader.setCustomModelResourceLocation(IndustrialWires.key, meta, new ModelResourceLocation(loc, "inventory"));
 		}
 
-		Block[] blocks = {IndustrialWires.ic2conn, IndustrialWires.mechConv, IndustrialWires.jacobsLadder, IndustrialWires.panel};
-		for (Block b : blocks) {
+		for (BlockIWBase b : IndustrialWires.blocks) {
 			if (b != null) {
 				Item blockItem = Item.getItemFromBlock(b);
 				final ResourceLocation loc = b.getRegistryName();
