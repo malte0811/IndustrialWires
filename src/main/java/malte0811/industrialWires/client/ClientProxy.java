@@ -77,39 +77,40 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public void preInit() {
 		super.preInit();
-		ConnLoader.baseModels.put("ic2_conn_tin", new ResourceLocation("immersiveengineering:block/connector/connector_lv.obj"));
-		ConnLoader.textureReplacements.put("ic2_conn_tin", ImmutableMap.of("#immersiveengineering:blocks/connector_connector_lv",
-				IndustrialWires.MODID + ":blocks/ic2_conn_tin"));
-		ConnLoader.baseModels.put("ic2_relay_tin", new ResourceLocation("immersiveengineering:block/connector/connector_lv.obj"));
-		ConnLoader.textureReplacements.put("ic2_relay_tin", ImmutableMap.of("#immersiveengineering:blocks/connector_connector_lv",
-				IndustrialWires.MODID + ":blocks/ic2_relay_tin"));
+		if (IndustrialWires.hasIC2) {
+			ConnLoader.baseModels.put("ic2_conn_tin", new ResourceLocation("immersiveengineering:block/connector/connector_lv.obj"));
+			ConnLoader.textureReplacements.put("ic2_conn_tin", ImmutableMap.of("#immersiveengineering:blocks/connector_connector_lv",
+					IndustrialWires.MODID + ":blocks/ic2_conn_tin"));
+			ConnLoader.baseModels.put("ic2_relay_tin", new ResourceLocation("immersiveengineering:block/connector/connector_lv.obj"));
+			ConnLoader.textureReplacements.put("ic2_relay_tin", ImmutableMap.of("#immersiveengineering:blocks/connector_connector_lv",
+					IndustrialWires.MODID + ":blocks/ic2_relay_tin"));
 
-		ConnLoader.baseModels.put("ic2_conn_copper", new ResourceLocation("immersiveengineering:block/connector/connector_lv.obj"));
-		ConnLoader.textureReplacements.put("ic2_conn_copper", ImmutableMap.of("#immersiveengineering:blocks/connector_connector_lv",
-				IndustrialWires.MODID + ":blocks/ic2_conn_copper"));
-		ConnLoader.baseModels.put("ic2_relay_copper", new ResourceLocation("immersiveengineering:block/connector/connector_lv.obj"));
-		ConnLoader.textureReplacements.put("ic2_relay_copper", ImmutableMap.of("#immersiveengineering:blocks/connector_connector_lv",
-				IndustrialWires.MODID + ":blocks/ic2_relay_copper"));
+			ConnLoader.baseModels.put("ic2_conn_copper", new ResourceLocation("immersiveengineering:block/connector/connector_lv.obj"));
+			ConnLoader.textureReplacements.put("ic2_conn_copper", ImmutableMap.of("#immersiveengineering:blocks/connector_connector_lv",
+					IndustrialWires.MODID + ":blocks/ic2_conn_copper"));
+			ConnLoader.baseModels.put("ic2_relay_copper", new ResourceLocation("immersiveengineering:block/connector/connector_lv.obj"));
+			ConnLoader.textureReplacements.put("ic2_relay_copper", ImmutableMap.of("#immersiveengineering:blocks/connector_connector_lv",
+					IndustrialWires.MODID + ":blocks/ic2_relay_copper"));
 
-		ConnLoader.baseModels.put("ic2_conn_gold", new ResourceLocation("immersiveengineering:block/connector/connector_mv.obj"));
-		ConnLoader.textureReplacements.put("ic2_conn_gold", ImmutableMap.of("#immersiveengineering:blocks/connector_connector_mv",
-				IndustrialWires.MODID + ":blocks/ic2_conn_gold"));
-		ConnLoader.baseModels.put("ic2_relay_gold", new ResourceLocation("immersiveengineering:block/connector/connector_mv.obj"));
-		ConnLoader.textureReplacements.put("ic2_relay_gold", ImmutableMap.of("#immersiveengineering:blocks/connector_connector_mv",
-				IndustrialWires.MODID + ":blocks/ic2_relay_gold"));
+			ConnLoader.baseModels.put("ic2_conn_gold", new ResourceLocation("immersiveengineering:block/connector/connector_mv.obj"));
+			ConnLoader.textureReplacements.put("ic2_conn_gold", ImmutableMap.of("#immersiveengineering:blocks/connector_connector_mv",
+					IndustrialWires.MODID + ":blocks/ic2_conn_gold"));
+			ConnLoader.baseModels.put("ic2_relay_gold", new ResourceLocation("immersiveengineering:block/connector/connector_mv.obj"));
+			ConnLoader.textureReplacements.put("ic2_relay_gold", ImmutableMap.of("#immersiveengineering:blocks/connector_connector_mv",
+					IndustrialWires.MODID + ":blocks/ic2_relay_gold"));
 
-		ConnLoader.baseModels.put("ic2_conn_hv", new ResourceLocation("immersiveengineering:block/connector/connector_hv.obj"));
-		ConnLoader.textureReplacements.put("ic2_conn_hv", ImmutableMap.of("#immersiveengineering:blocks/connector_connector_hv",
-				IndustrialWires.MODID + ":blocks/ic2_conn_hv"));
-		ConnLoader.baseModels.put("ic2_relay_hv", new ResourceLocation("immersiveengineering:block/connector/relay_hv.obj"));
+			ConnLoader.baseModels.put("ic2_conn_hv", new ResourceLocation("immersiveengineering:block/connector/connector_hv.obj"));
+			ConnLoader.textureReplacements.put("ic2_conn_hv", ImmutableMap.of("#immersiveengineering:blocks/connector_connector_hv",
+					IndustrialWires.MODID + ":blocks/ic2_conn_hv"));
+			ConnLoader.baseModels.put("ic2_relay_hv", new ResourceLocation("immersiveengineering:block/connector/relay_hv.obj"));
 
-		ConnLoader.baseModels.put("ic2_conn_glass", new ResourceLocation("immersiveengineering:block/connector/connector_hv.obj"));
-		ConnLoader.textureReplacements.put("ic2_conn_glass", ImmutableMap.of("#immersiveengineering:blocks/connector_connector_hv",
-				IndustrialWires.MODID + ":blocks/ic2_conn_glass"));
-		ConnLoader.baseModels.put("ic2_relay_glass", new ResourceLocation("immersiveengineering:block/connector/relay_hv.obj"));
-		ConnLoader.textureReplacements.put("ic2_relay_glass", ImmutableMap.of("#immersiveengineering:blocks/connector_relay_hv",
-				IndustrialWires.MODID + ":blocks/ic2_relay_glass"));
-
+			ConnLoader.baseModels.put("ic2_conn_glass", new ResourceLocation("immersiveengineering:block/connector/connector_hv.obj"));
+			ConnLoader.textureReplacements.put("ic2_conn_glass", ImmutableMap.of("#immersiveengineering:blocks/connector_connector_hv",
+					IndustrialWires.MODID + ":blocks/ic2_conn_glass"));
+			ConnLoader.baseModels.put("ic2_relay_glass", new ResourceLocation("immersiveengineering:block/connector/relay_hv.obj"));
+			ConnLoader.textureReplacements.put("ic2_relay_glass", ImmutableMap.of("#immersiveengineering:blocks/connector_relay_hv",
+					IndustrialWires.MODID + ":blocks/ic2_relay_glass"));
+		}
 		ConnLoader.baseModels.put("rs_panel_conn", new ResourceLocation("industrialwires:block/rs_panel_conn.obj"));
 		OBJLoader.INSTANCE.addDomain(IndustrialWires.MODID);
 		ModelLoaderRegistry.registerLoader(new PanelModelLoader());
@@ -120,42 +121,57 @@ public class ClientProxy extends CommonProxy {
 	public void postInit() {
 		super.postInit();
 		ManualInstance m = ManualHelper.getManual();
-		PositionedItemStack[][] wireRecipes = new PositionedItemStack[3][10];
-		int xBase = 15;
-		Ingredient tinCable = IC2TRHelper.getStack("cable", "type:tin,insulation:0");
-		List<ItemStack> tinCableList = Arrays.asList(tinCable.getMatchingStacks());
-		for (int i = 0; i < 3; i++) {
-			for (int j = 0; j < 3; j++) {
-				wireRecipes[0][3 * i + j] = new PositionedItemStack(tinCableList, 18 * i + xBase, 18 * j);
-			}
-		}
-		ItemStack tmp = new ItemStack(IndustrialWires.coil);
-		ItemIC2Coil.setLength(tmp, 9);
-		wireRecipes[0][9] = new PositionedItemStack(tmp, 18 * 4 + xBase, 18);
-		Random r = new Random();
-		for (int i = 1; i < 3; i++) {
-			int lengthSum = 0;
-			for (int j1 = 0; j1 < 3; j1++) {
-				for (int j2 = 0; j2 < 3; j2++) {
-					if (r.nextBoolean()) {
-						// cable
-						lengthSum++;
-						wireRecipes[i][3 * j1 + j2] = new PositionedItemStack(tinCableList, 18 * j1 + xBase, 18 * j2);
-					} else {
-						// wire coil
-						int length = r.nextInt(99) + 1;
-						tmp = new ItemStack(IndustrialWires.coil);
-						ItemIC2Coil.setLength(tmp, length);
-						wireRecipes[i][3 * j1 + j2] = new PositionedItemStack(tmp, 18 * j1 + xBase, 18 * j2);
-						lengthSum += length;
-					}
+		if (IndustrialWires.hasIC2) {
+			PositionedItemStack[][] wireRecipes = new PositionedItemStack[3][10];
+			int xBase = 15;
+			Ingredient tinCable = IC2TRHelper.getStack("cable", "type:tin,insulation:0");
+			List<ItemStack> tinCableList = Arrays.asList(tinCable.getMatchingStacks());
+			for (int i = 0; i < 3; i++) {
+				for (int j = 0; j < 3; j++) {
+					wireRecipes[0][3 * i + j] = new PositionedItemStack(tinCableList, 18 * i + xBase, 18 * j);
 				}
 			}
-			tmp = new ItemStack(IndustrialWires.coil);
-			ItemIC2Coil.setLength(tmp, lengthSum);
-			wireRecipes[i][9] = new PositionedItemStack(tmp, 18 * 4 + xBase, 18);
-		}
+			ItemStack tmp = new ItemStack(IndustrialWires.coil);
+			ItemIC2Coil.setLength(tmp, 9);
+			wireRecipes[0][9] = new PositionedItemStack(tmp, 18 * 4 + xBase, 18);
+			Random r = new Random();
+			for (int i = 1; i < 3; i++) {
+				int lengthSum = 0;
+				for (int j1 = 0; j1 < 3; j1++) {
+					for (int j2 = 0; j2 < 3; j2++) {
+						if (r.nextBoolean()) {
+							// cable
+							lengthSum++;
+							wireRecipes[i][3 * j1 + j2] = new PositionedItemStack(tinCableList, 18 * j1 + xBase, 18 * j2);
+						} else {
+							// wire coil
+							int length = r.nextInt(99) + 1;
+							tmp = new ItemStack(IndustrialWires.coil);
+							ItemIC2Coil.setLength(tmp, length);
+							wireRecipes[i][3 * j1 + j2] = new PositionedItemStack(tmp, 18 * j1 + xBase, 18 * j2);
+							lengthSum += length;
+						}
+					}
+				}
+				tmp = new ItemStack(IndustrialWires.coil);
+				ItemIC2Coil.setLength(tmp, lengthSum);
+				wireRecipes[i][9] = new PositionedItemStack(tmp, 18 * 4 + xBase, 18);
+			}
 
+			m.addEntry("industrialwires.wires", "industrialwires",
+					new ManualPages.CraftingMulti(m, "industrialwires.wires0", new ItemStack(IndustrialWires.ic2conn, 1, 0), new ItemStack(IndustrialWires.ic2conn, 1, 1), new ItemStack(IndustrialWires.ic2conn, 1, 2), new ItemStack(IndustrialWires.ic2conn, 1, 3),
+							new ItemStack(IndustrialWires.ic2conn, 1, 4), new ItemStack(IndustrialWires.ic2conn, 1, 5), new ItemStack(IndustrialWires.ic2conn, 1, 6), new ItemStack(IndustrialWires.ic2conn, 1, 7)),
+					new ManualPages.Text(m, "industrialwires.wires1"),
+					new ManualPages.CraftingMulti(m, "industrialwires.wires2", (Object[]) wireRecipes)
+			);
+			if (IndustrialWires.mechConv != null) {
+				m.addEntry("industrialwires.mechConv", "industrialwires",
+						new ManualPages.Crafting(m, "industrialwires.mechConv0", new ItemStack(IndustrialWires.mechConv, 1, 1)),
+						new ManualPages.Crafting(m, "industrialwires.mechConv1", new ItemStack(IndustrialWires.mechConv, 1, 2)),
+						new ManualPages.Crafting(m, "industrialwires.mechConv2", new ItemStack(IndustrialWires.mechConv, 1, 0))
+				);
+			}
+		}
 		ClientUtils.mc().getItemColors().registerItemColorHandler((stack, pass) -> {
 			if (pass == 1) {
 				PanelComponent pc = ItemPanelComponent.componentFromStack(stack);
@@ -166,19 +182,6 @@ public class ClientProxy extends CommonProxy {
 			return ~0;
 		}, IndustrialWires.panelComponent);
 
-		m.addEntry("industrialwires.wires", "industrialwires",
-				new ManualPages.CraftingMulti(m, "industrialwires.wires0", new ItemStack(IndustrialWires.ic2conn, 1, 0), new ItemStack(IndustrialWires.ic2conn, 1, 1), new ItemStack(IndustrialWires.ic2conn, 1, 2), new ItemStack(IndustrialWires.ic2conn, 1, 3),
-						new ItemStack(IndustrialWires.ic2conn, 1, 4), new ItemStack(IndustrialWires.ic2conn, 1, 5), new ItemStack(IndustrialWires.ic2conn, 1, 6), new ItemStack(IndustrialWires.ic2conn, 1, 7)),
-				new ManualPages.Text(m, "industrialwires.wires1"),
-				new ManualPages.CraftingMulti(m, "industrialwires.wires2", (Object[]) wireRecipes)
-		);
-		if (IndustrialWires.mechConv != null) {
-			m.addEntry("industrialwires.mechConv", "industrialwires",
-					new ManualPages.Crafting(m, "industrialwires.mechConv0", new ItemStack(IndustrialWires.mechConv, 1, 1)),
-					new ManualPages.Crafting(m, "industrialwires.mechConv1", new ItemStack(IndustrialWires.mechConv, 1, 2)),
-					new ManualPages.Crafting(m, "industrialwires.mechConv2", new ItemStack(IndustrialWires.mechConv, 1, 0))
-			);
-		}
 		Config.manual_doubleA.put("iwJacobsUsage", IWConfig.HVStuff.jacobsUsageEU);
 		Config.manual_int.put("iwKeysOnRing", IWConfig.maxKeysOnRing);
 		m.addEntry("industrialwires.jacobs", "industrialwires",
