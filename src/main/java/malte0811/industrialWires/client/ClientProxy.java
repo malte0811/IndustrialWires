@@ -18,9 +18,11 @@
 package malte0811.industrialWires.client;
 
 import blusunrize.immersiveengineering.api.ManualHelper;
+import blusunrize.immersiveengineering.api.ManualPageMultiblock;
 import blusunrize.immersiveengineering.client.ClientUtils;
 import blusunrize.immersiveengineering.client.models.smart.ConnLoader;
 import blusunrize.immersiveengineering.common.Config;
+import blusunrize.immersiveengineering.common.util.Utils;
 import blusunrize.lib.manual.ManualInstance;
 import blusunrize.lib.manual.ManualPages;
 import blusunrize.lib.manual.ManualPages.PositionedItemStack;
@@ -43,6 +45,8 @@ import malte0811.industrialWires.client.panelmodel.PanelModelLoader;
 import malte0811.industrialWires.client.render.TileRenderJacobsLadder;
 import malte0811.industrialWires.client.render.TileRenderMarx;
 import malte0811.industrialWires.controlpanel.PanelComponent;
+import malte0811.industrialWires.hv.MarxOreHandler;
+import malte0811.industrialWires.hv.MultiblockMarx;
 import malte0811.industrialWires.items.ItemIC2Coil;
 import malte0811.industrialWires.items.ItemPanelComponent;
 import net.minecraft.client.Minecraft;
@@ -50,6 +54,7 @@ import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.MovingSound;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -64,9 +69,7 @@ import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 
-import java.util.Arrays;
-import java.util.Random;
-import java.util.WeakHashMap;
+import java.util.*;
 
 public class ClientProxy extends CommonProxy {
 	@Override
@@ -166,17 +169,17 @@ public class ClientProxy extends CommonProxy {
 
 		int oldLength = Config.IEConfig.Tools.earDefenders_SoundBlacklist.length;
 		Config.IEConfig.Tools.earDefenders_SoundBlacklist =
-				Arrays.copyOf(Config.IEConfig.Tools.earDefenders_SoundBlacklist, oldLength+1);
+				Arrays.copyOf(Config.IEConfig.Tools.earDefenders_SoundBlacklist, oldLength + 1);
 		Config.IEConfig.Tools.earDefenders_SoundBlacklist[oldLength] = TINNITUS_LOC.toString();
 
-		m.addEntry("industrialwires.wires", "industrialwires",
+		m.addEntry("industrialwires.wires", IndustrialWires.MODID,
 				new ManualPages.CraftingMulti(m, "industrialwires.wires0", new ItemStack(IndustrialWires.ic2conn, 1, 0), new ItemStack(IndustrialWires.ic2conn, 1, 1), new ItemStack(IndustrialWires.ic2conn, 1, 2), new ItemStack(IndustrialWires.ic2conn, 1, 3),
 						new ItemStack(IndustrialWires.ic2conn, 1, 4), new ItemStack(IndustrialWires.ic2conn, 1, 5), new ItemStack(IndustrialWires.ic2conn, 1, 6), new ItemStack(IndustrialWires.ic2conn, 1, 7)),
 				new ManualPages.Text(m, "industrialwires.wires1"),
 				new ManualPages.CraftingMulti(m, "industrialwires.wires2", (Object[]) wireRecipes)
 		);
 		if (IndustrialWires.mechConv != null) {
-			m.addEntry("industrialwires.mechConv", "industrialwires",
+			m.addEntry("industrialwires.mechConv", IndustrialWires.MODID,
 					new ManualPages.Crafting(m, "industrialwires.mechConv0", new ItemStack(IndustrialWires.mechConv, 1, 1)),
 					new ManualPages.Crafting(m, "industrialwires.mechConv1", new ItemStack(IndustrialWires.mechConv, 1, 2)),
 					new ManualPages.Crafting(m, "industrialwires.mechConv2", new ItemStack(IndustrialWires.mechConv, 1, 0))
@@ -184,7 +187,7 @@ public class ClientProxy extends CommonProxy {
 		}
 		Config.manual_doubleA.put("iwJacobsUsage", IWConfig.HVStuff.jacobsUsageEU);
 		Config.manual_int.put("iwKeysOnRing", IWConfig.maxKeysOnRing);
-		m.addEntry("industrialwires.jacobs", "industrialwires",
+		m.addEntry("industrialwires.jacobs", IndustrialWires.MODID,
 				new ManualPages.CraftingMulti(m, "industrialwires.jacobs0", new ItemStack(IndustrialWires.jacobsLadder, 1, 0), new ItemStack(IndustrialWires.jacobsLadder, 1, 1), new ItemStack(IndustrialWires.jacobsLadder, 1, 2)),
 				new ManualPages.Text(m, "industrialwires.jacobs1"));
 
@@ -219,6 +222,32 @@ public class ClientProxy extends CommonProxy {
 				new ManualPages.Crafting(m, "industrialwires.lock1", new ItemStack(IndustrialWires.key, 1, 2)),
 				new ManualPages.Crafting(m, "industrialwires.panel_meter", new ItemStack(IndustrialWires.panelComponent, 1, 8))
 		);
+		List<MarxOreHandler.OreInfo> ores = MarxOreHandler.getRecipes();
+		List<ManualPages> marxEntry = new ArrayList<>();
+		marxEntry.add(new ManualPages.Text(m, IndustrialWires.MODID + ".marx0"));
+		marxEntry.add(new ManualPageMultiblock(m, IndustrialWires.MODID + ".marx1", MultiblockMarx.INSTANCE));
+		marxEntry.add(new ManualPages.Text(m, IndustrialWires.MODID + ".marx2"));
+		marxEntry.add(new ManualPages.Text(m, IndustrialWires.MODID + ".marx3"));
+		marxEntry.add(new ManualPages.Text(m, IndustrialWires.MODID + ".marx4"));
+		marxEntry.add(new ManualPages.Text(m, IndustrialWires.MODID + ".marx5"));
+		marxEntry.add(new ManualPages.Text(m, IndustrialWires.MODID + ".marx6"));
+		String text = I18n.format("ie.manual.entry.industrialwires.marx7")+"\n";
+		for (int i = 0; i < ores.size(); ) {
+			for (int j = 0; j < (i==0?12:13) && i < ores.size(); j+=4, i++) {
+				MarxOreHandler.OreInfo curr = ores.get(i);
+				text += I18n.format(IndustrialWires.MODID+".desc.input")+": §l" + curr.exampleInput.get(0).getDisplayName() + "§r\n";
+				text += I18n.format(IndustrialWires.MODID+".desc.output")+": " + Utils.formatDouble(curr.maxYield, "0.#") + "x" + curr.output.get().getDisplayName() + "\n";
+				if (curr.outputSmall!=null&&!curr.outputSmall.get().isEmpty()) {
+					text += I18n.format(IndustrialWires.MODID+".desc.alt")+": " + curr.smallMax + "x" + curr.outputSmall.get().getDisplayName() + "\n";
+					j++;
+				}
+				text += I18n.format(IndustrialWires.MODID+".desc.ideal_e")+": " + Utils.formatDouble(curr.avgEnergy*MarxOreHandler.defaultEnergy / 1000, "0.#") + " kJ\n\n";
+			}
+			marxEntry.add(new ManualPages.Text(m, text));
+			text = "";
+		}
+		m.addEntry("industrialwires.marx", IndustrialWires.MODID, marxEntry.toArray(new ManualPages[marxEntry.size()]));
+
 	}
 
 	private static final ResourceLocation TINNITUS_LOC = new ResourceLocation(IndustrialWires.MODID, "tinnitus");

@@ -672,7 +672,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		signals[channel] = (byte) Math.max(value, signals[channel]);
 	}
 
-	void setStageCount(int stageCount) {
+	public void setStageCount(int stageCount) {
 		this.stageCount = stageCount;
 		rcTimeConst = 5D/stageCount;
 		timeFactor = Math.exp(-1/(20*rcTimeConst));

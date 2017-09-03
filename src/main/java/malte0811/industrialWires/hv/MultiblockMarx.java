@@ -16,7 +16,7 @@
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package malte0811.industrialWires.blocks.hv;
+package malte0811.industrialWires.hv;
 
 import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.api.IEProperties;
@@ -24,34 +24,98 @@ import blusunrize.immersiveengineering.api.MultiblockHandler.IMultiblock;
 import blusunrize.immersiveengineering.api.crafting.IngredientStack;
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler;
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler.Connection;
+import blusunrize.immersiveengineering.api.energy.wires.WireType;
 import blusunrize.immersiveengineering.common.IEContent;
 import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_Connector;
-import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0;
-import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration2;
-import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDevice0;
+import com.google.common.collect.ImmutableSet;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.IWProperties;
+import malte0811.industrialWires.blocks.hv.BlockHVMultiblocks;
+import malte0811.industrialWires.blocks.hv.TileEntityMarx;
+import malte0811.industrialWires.client.ClientUtilsIW;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BlockRendererDispatcher;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.common.property.IExtendedBlockState;
+import org.lwjgl.opengl.GL11;
 
 import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_Connector.CONNECTOR_HV;
-import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_Connector.CONNECTOR_REDSTONE;
+import static blusunrize.immersiveengineering.api.ApiUtils.getConnectionCatenary;
+import static blusunrize.immersiveengineering.api.IEProperties.*;
+import static blusunrize.immersiveengineering.common.IEContent.*;
+import static blusunrize.immersiveengineering.common.blocks.BlockTypes_MetalsIE.STEEL;
+import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_Connector.*;
+import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.HEAVY_ENGINEERING;
+import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration1.STEEL_FENCE;
+import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration2.STEEL_WALLMOUNT;
+import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDevice0.CAPACITOR_HV;
 import static malte0811.industrialWires.blocks.IWProperties.MarxType.*;
 import static malte0811.industrialWires.blocks.hv.BlockTypes_HVMultiblocks.MARX;
 import static malte0811.industrialWires.util.MiscUtils.offset;
 
 public class MultiblockMarx implements IMultiblock {
-	public static final IBlockState[][][] structure = new IBlockState[2][5][5];
+	//up forward right
+	private static final ItemStack[][][] structureStacks = new ItemStack[5][8][2];
+	private static ItemStack rsConnDummy;
+	private static ItemStack hvConnDummy;
+	private static ItemStack hvRel1Dummy;
+	private static ItemStack hvRel0Dummy;
+	private static ItemStack wallMountUpDummy;
+	private static ItemStack wallMountDownDummy;
+	public static MultiblockMarx INSTANCE;
+
+	public MultiblockMarx() {
+		if (rsConnDummy == null) {
+			rsConnDummy = new ItemStack(Blocks.BRICK_BLOCK);
+			hvConnDummy = new ItemStack(Blocks.BRICK_BLOCK);
+			hvRel1Dummy = new ItemStack(Blocks.BRICK_BLOCK);
+			hvRel0Dummy = new ItemStack(Blocks.BRICK_BLOCK);
+			wallMountUpDummy = new ItemStack(Blocks.BRICK_BLOCK);
+			wallMountDownDummy = new ItemStack(Blocks.BRICK_BLOCK);
+		}
+		for (int up = 0; up < 5; up++) {
+			structureStacks[up][2][0] = structureStacks[up][2][1] = hvRel1Dummy;
+			structureStacks[up][3][0] = structureStacks[up][3][1]
+					= new ItemStack(blockMetalDevice0, 1, CAPACITOR_HV.getMeta());
+			structureStacks[up][4][0] = wallMountDownDummy;
+			structureStacks[up][4][1] = wallMountUpDummy;
+			if (up == 0) {
+				structureStacks[up][0][0] = rsConnDummy;
+				structureStacks[up][0][1] = hvConnDummy;
+				structureStacks[up][1][0] = structureStacks[0][1][1]
+						= new ItemStack(blockMetalDecoration0, 1, HEAVY_ENGINEERING.getMeta());
+				for (int i = 4; i < structureStacks[up].length; i++) {
+					structureStacks[up][i][0] = new ItemStack(IEContent.blockMetalDecoration1, 1, STEEL_FENCE.getMeta());
+				}
+				structureStacks[up][structureStacks[0].length - 1][1] = new ItemStack(blockStorage, 1, STEEL.getMeta());
+			} else if (up == 4) {
+				structureStacks[up][2][0] = structureStacks[up][2][1] = hvRel0Dummy;
+				for (int i = 4; i < structureStacks[up].length; i++) {
+					structureStacks[up][i][1] = new ItemStack(IEContent.blockMetalDecoration1, 1, STEEL_FENCE.getMeta());
+				}
+			}
+		}
+	}
+
 
 	@Override
 	public String getUniqueName() {
@@ -61,7 +125,27 @@ public class MultiblockMarx implements IMultiblock {
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean isBlockTrigger(IBlockState state) {
-		return state.getBlock() == IEContent.blockMetalDevice0 && state.getValue(IEContent.blockMetalDevice0.property) == BlockTypes_MetalDevice0.CAPACITOR_HV;
+		return state.getBlock() == blockMetalDevice0 && state.getValue(blockMetalDevice0.property) == CAPACITOR_HV;
+	}
+
+	@Override
+	public ItemStack[][][] getStructureManual() {
+		return structureStacks;
+	}
+
+	@Override
+	public IngredientStack[] getTotalMaterials() {
+		return new IngredientStack[] {
+				new IngredientStack(new ItemStack(blockMetalDevice0, 10, CAPACITOR_HV.getMeta())),
+				new IngredientStack(new ItemStack(blockMetalDecoration0, 2, HEAVY_ENGINEERING.getMeta())),
+				new IngredientStack(new ItemStack(blockConnectors, 1, CONNECTOR_HV.getMeta())),
+				new IngredientStack(new ItemStack(blockConnectors, 1, CONNECTOR_REDSTONE.getMeta())),
+				new IngredientStack(new ItemStack(blockConnectors, 10, RELAY_HV.getMeta())),
+				new IngredientStack(new ItemStack(itemWireCoil, 8, 2)),
+				new IngredientStack(new ItemStack(blockMetalDecoration2, 8, STEEL_WALLMOUNT.getMeta())),
+				new IngredientStack("fenceSteel", 7),
+				new IngredientStack("blockSteel", 1)
+		};
 	}
 	private EnumFacing facing;
 	@SuppressWarnings("unchecked")
@@ -74,12 +158,12 @@ public class MultiblockMarx implements IMultiblock {
 		boolean mirrored = false;
 		Predicate<BlockPos> hvCap = (local) -> {
 			IBlockState b = world.getBlockState(local);
-			return b.getBlock() == IEContent.blockMetalDevice0 && b.getValue(IEContent.blockMetalDevice0.property) == BlockTypes_MetalDevice0.CAPACITOR_HV;
+			return b.getBlock() == blockMetalDevice0 && b.getValue(blockMetalDevice0.property) == CAPACITOR_HV;
 		};
 		Predicate<BlockPos> heavyEng = (local) -> {
 			IBlockState b = world.getBlockState(local);
 			IBlockState state = world.getBlockState(local);
-			return b.getBlock() == IEContent.blockMetalDecoration0 && b.getValue(IEContent.blockMetalDecoration0.property) == BlockTypes_MetalDecoration0.HEAVY_ENGINEERING;
+			return b.getBlock() == blockMetalDecoration0 && b.getValue(blockMetalDecoration0.property) == HEAVY_ENGINEERING;
 		};
 		Predicate<BlockPos> steelBlock = (local) -> {
 			IBlockState b = world.getBlockState(local);
@@ -91,7 +175,7 @@ public class MultiblockMarx implements IMultiblock {
 			IBlockState b = world.getBlockState(local);
 			if (b.getBlock()==IEContent.blockMetalDecoration2) {
 				b = b.getBlock().getActualState(b, world, local);
-				if (b.getValue(IEContent.blockMetalDecoration2.property)== BlockTypes_MetalDecoration2.STEEL_WALLMOUNT) {
+				if (b.getValue(IEContent.blockMetalDecoration2.property)== STEEL_WALLMOUNT) {
 					int int_4_wanted = up ? 0 : 1;
 					return b.getValue(IEProperties.INT_4)==int_4_wanted;
 				}
@@ -113,7 +197,7 @@ public class MultiblockMarx implements IMultiblock {
 			if (state.getValue(IEContent.blockConnectors.property)!= BlockTypes_Connector.RELAY_HV) {
 				return (byte)-1;
 			}
-			if (state.getValue(IEProperties.FACING_ALL)!=facing) {
+			if (state.getValue(FACING_ALL)!=facing) {
 				return (byte)-1;
 			}
 			byte ret = 0;
@@ -141,7 +225,7 @@ public class MultiblockMarx implements IMultiblock {
 			if (state.getValue(IEContent.blockConnectors.property)!= type) {
 				return false;
 			}
-			if (state.getValue(IEProperties.FACING_ALL)!=(facing)) {
+			if (state.getValue(FACING_ALL)!=(facing)) {
 				return false;
 			}
 			Set<Connection> existingConns = ImmersiveNetHandler.INSTANCE.getConnections(world, local);
@@ -281,24 +365,55 @@ public class MultiblockMarx implements IMultiblock {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public ItemStack[][][] getStructureManual() {
-		return new ItemStack[0][][];
-	}
-
-	@Override
-	public IngredientStack[] getTotalMaterials() {
-		return new IngredientStack[0];
+	public IBlockState getBlockstateFromStack(int index, ItemStack stack) {
+		IBlockState connBase = blockConnectors.getDefaultState().withProperty(FACING_ALL, EnumFacing.EAST);
+		IBlockState mountBase = blockMetalDecoration2.getDefaultState().withProperty(FACING_ALL, EnumFacing.WEST)
+				.withProperty(blockMetalDecoration2.property, STEEL_WALLMOUNT);
+		if (stack == rsConnDummy) {
+			return connBase.withProperty(blockConnectors.property, CONNECTOR_REDSTONE);
+		} else if (stack == hvConnDummy) {
+			return connBase.withProperty(blockConnectors.property, CONNECTOR_HV);
+		} else if (stack == hvRel0Dummy || stack == hvRel1Dummy) {
+			return connBase.withProperty(blockConnectors.property, RELAY_HV);
+		} else if (stack == wallMountDownDummy) {
+			return mountBase.withProperty(INT_4, 1);
+		} else if (stack == wallMountUpDummy) {
+			return mountBase.withProperty(INT_4, 0);
+		}
+		return index==-1?null:IMultiblock.super.getBlockstateFromStack(index, stack);
 	}
 
 	@Override
 	public boolean overwriteBlockRender(ItemStack stack, int iterator) {
+		IBlockState here = getBlockstateFromStack(-1, stack);
+		if (here!=null) {
+			BlockRendererDispatcher dispatcher = Minecraft.getMinecraft().getBlockRendererDispatcher();
+			IBakedModel model = dispatcher.getModelForState(here);
+			if (stack == hvRel1Dummy && here instanceof IExtendedBlockState) {
+				Connection up = new Connection(BlockPos.ORIGIN, BlockPos.ORIGIN.down(), WireType.STEEL, 1);
+				up.catenaryVertices = getConnectionCatenary(up, new Vec3d(.125, .5, .5),
+						new Vec3d(.125, 1.5, .5));
+				here = ((IExtendedBlockState) here).withProperty(CONNECTIONS, ImmutableSet.of(up));
+			}
+			GlStateManager.disableBlend();
+			ForgeHooksClient.setRenderLayer(BlockRenderLayer.SOLID);
+			Tessellator tessellator = Tessellator.getInstance();
+			BufferBuilder buffer = tessellator.getBuffer();
+			buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+			ClientUtilsIW.renderModelTESRFast(model.getQuads(here, null, 13), buffer);
+			tessellator.draw();
+			GlStateManager.enableBlend();
+			ForgeHooksClient.setRenderLayer(null);
+			return true;
+		}
 		return false;
 	}
 
 	@Override
 	public float getManualScale() {
-		return 0;
+		return 12;
 	}
 
 	@Override

@@ -24,12 +24,16 @@ import malte0811.industrialWires.blocks.converter.BlockMechanicalConverter;
 import malte0811.industrialWires.blocks.converter.TileEntityIEMotor;
 import malte0811.industrialWires.blocks.converter.TileEntityMechICtoIE;
 import malte0811.industrialWires.blocks.converter.TileEntityMechIEtoIC;
-import malte0811.industrialWires.blocks.hv.*;
+import malte0811.industrialWires.blocks.hv.BlockHVMultiblocks;
+import malte0811.industrialWires.blocks.hv.BlockJacobsLadder;
+import malte0811.industrialWires.blocks.hv.TileEntityJacobsLadder;
+import malte0811.industrialWires.blocks.hv.TileEntityMarx;
 import malte0811.industrialWires.blocks.wire.*;
 import malte0811.industrialWires.compat.Compat;
 import malte0811.industrialWires.controlpanel.PanelUtils;
 import malte0811.industrialWires.crafting.Recipes;
 import malte0811.industrialWires.hv.MarxOreHandler;
+import malte0811.industrialWires.hv.MultiblockMarx;
 import malte0811.industrialWires.items.ItemIC2Coil;
 import malte0811.industrialWires.items.ItemKey;
 import malte0811.industrialWires.items.ItemPanelComponent;
@@ -37,6 +41,7 @@ import malte0811.industrialWires.network.MessageGUIInteract;
 import malte0811.industrialWires.network.MessageItemSync;
 import malte0811.industrialWires.network.MessagePanelInteract;
 import malte0811.industrialWires.network.MessageTileSyncIW;
+import malte0811.industrialWires.util.CommandIW;
 import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
@@ -49,6 +54,7 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
@@ -127,7 +133,6 @@ public class IndustrialWires {
 			GameRegistry.registerTileEntity(TileEntityMechICtoIE.class, MODID + ":mechIcToIe");
 			GameRegistry.registerTileEntity(TileEntityMechIEtoIC.class, MODID + ":mechIeToIc");
 		}
-		MultiblockHandler.registerMultiblock(new MultiblockMarx());
 
 		proxy.preInit();
 		Compat.preInit();
@@ -159,6 +164,9 @@ public class IndustrialWires {
 	@EventHandler
 	public void init(FMLInitializationEvent e) {
 
+		MultiblockMarx.INSTANCE = new MultiblockMarx();
+		MultiblockHandler.registerMultiblock(MultiblockMarx.INSTANCE);
+
 		packetHandler.registerMessage(MessageTileSyncIW.HandlerClient.class, MessageTileSyncIW.class, 0, Side.CLIENT);
 		packetHandler.registerMessage(MessagePanelInteract.HandlerServer.class, MessagePanelInteract.class, 1, Side.SERVER);
 		packetHandler.registerMessage(MessageGUIInteract.HandlerServer.class, MessageGUIInteract.class, 2, Side.SERVER);
@@ -173,5 +181,9 @@ public class IndustrialWires {
 	public void postInit(FMLPostInitializationEvent e) {
         PanelUtils.PANEL_ITEM = Item.getItemFromBlock(panel);
         proxy.postInit();
+	}
+	@Mod.EventHandler
+	public void serverStarting(FMLServerStartingEvent event) {
+		event.registerServerCommand(new CommandIW());
 	}
 }

@@ -51,6 +51,10 @@ industrialwires.subtitle.marx_pop=Marx generator misfires
 industrialwires.desc.jei.marx=Marx Generator
 industrialwires.desc.jei.alt= (alternative)
 industrialwires.desc.jei.max= (max.)
+industrialwires.desc.input=Input
+industrialwires.desc.output=Main Output
+industrialwires.desc.alt=Replacement
+industrialwires.desc.ideal_e=Ideal Energy
 
 industrialwires.desc.wireLength=Wire length: %1s block(s)
 industrialwires.desc.recipe=Please check the Engineer's manual for recipe details
@@ -117,11 +121,22 @@ ie.manual.entry.industrialwires.mechConv1=like a waterwheel or a motor (see page
 ie.manual.entry.industrialwires.mechConv2=lost with each conversion.<br>As a little extra the "Mechanical converter" product series also contains a Rotational Motor: It consumes IF to produce IE rotational energy. As with the converters this is not a lossless process.
 
 ie.manual.entry.industrialwires.jacobs.name=Jacob's Ladders
+# Note for potential translators: This refers to Polychlorinated biphenyls (a poisonous ingredient in old insulation oils) rather than printed circuit boards
 ie.manual.entry.industrialwires.jacobs.subtext=Probably contain PCB's!
 ie.manual.entry.industrialwires.jacobs0=By applying a high voltage between 2 electrodes forming a "V" one can create an arc travelling upwards. They don't serve a particular purpose apart from being a nice-looking waste of power. Power can be supplied using either Flux or EU. The energy usage varies with the size of the ladder.
 ie.manual.entry.industrialwires.jacobs1=These are the required power values in EU: <config;dA;iwJacobsUsage>. Due to the voltages involved touching the ladder while active is not a good idea. Applying salt to the electrodes will cause the arc to be colored orange for a short time due to the sodium contained in the salt.
 
 
+ie.manual.entry.industrialwires.marx.name=Marx Generator
+ie.manual.entry.industrialwires.marx.subtext=I'm Erwin-Otto, not Karl!
+ie.manual.entry.industrialwires.marx0=A Marx Generator is a device use to produce high-voltage high-energy pulses. These pulses are visible as lightning between the output terminals and can be used to process ores. Each type of ore has an ideal amount of processing energy (see <link;industrialwires.marx;§oAppendix B§r;7>). The precise values are unknown, estimate values with 10%% accuracy can be found at the end of this entry. The factor between the actual value and the estimate is the same for all types of ore.
+ie.manual.entry.industrialwires.marx1=§lConstruction§r<br>The above plan shows a 5-stage generator capable of producing 3 block lightning. An arbitrary amount of stages can be added by increasing the number of
+ie.manual.entry.industrialwires.marx2="middle" layers. Power (either IF or EU) is connected to the HV connector, the redstone wire for the control signals is connected to the redstone connector<br>§lEnergy§r<br>Each stage of the Marx generator consists of a 1.6μF capacitor that is charged to up to 250kV (see <link;industrialwires.marx;§oAppendix A§r;6>). When the generator is fully charged the voltage of each capacitor is roughly equal to the charging voltage. The total energy is the sum of the energy stored in the individual
+ie.manual.entry.industrialwires.marx3=capacitors and is split equally between the ores to be processed.<br>§lControl signals§r<br>Voltages are represented by 2 signals: The first signal is simply proportional to the voltage to represent. The second signal is proportional to the voltage in the "gap" between 2 values of the first signal.<br>The charging voltage is controlled by the white and yellow signals. The voltages of the top and bottom capacitor are output to the magenta and
+ie.manual.entry.industrialwires.marx4=pink resp. the orange and lime signals. The light blue signal is a firing control. If it is high the generator will attempt to fire. If the voltage of the bottom capacitor is lower than 125 kV or the total voltage is lower than 30%% of the maximum output voltage the generator will misfire, discharging the capacitors without actually producing lightning.<br> §lSafety§r<br>Due to the high voltages and energies involved in firing a Marx generator a safe distance should be maintained to avoid
+ie.manual.entry.industrialwires.marx5=injury or death. Even outside of this area hearing protection (As provided by Immersive Engineering) is obligatory. Formulas to calculate the safe distances can be found in <link;industrialwires.marx;§oAppendix A§r;6>.
+ie.manual.entry.industrialwires.marx6=§lAppendix A: Formulas§r<br>Energy stored in a capacitor:<br>E=0.5*C*U^2<br>E: Energy, C: Capacitance, U: Voltage<br>Voltage from redstone signals:<br>U=250/255*(16*a+b)<br>U: Voltage, a: First signal, b: Second signal<br>Safe distance (Physical damage):<br>r=sqrt(e/50,000)<br>r: Safe distance, e: Energy stored<br>Safe distance (Ear damage):<br>r=sqrt(e)/100<br>r: Safe distance, e: Energy stored
+ie.manual.entry.industrialwires.marx7=§lAppendix B: Ore Energy Values§r
 
 ie.manual.entry.industrialwires.intro.name=Introduction
 ie.manual.entry.industrialwires.intro.subtext=

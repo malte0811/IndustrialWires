@@ -22,22 +22,18 @@ import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.api.crafting.IngredientStack;
 import blusunrize.immersiveengineering.common.util.Utils;
 import malte0811.industrialWires.IndustrialWires;
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiPredicate;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static net.minecraftforge.oredict.OreDictionary.getOres;
@@ -52,7 +48,7 @@ public class MarxOreHandler {
 		putOre("oreIron", .5, 4, "dustIron", "nuggetIron");
 		putOre("oreGold", 1, 4, "dustGold", "nuggetGold");
 		putOre("oreDiamond", 2, 4, "gemDiamond");
-		putOre("oreEmerald", 3, 4, "gemEmerald");
+		putOre("oreEmerald", 2.25, 4, "gemEmerald");
 		putOre("oreLapis", .75, 10, "gemLapis");
 		putOre("oreCoal", .75, 8, Items.COAL, 0);
 		putOre("oreRedstone", 1, 12, "dustRedstone");
@@ -80,7 +76,7 @@ public class MarxOreHandler {
 	}
 
 	public static void resetModifier() {
-		modifier = MathHelper.clamp(Utils.RAND.nextGaussian()*.1+1, .9, 1.1);
+		modifier = .9+Utils.RAND.nextDouble()*.2;
 	}
 
 	public static ItemStack[] getYield(World world, BlockPos pos, double energy) {
