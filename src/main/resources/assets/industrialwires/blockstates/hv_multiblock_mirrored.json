@@ -65,13 +65,13 @@
 		},
 		"marx_type": {
 			"bottom": {
-				"model": "industrialwires:marx_bottom.obj"
+				"model": "industrialwires:marx_bottom_mirrored.obj"
 			},
 			"stage": {
-				"model": "industrialwires:marx_stage.obj"
+				"model": "industrialwires:marx_stage_mirrored.obj"
 			},
 			"top": {
-				"model": "industrialwires:marx_top.obj"
+				"model": "industrialwires:marx_top_mirrored.obj"
 			},
 			"no_model": {
 				"model": "builtin/generated"

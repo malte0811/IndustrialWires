@@ -28,7 +28,6 @@ import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.NonNullList;
@@ -43,14 +42,17 @@ import javax.annotation.Nullable;
 
 public class BlockHVMultiblocks extends BlockIWMultiblock implements IMetaEnum {
 	public static final PropertyEnum<BlockTypes_HVMultiblocks> type = PropertyEnum.create("type", BlockTypes_HVMultiblocks.class);
+	public static final String NAME = "hv_multiblock";
 	public BlockHVMultiblocks() {
-		super(Material.IRON, "hv_multiblock");
+		super(Material.IRON, NAME);
 	}
 
 	@Override
 	public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> list) {
 		// No MB's in the creative inventory!
 	}
+
+
 
 	@Override
 	protected IProperty[] getProperties() {

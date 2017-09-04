@@ -27,7 +27,6 @@ import blusunrize.lib.manual.ManualInstance;
 import blusunrize.lib.manual.ManualPages;
 import blusunrize.lib.manual.ManualPages.PositionedItemStack;
 import com.google.common.collect.ImmutableMap;
-import ic2.api.item.IC2Items;
 import malte0811.industrialWires.CommonProxy;
 import malte0811.industrialWires.IWConfig;
 import malte0811.industrialWires.IWPotions;
@@ -45,9 +44,9 @@ import malte0811.industrialWires.client.panelmodel.PanelModelLoader;
 import malte0811.industrialWires.client.render.TileRenderJacobsLadder;
 import malte0811.industrialWires.client.render.TileRenderMarx;
 import malte0811.industrialWires.controlpanel.PanelComponent;
+import malte0811.industrialWires.crafting.IC2TRHelper;
 import malte0811.industrialWires.hv.MarxOreHandler;
 import malte0811.industrialWires.hv.MultiblockMarx;
-import malte0811.industrialWires.crafting.IC2TRHelper;
 import malte0811.industrialWires.items.ItemIC2Coil;
 import malte0811.industrialWires.items.ItemPanelComponent;
 import net.minecraft.client.Minecraft;
@@ -255,15 +254,19 @@ public class ClientProxy extends CommonProxy {
 		marxEntry.add(new ManualPages.Text(m, IndustrialWires.MODID + ".marx6"));
 		String text = I18n.format("ie.manual.entry.industrialwires.marx7")+"\n";
 		for (int i = 0; i < ores.size(); ) {
-			for (int j = 0; j < (i==0?12:13) && i < ores.size(); j+=4, i++) {
+			for (int j = 0; j < 12 && i < ores.size(); j+=4, i++) {
 				MarxOreHandler.OreInfo curr = ores.get(i);
-				text += I18n.format(IndustrialWires.MODID+".desc.input")+": §l" + curr.exampleInput.get(0).getDisplayName() + "§r\n";
-				text += I18n.format(IndustrialWires.MODID+".desc.output")+": " + Utils.formatDouble(curr.maxYield, "0.#") + "x" + curr.output.get().getDisplayName() + "\n";
-				if (curr.outputSmall!=null&&!curr.outputSmall.get().isEmpty()) {
-					text += I18n.format(IndustrialWires.MODID+".desc.alt")+": " + curr.smallMax + "x" + curr.outputSmall.get().getDisplayName() + "\n";
-					j++;
+				if (!curr.exampleInput.isEmpty())
+				{
+					text += I18n.format(IndustrialWires.MODID + ".desc.input") + ": §l" + curr.exampleInput.get(0).getDisplayName() + "§r\n";
+					text += I18n.format(IndustrialWires.MODID + ".desc.output") + ": " + Utils.formatDouble(curr.maxYield, "0.#") + "x" + curr.output.get().getDisplayName() + "\n";
+					if (curr.outputSmall != null && !curr.outputSmall.get().isEmpty())
+					{
+						text += I18n.format(IndustrialWires.MODID + ".desc.alt") + ": " + curr.smallMax + "x" + curr.outputSmall.get().getDisplayName() + "\n";
+						j++;
+					}
+					text += I18n.format(IndustrialWires.MODID + ".desc.ideal_e") + ": " + Utils.formatDouble(curr.avgEnergy * MarxOreHandler.defaultEnergy / 1000, "0.#") + " kJ\n\n";
 				}
-				text += I18n.format(IndustrialWires.MODID+".desc.ideal_e")+": " + Utils.formatDouble(curr.avgEnergy*MarxOreHandler.defaultEnergy / 1000, "0.#") + " kJ\n\n";
 			}
 			marxEntry.add(new ManualPages.Text(m, text));
 			text = "";
@@ -296,7 +299,7 @@ public class ClientProxy extends CommonProxy {
 
 			@Override
 			public float getVolume() {
-				return .1F;
+				return 1F;
 			}
 
 			@Override

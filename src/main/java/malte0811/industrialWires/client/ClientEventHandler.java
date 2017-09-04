@@ -17,6 +17,7 @@
  */
 package malte0811.industrialWires.client;
 
+import blusunrize.immersiveengineering.api.IEProperties;
 import blusunrize.immersiveengineering.api.Lib;
 import blusunrize.immersiveengineering.client.ClientUtils;
 import blusunrize.immersiveengineering.common.util.ItemNBTHelper;
@@ -24,16 +25,19 @@ import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.BlockIWBase;
 import malte0811.industrialWires.blocks.IMetaEnum;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
+import malte0811.industrialWires.blocks.hv.BlockHVMultiblocks;
 import malte0811.industrialWires.client.panelmodel.PanelModel;
 import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.items.ItemIC2Coil;
 import malte0811.industrialWires.items.ItemKey;
 import malte0811.industrialWires.items.ItemPanelComponent;
 import malte0811.industrialWires.wires.IC2Wiretype;
-import net.minecraft.block.Block;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.renderer.block.statemap.StateMapperBase;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -54,7 +58,9 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.oredict.OreDictionary;
 import org.apache.commons.lang3.tuple.Pair;
 
+import javax.annotation.Nonnull;
 import java.util.Locale;
+import java.util.Map;
 
 @Mod.EventBusSubscriber(modid = IndustrialWires.MODID, value = Side.CLIENT)
 public class ClientEventHandler {
@@ -150,5 +156,20 @@ public class ClientEventHandler {
 				}
 			}
 		}
+		ModelLoader.setCustomStateMapper(IndustrialWires.hvMultiblocks, new StateMapperBase()
+		{
+			@Nonnull
+			@Override
+			protected ModelResourceLocation getModelResourceLocation(@Nonnull IBlockState state)
+			{
+				Map<IProperty<?>, Comparable<?>> properties = /*new HashMap<>(*/state.getProperties();
+				boolean mirror = (Boolean) properties.get(IEProperties.BOOLEANS[0]);
+				//properties.remove(IEProperties.BOOLEANS[0]);
+				return new ModelResourceLocation(
+						new ResourceLocation(IndustrialWires.MODID,
+						BlockHVMultiblocks.NAME+(mirror?"_mirrored":"")),
+						getPropertyString(properties));
+			}
+		});
 	}
 }

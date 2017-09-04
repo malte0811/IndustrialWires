@@ -522,7 +522,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	private Matrix4 getBaseTransform() {
 		Matrix4 transform = new Matrix4();
 		transform.translate(.5, 0, .5);
-		transform.rotate(facing.getHorizontalAngle() * Math.PI / 180, 0, 1, 0);
+		transform.rotate(-facing.getHorizontalAngle() * Math.PI / 180, 0, 1, 0);
 		if (mirrored) {
 			transform.scale(-1, 1, 1);
 		}

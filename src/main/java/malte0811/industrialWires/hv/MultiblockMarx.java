@@ -234,6 +234,8 @@ public class MultiblockMarx implements IMultiblock {
 
 		mirrorLoop:for (int fakeI = 0; fakeI < 2; fakeI++) {
 			mirrored = !mirrored;
+			facing = facing.getOpposite();
+
 			// PSU
 			if (!connNoConns.test(offset(pos, facing, mirrored, 0, -3, 0), CONNECTOR_REDSTONE)) {
 				continue;
@@ -303,9 +305,10 @@ public class MultiblockMarx implements IMultiblock {
 					continue mirrorLoop;
 				}
 			}
+			IndustrialWires.logger.info(facing);
 			//REPLACE STRUCTURE
 			if (!world.isRemote) {
-				IBlockState noModel = IndustrialWires.hvMultiblocks.getDefaultState().withProperty(BlockHVMultiblocks.type, MARX)
+				IBlockState noModel = IndustrialWires.hvMultiblocks.getDefaultState().withProperty(FACING_HORIZONTAL, facing).withProperty(BlockHVMultiblocks.type, MARX)
 						.withProperty(IWProperties.MARX_TYPE, NO_MODEL).withProperty(IEProperties.BOOLEANS[0], mirrored);
 				IBlockState stageModel = noModel.withProperty(IWProperties.MARX_TYPE, STAGE);
 				IBlockState connModel = noModel.withProperty(IWProperties.MARX_TYPE, CONNECTOR);
