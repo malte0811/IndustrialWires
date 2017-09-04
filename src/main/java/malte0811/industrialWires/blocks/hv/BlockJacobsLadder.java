@@ -16,10 +16,13 @@
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package malte0811.industrialWires.blocks;
+package malte0811.industrialWires.blocks.hv;
 
 import blusunrize.immersiveengineering.api.IEProperties;
-import malte0811.industrialWires.blocks.TileEntityJacobsLadder.LadderSize;
+import malte0811.industrialWires.blocks.BlockIWBase;
+import malte0811.industrialWires.blocks.IMetaEnum;
+import malte0811.industrialWires.blocks.IPlacementCheck;
+import malte0811.industrialWires.blocks.hv.TileEntityJacobsLadder.LadderSize;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
@@ -75,7 +78,7 @@ public class BlockJacobsLadder extends BlockIWBase implements IMetaEnum, IPlacem
 	@Nonnull
 	@Override
 	public IBlockState getStateFromMeta(int meta) {
-		return super.getStateFromMeta(meta).withProperty(size_property, LadderSize.values()[meta]);
+		return super.getStateFromMeta(meta).withProperty(size_property, TileEntityJacobsLadder.LadderSize.values()[meta]);
 	}
 
 	@Override

@@ -18,9 +18,11 @@
 package malte0811.industrialWires.client;
 
 import blusunrize.immersiveengineering.api.ManualHelper;
+import blusunrize.immersiveengineering.api.ManualPageMultiblock;
 import blusunrize.immersiveengineering.client.ClientUtils;
 import blusunrize.immersiveengineering.client.models.smart.ConnLoader;
 import blusunrize.immersiveengineering.common.Config;
+import blusunrize.immersiveengineering.common.util.Utils;
 import blusunrize.lib.manual.ManualInstance;
 import blusunrize.lib.manual.ManualPages;
 import blusunrize.lib.manual.ManualPages.PositionedItemStack;
@@ -28,48 +30,46 @@ import com.google.common.collect.ImmutableMap;
 import ic2.api.item.IC2Items;
 import malte0811.industrialWires.CommonProxy;
 import malte0811.industrialWires.IWConfig;
+import malte0811.industrialWires.IWPotions;
 import malte0811.industrialWires.IndustrialWires;
-import malte0811.industrialWires.blocks.IMetaEnum;
-import malte0811.industrialWires.blocks.TileEntityJacobsLadder;
 import malte0811.industrialWires.blocks.controlpanel.BlockTypes_Panel;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanelCreator;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityRSPanelConn;
+import malte0811.industrialWires.blocks.hv.TileEntityJacobsLadder;
+import malte0811.industrialWires.blocks.hv.TileEntityMarx;
 import malte0811.industrialWires.client.gui.GuiPanelComponent;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import malte0811.industrialWires.client.gui.GuiRSPanelConn;
 import malte0811.industrialWires.client.gui.GuiRenameKey;
 import malte0811.industrialWires.client.panelmodel.PanelModelLoader;
 import malte0811.industrialWires.client.render.TileRenderJacobsLadder;
+import malte0811.industrialWires.client.render.TileRenderMarx;
 import malte0811.industrialWires.controlpanel.PanelComponent;
+import malte0811.industrialWires.hv.MarxOreHandler;
+import malte0811.industrialWires.hv.MultiblockMarx;
 import malte0811.industrialWires.crafting.IC2TRHelper;
 import malte0811.industrialWires.items.ItemIC2Coil;
-import malte0811.industrialWires.items.ItemKey;
 import malte0811.industrialWires.items.ItemPanelComponent;
-import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
+import net.minecraft.client.audio.MovingSound;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.renderer.block.model.ModelBakery;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.client.model.obj.OBJLoader;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.*;
 
@@ -112,22 +112,29 @@ public class ClientProxy extends CommonProxy {
 					IndustrialWires.MODID + ":blocks/ic2_relay_glass"));
 		}
 		ConnLoader.baseModels.put("rs_panel_conn", new ResourceLocation("industrialwires:block/rs_panel_conn.obj"));
+
+		ConnLoader.baseModels.put("empty", new ResourceLocation("builtin/generated"));
+
 		OBJLoader.INSTANCE.addDomain(IndustrialWires.MODID);
 		ModelLoaderRegistry.registerLoader(new PanelModelLoader());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityJacobsLadder.class, new TileRenderJacobsLadder());
+		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMarx.class, new TileRenderMarx());
 	}
 
 	@Override
 	public void postInit() {
 		super.postInit();
 		ManualInstance m = ManualHelper.getManual();
-		if (IndustrialWires.hasIC2) {
+		if (IndustrialWires.hasIC2)
+		{
 			PositionedItemStack[][] wireRecipes = new PositionedItemStack[3][10];
 			int xBase = 15;
 			Ingredient tinCable = IC2TRHelper.getStack("cable", "type:tin,insulation:0");
 			List<ItemStack> tinCableList = Arrays.asList(tinCable.getMatchingStacks());
-			for (int i = 0; i < 3; i++) {
-				for (int j = 0; j < 3; j++) {
+			for (int i = 0; i < 3; i++)
+			{
+				for (int j = 0; j < 3; j++)
+				{
 					wireRecipes[0][3 * i + j] = new PositionedItemStack(tinCableList, 18 * i + xBase, 18 * j);
 				}
 			}
@@ -135,15 +142,20 @@ public class ClientProxy extends CommonProxy {
 			ItemIC2Coil.setLength(tmp, 9);
 			wireRecipes[0][9] = new PositionedItemStack(tmp, 18 * 4 + xBase, 18);
 			Random r = new Random();
-			for (int i = 1; i < 3; i++) {
+			for (int i = 1; i < 3; i++)
+			{
 				int lengthSum = 0;
-				for (int j1 = 0; j1 < 3; j1++) {
-					for (int j2 = 0; j2 < 3; j2++) {
-						if (r.nextBoolean()) {
+				for (int j1 = 0; j1 < 3; j1++)
+				{
+					for (int j2 = 0; j2 < 3; j2++)
+					{
+						if (r.nextBoolean())
+						{
 							// cable
 							lengthSum++;
 							wireRecipes[i][3 * j1 + j2] = new PositionedItemStack(tinCableList, 18 * j1 + xBase, 18 * j2);
-						} else {
+						} else
+						{
 							// wire coil
 							int length = r.nextInt(99) + 1;
 							tmp = new ItemStack(IndustrialWires.coil);
@@ -164,7 +176,8 @@ public class ClientProxy extends CommonProxy {
 					new ManualPages.Text(m, "industrialwires.wires1"),
 					new ManualPages.CraftingMulti(m, "industrialwires.wires2", (Object[]) wireRecipes)
 			);
-			if (IndustrialWires.mechConv != null) {
+			if (IndustrialWires.mechConv != null)
+			{
 				m.addEntry("industrialwires.mechConv", "industrialwires",
 						new ManualPages.Crafting(m, "industrialwires.mechConv0", new ItemStack(IndustrialWires.mechConv, 1, 1)),
 						new ManualPages.Crafting(m, "industrialwires.mechConv1", new ItemStack(IndustrialWires.mechConv, 1, 2)),
@@ -172,7 +185,12 @@ public class ClientProxy extends CommonProxy {
 				);
 			}
 		}
-		ClientUtils.mc().getItemColors().registerItemColorHandler((stack, pass) -> {
+			int oldLength = Config.IEConfig.Tools.earDefenders_SoundBlacklist.length;
+			Config.IEConfig.Tools.earDefenders_SoundBlacklist =
+					Arrays.copyOf(Config.IEConfig.Tools.earDefenders_SoundBlacklist, oldLength + 1);
+			Config.IEConfig.Tools.earDefenders_SoundBlacklist[oldLength] = TINNITUS_LOC.toString();
+
+			ClientUtils.mc().getItemColors().registerItemColorHandler((stack, pass) -> {
 			if (pass == 1) {
 				PanelComponent pc = ItemPanelComponent.componentFromStack(stack);
 				if (pc != null) {
@@ -182,9 +200,16 @@ public class ClientProxy extends CommonProxy {
 			return ~0;
 		}, IndustrialWires.panelComponent);
 
+			if (IndustrialWires.mechConv != null) {
+				m.addEntry("industrialwires.mechConv", "industrialwires",
+						new ManualPages.Crafting(m, "industrialwires.mechConv0", new ItemStack(IndustrialWires.mechConv, 1, 1)),
+						new ManualPages.Crafting(m, "industrialwires.mechConv1", new ItemStack(IndustrialWires.mechConv, 1, 2)),
+						new ManualPages.Crafting(m, "industrialwires.mechConv2", new ItemStack(IndustrialWires.mechConv, 1, 0))
+				);
+			}
 		Config.manual_doubleA.put("iwJacobsUsage", IWConfig.HVStuff.jacobsUsageEU);
 		Config.manual_int.put("iwKeysOnRing", IWConfig.maxKeysOnRing);
-		m.addEntry("industrialwires.jacobs", "industrialwires",
+		m.addEntry("industrialwires.jacobs", IndustrialWires.MODID,
 				new ManualPages.CraftingMulti(m, "industrialwires.jacobs0", new ItemStack(IndustrialWires.jacobsLadder, 1, 0), new ItemStack(IndustrialWires.jacobsLadder, 1, 1), new ItemStack(IndustrialWires.jacobsLadder, 1, 2)),
 				new ManualPages.Text(m, "industrialwires.jacobs1"));
 
@@ -219,6 +244,81 @@ public class ClientProxy extends CommonProxy {
 				new ManualPages.Crafting(m, "industrialwires.lock1", new ItemStack(IndustrialWires.key, 1, 2)),
 				new ManualPages.Crafting(m, "industrialwires.panel_meter", new ItemStack(IndustrialWires.panelComponent, 1, 8))
 		);
+		List<MarxOreHandler.OreInfo> ores = MarxOreHandler.getRecipes();
+		List<ManualPages> marxEntry = new ArrayList<>();
+		marxEntry.add(new ManualPages.Text(m, IndustrialWires.MODID + ".marx0"));
+		marxEntry.add(new ManualPageMultiblock(m, IndustrialWires.MODID + ".marx1", MultiblockMarx.INSTANCE));
+		marxEntry.add(new ManualPages.Text(m, IndustrialWires.MODID + ".marx2"));
+		marxEntry.add(new ManualPages.Text(m, IndustrialWires.MODID + ".marx3"));
+		marxEntry.add(new ManualPages.Text(m, IndustrialWires.MODID + ".marx4"));
+		marxEntry.add(new ManualPages.Text(m, IndustrialWires.MODID + ".marx5"));
+		marxEntry.add(new ManualPages.Text(m, IndustrialWires.MODID + ".marx6"));
+		String text = I18n.format("ie.manual.entry.industrialwires.marx7")+"\n";
+		for (int i = 0; i < ores.size(); ) {
+			for (int j = 0; j < (i==0?12:13) && i < ores.size(); j+=4, i++) {
+				MarxOreHandler.OreInfo curr = ores.get(i);
+				text += I18n.format(IndustrialWires.MODID+".desc.input")+": §l" + curr.exampleInput.get(0).getDisplayName() + "§r\n";
+				text += I18n.format(IndustrialWires.MODID+".desc.output")+": " + Utils.formatDouble(curr.maxYield, "0.#") + "x" + curr.output.get().getDisplayName() + "\n";
+				if (curr.outputSmall!=null&&!curr.outputSmall.get().isEmpty()) {
+					text += I18n.format(IndustrialWires.MODID+".desc.alt")+": " + curr.smallMax + "x" + curr.outputSmall.get().getDisplayName() + "\n";
+					j++;
+				}
+				text += I18n.format(IndustrialWires.MODID+".desc.ideal_e")+": " + Utils.formatDouble(curr.avgEnergy*MarxOreHandler.defaultEnergy / 1000, "0.#") + " kJ\n\n";
+			}
+			marxEntry.add(new ManualPages.Text(m, text));
+			text = "";
+		}
+		m.addEntry("industrialwires.marx", IndustrialWires.MODID, marxEntry.toArray(new ManualPages[marxEntry.size()]));
+
+	}
+
+	private static final ResourceLocation TINNITUS_LOC = new ResourceLocation(IndustrialWires.MODID, "tinnitus");
+	private static ISound playingTinnitus = null;
+	@Override
+	public void startTinnitus() {
+		final Minecraft mc = Minecraft.getMinecraft();
+		if (playingTinnitus==null) {
+			playingTinnitus = getTinnitus();
+			mc.getSoundHandler().playSound(playingTinnitus);
+		}
+	}
+
+	private ISound getTinnitus() {
+		final Minecraft mc = Minecraft.getMinecraft();
+		return  new MovingSound(new SoundEvent(TINNITUS_LOC), SoundCategory.PLAYERS) {
+			@Override
+			public void update() {
+				if (mc.player.getActivePotionEffect(IWPotions.tinnitus)==null) {
+					donePlaying = true;
+					playingTinnitus = null;
+				}
+			}
+
+			@Override
+			public float getVolume() {
+				return .1F;
+			}
+
+			@Override
+			public float getXPosF() {
+				return (float) mc.player.posX;
+			}
+
+			@Override
+			public float getYPosF() {
+				return (float) mc.player.posY;
+			}
+
+			@Override
+			public float getZPosF() {
+				return (float) mc.player.posZ;
+			}
+
+			@Override
+			public boolean canRepeat() {
+				return true;
+			}
+		};
 	}
 
 	@Override
@@ -230,6 +330,8 @@ public class ClientProxy extends CommonProxy {
 	private static ResourceLocation jacobsStart = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_start");//~470 ms ~=9 ticks
 	private static ResourceLocation jacobsMiddle = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_middle");
 	private static ResourceLocation jacobsEnd = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_end");//~210 ms ~= 4 ticks
+	private static ResourceLocation marxBang = new ResourceLocation(IndustrialWires.MODID, "marx_bang");
+	private static ResourceLocation marxPop = new ResourceLocation(IndustrialWires.MODID, "marx_pop");
 
 	@Override
 	public void playJacobsLadderSound(TileEntityJacobsLadder te, int phase, Vec3d soundPos) {
@@ -252,6 +354,18 @@ public class ClientProxy extends CommonProxy {
 			return;
 		}
 		PositionedSoundRecord sound = new PositionedSoundRecord(event, SoundCategory.BLOCKS, te.size.soundVolume, 1, false, 0, ISound.AttenuationType.LINEAR, (float) soundPos.x, (float) soundPos.y, (float) soundPos.z);
+		ClientUtils.mc().getSoundHandler().playSound(sound);
+		playingSounds.put(te.getPos(), sound);
+	}
+
+	@Override
+	public void playMarxBang(TileEntityMarx te, Vec3d pos, float energy) {
+		ResourceLocation soundLoc = marxBang;
+		if (energy<0) {
+			energy = -energy;
+			soundLoc = marxPop;
+		}
+		PositionedSoundRecord sound = new PositionedSoundRecord(soundLoc, SoundCategory.BLOCKS, 5*energy, 1, false, 0, ISound.AttenuationType.LINEAR, (float) pos.x, (float) pos.y, (float) pos.z);
 		ClientUtils.mc().getSoundHandler().playSound(sound);
 		playingSounds.put(te.getPos(), sound);
 	}

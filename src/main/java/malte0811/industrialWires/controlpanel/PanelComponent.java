@@ -22,6 +22,7 @@ import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
+import malte0811.industrialWires.util.MiscUtils;
 import malte0811.industrialWires.util.TriConsumer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
@@ -57,6 +58,9 @@ public abstract class PanelComponent {
 	public final static String COLOR = "color";
 	public final static String RS_CHANNEL = "rsChannel";
 	public final static String RS_ID = "rsId";
+	public final static String HAS_SECOND_CHANNEL = "has2ndChannel";
+	public final static String RS_CHANNEL2 = "rsChannel2";
+	public final static String RS_ID2 = "rsId2";
 	public final static String TEXT = "text";
 	public static final String HORIZONTAL = "horizontal";
 	public static final String LENGTH = "length";

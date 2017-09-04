@@ -19,5 +19,26 @@
     "sounds": [
       "industrialwires:jacobs_ladder/end"
     ]
+  },
+  "tinnitus": {
+    "category": "player",
+    "subtitle": "industrialwires.subtitle.tinnitus",
+    "sounds": [
+      "industrialwires:tinnitus"
+    ]
+  },
+  "marx_bang": {
+    "category": "block",
+    "subtitle": "industrialwires.subtitle.marx_bang",
+    "sounds": [
+      "industrialwires:marx_bang"
+    ]
+  },
+  "marx_pop": {
+    "category": "block",
+    "subtitle": "industrialwires.subtitle.marx_pop",
+    "sounds": [
+      "industrialwires:marx_pop"
+    ]
   }
 }

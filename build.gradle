@@ -30,7 +30,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 minecraft {
-    version = "14.21.1.2443"
+    version = "14.22.0.2463"
     runDir = "run"
 
     replace '${version}', project.version
@@ -50,6 +50,13 @@ repositories {
     	name 'jared maven'
     	url 'http://blamejared.com/maven'
     }
+    maven { // Albedo Lights
+        url 'https://repo.elytradev.com/'
+    }
+    maven { // JEI & Tinkers
+        name 'DVS1 Maven FS'
+        url 'http://dvs1.progwml6.com/files/maven'
+    }
     // dependencies of TR...
     maven {
         url 'http://maven.epoxide.xyz'
@@ -66,6 +73,9 @@ dependencies {
     deobfCompile "blusunrize:ImmersiveEngineering:0.12-+:deobf"
     compileOnly "TechReborn:TechReborn-1.12:2.6.+:dev"
     compileOnly "RebornCore:RebornCore-1.12:3.2.+:dev"
+    deobfCompile 'elucent:albedo:2.0-SNAPSHOT'
+    deobfCompile "mezz.jei:jei_1.12:4.+"
+    deobfCompile "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.+"
 }
 
 jar {

@@ -52,6 +52,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static malte0811.industrialWires.util.MiscUtils.apply;
+
 public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTile, IBlockBoundsIW, IPlayerInteraction, ITickable, IEBlockInterfaces.ITileDrop {
 	protected PropertyComponents.PanelRenderProperties components = new PropertyComponents.PanelRenderProperties();
 	public boolean firstTick = true;

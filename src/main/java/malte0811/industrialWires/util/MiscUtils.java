@@ -21,11 +21,20 @@ package malte0811.industrialWires.util;
 import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.api.energy.wires.IImmersiveConnectable;
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler;
+import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
+import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import com.google.common.collect.ImmutableSet;
+import malte0811.industrialWires.blocks.TileEntityIWMultiblock;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -83,5 +92,65 @@ public final class MiscUtils {
 			}
 		}
 		return ret;
+	}
+
+	/**
+	 * @param mirror inverts right
+	 */
+	public static BlockPos offset(BlockPos p, EnumFacing f, boolean mirror, int right, int forward, int up) {
+		if (mirror) {
+			right *= -1;
+		}
+		return p.offset(f, forward).offset(f.rotateY(), right).add(0, up, 0);
+	}
+
+	/**
+	 * Calculates the parameters for offset to generate here from origin
+	 * @return right, forward, up
+	 */
+	public static BlockPos getOffset(BlockPos origin, EnumFacing f, boolean mirror, BlockPos here) {
+		int dX = origin.getZ()-here.getZ();
+		int dZ = origin.getX()-here.getX();
+		int forward = 0;
+		int right = 0;
+		int up = here.getY()-origin.getY();
+		switch (f) {
+			case NORTH:
+				forward = dZ;
+				right = -dX;
+				break;
+			case SOUTH:
+				forward = -dZ;
+				right = dX;
+				break;
+			case WEST:
+				right = dZ;
+				forward = dX;
+				break;
+			case EAST:
+				right = -dZ;
+				forward = -dX;
+				break;
+		}
+		if (mirror) {
+			right *= -1;
+		}
+		return new BlockPos(right, forward, up);
+	}
+	@Nonnull
+	public static AxisAlignedBB apply(@Nonnull Matrix4 mat, @Nonnull AxisAlignedBB in) {
+		Vec3d min = new Vec3d(in.minX, in.minY, in.minZ);
+		Vec3d max = new Vec3d(in.maxX, in.maxY, in.maxZ);
+		min = mat.apply(min);
+		max = mat.apply(max);
+		return new AxisAlignedBB(min.x, min.y, min.z, max.x, max.y, max.z);
+	}
+
+	public static ItemStack getItemStack(IBlockState origState, World w, BlockPos pos) {
+		if (origState.getBlock() instanceof IEBlockInterfaces.IIEMetaBlock) {
+			int meta = origState.getBlock().getMetaFromState(origState);
+			return new ItemStack(origState.getBlock(), 1, meta);
+		}
+		return origState.getBlock().getPickBlock(origState, null, w, pos, null);
 	}
 }

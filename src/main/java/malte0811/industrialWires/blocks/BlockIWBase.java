@@ -31,6 +31,7 @@ import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
@@ -44,7 +45,9 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 public abstract class BlockIWBase extends Block {
@@ -139,6 +142,15 @@ public abstract class BlockIWBase extends Block {
 			}
 		}
 		return super.getBoundingBox(state, source, pos);
+	}
+
+	@Override
+	public void addCollisionBoxToList(IBlockState state, @Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull AxisAlignedBB entityBox,
+									  @Nonnull List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean p_185477_7_) {
+		AxisAlignedBB aabb = getBoundingBox(state, worldIn, pos).offset(pos);
+		if (entityBox.intersects(aabb)) {
+			collidingBoxes.add(aabb);
+		}
 	}
 
 	//mostly copied from IE

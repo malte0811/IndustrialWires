@@ -39,14 +39,20 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
+import org.apache.commons.lang3.tuple.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class GuiPanelCreator extends GuiContainer {
 	public int panelSize = 128;
 	private ContainerPanelCreator container;
-	private boolean snapToGrid = false;
+	private int snapToGrid = 0;
 	private ResourceLocation textureLoc = new ResourceLocation(IndustrialWires.MODID, "textures/gui/panel_creator.png");
 
 	public GuiPanelCreator(InventoryPlayer ip, TileEntityPanelCreator te) {
@@ -60,21 +66,121 @@ public class GuiPanelCreator extends GuiContainer {
 		GlStateManager.color(1, 1, 1, 1);
 		mc.getTextureManager().bindTexture(textureLoc);
 		this.drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
+		for (PanelComponent pc : container.tile.components) {
+			drawPanelComponent(pc, -1, -1);
+		}
 		int x0 = getX0();
 		int y0 = getY0();
 		int xRel = mouseX - x0;
 		int yRel = mouseY - y0;
-		if (snapToGrid) {
-			xRel = (int) Math.floor(xRel * 16 / panelSize) * panelSize / 16;
-			yRel = (int) Math.floor(yRel * 16 / panelSize) * panelSize / 16;
-		}
-		for (PanelComponent pc : container.tile.components) {
-			drawPanelComponent(pc, -1, -1);
-		}
 		PanelComponent curr = getFloatingPC();
 		if (curr != null && 0 <= xRel && xRel <= panelSize && 0 <= yRel && yRel <= panelSize) {
+			Runnable after = ()->{};
+			if (snapToGrid != 0) {
+				curr.setX(xRel/(float)panelSize);
+				curr.setY(yRel/(float)panelSize);
+				BiFunction<Integer, Integer, Integer> right = (a, b)->b;
+				BiFunction<Integer, Integer, Integer> left = (a, b)->a;
+				Function<PanelComponent, Double> xSize = (pc)->{
+					AxisAlignedBB aabb = pc.getBlockRelativeAABB();
+					return aabb.maxX-aabb.minX;
+				};
+				Function<PanelComponent, Double> ySize = (pc)->{
+					AxisAlignedBB aabb = pc.getBlockRelativeAABB();
+					return aabb.maxZ-aabb.minZ;
+				};
+				Pair<Integer, Runnable> xSnap = snapToGrid(xRel, curr, PanelComponent::getX, PanelComponent::getY,
+						xSize, ySize, left, right);
+				xRel = xSnap.getLeft();
+				Pair<Integer, Runnable> ySnap = snapToGrid(yRel, curr, PanelComponent::getY, PanelComponent::getX,
+						ySize, xSize, right, left);
+
+				yRel = ySnap.getLeft();
+				after = ()->{
+					xSnap.getRight().run();
+					ySnap.getRight().run();
+				};
+			}
 			drawPanelComponent(curr, xRel, yRel);
+			after.run();
 		}
+	}
+
+	private Pair<Integer, Runnable> snapToGrid(int mouse, PanelComponent toPlace, Function<PanelComponent, Float> pos, Function<PanelComponent, Float> pos2,
+											   Function<PanelComponent, Double> size,Function<PanelComponent, Double> size2,
+											   BiFunction<Integer, Integer, Integer> getY, BiFunction<Integer, Integer, Integer> getX) {
+		List<PanelComponent> components = container.tile.components;
+		if (snapToGrid==2&&!components.isEmpty()) {
+			List<Pair<PanelComponent, Double>> compLefts = new ArrayList<>(components.size());
+			List<Pair<PanelComponent, Double>> compCenters = new ArrayList<>(components.size());
+			List<Pair<PanelComponent, Double>> compRights = new ArrayList<>(components.size());
+			for (PanelComponent pc : components) {
+				double compLeft = pos.apply(pc);
+				double compSize = size.apply(pc);
+				compLefts.add(new ImmutablePair<>(pc, compLeft));
+				compRights.add(new ImmutablePair<>(pc, compLeft + compSize));
+				compCenters.add(new ImmutablePair<>(pc, compLeft + compSize / 2));
+			}
+			double mainLeft = pos.apply(toPlace);
+			double mainSize = size.apply(toPlace);
+			double mainRight = mainLeft + mainSize;
+			double mainCenter = (mainRight + mainLeft) / 2;
+			Triple<PanelComponent, ComponentSnapType, Double> min = getMinDist(compLefts, mainLeft, mainCenter, mainRight);
+
+			{
+				Triple<PanelComponent, ComponentSnapType, Double> tmpMin = getMinDist(compCenters, mainLeft, mainCenter, mainRight);
+				if (Math.abs(tmpMin.getRight()) < Math.abs(min.getRight())) {
+					min = tmpMin;
+				}
+
+				tmpMin = getMinDist(compRights, mainLeft, mainCenter, mainRight);
+				if (Math.abs(tmpMin.getRight()) < Math.abs(min.getRight())) {
+					min = tmpMin;
+				}
+			}
+
+			if (Math.abs(min.getRight())<.5/16) {
+				int ret = (int)(mouse+min.getRight()*panelSize);
+				PanelComponent snappedTo = min.getLeft();
+				ComponentSnapType type = min.getMiddle();
+				return new ImmutablePair<>(ret,()->{
+					int hor1, hor2;
+					float posOther = pos2.apply(toPlace);
+					hor1 = Math.round(Math.min(posOther, pos2.apply(snappedTo))*panelSize);
+					hor2 = (int) Math.round(Math.max(posOther+size2.apply(toPlace), pos2.apply(snappedTo)+size2.apply(snappedTo))*panelSize);
+					int vert1 = (int) (ret+(.5*type.ordinal())*mainSize*panelSize);
+					int vert2 = vert1+1;
+					int x0 = getX0(), y0 = getY0();
+					drawRect(x0+getX.apply(hor1, vert1), y0+getY.apply(hor1, vert1), x0+getX.apply(hor2, vert2),
+							y0+getY.apply(hor2, vert2), 0xff666666);
+				});
+			}
+		}
+		if (snapToGrid!=0) {
+			mouse = Math.round(mouse * 16 / panelSize) * panelSize / 16;
+		}
+		return new ImmutablePair<>(mouse, ()->{});
+	}
+
+
+	private Triple<PanelComponent, ComponentSnapType, Double> getMinDist(List<Pair<PanelComponent, Double>> comps,
+																		 double left, double center, double right) {
+		Pair<PanelComponent, Double> tmpMin = Collections.min(comps, Comparator.comparingDouble(a -> Math.abs(a.getRight() - left)));
+		Triple<PanelComponent, ComponentSnapType, Double> totalMin = new ImmutableTriple<>(tmpMin.getLeft(), ComponentSnapType.LEFT,
+				tmpMin.getRight()-left);
+
+		tmpMin = Collections.min(comps, Comparator.comparingDouble(a -> Math.abs(a.getRight() - center)));
+		if (Math.abs(tmpMin.getRight() - center)<Math.abs(totalMin.getRight())) {
+			totalMin = new ImmutableTriple<>(tmpMin.getLeft(), ComponentSnapType.CENTER,
+					tmpMin.getRight()-center);
+		}
+
+		tmpMin = Collections.min(comps, Comparator.comparingDouble(a -> Math.abs(a.getRight() - right)));
+		if (Math.abs(tmpMin.getRight() - right)<Math.abs(totalMin.getRight())) {
+			totalMin = new ImmutableTriple<>(tmpMin.getLeft(), ComponentSnapType.RIGHT,
+					tmpMin.getRight()-right);
+		}
+		return totalMin;
 	}
 
 	@Override
@@ -89,11 +195,7 @@ public class GuiPanelCreator extends GuiContainer {
 		} else if (buttonList.get(1).isMouseOver()) {
 			tooltip = I18n.format(IndustrialWires.MODID + ".desc.remove_all");
 		} else if (buttonList.get(2).isMouseOver()) {
-			if (snapToGrid) {
-				tooltip = I18n.format(IndustrialWires.MODID + ".desc.disable_snap");
-			} else {
-				tooltip = I18n.format(IndustrialWires.MODID + ".desc.enable_snap");
-			}
+			tooltip = I18n.format(IndustrialWires.MODID + ".desc.snap"+snapToGrid);
 		} else if (buttonList.get(3).isMouseOver()) {
 			tooltip = I18n.format(IndustrialWires.MODID + ".desc.disassemble");
 		}
@@ -201,7 +303,7 @@ public class GuiPanelCreator extends GuiContainer {
 			nbt.setInteger("type", MessageType.REMOVE_ALL.ordinal());
 			break;
 		case 2:
-			snapToGrid = !snapToGrid;
+			snapToGrid = (snapToGrid+1)%3;
 			break;
 		case 3:
 			nbt.setInteger("type", MessageType.DISASSEMBLE.ordinal());
@@ -226,5 +328,11 @@ public class GuiPanelCreator extends GuiContainer {
 		lastFloating = floating.copy();
 		lastFloatingPC = ItemPanelComponent.componentFromStack(floating);
 		return lastFloatingPC;
+	}
+
+	private enum ComponentSnapType {
+		LEFT,
+		CENTER,
+		RIGHT;
 	}
 }

@@ -16,7 +16,7 @@
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package malte0811.industrialWires.blocks;
+package malte0811.industrialWires.blocks.hv;
 
 import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDirectionalTile;
@@ -26,7 +26,11 @@ import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergyEmitter;
 import ic2.api.energy.tile.IEnergySink;
 import malte0811.industrialWires.IWConfig;
+import malte0811.industrialWires.IWDamageSources;
 import malte0811.industrialWires.IndustrialWires;
+import malte0811.industrialWires.blocks.IBlockBoundsIW;
+import malte0811.industrialWires.blocks.IHasDummyBlocksIW;
+import malte0811.industrialWires.blocks.ISyncReceiver;
 import malte0811.industrialWires.network.MessageTileSyncIW;
 import malte0811.industrialWires.util.Beziers;
 import malte0811.industrialWires.util.DualEnergyStorage;
@@ -209,7 +213,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 			initControl();
 		}
 		dummy = nbt.getInteger("dummy");
-		energy = DualEnergyStorage.readFromNBT(nbt.getCompoundTag("energy"));
+		energy.readFromNBT(nbt.getCompoundTag("energy"));
 		facing = EnumFacing.HORIZONTALS[nbt.getInteger("facing")];
 		salt = nbt.getDouble("salt");
 	}
@@ -335,7 +339,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 	}
 
 	private void hurtEntity(Entity e) {
-		e.attackEntityFrom(new DamageSource("industrialwires.jacobs_ladder"), IWConfig.HVStuff.jacobsBaseDmg * (size.ordinal() + 1));
+		e.attackEntityFrom(IWDamageSources.dmg_jacobs, IWConfig.HVStuff.jacobsBaseDmg * (size.ordinal() + 1));
 	}
 
 	public boolean onActivated(EntityPlayer player, EnumHand hand) {

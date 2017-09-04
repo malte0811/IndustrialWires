@@ -135,6 +135,11 @@ public class GuiPanelComponent extends GuiContainer {
 				sync(i, picker.getSelected());
 			}
 			if (stopNow) {
+				for (GuiChannelPicker picker2:rsChannelChoosers) {
+					if (picker!=picker2&&picker2 instanceof GuiChannelPickerSmall) {
+						((GuiChannelPickerSmall) picker2).close();
+					}
+				}
 				return;
 			}
 		}
@@ -192,9 +197,6 @@ public class GuiPanelComponent extends GuiContainer {
 		this.renderHoveredToolTip(mouseX, mouseY);
 		GlStateManager.color(1, 1, 1, 1);
 		RenderHelper.disableStandardItemLighting();
-		for (GuiChannelPicker pick : rsChannelChoosers) {
-			pick.drawButton(mc, mouseX, mouseY, partialTicks);
-		}
 		for (GuiButtonCheckbox box : boolButtons) {
 			box.drawButton(mc, mouseX, mouseY, partialTicks);
 		}
@@ -207,12 +209,24 @@ public class GuiPanelComponent extends GuiContainer {
 		for (GuiSliderIE choose : floatSliders) {
 			choose.drawButton(mc, mouseX, mouseY, partialTicks);
 		}
+		GuiChannelPickerSmall openPicker = null;
+		for (GuiChannelPicker pick : rsChannelChoosers) {
+			if (pick instanceof GuiChannelPickerSmall&&((GuiChannelPickerSmall) pick).open) {
+				openPicker = (GuiChannelPickerSmall) pick;
+			} else {
+				pick.drawButton(mc, mouseX, mouseY, partialTicks);
+			}
+		}
+		if (openPicker != null) {
+			openPicker.drawButton(mc, mouseX, mouseY, partialTicks);
+		}
 		//TOOLTIPS
 		for (int i = 0; i < rsChannelChoosers.size(); i++) {
 			GuiChannelPicker pick = rsChannelChoosers.get(i);
 			String tooltip = confComp.fomatConfigDescription(IConfigurableComponent.ConfigType.RS_CHANNEL, i);
 			if (tooltip != null && pick.isHovered(mouseX, mouseY)) {
 				ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRenderer);
+				return;
 			}
 		}
 		for (int i = 0; i < boolButtons.size(); i++) {
@@ -220,6 +234,7 @@ public class GuiPanelComponent extends GuiContainer {
 			String tooltip = confComp.fomatConfigDescription(IConfigurableComponent.ConfigType.BOOL, i);
 			if (tooltip != null && box.isMouseOver()) {
 				ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRenderer);
+				return;
 			}
 		}
 		for (int i = 0; i < stringTexts.size(); i++) {
@@ -228,6 +243,7 @@ public class GuiPanelComponent extends GuiContainer {
 			if (tooltip != null && mouseX >= field.x && mouseX < field.x + field.width &&
 					mouseY >= field.y && mouseY < field.y + field.height) {
 				ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRenderer);
+				return;
 			}
 		}
 		for (int i = 0; i < intChoosers.size(); i++) {
@@ -235,6 +251,7 @@ public class GuiPanelComponent extends GuiContainer {
 			String tooltip = confComp.fomatConfigDescription(IConfigurableComponent.ConfigType.INT, i);
 			if (tooltip != null && choose.isMouseOver(mouseX, mouseY)) {
 				ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRenderer);
+				return;
 			}
 		}
 		for (int i = 0; i < floatSliders.size(); i++) {
@@ -242,6 +259,7 @@ public class GuiPanelComponent extends GuiContainer {
 			String tooltip = confComp.fomatConfigDescription(IConfigurableComponent.ConfigType.FLOAT, i);
 			if (tooltip != null && choose.isMouseOver()) {
 				ClientUtils.drawHoveringText(ImmutableList.of(tooltip), mouseX, mouseY, mc.fontRenderer);
+				return;
 			}
 		}
 	}

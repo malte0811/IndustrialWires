@@ -43,18 +43,33 @@ item.industrialwires.key.key_named.name=Key for
 item.industrialwires.key.blank_key.name=Blank Key
 item.industrialwires.key.key_ring.name=Key Ring
 
+industrialwires.subtitle.tinnitus=You have a tinnitus
+industrialwires.subtitle.jacobs_ladder=Jacob's ladder hums
+industrialwires.subtitle.marx_bang=Marx generator discharges
+industrialwires.subtitle.marx_pop=Marx generator misfires
+
+industrialwires.desc.jei.marx=Marx Generator
+industrialwires.desc.jei.alt= (alternative)
+industrialwires.desc.jei.max= (max.)
+industrialwires.desc.input=Input
+industrialwires.desc.output=Main Output
+industrialwires.desc.alt=Replacement
+industrialwires.desc.ideal_e=Ideal Energy
 
 industrialwires.desc.wireLength=Wire length: %1s block(s)
 industrialwires.desc.recipe=Please check the Engineer's manual for recipe details
 industrialwires.desc.remove_all=Remove all components from this panel
 industrialwires.desc.create_panel=Create a new control panel
-industrialwires.desc.enable_snap=Snap new components to the 16*16 grid
-industrialwires.desc.disable_snap=Allow free placing of components
+industrialwires.desc.snap0=Allow free placing of components
+industrialwires.desc.snap1=Snap to grid
+industrialwires.desc.snap2=Snap to other components
 industrialwires.desc.latching=Latching
 industrialwires.desc.latching_info=Does this button stay on indefinitely?
 industrialwires.desc.disassemble=Disassemble the panel
-industrialwires.desc.rsid_info=The ID of the redstone wire controller to output a signal to
-industrialwires.desc.rschannel_info=The color of the channel to output the signal to
+industrialwires.desc.rsid_info=The ID of the redstone wire controller to interact with
+industrialwires.desc.rschannel_info=The color of the channel to use
+industrialwires.desc.rsid_info2=The ID of the redstone wire controller for the second signal. -1 to disable.
+industrialwires.desc.rschannel_info2=The color of the channel to use for the second signal
 industrialwires.desc.label_text=The text in this label
 industrialwires.desc.red=Red
 industrialwires.desc.green=Green
@@ -85,6 +100,7 @@ industrialwires.chat.tooLong=This coil does not contain enough wire for this con
 industrialwires.chat.stackSize=Linking is only possible with a stack of size 1
 
 death.attack.industrialwires.jacobs_ladder=%1$s was electrocuted by a Jacob's Ladder
+death.attack.industrialwires.marx=%1$s was struck by lightning produced by a Marx generator
 
  
 itemGroup.industrialwires=Industrial Wires
@@ -105,11 +121,22 @@ ie.manual.entry.industrialwires.mechConv1=like a waterwheel or a motor (see page
 ie.manual.entry.industrialwires.mechConv2=lost with each conversion.<br>As a little extra the "Mechanical converter" product series also contains a Rotational Motor: It consumes IF to produce IE rotational energy. As with the converters this is not a lossless process.
 
 ie.manual.entry.industrialwires.jacobs.name=Jacob's Ladders
+# Note for potential translators: This refers to Polychlorinated biphenyls (a poisonous ingredient in old insulation oils) rather than printed circuit boards
 ie.manual.entry.industrialwires.jacobs.subtext=Probably contain PCB's!
 ie.manual.entry.industrialwires.jacobs0=By applying a high voltage between 2 electrodes forming a "V" one can create an arc travelling upwards. They don't serve a particular purpose apart from being a nice-looking waste of power. Power can be supplied using either Flux or EU. The energy usage varies with the size of the ladder.
 ie.manual.entry.industrialwires.jacobs1=These are the required power values in EU: <config;dA;iwJacobsUsage>. Due to the voltages involved touching the ladder while active is not a good idea. Applying salt to the electrodes will cause the arc to be colored orange for a short time due to the sodium contained in the salt.
 
 
+ie.manual.entry.industrialwires.marx.name=Marx Generator
+ie.manual.entry.industrialwires.marx.subtext=I'm Erwin-Otto, not Karl!
+ie.manual.entry.industrialwires.marx0=A Marx Generator is a device use to produce high-voltage high-energy pulses. These pulses are visible as lightning between the output terminals and can be used to process ores. Each type of ore has an ideal amount of processing energy (see <link;industrialwires.marx;§oAppendix B§r;7>). The precise values are unknown, estimate values with 10%% accuracy can be found at the end of this entry. The factor between the actual value and the estimate is the same for all types of ore.
+ie.manual.entry.industrialwires.marx1=§lConstruction§r<br>The above plan shows a 5-stage generator capable of producing 3 block lightning. An arbitrary amount of stages can be added by increasing the number of
+ie.manual.entry.industrialwires.marx2="middle" layers. Power (either IF or EU) is connected to the HV connector, the redstone wire for the control signals is connected to the redstone connector<br>§lEnergy§r<br>Each stage of the Marx generator consists of a 1.6μF capacitor that is charged to up to 250kV (see <link;industrialwires.marx;§oAppendix A§r;6>). When the generator is fully charged the voltage of each capacitor is roughly equal to the charging voltage. The total energy is the sum of the energy stored in the individual
+ie.manual.entry.industrialwires.marx3=capacitors and is split equally between the ores to be processed.<br>§lControl signals§r<br>Voltages are represented by 2 signals: The first signal is simply proportional to the voltage to represent. The second signal is proportional to the voltage in the "gap" between 2 values of the first signal, thus allowing more precise control/measurements. Panel components capable of interacting with analog signals usually support this dual-channel setup.
+ie.manual.entry.industrialwires.marx4=The charging voltage is controlled by the white and yellow signals. The voltages of the top and bottom capacitor are output to the magenta and pink resp. the orange and lime signals. The light blue signal is a firing control. If it is high the generator will attempt to fire. If the voltage of the bottom capacitor is lower than 125 kV or the total voltage is lower than 30%% of the maximum output voltage the generator will misfire, discharging the capacitors without actually producing lightning.
+ie.manual.entry.industrialwires.marx5=§lSafety§r<br>Due to the high voltages and energies involved in firing a Marx generator a safe distance should be maintained to avoid injury or death. Even outside of this area hearing protection (As provided by Immersive Engineering) is obligatory. Formulas to calculate the safe distances can be found in <link;industrialwires.marx;§oAppendix A§r;6>.
+ie.manual.entry.industrialwires.marx6=§lAppendix A: Formulas§r<br>Energy stored in a capacitor:<br>E=0.5*C*U^2<br>E: Energy, C: Capacitance, U: Voltage<br>Voltage from redstone signals:<br>U=250/255*(16*a+b)<br>U: Voltage, a: First signal, b: Second signal<br>Safe distance (Physical damage):<br>r=sqrt(e/50,000)<br>r: Safe distance, e: Energy stored<br>Safe distance (Ear damage):<br>r=sqrt(e)/100<br>r: Safe distance, e: Energy stored
+ie.manual.entry.industrialwires.marx7=§lAppendix B: Ore Energy Values§r
 
 ie.manual.entry.industrialwires.intro.name=Introduction
 ie.manual.entry.industrialwires.intro.subtext=
@@ -124,7 +151,7 @@ ie.manual.entry.industrialwires.panel_creator.name=Panel Creator
 ie.manual.entry.industrialwires.panel_creator.subtext=
 ie.manual.entry.industrialwires.panel_creator0=The GUI of the panel creator consists of two major sections: The controls on the left and the panel on the right. Components can be placed on the panel by "placing" the items in the corresponding point in the GUI. If the component is surrounded by a red area, it can not be placed in that
 ie.manual.entry.industrialwires.panel_creator1=position on the panel. This usually means that it is either overlapping with an other component or isn't completely on the panel.<br>The top button on the left (D) disassembles an existing control panel when it is placed in the slot beneath the button: The components of that panel are placed in the GUI, allowing them to be repositioned. The casing is lost in this process.<br>The next button (C) places the components from the right of the GUI on an Unfinished Control Panel in the slot in the
-ie.manual.entry.industrialwires.panel_creator2=left of the GUI, turning it into a regular Control Panel.<br>The button labeled R removes all components from the GUI panel area and places them in your inventory.<br>Finally the last button (S) changes between being able to place components anywhere on the panel to only being able to place them on a 16x16 grid.
+ie.manual.entry.industrialwires.panel_creator2=left of the GUI, turning it into a regular Control Panel.<br>The button labeled R removes all components from the GUI panel area and places them in your inventory.<br>Finally the last button (S) changes the snapping mode. Components can be placed anywhere by default. The first snapping option forces the component to align with the 16x16 grid, the second option forces it to align with components already placed on the panel.
 
 ie.manual.entry.industrialwires.redstone.name=Redstone Connections
 ie.manual.entry.industrialwires.redstone.subtext=Could also be blood vessels

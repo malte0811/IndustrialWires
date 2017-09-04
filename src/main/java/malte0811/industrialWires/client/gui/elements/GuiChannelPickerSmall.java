@@ -25,7 +25,7 @@ import net.minecraft.item.EnumDyeColor;
 import javax.annotation.Nonnull;
 
 public class GuiChannelPickerSmall extends GuiChannelPicker {
-	private boolean open = false;
+	public boolean open = false;
 	private int offSize, onSize;
 
 	public GuiChannelPickerSmall(int id, int x, int y, int offSize, int onSize, byte selectedChannel) {
@@ -42,6 +42,7 @@ public class GuiChannelPickerSmall extends GuiChannelPicker {
 		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 		GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 		if (open) {
+			drawRect(x, y, x + width, y + height, 0xff99ff99);
 			super.drawButton(mc, mouseX, mouseY, partialTicks);
 		} else {
 			EnumDyeColor color = EnumDyeColor.byMetadata(selected);
@@ -66,10 +67,14 @@ public class GuiChannelPickerSmall extends GuiChannelPicker {
 				select();
 				ret = true;
 			}
-			open = false;
-			width = offSize;
-			height = offSize;
+			close();
 			return ret;
 		}
+	}
+
+	public void close() {
+		open = false;
+		width = offSize;
+		height = offSize;
 	}
 }

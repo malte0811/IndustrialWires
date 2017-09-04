@@ -48,19 +48,23 @@ import java.util.function.Consumer;
 public class PanelMeter extends PanelComponent implements IConfigurableComponent {
 	public static final String WIDE = "wide";
 
-	private int rsInputId;
-	private byte rsInputChannel;
-	private byte rsInput;
+	private int rsInputId, rsInputId2 = -1;
+	private byte rsInputChannel, rsInputChannel2;
+	private int rsInput;
 	private boolean wide = true;
+	private boolean hasSecond;
 
 	public PanelMeter() {
 		super("panel_meter");
 	}
 
-	public PanelMeter(int rsId, byte rsChannel, boolean wide) {
+	public PanelMeter(int rsId, byte rsChannel, int rsId2, byte rsChannel2, boolean wide, boolean hasSecond) {
 		this();
 		rsInputChannel = rsChannel;
 		rsInputId = rsId;
+		rsInputChannel2 = rsChannel2;
+		rsInputId2 = rsId2;
+		this.hasSecond = hasSecond;
 		this.wide = wide;
 	}
 
@@ -68,6 +72,11 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 	protected void writeCustomNBT(NBTTagCompound nbt, boolean toItem) {
 		nbt.setInteger(RS_ID, rsInputId);
 		nbt.setByte(RS_CHANNEL, rsInputChannel);
+		nbt.setBoolean(HAS_SECOND_CHANNEL, hasSecond);
+		if (hasSecond) {
+			nbt.setInteger(RS_ID2, rsInputId2);
+			nbt.setByte(RS_CHANNEL2, rsInputChannel2);
+		}
 		nbt.setBoolean(WIDE, wide);
 		if (!toItem) {
 			nbt.setInteger("rsInput", rsInput);
@@ -78,14 +87,22 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 	protected void readCustomNBT(NBTTagCompound nbt) {
 		rsInputId = nbt.getInteger(RS_ID);
 		rsInputChannel = nbt.getByte(RS_CHANNEL);
-		rsInput = nbt.getByte("rsInput");
+		rsInput = nbt.getInteger("rsInput");
 		wide = nbt.getBoolean(WIDE);
+		hasSecond = nbt.getBoolean(HAS_SECOND_CHANNEL);
+		if (hasSecond) {
+			rsInputId2 = nbt.getInteger(RS_ID2);
+			rsInputChannel2 = nbt.getByte(RS_CHANNEL2);
+		} else {
+			rsInputId2 = -1;
+			rsInputChannel2 = -1;
+		}
 	}
 
 	private static final float SIZE = .25F;
 	private static final float WIDTH = 1.5F*SIZE;
 	private static final float BORDER = SIZE /20;
-	private static final float antiZOffset = .0001F;
+	private static final float antiZOffset = .001F;
 	private static final float[] BLACK = {0, 0, 0, 1};
 	private static final float[] WHITE = {1, 1, 1, 1};
 	@Override
@@ -101,7 +118,7 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 		RawModelFontRenderer r = fontRenderer();
 		r.transform = new Matrix4();
 		for (int i = 0;i<=3;i++) {
-			transformNumber(r.transform, (byte)(5*i));
+			transformNumber(r.transform, 5*17*i);
 			String asString = Integer.toString(5*i);
 			int lengthHalf = r.getStringWidth(asString)/2;
 			r.transform.translate(-lengthHalf*r.scale, 0, -3.5*r.scale);
@@ -127,7 +144,7 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 		return renderer;
 	}
 
-	private void transformNumber(Matrix4 mat, byte value) {
+	private void transformNumber(Matrix4 mat, int value) {
 		if (wide) {
 			transformNeedle(mat, value);
 			mat.translate(0, 0, getLength()+1.5*BORDER);
@@ -135,22 +152,22 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 		} else {
 			mat.setIdentity().translate(0, antiZOffset, SIZE);
 			mat.translate(SIZE-3*BORDER, 0, -3*BORDER);
-			float angle = 90*(1-value/15F);
+			float angle = 90*(1-value/255F);
 			angle = (float) (angle*Math.PI/180);
 			float length = getLength()+BORDER;
 			mat.translate((float)(-Math.sin(angle)*length), 0, (float)(-Math.cos(angle)*length));
 		}
 	}
 
-	private void transformNeedle(Matrix4 mat, byte value) {
+	private void transformNeedle(Matrix4 mat, int value) {
 		mat.setIdentity().translate(0, 2*antiZOffset, SIZE);
 		float angle;
 		if (wide) {
 			mat.translate(WIDTH/2, 0, -2*BORDER);
-			angle = 50-(100*(value/15F));
+			angle = 50-(100*(value/255F));
 		} else {
 			mat.translate(SIZE-3*BORDER, 0, -3*BORDER);
-			angle = 90-(90*(value/15F));
+			angle = 90-(90*(value/255F));
 		}
 		angle = (float) ((180+angle)*Math.PI/180);
 		mat.rotate(angle, 0, 1, 0);
@@ -162,7 +179,7 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 	@Nonnull
 	@Override
 	public PanelComponent copyOf() {
-		PanelMeter ret = new PanelMeter(rsInputId, rsInputChannel, wide);
+		PanelMeter ret = new PanelMeter(rsInputId, rsInputChannel, rsInputId2, rsInputChannel2, wide, hasSecond);
 		ret.rsInput = rsInput;
 		ret.setX(x);
 		ret.setY(y);
@@ -189,11 +206,25 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 	}
 
 	private TileEntityPanel panel;
-	private Consumer<byte[]> handler = (input) -> {
-		if (input[rsInputChannel] != rsInput) {
-			rsInput = input[rsInputChannel];
+	private Consumer<byte[]> handlerSec = (input) -> {
+		if (input[rsInputChannel2] != (rsInput&0xf)) {
+			rsInput = (input[rsInputChannel2]&0xf)|(rsInput&0xf0);
 			panel.markDirty();
 			panel.triggerRenderUpdate();
+		}
+	};
+	private Consumer<byte[]> handler = (input) -> {
+		if (input[rsInputChannel] != rsInput>>4) {
+			if (hasSecond) {
+				rsInput = (input[rsInputChannel]<<4)|(rsInput&0xf);
+			} else {
+				rsInput = input[rsInputChannel]*17;
+			}
+			panel.markDirty();
+			panel.triggerRenderUpdate();
+		}
+		if (rsInputId2==rsInputId) {
+			handlerSec.accept(input);
 		}
 	};
 
@@ -203,6 +234,9 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 		if (matchesId(rsInputId, id)) {
 			this.panel = panel;
 			return handler;
+		} else if (matchesId(rsInputId2, id)) {
+			this.panel = panel;
+			return handlerSec;
 		}
 		return null;
 	}
@@ -221,18 +255,24 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 		PanelMeter that = (PanelMeter) o;
 
 		if (rsInputId != that.rsInputId) return false;
+		if (rsInputId2 != that.rsInputId2) return false;
 		if (rsInputChannel != that.rsInputChannel) return false;
+		if (rsInputChannel2 != that.rsInputChannel2) return false;
 		if (rsInput != that.rsInput) return false;
-		return wide == that.wide;
+		if (wide != that.wide) return false;
+		return hasSecond == that.hasSecond;
 	}
 
 	@Override
 	public int hashCode() {
 		int result = super.hashCode();
 		result = 31 * result + rsInputId;
+		result = 31 * result + rsInputId2;
 		result = 31 * result + (int) rsInputChannel;
-		result = 31 * result + (int) rsInput;
+		result = 31 * result + (int) rsInputChannel2;
+		result = 31 * result + rsInput;
 		result = 31 * result + (wide ? 1 : 0);
+		result = 31 * result + (hasSecond ? 1 : 0);
 		return result;
 	}
 
@@ -267,14 +307,23 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 	@Override
 	public void applyConfigOption(ConfigType type, int id, NBTBase value) {
 		switch (type) {
-		case RS_CHANNEL:
-			rsInputChannel = ((NBTTagByte) value).getByte();
-			break;
-		case INT:
-			rsInputId = ((NBTTagInt) value).getInt();
-			break;
-		case BOOL:
-			wide = ((NBTTagByte)value).getByte()!=0;
+			case RS_CHANNEL:
+				if (id == 0) {
+					rsInputChannel = ((NBTTagByte) value).getByte();
+				} else {
+					rsInputChannel2 = ((NBTTagByte) value).getByte();
+				}
+				break;
+			case INT:
+				if (id == 0) {
+					rsInputId = ((NBTTagInt) value).getInt();
+				} else {
+					rsInputId2 = ((NBTTagInt) value).getInt();
+					hasSecond = rsInputId2>=0;
+				}
+				break;
+			case BOOL:
+				wide = ((NBTTagByte) value).getByte() != 0;
 		}
 	}
 
@@ -300,9 +349,9 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 		case FLOAT:
 			return null;
 		case RS_CHANNEL:
-			return I18n.format(IndustrialWires.MODID + ".desc.rschannel_info");
+			return I18n.format(IndustrialWires.MODID + ".desc.rschannel_info"+(id==1?"2":""));
 		case INT:
-			return I18n.format(IndustrialWires.MODID + ".desc.rsid_info");
+			return I18n.format(IndustrialWires.MODID + ".desc.rsid_info"+(id==1?"2":""));
 		default:
 			return null;
 		}
@@ -311,21 +360,23 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 	@Override
 	public RSChannelConfig[] getRSChannelOptions() {
 		return new RSChannelConfig[]{
-				new RSChannelConfig("channel", 0, 0, rsInputChannel)
+				new RSChannelConfig("channel", 0, 0, rsInputChannel, false),
+				new RSChannelConfig("channel2", 60, 0, rsInputChannel2, false)
 		};
 	}
 
 	@Override
 	public IntConfig[] getIntegerOptions() {
 		return new IntConfig[]{
-				new IntConfig("rsId", 0, 45, rsInputId, 2, false)
+				new IntConfig("rsId", 0, 60, rsInputId, 2, false),
+				new IntConfig("rsId2", 60, 60, rsInputId2, 2, true)
 		};
 	}
 
 	@Override
 	public BoolConfig[] getBooleanOptions() {
 		return new BoolConfig[]{
-			new BoolConfig("wide", 70, 10, wide)
+			new BoolConfig("wide", 0, 80, wide)
 		};
 	}
 

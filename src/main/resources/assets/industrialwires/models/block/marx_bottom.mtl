@@ -1,0 +1,8 @@
+newmtl marx
+map_Ka industrialwires:blocks/marx
+
+newmtl connectorHV
+map_Ka immersiveengineering:blocks/connector_connector_hv
+
+newmtl connectorRedstone
+map_Ka immersiveengineering:blocks/connector_connector_redstone

@@ -1,0 +1,95 @@
+{
+	"forge_marker": 1,
+	"defaults": {
+		"transform": "forge:default-block",
+		"custom": {
+			"flip-v": true
+		},
+		"textures": {
+			"particle": "immersiveengineering:blocks/storage_steel"
+		}
+	},
+	"variants": {
+		"inventory,type=marx": [
+			{
+				"model": "industrialwires:marx_stage.obj",
+				"transform": {
+					"scale": 0.375,
+					"rotation": [
+						{
+							"x": 20
+						},
+						{
+							"y": 135
+						}
+					],
+					"translation": [
+						0.15, 0, 0
+					]
+				}
+			}
+		],
+		"type": {
+			"marx": {
+			}
+		},
+		"facing": {
+			"north": {
+				"transform": {
+					"rotation": {
+						"y": 0
+					}
+				}
+			},
+			"south": {
+				"transform": {
+					"rotation": {
+						"y": 180
+					}
+				}
+			},
+			"west": {
+				"transform": {
+					"rotation": {
+						"y": 90
+					}
+				}
+			},
+			"east": {
+				"transform": {
+					"rotation": {
+						"y": -90
+					}
+				}
+			}
+		},
+		"marx_type": {
+			"bottom": {
+				"model": "industrialwires:marx_bottom.obj"
+			},
+			"stage": {
+				"model": "industrialwires:marx_stage.obj"
+			},
+			"top": {
+				"model": "industrialwires:marx_top.obj"
+			},
+			"no_model": {
+				"model": "builtin/generated"
+			},
+			"connector": {
+				"model": "immersiveengineering:smartmodel/conn_empty"
+			}
+		},
+		"boolean0":
+		{
+			"false": {},
+			"true": {
+				"transform": {
+					"rotation": {
+						"y": 0
+					}
+				}
+			}
+		}
+	}
+}

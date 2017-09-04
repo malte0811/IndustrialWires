@@ -18,12 +18,11 @@
 
 package malte0811.industrialWires.client.render;
 
-import malte0811.industrialWires.blocks.TileEntityJacobsLadder;
-import malte0811.industrialWires.blocks.TileEntityJacobsLadder.LadderSize;
+import malte0811.industrialWires.blocks.hv.TileEntityJacobsLadder;
+import malte0811.industrialWires.blocks.hv.TileEntityJacobsLadder.LadderSize;
 import malte0811.industrialWires.util.Beziers;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -45,10 +44,8 @@ public class TileRenderJacobsLadder extends TileEntitySpecialRenderer<TileEntity
 			GlStateManager.disableLighting();
 			GlStateManager.shadeModel(GL11.GL_SMOOTH);
 
-			float oldBX = OpenGlHelper.lastBrightnessX;
-			float oldBY = OpenGlHelper.lastBrightnessY;
-			OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 238, 238);
-			GlStateManager.color(1, .85F, 1, alpha);
+			setLightmapDisabled(true);
+			GlStateManager.color(1, .85F, 1, 1);
 			Vec3d[] controls = new Vec3d[tile.size.arcPoints];
 			for (int i = 0; i < tile.size.arcPoints; i++) {
 				Vec3d speed = tile.controlMovement[i];
@@ -70,7 +67,7 @@ public class TileRenderJacobsLadder extends TileEntitySpecialRenderer<TileEntity
 			tes.draw();*/
 			//END OF DEBUG CODE
 
-			OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, oldBX, oldBY);
+			setLightmapDisabled(false);
 
 			GlStateManager.enableTexture2D();
 			GlStateManager.enableLighting();
