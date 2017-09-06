@@ -24,10 +24,8 @@ import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import com.google.common.collect.ImmutableSet;
-import malte0811.industrialWires.blocks.TileEntityIWMultiblock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -152,5 +150,13 @@ public final class MiscUtils {
 			return new ItemStack(origState.getBlock(), 1, meta);
 		}
 		return origState.getBlock().getPickBlock(origState, null, w, pos, null);
+	}
+
+	public static float[] interpolate(double a, float[] cA, double b, float[] cB) {
+		float[] ret = new float[cA.length];
+		for (int i = 0; i < ret.length; i++) {
+			ret[i] = (float) (a * cA[i] + b * cB[i]);
+		}
+		return ret;
 	}
 }

@@ -29,6 +29,8 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.Vec3d;
 import org.lwjgl.opengl.GL11;
 
+import static malte0811.industrialWires.blocks.hv.TileEntityJacobsLadder.getColor;
+
 public class TileRenderJacobsLadder extends TileEntitySpecialRenderer<TileEntityJacobsLadder> {
 	@Override
 	public void render(TileEntityJacobsLadder tile, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
@@ -97,39 +99,6 @@ public class TileRenderJacobsLadder extends TileEntitySpecialRenderer<TileEntity
 			last = pos;
 		}
 		tes.draw();
-	}
-
-	private final float[] saltColor = {1, 190 / 255F, 50 / 255F};
-	private final float[] airColor = {1, .85F, 1};
-
-	private float[] getColor(double t, double salt, LadderSize size) {
-		salt = Math.min(salt, 1);
-		int factor = 20;
-		double smallMin = Math.exp(-.5);
-		double normalMin = Math.exp(-.25 * factor);
-		double hugeMin = Math.exp(-.75 * factor);
-		double saltyness = 0;
-		double t2 = t - .5;
-		switch (size) {
-		case SMALL:
-			saltyness = salt * (1 - .9 * (Math.exp(-Math.abs(t2)) - smallMin));
-			break;
-		case NORMAL:
-			saltyness = salt * (1 - .9 * (Math.exp(-factor * t2 * t2) - normalMin));
-			break;
-		case HUGE:
-			saltyness = salt * (1 - .9 * (Math.exp(-Math.abs(factor * t2 * t2 * t2)) - hugeMin));
-			break;
-		}
-		return interpolate(saltyness, saltColor, 1 - saltyness, airColor);
-	}
-
-	private float[] interpolate(double a, float[] cA, double b, float[] cB) {
-		float[] ret = new float[cA.length];
-		for (int i = 0; i < ret.length; i++) {
-			ret[i] = (float) (a * cA[i] + b * cB[i]);
-		}
-		return ret;
 	}
 
 	private void drawQuad(Vec3d v0, Vec3d v1, Vec3d rad, float[] color0, float[] color1, BufferBuilder vertexBuffer) {

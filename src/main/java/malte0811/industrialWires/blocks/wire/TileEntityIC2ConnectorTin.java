@@ -48,7 +48,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Optional;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import reborncore.api.power.EnumPowerTier;
 import reborncore.api.power.IEnergyInterfaceTile;
 
 import javax.annotation.Nonnull;
@@ -59,7 +58,7 @@ import java.util.Set;
 
 @Optional.InterfaceList({
 		@Optional.Interface(iface = "ic2.api.energy.tile.IEnergySource", modid = "ic2"),
-		@Optional.Interface(iface = "ic2.api.energy.tile.IEnergySink", modid = "ic2")//TODO tech reborn
+		@Optional.Interface(iface = "ic2.api.energy.tile.IEnergySink", modid = "ic2")
 })
 public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable implements IEnergySource, IEnergySink, IDirectionalTile,
 		ITickable, IIC2Connector, IBlockBoundsIW {

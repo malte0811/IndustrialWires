@@ -1,8 +1,20 @@
-newmtl marx
-map_Ka industrialwires:blocks/marx
+# Blender MTL File: 'None'
+# Material Count: 3
 
 newmtl connectorHV
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+d 1.000000
 map_Ka immersiveengineering:blocks/connector_connector_hv
 
 newmtl connectorRedstone
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+d 1.000000
 map_Ka immersiveengineering:blocks/connector_connector_redstone
+
+newmtl marx
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+d 1.000000
+map_Ka industrialwires:blocks/marx

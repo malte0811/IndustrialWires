@@ -39,7 +39,7 @@ import static malte0811.industrialWires.blocks.hv.TileEntityMarx.FiringState.FIR
 public class TileRenderMarx extends TileEntitySpecialRenderer<TileEntityMarx> {
 	@Override
 	public void render(TileEntityMarx te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
-		final boolean debug = true;
+		final boolean debug = false;
 		//noinspection ConstantConditions,PointlessBooleanExpression
 		if (te.type == IWProperties.MarxType.BOTTOM && (debug || te.state == FIRE) && te.dischargeData!=null) {
 			Vec3d player = Minecraft.getMinecraft().player.getPositionEyes(partialTicks);
@@ -55,16 +55,14 @@ public class TileRenderMarx extends TileEntitySpecialRenderer<TileEntityMarx> {
 			Vec3d offset = new Vec3d(MiscUtils.offset(BlockPos.ORIGIN, te.facing, te.mirrored, 1, 1, 0));
 			offset = offset.addVector(-.5*oneSgn(offset.x), 0, -.5*oneSgn(offset.z));
 			final float pos = .3125F;
-			Vec3d gapDir = new Vec3d(facing.getZ()*(te.mirrored?-1:1), 1, facing.getX()*(te.mirrored?-1:1));
-			Vec3d up = new Vec3d(-gapDir.x, 1, -gapDir.z);
+			Vec3d gapDir = new Vec3d(facing.getZ()*(te.mirrored?-1:1), 1, facing.getX()*(te.mirrored?1:-1));
+			Vec3d up = new Vec3d(gapDir.x, -1, gapDir.z);
 			Vec3d bottomGap = new Vec3d(offset.x+facing.getX()*pos+.5, offset.y+.75, offset.z+facing.getZ() * pos+.5);
-			if (te.mirrored)
-				facing = te.facing.getOpposite().getDirectionVec();
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(x + bottomGap.x, y + bottomGap.y, z + bottomGap.z);
 			bottomGap = bottomGap.addVector(te.getPos().getX(), te.getPos().getY(), te.getPos().getZ());
 			for (int i = 0; i < te.getStageCount() - 1; i++) {
-				renderGap(i, facing, vb, tes, player, gapDir, up, bottomGap);
+				renderGap(i, facing, vb, tes, player, gapDir, up, bottomGap, te.mirrored);
 			}
 			cleanUp();
 			te.state = TileEntityMarx.FiringState.CHARGING;
@@ -76,16 +74,25 @@ public class TileRenderMarx extends TileEntitySpecialRenderer<TileEntityMarx> {
 		return ret==0?1:ret;
 	}
 
-	private void renderGap(int i, Vec3i facing, BufferBuilder vb, Tessellator tes, Vec3d player, Vec3d gapDir, Vec3d up, Vec3d bottomGap) {
+	private void renderGap(int i, Vec3i facing, BufferBuilder vb, Tessellator tes, Vec3d player, Vec3d gapDir, Vec3d up,
+						   Vec3d bottomGap, boolean mirrored) {
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(0, i, 0);
-		GlStateManager.rotate(-45, facing.getX(), facing.getY(), facing.getZ());
+		GlStateManager.rotate((mirrored?45:135), facing.getX(), facing.getY(), facing.getZ());
 		player = player.subtract(bottomGap.x, bottomGap.y+i, bottomGap.z);
 		double t = player.dotProduct(gapDir)/2;
-		Vec3d playerToLine = player.subtract(gapDir.scale(t));
-		double angleRad = Math.acos(up.dotProduct(playerToLine)/(up.lengthVector()*playerToLine.lengthVector()));
-		angleRad *= Math.signum(playerToLine.dotProduct(new Vec3d(facing)));
-		GlStateManager.rotate((float) (oneSgn(facing.getX())*Math.toDegrees(angleRad)-90*facing.getZ()), 0, 1, 0);
+		Vec3d lineToPlayer = gapDir.scale(t).subtract(player);
+		double angleRad = Math.acos(up.dotProduct(lineToPlayer)/(up.lengthVector()*lineToPlayer.lengthVector()));
+		angleRad *= Math.signum(lineToPlayer.dotProduct(new Vec3d(facing)));
+		float angle = (float) (Math.toDegrees(angleRad));
+		if (facing.getZ()<0) {
+			angle = 270+angle;
+		} else if (facing.getZ()>0) {
+			angle = 90+angle;
+		} else if (facing.getX()>0) {
+			angle = 180+angle;
+		}
+		GlStateManager.rotate(angle, 0, 1, 0);
 		vb.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 		drawDischargeSection(new Vec3d(0, -.2F, 0), new Vec3d(0, .2F, 0), .25F, vb);
 		tes.draw();

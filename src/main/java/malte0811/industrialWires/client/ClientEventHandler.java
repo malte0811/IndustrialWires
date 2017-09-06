@@ -162,9 +162,8 @@ public class ClientEventHandler {
 			@Override
 			protected ModelResourceLocation getModelResourceLocation(@Nonnull IBlockState state)
 			{
-				Map<IProperty<?>, Comparable<?>> properties = /*new HashMap<>(*/state.getProperties();
+				Map<IProperty<?>, Comparable<?>> properties = state.getProperties();
 				boolean mirror = (Boolean) properties.get(IEProperties.BOOLEANS[0]);
-				//properties.remove(IEProperties.BOOLEANS[0]);
 				return new ModelResourceLocation(
 						new ResourceLocation(IndustrialWires.MODID,
 						BlockHVMultiblocks.NAME+(mirror?"_mirrored":"")),

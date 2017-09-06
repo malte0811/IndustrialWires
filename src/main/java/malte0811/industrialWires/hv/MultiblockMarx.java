@@ -162,19 +162,19 @@ public class MultiblockMarx implements IMultiblock {
 		};
 		Predicate<BlockPos> heavyEng = (local) -> {
 			IBlockState b = world.getBlockState(local);
-			IBlockState state = world.getBlockState(local);
+			b = b.getActualState(world, local);
 			return b.getBlock() == blockMetalDecoration0 && b.getValue(blockMetalDecoration0.property) == HEAVY_ENGINEERING;
 		};
 		Predicate<BlockPos> steelBlock = (local) -> {
 			IBlockState b = world.getBlockState(local);
-			b = b.getBlock().getActualState(b, world, local);
+			b = b.getActualState(world, local);
 			ItemStack stack = new ItemStack(b.getBlock(), 1, b.getBlock().getMetaFromState(b));
 			return ApiUtils.compareToOreName(stack, "blockSteel");
 		};
 		BiPredicate<BlockPos, Boolean> wallmount = (local, up) -> {
 			IBlockState b = world.getBlockState(local);
 			if (b.getBlock()==IEContent.blockMetalDecoration2) {
-				b = b.getBlock().getActualState(b, world, local);
+				b = b.getActualState(world, local);
 				if (b.getValue(IEContent.blockMetalDecoration2.property)== STEEL_WALLMOUNT) {
 					int int_4_wanted = up ? 0 : 1;
 					return b.getValue(IEProperties.INT_4)==int_4_wanted;
@@ -184,13 +184,13 @@ public class MultiblockMarx implements IMultiblock {
 		};
 		Predicate<BlockPos> steelFence = (local) -> {
 			IBlockState b = world.getBlockState(local);
-			b = b.getBlock().getActualState(b, world, local);
+			b = b.getActualState(world, local);
 			ItemStack stack = new ItemStack(b.getBlock(), 1, b.getBlock().getMetaFromState(b));
 			return ApiUtils.compareToOreName(stack, "fenceSteel");
 		};
 		Function<BlockPos, Byte> hvRelayWith = (local) -> {
 			IBlockState state = world.getBlockState(local);
-			state = state.getBlock().getActualState(state, world, local);
+			state = state.getActualState(world, local);
 			if (state.getBlock() != IEContent.blockConnectors) {
 				return (byte)-1;
 			}
@@ -218,7 +218,7 @@ public class MultiblockMarx implements IMultiblock {
 		};
 		BiPredicate<BlockPos, BlockTypes_Connector> connNoConns = (local, type) -> {
 			IBlockState state = world.getBlockState(local);
-			state = state.getBlock().getActualState(state, world, local);
+			state = state.getActualState(world, local);
 			if (state.getBlock() != IEContent.blockConnectors) {
 				return false;
 			}

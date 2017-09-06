@@ -32,8 +32,8 @@ import blusunrize.immersiveengineering.common.blocks.metal.*;
 import blusunrize.immersiveengineering.common.blocks.wooden.TileEntityWallmount;
 import blusunrize.immersiveengineering.common.util.Utils;
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
-import elucent.albedo.event.GatherLightsEvent;
-import elucent.albedo.lighting.Light;
+import com.elytradev.mirage.event.GatherLightsEvent;
+import com.elytradev.mirage.lighting.Light;
 import malte0811.industrialWires.*;
 import malte0811.industrialWires.blocks.IBlockBoundsIW;
 import malte0811.industrialWires.blocks.ISyncReceiver;
@@ -695,8 +695,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		return offset(pos, facing, mirrored, 1, 4, 0);
 	}
 
-
-	@Optional.Method(modid="albedo")
+	@Optional.Method(modid="mirage")
 	@SubscribeEvent
 	public static void gatherLights(GatherLightsEvent event) {
 		for (TileEntityMarx te:FIRING_GENERATORS) {
@@ -706,15 +705,15 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 					.radius(5);
 			List<Light> toAdd = new ArrayList<>(te.stageCount*2-3);
 			if (te.dischargeData!=null&&te.dischargeData.energy>0) {
-				for (int i = 1;i<te.stageCount-1;i++) {
-					toAdd.add(builder.pos(origin.addVector(0, i, 0)).build());
-				}
+				toAdd.add(builder.pos(origin.addVector(0, 0, 0)).build());
+				toAdd.add(builder.pos(origin.addVector(0, te.stageCount/2, 0)).build());
+				toAdd.add(builder.pos(origin.addVector(0, te.stageCount-2, 0)).build());
 			}
 			origin = new Vec3d(offset(te.pos, te.facing, te.mirrored, 1, 0, 0))
 					.addVector(0, .75, 0)
 					.add(new Vec3d(te.facing.getDirectionVec()).scale(.25));
 			builder.radius(.5F);
-			for (int i = 0;i<te.stageCount-1;i++) {
+			for (int i = 0;i<te.stageCount-1;i+=te.stageCount/5) {
 				toAdd.add(builder.pos(origin.addVector(0, i, 0)).build());
 			}
 			event.getLightList().addAll(toAdd);

@@ -21,6 +21,8 @@ package malte0811.industrialWires.blocks.hv;
 import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDirectionalTile;
 import blusunrize.immersiveengineering.common.blocks.TileEntityIEBase;
+import com.elytradev.mirage.lighting.IColoredLight;
+import com.elytradev.mirage.lighting.Light;
 import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergyEmitter;
@@ -44,7 +46,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.*;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -54,14 +59,21 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fml.common.Optional;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import static malte0811.industrialWires.IndustrialWires.hasIC2;
+import static malte0811.industrialWires.util.MiscUtils.interpolate;
 
-@Optional.Interface(modid = "ic2", iface = "ic2.api.energy.tile.IEnergySink")
-public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickable, IHasDummyBlocksIW, ISyncReceiver, IEnergySink, IBlockBoundsIW, IDirectionalTile {
+@Optional.InterfaceList({
+		@Optional.Interface(modid = "ic2", iface = "ic2.api.energy.tile.IEnergySink"),
+		@Optional.Interface(modid = "mirage", iface = "com.elytradev.mirage.lighting.IColoredLight")
+})
+public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickable, IHasDummyBlocksIW, ISyncReceiver,
+		IEnergySink, IBlockBoundsIW, IDirectionalTile, IColoredLight {
 	public EnumFacing facing = EnumFacing.NORTH;
 	private DualEnergyStorage energy;
 	public LadderSize size;
@@ -530,6 +542,47 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 	@Override
 	public boolean canRotate(@Nonnull EnumFacing axis) {
 		return false;
+	}
+
+	public static final float[] saltColor = {1, 190 / 255F, 50 / 255F};
+	public static final float[] airColor = {1, .85F, 1};
+
+	public static float[] getColor(double t, double salt, LadderSize size) {
+		salt = Math.min(salt, 1);
+		int factor = 20;
+		double smallMin = Math.exp(-.5);
+		double normalMin = Math.exp(-.25 * factor);
+		double hugeMin = Math.exp(-.75 * factor);
+		double saltyness = 0;
+		double t2 = t - .5;
+		switch (size) {
+			case SMALL:
+				saltyness = salt * (1 - .9 * (Math.exp(-Math.abs(t2)) - smallMin));
+				break;
+			case NORMAL:
+				saltyness = salt * (1 - .9 * (Math.exp(-factor * t2 * t2) - normalMin));
+				break;
+			case HUGE:
+				saltyness = salt * (1 - .9 * (Math.exp(-Math.abs(factor * t2 * t2 * t2)) - hugeMin));
+				break;
+		}
+		return interpolate(saltyness, saltColor, 1 - saltyness, airColor);
+	}
+	@Nullable
+	@Override
+	@SideOnly(Side.CLIENT)
+	@Optional.Method(modid = "mirage")
+	public Light getColoredLight() {
+		if (timeTillActive == 0) {
+			float[] color = getColor(0, salt, size);
+			return Light.builder().pos(pos.getX()+.5,
+					Beziers.getPoint(.5, controls).y+pos.getY()+size.bottomDistance+1,
+					pos.getZ()+.5)
+					.color(color[0], color[1], color[2], 1)
+					.radius(size.soundVolume/3)
+					.build();
+		}
+		return null;
 	}
 
 
