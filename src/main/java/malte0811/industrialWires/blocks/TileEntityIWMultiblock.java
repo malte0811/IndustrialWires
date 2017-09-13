@@ -18,6 +18,8 @@
 
 package malte0811.industrialWires.blocks;
 
+import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
+import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IGeneralMultiblock;
 import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
@@ -33,7 +35,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.function.BiConsumer;
 
-public abstract class TileEntityIWMultiblock extends TileEntityIWBase {
+public abstract class TileEntityIWMultiblock extends TileEntityIWBase implements IGeneralMultiblock {
 	protected final static String OFFSET = "offset";
 	protected final static String FORMED = "formed";
 	protected final static String MIRRORED = "mirrored";
@@ -53,7 +55,7 @@ public abstract class TileEntityIWMultiblock extends TileEntityIWBase {
 	}
 	@Nullable
 	public <T extends TileEntityIWMultiblock> T master(T here) {
-		if (offset.getX()==0&&offset.getY()==0&&offset.getZ()==0) {
+		if (!isLogicDummy()) {
 			return here;
 		}
 		TileEntity m = world.getTileEntity(pos.subtract(offset));
@@ -62,6 +64,12 @@ public abstract class TileEntityIWMultiblock extends TileEntityIWBase {
 		}
 		return null;
 	}
+
+	@Override
+	public boolean isLogicDummy() {
+		return offset.getX()!=0||offset.getY()!=0||offset.getZ()!=0;
+	}
+
 	@Nonnull
 	public <T extends TileEntityIWMultiblock> T masterOr(T here, @Nonnull T def) {
 		T master = master(here);

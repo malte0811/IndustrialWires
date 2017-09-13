@@ -18,6 +18,7 @@
 
 package malte0811.industrialWires.blocks.hv;
 
+import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.api.IEProperties;
 import blusunrize.immersiveengineering.api.TargetingInfo;
 import blusunrize.immersiveengineering.api.energy.wires.IImmersiveConnectable;
@@ -217,6 +218,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 
 	@Override
 	public void update() {
+		ApiUtils.checkForNeedlessTicking(this);
 		FIRING_GENERATORS.remove(this);
 		switch (state) {
 			case NEXT_TICK:
@@ -544,8 +546,8 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	public int outputEnergy(int amount, boolean simulate, int energyType) {
 		TileEntityMarx master = master(this);
 		if (master!=null && amount>0) {
-			double ret = master.storage.insertIF(amount, leftover, !simulate);
-			leftover -= ret;
+			double ret = master.storage.insertIF(amount, master.leftover, !simulate);
+			master.leftover -= ret;
 			return (int) ret;
 		} else {
 			return 0;

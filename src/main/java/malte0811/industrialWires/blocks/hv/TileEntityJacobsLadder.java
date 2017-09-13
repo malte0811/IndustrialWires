@@ -114,6 +114,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 
 	@Override
 	public void update() {
+		ApiUtils.checkForNeedlessTicking(this);
 		if (isDummy()) {
 			return;
 		}

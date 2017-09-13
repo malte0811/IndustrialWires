@@ -58,7 +58,8 @@ public class MarxOreHandler {
 		for (String ore : ores) {
 			putOre("ore" + ore, .75, 4, "dust" + ore, "nugget" + ore);
 		}
-		putOre("oreUranium", 1.25, 4, "crushedUranium", "nuggetUranium");
+		putOre("oreUranium", 1.25, 4,
+				IndustrialWires.hasIC2?"crushedUranium":"ingotUranium", "nuggetUranium");
 	}
 
 	public static void putOre(String oreName, double avgEnergy, double maxYield, String oreOut) {

@@ -18,12 +18,18 @@
 
 package malte0811.industrialWires.blocks;
 
+import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
+import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IGeneralMultiblock;
 import net.minecraft.block.state.IBlockState;
 
-public interface IHasDummyBlocksIW {
+public interface IHasDummyBlocksIW extends IGeneralMultiblock {
 	void placeDummies(IBlockState state);
 
 	void breakDummies();
 
 	boolean isDummy();
+
+	default boolean isLogicDummy() {
+		return isDummy();
+	}
 }
