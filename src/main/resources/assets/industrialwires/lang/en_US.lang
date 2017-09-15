@@ -43,6 +43,8 @@ item.industrialwires.key.key_named.name=Key for
 item.industrialwires.key.blank_key.name=Blank Key
 item.industrialwires.key.key_ring.name=Key Ring
 
+potion.industrialwires.tinnitus=Tinnitus
+
 industrialwires.subtitle.tinnitus=You have a tinnitus
 industrialwires.subtitle.jacobs_ladder=Jacob's ladder hums
 industrialwires.subtitle.marx_bang=Marx generator discharges

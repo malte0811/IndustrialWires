@@ -305,7 +305,6 @@ public class MultiblockMarx implements IMultiblock {
 					continue mirrorLoop;
 				}
 			}
-			IndustrialWires.logger.info(facing);
 			//REPLACE STRUCTURE
 			if (!world.isRemote) {
 				IBlockState noModel = IndustrialWires.hvMultiblocks.getDefaultState().withProperty(FACING_HORIZONTAL, facing).withProperty(BlockHVMultiblocks.type, MARX)

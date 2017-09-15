@@ -48,7 +48,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -67,7 +66,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 //TODO require IE 0.12-72
-@Mod(modid = IndustrialWires.MODID, version = IndustrialWires.VERSION, dependencies = "required-after:immersiveengineering@[0.10-58,);after:ic2",
+@Mod(modid = IndustrialWires.MODID, version = IndustrialWires.VERSION, dependencies = "required-after:immersiveengineering@[0.12-72,);after:ic2",
 		certificateFingerprint = "7e11c175d1e24007afec7498a1616bef0000027d")
 @Mod.EventBusSubscriber
 public class IndustrialWires {
@@ -199,6 +198,7 @@ public class IndustrialWires {
 		NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
 		IWPotions.init();
 		Compat.init();
+		MarxOreHandler.init();
 	}
 
 	@EventHandler

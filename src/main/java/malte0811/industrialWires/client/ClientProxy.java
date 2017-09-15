@@ -280,7 +280,7 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public void startTinnitus() {
 		final Minecraft mc = Minecraft.getMinecraft();
-		if (playingTinnitus==null) {
+		if (playingTinnitus==null||!mc.getSoundHandler().isSoundPlaying(playingTinnitus)) {
 			playingTinnitus = getTinnitus();
 			mc.getSoundHandler().playSound(playingTinnitus);
 		}
@@ -299,7 +299,7 @@ public class ClientProxy extends CommonProxy {
 
 			@Override
 			public float getVolume() {
-				return 1F;
+				return .5F;
 			}
 
 			@Override

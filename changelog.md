@@ -1,4 +1,12 @@
-#####Version 1.5-20 (UNRELEASED)
+#####Version 1.6-20
+ - Added the Marx Generator, an alternative ore processing method
+   - Hearing protection absolutely required!
+   - You may need to do some math and measurements for ore processing to work. It will kill entites just fine without any science
+ - IC2 is no longer a hard dependency. The wires and converters will obviously be disabled without it
+ - Vastly improved snapping in the panel creator
+ - Added some Mirage (Albedo) compat
+ - IW is signed now!
+ - Analog panel components can interact with 2 channels now, rough and fine control
  - Fixed GUI background and item tooltips
  - Fixed some components resetting when the chunk is unloaded
  - Chunks with control panels properly unload now

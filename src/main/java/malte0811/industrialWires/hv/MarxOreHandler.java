@@ -59,7 +59,15 @@ public class MarxOreHandler {
 			putOre("ore" + ore, .75, 4, "dust" + ore, "nugget" + ore);
 		}
 		putOre("oreUranium", 1.25, 4,
-				IndustrialWires.hasIC2?"crushedUranium":"ingotUranium", "nuggetUranium");
+				IndustrialWires.hasIC2?"crushedUranium":"dustUranium", "nuggetUranium");
+	}
+
+	public static void init() {
+		oreData.removeIf(
+				(info)->
+						info.exampleInput.isEmpty()||info.exampleInput.stream().allMatch(ItemStack::isEmpty)
+								||info.output.get().isEmpty()
+		);
 	}
 
 	public static void putOre(String oreName, double avgEnergy, double maxYield, String oreOut) {

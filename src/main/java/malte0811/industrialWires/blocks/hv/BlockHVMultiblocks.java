@@ -30,6 +30,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -52,7 +53,13 @@ public class BlockHVMultiblocks extends BlockIWMultiblock implements IMetaEnum {
 		// No MB's in the creative inventory!
 	}
 
-
+	@Override
+	public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer) {
+		if (state.getValue(IWProperties.MARX_TYPE)!= IWProperties.MarxType.CONNECTOR)
+			return super.canRenderInLayer(state, layer);
+		else
+			return layer==BlockRenderLayer.TRANSLUCENT||layer==BlockRenderLayer.SOLID;
+	}
 
 	@Override
 	protected IProperty[] getProperties() {

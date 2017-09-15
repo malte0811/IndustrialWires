@@ -67,8 +67,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -109,7 +107,6 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	public IWProperties.MarxType type = IWProperties.MarxType.NO_MODEL;
 	private int stageCount = 0;
 	public FiringState state = FiringState.CHARGING;
-	@SideOnly(Side.CLIENT)
 	public Discharge dischargeData;
 	// Voltage=100*storedEU
 	private DualEnergyStorage storage = new DualEnergyStorage(50_000, 32_000);
@@ -345,7 +342,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 
 	private void handleEntities(double energyStored) {
 		Vec3d v0 = getMiddle();
-		AxisAlignedBB aabb = new AxisAlignedBB(v0, v0);
+		AxisAlignedBB aabb = new AxisAlignedBB(v0.x, v0.y, v0.z, v0.x, v0.y, v0.z);
 		aabb = aabb.grow(0, stageCount/2-1,0);
 		final double sqrtStages = Math.sqrt(stageCount);
 		aabb = aabb.grow(5*sqrtStages);
@@ -701,7 +698,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	@SubscribeEvent
 	public static void gatherLights(GatherLightsEvent event) {
 		for (TileEntityMarx te:FIRING_GENERATORS) {
-			Vec3d origin = te.getMiddle().subtract(0, .5*te.stageCount+1,0);
+			Vec3d origin = te.getMiddle().subtract(0, .5*te.stageCount-1,0);
 			Light.Builder builder = Light.builder()
 					.color(1, 1, 1)
 					.radius(5);
