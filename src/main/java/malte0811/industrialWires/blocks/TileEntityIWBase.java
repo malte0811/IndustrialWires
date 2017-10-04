@@ -25,9 +25,6 @@ import net.minecraft.tileentity.TileEntity;
 import javax.annotation.Nonnull;
 
 public abstract class TileEntityIWBase extends TileEntity {
-	protected static final String ENERGY_TAG = "energy";
-	protected static final String BUFFER_TAG = "buffer";
-	protected static final String DIR_TAG = "dir";
 
 	@Nonnull
 	@Override

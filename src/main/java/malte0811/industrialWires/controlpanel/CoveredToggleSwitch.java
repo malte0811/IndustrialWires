@@ -33,6 +33,8 @@ import org.lwjgl.util.vector.Vector3f;
 import javax.annotation.Nonnull;
 import java.util.List;
 
+import static malte0811.industrialWires.util.NBTKeys.*;
+
 public class CoveredToggleSwitch extends ToggleSwitch {
 	private int color = 0xff0000;
 	private SwitchState state = SwitchState.CLOSED;

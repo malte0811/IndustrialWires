@@ -40,6 +40,9 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
+import static malte0811.industrialWires.util.NBTKeys.RS_CHANNEL;
+import static malte0811.industrialWires.util.NBTKeys.RS_ID;
+
 public class ToggleSwitch extends PanelComponent implements IConfigurableComponent {
 	public boolean active;
 	public int rsOutputId;

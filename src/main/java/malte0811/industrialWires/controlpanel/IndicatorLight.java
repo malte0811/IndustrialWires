@@ -39,6 +39,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static malte0811.industrialWires.util.NBTKeys.*;
+
 public class IndicatorLight extends PanelComponent implements IConfigurableComponent {
 	private int rsInputId;
 	private byte rsInputChannel;

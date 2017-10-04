@@ -20,10 +20,7 @@ package malte0811.industrialWires;
 import blusunrize.immersiveengineering.api.MultiblockHandler;
 import malte0811.industrialWires.blocks.BlockIWBase;
 import malte0811.industrialWires.blocks.controlpanel.*;
-import malte0811.industrialWires.blocks.converter.BlockMechanicalConverter;
-import malte0811.industrialWires.blocks.converter.TileEntityIEMotor;
-import malte0811.industrialWires.blocks.converter.TileEntityMechICtoIE;
-import malte0811.industrialWires.blocks.converter.TileEntityMechIEtoIC;
+import malte0811.industrialWires.blocks.converter.*;
 import malte0811.industrialWires.blocks.hv.BlockHVMultiblocks;
 import malte0811.industrialWires.blocks.hv.BlockJacobsLadder;
 import malte0811.industrialWires.blocks.hv.TileEntityJacobsLadder;
@@ -31,6 +28,8 @@ import malte0811.industrialWires.blocks.hv.TileEntityMarx;
 import malte0811.industrialWires.blocks.wire.*;
 import malte0811.industrialWires.compat.Compat;
 import malte0811.industrialWires.controlpanel.PanelUtils;
+import malte0811.industrialWires.converter.MechMBPart;
+import malte0811.industrialWires.converter.MultiblockConverter;
 import malte0811.industrialWires.crafting.Recipes;
 import malte0811.industrialWires.hv.MarxOreHandler;
 import malte0811.industrialWires.hv.MultiblockMarx;
@@ -87,6 +86,8 @@ public class IndustrialWires {
 	public static BlockPanel panel = null;
 	@GameRegistry.ObjectHolder(MODID+":"+BlockHVMultiblocks.NAME)
 	public static BlockHVMultiblocks hvMultiblocks = null;
+	@GameRegistry.ObjectHolder(MODID+":"+BlockMechanicalMB.NAME)
+	public static BlockMechanicalMB mechanicalMB = null;
 
 	@GameRegistry.ObjectHolder(MODID+":"+ItemIC2Coil.NAME)
 	public static ItemIC2Coil coil = null;
@@ -140,6 +141,7 @@ public class IndustrialWires {
 				GameRegistry.registerTileEntity(TileEntityMechIEtoIC.class, MODID + ":mechIeToIc");
 			}
 		}
+		GameRegistry.registerTileEntity(TileEntityMultiblockConverter.class, MODID + ":mechMB");//TODO respect enableConversion!
 		GameRegistry.registerTileEntity(TileEntityJacobsLadder.class, MODID + ":jacobsLadder");
 		GameRegistry.registerTileEntity(TileEntityMarx.class, MODID + ":marx_generator");
 		GameRegistry.registerTileEntity(TileEntityPanel.class, MODID + ":control_panel");
@@ -165,6 +167,7 @@ public class IndustrialWires {
 		event.getRegistry().register(new BlockJacobsLadder());
 		event.getRegistry().register(new BlockPanel());
 		event.getRegistry().register(new BlockHVMultiblocks());
+		event.getRegistry().register(new BlockMechanicalMB());
 	}
 
 	@SubscribeEvent
@@ -189,6 +192,8 @@ public class IndustrialWires {
 	public void init(FMLInitializationEvent e) {
 		MultiblockMarx.INSTANCE = new MultiblockMarx();
 		MultiblockHandler.registerMultiblock(MultiblockMarx.INSTANCE);
+		MultiblockConverter.INSTANCE = new MultiblockConverter();
+		MultiblockHandler.registerMultiblock(MultiblockConverter.INSTANCE);
 
 		packetHandler.registerMessage(MessageTileSyncIW.HandlerClient.class, MessageTileSyncIW.class, 0, Side.CLIENT);
 		packetHandler.registerMessage(MessagePanelInteract.HandlerServer.class, MessagePanelInteract.class, 1, Side.SERVER);
@@ -199,6 +204,7 @@ public class IndustrialWires {
 		IWPotions.init();
 		Compat.init();
 		MarxOreHandler.init();
+		MechMBPart.init();
 	}
 
 	@EventHandler

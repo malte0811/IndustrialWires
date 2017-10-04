@@ -31,16 +31,14 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.*;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
+import static malte0811.industrialWires.util.NBTKeys.*;
+
 public class ItemKey extends Item implements INetGUIItem {
-	public static final String LOCK_ID = "lockId";
-	public static final String RING_KEYS = "ringkeys";
-	public static final String NAME = "name";
 	public static final String[] types = {"blank_key", "key", "key_ring"};
 	public static final String ITEM_NAME = "key";
 

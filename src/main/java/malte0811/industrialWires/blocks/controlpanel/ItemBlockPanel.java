@@ -26,9 +26,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.MathHelper;
 
+import static malte0811.industrialWires.util.NBTKeys.ANGLE;
+import static malte0811.industrialWires.util.NBTKeys.HEIGHT;
+
 public class ItemBlockPanel extends ItemBlockIW implements IConfigurableTool {
-	private static final String HEIGHT = "height";
-	private static final String ANGLE = "angle";
 
 	public ItemBlockPanel(Block b) {
 		super(b);

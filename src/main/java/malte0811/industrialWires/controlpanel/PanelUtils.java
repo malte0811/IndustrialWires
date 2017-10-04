@@ -26,7 +26,6 @@ import malte0811.industrialWires.blocks.controlpanel.BlockTypes_Panel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.panelmodel.SmartLightingQuadIW;
 import malte0811.industrialWires.controlpanel.PropertyComponents.PanelRenderProperties;
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -59,8 +58,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiPredicate;
 
-import static malte0811.industrialWires.controlpanel.PanelComponent.*;
 import static malte0811.industrialWires.util.MiscUtils.discoverLocal;
+import static malte0811.industrialWires.util.NBTKeys.*;
 
 public final class PanelUtils {
 	public static TextureAtlasSprite PANEL_TEXTURE;
@@ -320,8 +319,8 @@ public final class PanelUtils {
 			break;
 		case 8://Panel meter
 			addCommonInfo(data, list, false, true);
-			if (data.hasKey(PanelMeter.WIDE)) {
-				list.add(I18n.format(IndustrialWires.MODID + ".tooltip." + (data.getBoolean(PanelMeter.WIDE) ? "wide" : "narrow")));
+			if (data.hasKey(WIDE)) {
+				list.add(I18n.format(IndustrialWires.MODID + ".tooltip." + (data.getBoolean(WIDE) ? "wide" : "narrow")));
 			}
 			break;
 		}

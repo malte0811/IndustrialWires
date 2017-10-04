@@ -76,6 +76,7 @@ import java.util.function.BiConsumer;
 import static malte0811.industrialWires.blocks.hv.TileEntityMarx.FiringState.FIRE;
 import static malte0811.industrialWires.util.MiscUtils.getOffset;
 import static malte0811.industrialWires.util.MiscUtils.offset;
+import static malte0811.industrialWires.util.NBTKeys.*;
 import static net.minecraft.item.EnumDyeColor.*;
 
 /**
@@ -94,10 +95,6 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	//Only relevant client-side.
 	private static final Set<TileEntityMarx> FIRING_GENERATORS = Collections.newSetFromMap(new WeakHashMap<>());
 
-	private static final String TYPE = "type";
-	private static final String STAGES = "stages";
-	private static final String HAS_CONN = "hasConn";
-	private static final String CAP_VOLTAGES = "capVoltages";
 	private double rcTimeConst;
 	private double timeFactor;
 	private double timeFactorBottom;

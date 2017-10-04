@@ -37,6 +37,8 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
+import static malte0811.industrialWires.util.NBTKeys.*;
+
 public class LightedButton extends PanelComponent implements IConfigurableComponent {
 	public int color = 0xFF0000;
 	public boolean active;

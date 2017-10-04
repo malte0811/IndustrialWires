@@ -92,6 +92,9 @@ public final class MiscUtils {
 		return ret;
 	}
 
+	public static BlockPos offset(BlockPos p, EnumFacing f, boolean mirror, BlockPos relative) {
+		return offset(p, f, mirror, relative.getX(), relative.getZ(), relative.getY());
+	}
 	/**
 	 * @param mirror inverts right
 	 */

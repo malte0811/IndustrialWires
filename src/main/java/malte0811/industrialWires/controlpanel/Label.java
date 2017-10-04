@@ -40,6 +40,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
+import static malte0811.industrialWires.util.NBTKeys.COLOR;
+import static malte0811.industrialWires.util.NBTKeys.TEXT;
+
 public class Label extends PanelComponent implements IConfigurableComponent {
 	public static final ResourceLocation FONT = new ResourceLocation("minecraft", "textures/font/ascii.png");
 	private String text = "Test";

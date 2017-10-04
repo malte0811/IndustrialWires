@@ -36,6 +36,8 @@ import net.minecraftforge.energy.CapabilityEnergy;
 
 import javax.annotation.Nonnull;
 
+import static malte0811.industrialWires.util.NBTKeys.*;
+
 public class TileEntityIEMotor extends TileEntityIWBase implements ITickable, IFluxReceiver, IDirectionalTile {
 	public final double bufferMax = 2 * MechConversion.maxIfToMech * ConversionUtil.rotPerIf();
 

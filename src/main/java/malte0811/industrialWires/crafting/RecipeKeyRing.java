@@ -31,7 +31,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
 
-import static malte0811.industrialWires.items.ItemKey.*;
+import static malte0811.industrialWires.util.NBTKeys.*;
 
 public class RecipeKeyRing extends IForgeRegistryEntry.Impl<IRecipe> implements IRecipe {
 

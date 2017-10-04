@@ -38,6 +38,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static malte0811.industrialWires.util.NBTKeys.*;
+
 public class Slider extends PanelComponent implements IConfigurableComponent {
 	private static final float WIDTH = .0625F;
 	private float length = .5F;

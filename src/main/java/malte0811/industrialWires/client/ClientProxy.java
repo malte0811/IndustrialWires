@@ -34,6 +34,7 @@ import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.controlpanel.BlockTypes_Panel;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanelCreator;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityRSPanelConn;
+import malte0811.industrialWires.blocks.converter.TileEntityMultiblockConverter;
 import malte0811.industrialWires.blocks.hv.TileEntityJacobsLadder;
 import malte0811.industrialWires.blocks.hv.TileEntityMarx;
 import malte0811.industrialWires.client.gui.GuiPanelComponent;
@@ -42,6 +43,7 @@ import malte0811.industrialWires.client.gui.GuiRSPanelConn;
 import malte0811.industrialWires.client.gui.GuiRenameKey;
 import malte0811.industrialWires.client.panelmodel.PanelModelLoader;
 import malte0811.industrialWires.client.render.TileRenderJacobsLadder;
+import malte0811.industrialWires.client.render.TileRenderMBConverter;
 import malte0811.industrialWires.client.render.TileRenderMarx;
 import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.crafting.IC2TRHelper;
@@ -55,6 +57,7 @@ import net.minecraft.client.audio.MovingSound;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
@@ -118,6 +121,9 @@ public class ClientProxy extends CommonProxy {
 		ModelLoaderRegistry.registerLoader(new PanelModelLoader());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityJacobsLadder.class, new TileRenderJacobsLadder());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMarx.class, new TileRenderMarx());
+		TileRenderMBConverter tesr = new TileRenderMBConverter();
+		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMultiblockConverter.class, tesr);
+		((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(tesr);
 	}
 
 	@Override

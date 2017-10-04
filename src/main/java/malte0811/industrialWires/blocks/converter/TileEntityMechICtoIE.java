@@ -32,6 +32,9 @@ import net.minecraft.util.math.BlockPos;
 
 import javax.annotation.Nonnull;
 
+import static malte0811.industrialWires.util.NBTKeys.BUFFER_TAG;
+import static malte0811.industrialWires.util.NBTKeys.DIR_TAG;
+
 public class TileEntityMechICtoIE extends TileEntityIWBase implements IDirectionalTile, ITickable {
 	EnumFacing dir = EnumFacing.DOWN;
 	int kinBuffer = 0;

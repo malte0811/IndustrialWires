@@ -11,7 +11,6 @@ import malte0811.industrialWires.client.gui.elements.GuiIntChooser;
 import malte0811.industrialWires.containers.ContainerPanelComponent;
 import malte0811.industrialWires.controlpanel.IConfigurableComponent;
 import malte0811.industrialWires.controlpanel.PanelComponent;
-import malte0811.industrialWires.items.ItemPanelComponent;
 import malte0811.industrialWires.network.MessageItemSync;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiTextField;
@@ -27,6 +26,8 @@ import org.lwjgl.input.Keyboard;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static malte0811.industrialWires.util.NBTKeys.*;
 
 public class GuiPanelComponent extends GuiContainer {
 	private PanelComponent component;
@@ -266,41 +267,41 @@ public class GuiPanelComponent extends GuiContainer {
 
 	private void sync(int id, String value) {
 		NBTTagCompound update = new NBTTagCompound();
-		update.setInteger(ItemPanelComponent.TYPE, IConfigurableComponent.ConfigType.STRING.ordinal());
-		update.setInteger(ItemPanelComponent.ID, id);
-		update.setString(ItemPanelComponent.VALUE, value);
+		update.setInteger(TYPE, IConfigurableComponent.ConfigType.STRING.ordinal());
+		update.setInteger(ID, id);
+		update.setString(VALUE, value);
 		syncSingle(update);
 	}
 
 	private void sync(int id, boolean value) {
 		NBTTagCompound update = new NBTTagCompound();
-		update.setInteger(ItemPanelComponent.TYPE, IConfigurableComponent.ConfigType.BOOL.ordinal());
-		update.setInteger(ItemPanelComponent.ID, id);
-		update.setBoolean(ItemPanelComponent.VALUE, value);
+		update.setInteger(TYPE, IConfigurableComponent.ConfigType.BOOL.ordinal());
+		update.setInteger(ID, id);
+		update.setBoolean(VALUE, value);
 		syncSingle(update);
 	}
 
 	private void sync(int id, byte value) {
 		NBTTagCompound update = new NBTTagCompound();
-		update.setInteger(ItemPanelComponent.TYPE, IConfigurableComponent.ConfigType.RS_CHANNEL.ordinal());
-		update.setInteger(ItemPanelComponent.ID, id);
-		update.setByte(ItemPanelComponent.VALUE, value);
+		update.setInteger(TYPE, IConfigurableComponent.ConfigType.RS_CHANNEL.ordinal());
+		update.setInteger(ID, id);
+		update.setByte(VALUE, value);
 		syncSingle(update);
 	}
 
 	private void sync(int id, int value) {
 		NBTTagCompound update = new NBTTagCompound();
-		update.setInteger(ItemPanelComponent.TYPE, IConfigurableComponent.ConfigType.INT.ordinal());
-		update.setInteger(ItemPanelComponent.ID, id);
-		update.setInteger(ItemPanelComponent.VALUE, value);
+		update.setInteger(TYPE, IConfigurableComponent.ConfigType.INT.ordinal());
+		update.setInteger(ID, id);
+		update.setInteger(VALUE, value);
 		syncSingle(update);
 	}
 
 	private void sync(int id, float value) {
 		NBTTagCompound update = new NBTTagCompound();
-		update.setInteger(ItemPanelComponent.TYPE, IConfigurableComponent.ConfigType.FLOAT.ordinal());
-		update.setInteger(ItemPanelComponent.ID, id);
-		update.setFloat(ItemPanelComponent.VALUE, value);
+		update.setInteger(TYPE, IConfigurableComponent.ConfigType.FLOAT.ordinal());
+		update.setInteger(ID, id);
+		update.setFloat(VALUE, value);
 		syncSingle(update);
 	}
 
@@ -308,37 +309,37 @@ public class GuiPanelComponent extends GuiContainer {
 		NBTTagList list = new NBTTagList();
 		for (int i = 0; i < stringTexts.size(); i++) {
 			NBTTagCompound update = new NBTTagCompound();
-			update.setInteger(ItemPanelComponent.TYPE, IConfigurableComponent.ConfigType.STRING.ordinal());
-			update.setInteger(ItemPanelComponent.ID, i);
-			update.setString(ItemPanelComponent.VALUE, stringTexts.get(i).getText());
+			update.setInteger(TYPE, IConfigurableComponent.ConfigType.STRING.ordinal());
+			update.setInteger(ID, i);
+			update.setString(VALUE, stringTexts.get(i).getText());
 			list.appendTag(update);
 		}
 		for (int i = 0; i < boolButtons.size(); i++) {
 			NBTTagCompound update = new NBTTagCompound();
-			update.setInteger(ItemPanelComponent.TYPE, IConfigurableComponent.ConfigType.BOOL.ordinal());
-			update.setInteger(ItemPanelComponent.ID, i);
-			update.setBoolean(ItemPanelComponent.VALUE, boolButtons.get(i).state);
+			update.setInteger(TYPE, IConfigurableComponent.ConfigType.BOOL.ordinal());
+			update.setInteger(ID, i);
+			update.setBoolean(VALUE, boolButtons.get(i).state);
 			list.appendTag(update);
 		}
 		for (int i = 0; i < rsChannelChoosers.size(); i++) {
 			NBTTagCompound update = new NBTTagCompound();
-			update.setInteger(ItemPanelComponent.TYPE, IConfigurableComponent.ConfigType.RS_CHANNEL.ordinal());
-			update.setInteger(ItemPanelComponent.ID, i);
-			update.setByte(ItemPanelComponent.VALUE, rsChannelChoosers.get(i).getSelected());
+			update.setInteger(TYPE, IConfigurableComponent.ConfigType.RS_CHANNEL.ordinal());
+			update.setInteger(ID, i);
+			update.setByte(VALUE, rsChannelChoosers.get(i).getSelected());
 			list.appendTag(update);
 		}
 		for (int i = 0; i < intChoosers.size(); i++) {
 			NBTTagCompound update = new NBTTagCompound();
-			update.setInteger(ItemPanelComponent.TYPE, IConfigurableComponent.ConfigType.INT.ordinal());
-			update.setInteger(ItemPanelComponent.ID, i);
-			update.setInteger(ItemPanelComponent.VALUE, intChoosers.get(i).getValue());
+			update.setInteger(TYPE, IConfigurableComponent.ConfigType.INT.ordinal());
+			update.setInteger(ID, i);
+			update.setInteger(VALUE, intChoosers.get(i).getValue());
 			list.appendTag(update);
 		}
 		for (int i = 0; i < floatSliders.size(); i++) {
 			NBTTagCompound update = new NBTTagCompound();
-			update.setInteger(ItemPanelComponent.TYPE, IConfigurableComponent.ConfigType.FLOAT.ordinal());
-			update.setInteger(ItemPanelComponent.ID, i);
-			update.setFloat(ItemPanelComponent.VALUE, (float) floatSliders.get(i).getValue());
+			update.setInteger(TYPE, IConfigurableComponent.ConfigType.FLOAT.ordinal());
+			update.setInteger(ID, i);
+			update.setFloat(VALUE, (float) floatSliders.get(i).getValue());
 			list.appendTag(update);
 		}
 		sync(list);

@@ -1,0 +1,45 @@
+{
+  "forge_marker": 1,
+  "defaults": {
+    "transform": "forge:default-block",
+    "textures": {
+
+    },
+    "custom": {
+      "flip-v": true
+    },
+    "model": "builtin/generated"
+  },
+  "variants": {
+    "type": {
+      "no_model": {
+      },
+      "end": {
+        "model": "industrialwires:mech_mb/end.obj"
+      },
+      "other_end": {
+        "model": "industrialwires:mech_mb/end_other.obj"
+      },
+      "flywheel": {
+      },
+      "coil_1_phase": {
+        "model": "industrialwires:mech_mb/mag_ring.obj"
+      }
+    },
+    "facing":
+    {
+      "north": { "transform": {
+        "rotation": {"y": 0 }
+      }},
+      "south": { "transform": {
+        "rotation": {"y": 180 }
+      }},
+      "west": { "transform": {
+        "rotation": {"y": 90 }
+      }},
+      "east": { "transform": {
+        "rotation": {"y": -90 }
+      }}
+    }
+  }
+}

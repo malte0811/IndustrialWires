@@ -41,12 +41,12 @@ import org.lwjgl.util.vector.Vector3f;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static malte0811.industrialWires.util.NBTKeys.*;
+
 public class PanelMeter extends PanelComponent implements IConfigurableComponent {
-	public static final String WIDE = "wide";
 
 	private int rsInputId, rsInputId2 = -1;
 	private byte rsInputChannel, rsInputChannel2;

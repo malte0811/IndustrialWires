@@ -29,6 +29,9 @@ import net.minecraft.util.EnumFacing;
 
 import javax.annotation.Nonnull;
 
+import static malte0811.industrialWires.util.NBTKeys.BUFFER_TAG;
+import static malte0811.industrialWires.util.NBTKeys.DIR_TAG;
+
 public class TileEntityMechIEtoIC extends TileEntityIWBase implements IDirectionalTile, IRotationAcceptor, IKineticSource {
 	EnumFacing dir = EnumFacing.DOWN;
 	double rotBuffer = 0;

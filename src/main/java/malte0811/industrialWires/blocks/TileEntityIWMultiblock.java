@@ -18,7 +18,6 @@
 
 package malte0811.industrialWires.blocks;
 
-import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IGeneralMultiblock;
 import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.block.state.IBlockState;
@@ -42,7 +41,7 @@ public abstract class TileEntityIWMultiblock extends TileEntityIWBase implements
 	protected final static String FACING = "facing";
 	//HFR
 	protected Vec3i size;
-	public Vec3i offset = new Vec3i(0, 0, 0);
+	public Vec3i offset = new Vec3i(0, 1, 0);
 	public boolean formed;
 	public boolean mirrored;
 	public long onlyLocalDissassembly;

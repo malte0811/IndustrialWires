@@ -46,6 +46,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static malte0811.industrialWires.util.NBTKeys.*;
+
 public class Lock extends PanelComponent implements IConfigurableComponent {
 	private final static Random rand = new Random();
 	@Nullable

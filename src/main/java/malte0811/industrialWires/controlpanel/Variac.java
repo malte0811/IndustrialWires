@@ -43,6 +43,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static malte0811.industrialWires.util.NBTKeys.*;
+
 public class Variac extends PanelComponent implements IConfigurableComponent {
 	private static final float SIZE = 3 / 16F;
 	private static final float innerSize = (float) (Math.sqrt(2) / 2 * SIZE);
