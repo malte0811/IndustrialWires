@@ -548,12 +548,12 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 	public static final float[] saltColor = {1, 190 / 255F, 50 / 255F};
 	public static final float[] airColor = {1, .85F, 1};
 
+	private static final int factor = 20;
+	private static final double smallMin = Math.exp(-.5);
+	private static final double normalMin = Math.exp(-.25 * factor);
+	private static final double hugeMin = Math.exp(-.75 * factor);
 	public static float[] getColor(double t, double salt, LadderSize size) {
 		salt = Math.min(salt, 1);
-		int factor = 20;
-		double smallMin = Math.exp(-.5);
-		double normalMin = Math.exp(-.25 * factor);
-		double hugeMin = Math.exp(-.75 * factor);
 		double saltyness = 0;
 		double t2 = t - .5;
 		switch (size) {
