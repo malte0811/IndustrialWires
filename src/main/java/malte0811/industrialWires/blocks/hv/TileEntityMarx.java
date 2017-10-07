@@ -127,6 +127,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	@Override
 	public void writeNBT(NBTTagCompound out, boolean updatePacket) {
 		super.writeNBT(out, updatePacket);
+		MiscUtils.writeConnsToNBT(out, this);
 		out.setInteger(TYPE, type.ordinal());
 		out.setInteger(STAGES, stageCount);
 		out.setBoolean(HAS_CONN, hasConnection);
@@ -143,6 +144,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	@Override
 	public void readNBT(NBTTagCompound in, boolean updatePacket) {
 		super.readNBT(in, updatePacket);
+		MiscUtils.loadConnsFromNBT(in, this);
 		type = IWProperties.MarxType.values()[in.getInteger(TYPE)];
 		setStageCount(in.getInteger(STAGES));
 		NBTTagList voltages = in.getTagList(CAP_VOLTAGES, 6);//DOUBLE
@@ -603,6 +605,11 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	@Override
 	public void removeCable(ImmersiveNetHandler.Connection connection) {
 		hasConnection = false;
+		if(world != null)
+		{
+			IBlockState state = world.getBlockState(pos);
+			world.notifyBlockUpdate(pos, state,state, 3);
+		}
 	}
 
 	@Override
@@ -620,6 +627,28 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		return getRaytraceOffset(null);
 	}
 
+
+	@Override
+	public void validate()
+	{
+		super.validate();
+		ImmersiveNetHandler.INSTANCE.resetCachedIndirectConnections();
+	}
+
+	@Override
+	public void invalidate()
+	{
+		super.invalidate();
+		if (world.isRemote)
+			ImmersiveNetHandler.INSTANCE.clearConnectionsOriginatingFrom(pos, world);
+	}
+
+	@Override
+	public boolean receiveClientEvent(int id, int type) {
+		return MiscUtils.handleUpdate(id, pos, world)||super.receiveClientEvent(id, type);
+	}
+
+	// Redstone wire stuff
 	private RedstoneWireNetwork net = new RedstoneWireNetwork();
 	@Override
 	public void setNetwork(RedstoneWireNetwork net) {
