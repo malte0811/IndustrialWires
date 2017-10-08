@@ -221,13 +221,13 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		FIRING_GENERATORS.remove(this);
 		switch (state) {
 			case NEXT_TICK:
-				state = FIRE;
 				if (world.isRemote) {
 					FIRING_GENERATORS.add(this);
 					IndustrialWires.proxy.playMarxBang(this, getMiddle(), (float) getNormedEnergy(dischargeData.energy));
 				} else {
 					fire();
 				}
+				state = FIRE;
 				break;
 			case FIRE:
 				state = FiringState.CHARGING;
@@ -412,7 +412,6 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 
 	@Override
 	public void onSync(NBTTagCompound nbt) {
-		state = FiringState.NEXT_TICK;
 		float energy = nbt.getFloat("energy");
 		if (energy>0) {
 			genDischarge(energy, nbt.getInteger("randSeed"));
@@ -422,6 +421,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 			}
 			dischargeData.energy = energy;
 		}
+		state = FiringState.NEXT_TICK;
 	}
 
 	private void genDischarge(float energy, int seed) {
