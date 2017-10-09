@@ -101,8 +101,8 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	private double rcTimeConst;
 	private double timeFactor;
 	private double timeFactorBottom;
-	private final static double CAPACITANCE = 0.000_001_6;
-	private final static double MAX_VOLTAGE = 250_000;
+	private final static double CAPACITANCE = 1.6e-6;
+	private final static double MAX_VOLTAGE = 250e3;
 
 	public IWProperties.MarxType type = IWProperties.MarxType.NO_MODEL;
 	private int stageCount = 0;
@@ -343,15 +343,13 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	}
 
 	private void handleEntities(double energyStored) {
+		double damageDistSqu = Math.sqrt(energyStored/50e3);
+		double tinnitusDistSqu = Math.sqrt(energyStored)/50;
 		Vec3d v0 = getMiddle();
 		AxisAlignedBB aabb = new AxisAlignedBB(v0.x, v0.y, v0.z, v0.x, v0.y, v0.z);
 		aabb = aabb.grow(0, stageCount/2-1,0);
-		final double sqrtStages = Math.sqrt(stageCount);
-		aabb = aabb.grow(5*sqrtStages);
+		aabb = aabb.grow(tinnitusDistSqu);
 		List<Entity> fools = world.getEntitiesWithinAABB(Entity.class, aabb);
-		double energyNormed = getNormedEnergy(energyStored);
-		double damageDistSqu = energyNormed * stageCount;
-		double tinnitusDistSqu = 5 * energyNormed * stageCount;
 		damageDistSqu *= damageDistSqu;
 		tinnitusDistSqu *= tinnitusDistSqu;
 		if (IWConfig.HVStuff.marxSoundDamage == 2) {

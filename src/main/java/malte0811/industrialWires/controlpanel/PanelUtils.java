@@ -26,7 +26,6 @@ import malte0811.industrialWires.blocks.controlpanel.BlockTypes_Panel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.panelmodel.SmartLightingQuadIW;
 import malte0811.industrialWires.controlpanel.PropertyComponents.PanelRenderProperties;
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
