@@ -310,11 +310,10 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	private void handleOreProcessing(double energyStored) {
 		BlockPos bottom = getBottomElectrode();
 		Vec3d origin = new Vec3d(bottom).addVector(.5, 1, .5);
-		Set<BlockPos> toBreak = new HashSet<>(dischargeData.vertices.length);
+		Set<BlockPos> toBreak = new HashSet<>(stageCount-2);
 		int ores = 0;
-		for (int i = 1;i<dischargeData.vertices.length;i++) {
-			Vec3d vecHere = origin.add(dischargeData.vertices[i]);
-			BlockPos blockHere = new BlockPos(vecHere);
+		for (int i = 1;i<stageCount-1;i++) {
+			BlockPos blockHere = bottom.up(i);
 			if (!world.isAirBlock(blockHere) && canBreak(blockHere)) {
 				toBreak.add(blockHere);
 				ores++;
