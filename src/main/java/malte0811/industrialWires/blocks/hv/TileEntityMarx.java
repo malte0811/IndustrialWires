@@ -50,6 +50,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagDouble;
@@ -296,7 +297,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 				energyStored = -energyStored;
 			} else {
 				int seed = Utils.RAND.nextInt();
-				genDischarge((float) energyStored, seed);//TODO test on a dedicated server
+				genDischarge((float) energyStored, seed);
 				data.setInteger("randSeed", seed);
 				handleEntities(energyStored);
 				handleOreProcessing(energyStored);//After entities to prevent killing the newly dropped items
@@ -687,15 +688,15 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		if (master.capVoltages!=null&&master.capVoltages.length==stageCount) {
 			int signalTop = getRSSignalFromVoltage(master.capVoltages[stageCount-1]);
 			int signalBottom = getRSSignalFromVoltage(master.capVoltages[0]);
-			setSignal(ORANGE.getMetadata(), (signalBottom>>4)&0xf, signals);
-			setSignal(MAGENTA.getMetadata(), (signalTop>>4)&0xf, signals);
-			setSignal(LIME.getMetadata(), signalBottom&0xf, signals);
-			setSignal(PINK.getMetadata(), signalTop&0xf, signals);
+			setSignal(ORANGE, (signalBottom>>4)&0xf, signals);
+			setSignal(MAGENTA, (signalTop>>4)&0xf, signals);
+			setSignal(LIME, signalBottom&0xf, signals);
+			setSignal(PINK, signalTop&0xf, signals);
 		}
 	}
 
-	private void setSignal(int channel, int value, byte[] signals) {
-		signals[channel] = (byte) Math.max(value, signals[channel]);
+	private void setSignal(EnumDyeColor channel, int value, byte[] signals) {
+		signals[channel.getMetadata()] = (byte) Math.max(value, signals[channel.getMetadata()]);
 	}
 
 	public void setStageCount(int stageCount) {
@@ -759,11 +760,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		final int stageCount;
 		Discharge(int stages) {
 			stageCount = stages;
-			int count = 1;
-			while (count<stageCount) {
-				count <<= 1;
-			}
-			count = 8;
+			int count = stages/5+1;
 			vertices = new Vec3d[2*count];
 			vertices[0] = new Vec3d(0, -.5F, 0);
 			for (int i = 1;i<vertices.length;i++) {
@@ -775,10 +772,6 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 
 		// Meant to be const
 		private final Vec3d side = new Vec3d(0, 0, 1);
-		//used for calculation buffering
-		private Vec3d diff;
-		private Vec3d center;
-		private Vec3d v0;
 		private Matrix4 transform = new Matrix4();
 
 		void genMarxPoint(int randSeed) {
@@ -790,8 +783,8 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		 */
 		void genMarxPoint(int min, int max, Random rand) {
 			int toGenerate = (min+max)/2;
-			diff = vertices[max].subtract(vertices[min]);
-			v0 = diff.crossProduct(side);
+			Vec3d diff = vertices[max].subtract(vertices[min]);
+			Vec3d v0 = diff.crossProduct(side);
 			transform.setIdentity();
 			double diffLength = diff.lengthVector();
 			double noise = Math.sqrt(diffLength)*rand.nextDouble()*1/(1+Math.abs(stageCount/2.0-toGenerate))*.75;
@@ -801,7 +794,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 			v0 = v0.scale((float) (noise/v0.lengthVector()));
 			diff = diff.scale(1/diffLength);
 			transform.rotate(Math.PI*2*rand.nextDouble(), diff.x, diff.y, diff.z);
-			center = vertices[max].add(vertices[min]).scale(.5);
+			Vec3d center = vertices[max].add(vertices[min]).scale(.5);
 			vertices[toGenerate] = transform.apply(v0);
 			vertices[toGenerate] = center.add(vertices[toGenerate]);
 

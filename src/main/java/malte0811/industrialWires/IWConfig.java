@@ -66,5 +66,7 @@ public class IWConfig {
 		@Comment({"The effect of standing somewhat close to a Marx generator discharge.",
 				"0: Tinnitus, 1: Nausea, 2: normal damage"})
 		public static int marxSoundDamage = 0;
+		@Comment({"Set to false to disable shaders. They are used for rendering the Marx generator and the Jacob's ladder."})
+		public static boolean enableShaders = true;
 	}
 }
