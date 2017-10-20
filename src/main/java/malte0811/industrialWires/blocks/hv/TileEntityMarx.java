@@ -28,9 +28,7 @@ import blusunrize.immersiveengineering.api.energy.wires.redstone.IRedstoneConnec
 import blusunrize.immersiveengineering.api.energy.wires.redstone.RedstoneWireNetwork;
 import blusunrize.immersiveengineering.common.IEContent;
 import blusunrize.immersiveengineering.common.blocks.BlockTypes_MetalsIE;
-import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDirectionalTile;
 import blusunrize.immersiveengineering.common.blocks.metal.*;
-import blusunrize.immersiveengineering.common.blocks.wooden.TileEntityWallmount;
 import blusunrize.immersiveengineering.common.util.Utils;
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import com.elytradev.mirage.event.GatherLightsEvent;
@@ -57,7 +55,6 @@ import net.minecraft.nbt.NBTTagDouble;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -72,7 +69,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.function.BiConsumer;
 
 import static malte0811.industrialWires.blocks.hv.TileEntityMarx.FiringState.FIRE;
 import static malte0811.industrialWires.util.MiscUtils.getOffset;
@@ -195,25 +191,6 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 			return IEContent.blockConnectors.getDefaultState().withProperty(IEContent.blockConnectors.property, BlockTypes_Connector.CONNECTOR_HV)
 					.withProperty(IEProperties.FACING_ALL, facing);
 		}
-	}
-
-	@Override
-	public BiConsumer<World, BlockPos> getOriginalBlockPlacer() {
-		IBlockState original = getOriginalBlock();
-		if (original!=null) {
-			return (w, p) -> {
-				w.setBlockState(p, original);
-				TileEntity te = w.getTileEntity(p);
-				if (te instanceof IDirectionalTile&&original.getProperties().containsKey(IEProperties.FACING_ALL)) {
-					((IDirectionalTile) te).setFacing(original.getValue(IEProperties.FACING_ALL));
-					te.markDirty();
-				}
-				if (te instanceof TileEntityWallmount) {
-					((TileEntityWallmount) te).orientation = original.getValue(IEProperties.INT_4);
-				}
-			};
-		}
-		return (a, b)->IndustrialWires.logger.warn(a+", "+b+" wasn't found");//NOP
 	}
 
 	@Override
