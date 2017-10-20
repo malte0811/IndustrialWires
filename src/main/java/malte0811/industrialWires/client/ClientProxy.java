@@ -40,6 +40,7 @@ import malte0811.industrialWires.client.gui.GuiPanelComponent;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import malte0811.industrialWires.client.gui.GuiRSPanelConn;
 import malte0811.industrialWires.client.gui.GuiRenameKey;
+import malte0811.industrialWires.client.manual.TextSplitter;
 import malte0811.industrialWires.client.panelmodel.PanelModelLoader;
 import malte0811.industrialWires.client.render.Shaders;
 import malte0811.industrialWires.client.render.TileRenderJacobsLadder;
@@ -71,7 +72,10 @@ import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.WeakHashMap;
 
 public class ClientProxy extends CommonProxy {
 	@Override
@@ -246,33 +250,30 @@ public class ClientProxy extends CommonProxy {
 				new ManualPages.Crafting(m, "industrialwires.panel_meter", new ItemStack(IndustrialWires.panelComponent, 1, 8))
 		);
 		List<MarxOreHandler.OreInfo> ores = MarxOreHandler.getRecipes();
-		List<ManualPages> marxEntry = new ArrayList<>();
-		marxEntry.add(new ManualPages.Text(m, IndustrialWires.MODID + ".marx0"));
-		marxEntry.add(new ManualPageMultiblock(m, IndustrialWires.MODID + ".marx1", MultiblockMarx.INSTANCE));
-		marxEntry.add(new ManualPages.Text(m, IndustrialWires.MODID + ".marx2"));
-		marxEntry.add(new ManualPages.Text(m, IndustrialWires.MODID + ".marx3"));
-		marxEntry.add(new ManualPages.Text(m, IndustrialWires.MODID + ".marx4"));
-		marxEntry.add(new ManualPages.Text(m, IndustrialWires.MODID + ".marx5"));
-		marxEntry.add(new ManualPages.Text(m, IndustrialWires.MODID + ".marx6"));
-		String text = I18n.format("ie.manual.entry.industrialwires.marx7")+"\n";
-		for (int i = 0; i < ores.size(); ) {
-			for (int j = 0; j < 12 && i < ores.size(); j+=4, i++) {
-				MarxOreHandler.OreInfo curr = ores.get(i);
-				if (!curr.exampleInput.isEmpty())
-				{
-					text += I18n.format(IndustrialWires.MODID + ".desc.input") + ": §l" + curr.exampleInput.get(0).getDisplayName() + "§r\n";
-					text += I18n.format(IndustrialWires.MODID + ".desc.output") + ": " + Utils.formatDouble(curr.maxYield, "0.#") + "x" + curr.output.get().getDisplayName() + "\n";
-					if (curr.outputSmall != null && !curr.outputSmall.get().isEmpty())
-					{
-						text += I18n.format(IndustrialWires.MODID + ".desc.alt") + ": " + curr.smallMax + "x" + curr.outputSmall.get().getDisplayName() + "\n";
-						j++;
-					}
-					text += I18n.format(IndustrialWires.MODID + ".desc.ideal_e") + ": " + Utils.formatDouble(curr.avgEnergy * MarxOreHandler.defaultEnergy / 1000, "0.#") + " kJ\n\n";
+		String text = I18n.format("ie.manual.entry.industrialwires.marx");
+		for (int i = 0; i < ores.size(); i++) {
+			MarxOreHandler.OreInfo curr = ores.get(i);
+			if (!curr.exampleInput.isEmpty()) {
+				text += I18n.format(IndustrialWires.MODID + ".desc.input") + ": §l" + curr.exampleInput.get(0).getDisplayName() + "§r<br>";
+				text += I18n.format(IndustrialWires.MODID + ".desc.output") + ": " + Utils.formatDouble(curr.maxYield, "0.#") + "x" + curr.output.get().getDisplayName() + "<br>";
+				if (curr.outputSmall != null && !curr.outputSmall.get().isEmpty()) {
+					text += I18n.format(IndustrialWires.MODID + ".desc.alt") + ": " + curr.smallMax + "x" + curr.outputSmall.get().getDisplayName() + "<br>";
 				}
+				text += I18n.format(IndustrialWires.MODID + ".desc.ideal_e") + ": " + Utils.formatDouble(curr.avgEnergy * MarxOreHandler.defaultEnergy / 1000, "0.#") + " kJ<br><br>";
 			}
-			marxEntry.add(new ManualPages.Text(m, text));
-			text = "";
 		}
+		boolean uni = m.fontRenderer.getUnicodeFlag();
+		m.fontRenderer.setUnicodeFlag(true);
+		m.entryRenderPre();
+		TextSplitter splitter = new TextSplitter(m.fontRenderer::getStringWidth, 16, 120,
+				(s)->new ManualPages.Text(m, s));
+		splitter.addSpecialPage(0, 0, 6,
+				(s)->new ManualPageMultiblock(m, s,
+						MultiblockMarx.INSTANCE));
+		splitter.split(text);
+		m.entryRenderPost();
+		m.fontRenderer.setUnicodeFlag(uni);
+		List<ManualPages> marxEntry = splitter.toManualEntry();
 		m.addEntry("industrialwires.marx", IndustrialWires.MODID, marxEntry.toArray(new ManualPages[marxEntry.size()]));
 
 	}
