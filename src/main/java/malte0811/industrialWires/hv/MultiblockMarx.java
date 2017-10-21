@@ -27,7 +27,6 @@ import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler.Conn
 import blusunrize.immersiveengineering.api.energy.wires.WireType;
 import blusunrize.immersiveengineering.common.IEContent;
 import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_Connector;
-import com.google.common.collect.ImmutableSet;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.IWProperties;
 import malte0811.industrialWires.blocks.hv.BlockHVMultiblocks;
@@ -35,11 +34,10 @@ import malte0811.industrialWires.blocks.hv.TileEntityMarx;
 import malte0811.industrialWires.client.ClientUtilsIW;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BlockRendererDispatcher;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -48,18 +46,18 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.common.property.IExtendedBlockState;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 
+import java.util.List;
 import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static blusunrize.immersiveengineering.api.ApiUtils.getConnectionCatenary;
 import static blusunrize.immersiveengineering.api.IEProperties.*;
 import static blusunrize.immersiveengineering.common.IEContent.*;
 import static blusunrize.immersiveengineering.common.blocks.BlockTypes_MetalsIE.STEEL;
@@ -390,15 +388,51 @@ public class MultiblockMarx implements IMultiblock {
 	@Override
 	public boolean overwriteBlockRender(ItemStack stack, int iterator) {
 		IBlockState here = getBlockstateFromStack(-1, stack);
-		if (here!=null) {
+		if (stack == hvRel1Dummy) {
+			//Based on ClientUtils.tessellateConnection
+			Tessellator tessellator = Tessellator.getInstance();
+			BufferBuilder buffer = tessellator.getBuffer();
+			buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
+			double radius = WireType.STEEL.getRenderDiameter()/2;
+			int c = WireType.STEEL.getColour(null);
+			int[] rgba = {
+					c&255,
+					(c>>8)&255,
+					(c>>16)&255,
+					(c>>24)&255
+			};
+			TextureAtlasSprite tex = WireType.STEEL.getIcon(null);
+			double uMin = tex.getMinU();
+			double uMax = tex.getMaxU();
+			double vMin = tex.getMinV();
+			double vMax = tex.getMaxV();
+			buffer.setTranslation(.125, .5, .5);
+			buffer.pos(- radius, 0, 0).tex(uMin, vMin).color(rgba[0], rgba[1], rgba[2], 255).endVertex();
+			buffer.pos(- radius, 1, 0).tex(uMax, vMin).color(rgba[0], rgba[1], rgba[2], 255).endVertex();
+			buffer.pos(+ radius, 1, 0).tex(uMax, vMax).color(rgba[0], rgba[1], rgba[2], 255).endVertex();
+			buffer.pos(+ radius, 0, 0).tex(uMin, vMax).color(rgba[0], rgba[1], rgba[2], 255).endVertex();
+
+			buffer.pos(- radius, 1, 0).tex(uMax, vMin).color(rgba[0], rgba[1], rgba[2], 255).endVertex();
+			buffer.pos(- radius, 0, 0).tex(uMin, vMin).color(rgba[0], rgba[1], rgba[2], 255).endVertex();
+			buffer.pos(+ radius, 0, 0).tex(uMin, vMax).color(rgba[0], rgba[1], rgba[2], 255).endVertex();
+			buffer.pos(+ radius, 1, 0).tex(uMax, vMax).color(rgba[0], rgba[1], rgba[2], 255).endVertex();
+
+
+			buffer.pos(0, 0, - radius).tex(uMin, vMin).color(rgba[0], rgba[1], rgba[2], 255).endVertex();
+			buffer.pos(0, 1, - radius).tex(uMax, vMin).color(rgba[0], rgba[1], rgba[2], 255).endVertex();
+			buffer.pos(0, 1, + radius).tex(uMax, vMax).color(rgba[0], rgba[1], rgba[2], 255).endVertex();
+			buffer.pos(0, 0, + radius).tex(uMin, vMax).color(rgba[0], rgba[1], rgba[2], 255).endVertex();
+
+			buffer.pos(0, 1, - radius).tex(uMax, vMin).color(rgba[0], rgba[1], rgba[2], 255).endVertex();
+			buffer.pos(0, 0, - radius).tex(uMin, vMin).color(rgba[0], rgba[1], rgba[2], 255).endVertex();
+			buffer.pos(0, 0, + radius).tex(uMin, vMax).color(rgba[0], rgba[1], rgba[2], 255).endVertex();
+			buffer.pos(0, 1, + radius).tex(uMax, vMax).color(rgba[0], rgba[1], rgba[2], 255).endVertex();
+			buffer.setTranslation(0, 0, 0);
+			tessellator.draw();
+		}
+		if (here!=null&&IndustrialWires.isOldIE) {
 			BlockRendererDispatcher dispatcher = Minecraft.getMinecraft().getBlockRendererDispatcher();
 			IBakedModel model = dispatcher.getModelForState(here);
-			if (stack == hvRel1Dummy && here instanceof IExtendedBlockState) {
-				Connection up = new Connection(BlockPos.ORIGIN, BlockPos.ORIGIN.down(), WireType.STEEL, 1);
-				up.catenaryVertices = getConnectionCatenary(up, new Vec3d(.125, .5, .5),
-						new Vec3d(.125, 1.5, .5));
-				here = ((IExtendedBlockState) here).withProperty(CONNECTIONS, ImmutableSet.of(up));
-			}
 			GlStateManager.disableBlend();
 			ForgeHooksClient.setRenderLayer(BlockRenderLayer.SOLID);
 			Tessellator tessellator = Tessellator.getInstance();
@@ -419,12 +453,41 @@ public class MultiblockMarx implements IMultiblock {
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public boolean canRenderFormedStructure() {
-		return false;
+		return true;
 	}
 
+	private List<BakedQuad> bottom = null;
+	private List<BakedQuad> stage = null;
+	private List<BakedQuad> top = null;
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void renderFormedStructure() {
-
+		BlockRendererDispatcher disp = Minecraft.getMinecraft().getBlockRendererDispatcher();
+		if (bottom==null) {
+			IBlockState base = IndustrialWires.hvMultiblocks.getStateFromMeta(0);
+			BlockModelShapes shapes = disp.getBlockModelShapes();
+			base = base.withProperty(IWProperties.MARX_TYPE, BOTTOM);
+			bottom = shapes.getModelForState(base).getQuads(base, null, 0);
+			base = base.withProperty(IWProperties.MARX_TYPE, STAGE);
+			stage = shapes.getModelForState(base).getQuads(base, null, 0);
+			base = base.withProperty(IWProperties.MARX_TYPE, TOP);
+			top = shapes.getModelForState(base).getQuads(base, null, 0);
+		}
+		GlStateManager.translate(1.5, 1.5, 2.5);
+		GlStateManager.rotate(-90, 0, 1, 0);
+		Tessellator tes = Tessellator.getInstance();
+		BufferBuilder buf = tes.getBuffer();
+		buf.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+		ClientUtilsIW.renderModelTESRFast(bottom, buf);
+		for (int i = 1;i<4;i++) {
+			buf.setTranslation(0, i, 0);
+			ClientUtilsIW.renderModelTESRFast(stage, buf);
+		}
+		buf.setTranslation(0, 4, 0);
+		ClientUtilsIW.renderModelTESRFast(top, buf);
+		buf.setTranslation(0, 0, 0);
+		tes.draw();
 	}
 }

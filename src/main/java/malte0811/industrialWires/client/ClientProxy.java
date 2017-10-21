@@ -130,16 +130,13 @@ public class ClientProxy extends CommonProxy {
 	public void postInit() {
 		super.postInit();
 		ManualInstance m = ManualHelper.getManual();
-		if (IndustrialWires.hasIC2)
-		{
+		if (IndustrialWires.hasIC2) {
 			PositionedItemStack[][] wireRecipes = new PositionedItemStack[3][10];
 			int xBase = 15;
 			Ingredient tinCable = IC2TRHelper.getStack("cable", "type:tin,insulation:0");
 			List<ItemStack> tinCableList = Arrays.asList(tinCable.getMatchingStacks());
-			for (int i = 0; i < 3; i++)
-			{
-				for (int j = 0; j < 3; j++)
-				{
+			for (int i = 0; i < 3; i++) {
+				for (int j = 0; j < 3; j++) {
 					wireRecipes[0][3 * i + j] = new PositionedItemStack(tinCableList, 18 * i + xBase, 18 * j);
 				}
 			}
@@ -147,20 +144,15 @@ public class ClientProxy extends CommonProxy {
 			ItemIC2Coil.setLength(tmp, 9);
 			wireRecipes[0][9] = new PositionedItemStack(tmp, 18 * 4 + xBase, 18);
 			Random r = new Random();
-			for (int i = 1; i < 3; i++)
-			{
+			for (int i = 1; i < 3; i++) {
 				int lengthSum = 0;
-				for (int j1 = 0; j1 < 3; j1++)
-				{
-					for (int j2 = 0; j2 < 3; j2++)
-					{
-						if (r.nextBoolean())
-						{
+				for (int j1 = 0; j1 < 3; j1++) {
+					for (int j2 = 0; j2 < 3; j2++) {
+						if (r.nextBoolean()) {
 							// cable
 							lengthSum++;
 							wireRecipes[i][3 * j1 + j2] = new PositionedItemStack(tinCableList, 18 * j1 + xBase, 18 * j2);
-						} else
-						{
+						} else {
 							// wire coil
 							int length = r.nextInt(99) + 1;
 							tmp = new ItemStack(IndustrialWires.coil);
@@ -181,8 +173,7 @@ public class ClientProxy extends CommonProxy {
 					new ManualPages.Text(m, "industrialwires.wires1"),
 					new ManualPages.CraftingMulti(m, "industrialwires.wires2", (Object[]) wireRecipes)
 			);
-			if (IndustrialWires.mechConv != null)
-			{
+			if (IndustrialWires.mechConv != null) {
 				m.addEntry("industrialwires.mechConv", "industrialwires",
 						new ManualPages.Crafting(m, "industrialwires.mechConv0", new ItemStack(IndustrialWires.mechConv, 1, 1)),
 						new ManualPages.Crafting(m, "industrialwires.mechConv1", new ItemStack(IndustrialWires.mechConv, 1, 2)),
@@ -190,12 +181,12 @@ public class ClientProxy extends CommonProxy {
 				);
 			}
 		}
-			int oldLength = Config.IEConfig.Tools.earDefenders_SoundBlacklist.length;
-			Config.IEConfig.Tools.earDefenders_SoundBlacklist =
-					Arrays.copyOf(Config.IEConfig.Tools.earDefenders_SoundBlacklist, oldLength + 1);
-			Config.IEConfig.Tools.earDefenders_SoundBlacklist[oldLength] = TINNITUS_LOC.toString();
+		int oldLength = Config.IEConfig.Tools.earDefenders_SoundBlacklist.length;
+		Config.IEConfig.Tools.earDefenders_SoundBlacklist =
+				Arrays.copyOf(Config.IEConfig.Tools.earDefenders_SoundBlacklist, oldLength + 1);
+		Config.IEConfig.Tools.earDefenders_SoundBlacklist[oldLength] = TINNITUS_LOC.toString();
 
-			ClientUtils.mc().getItemColors().registerItemColorHandler((stack, pass) -> {
+		ClientUtils.mc().getItemColors().registerItemColorHandler((stack, pass) -> {
 			if (pass == 1) {
 				PanelComponent pc = ItemPanelComponent.componentFromStack(stack);
 				if (pc != null) {
@@ -205,13 +196,6 @@ public class ClientProxy extends CommonProxy {
 			return ~0;
 		}, IndustrialWires.panelComponent);
 
-			if (IndustrialWires.mechConv != null) {
-				m.addEntry("industrialwires.mechConv", "industrialwires",
-						new ManualPages.Crafting(m, "industrialwires.mechConv0", new ItemStack(IndustrialWires.mechConv, 1, 1)),
-						new ManualPages.Crafting(m, "industrialwires.mechConv1", new ItemStack(IndustrialWires.mechConv, 1, 2)),
-						new ManualPages.Crafting(m, "industrialwires.mechConv2", new ItemStack(IndustrialWires.mechConv, 1, 0))
-				);
-			}
 		Config.manual_doubleA.put("iwJacobsUsage", IWConfig.HVStuff.jacobsUsageEU);
 		Config.manual_int.put("iwKeysOnRing", IWConfig.maxKeysOnRing);
 		m.addEntry("industrialwires.jacobs", IndustrialWires.MODID,
@@ -266,16 +250,15 @@ public class ClientProxy extends CommonProxy {
 		m.fontRenderer.setUnicodeFlag(true);
 		m.entryRenderPre();
 		TextSplitter splitter = new TextSplitter(m.fontRenderer::getStringWidth, 16, 120,
-				(s)->new ManualPages.Text(m, s));
+				(s) -> new ManualPages.Text(m, s));
 		splitter.addSpecialPage(0, 0, 6,
-				(s)->new ManualPageMultiblock(m, s,
+				(s) -> new ManualPageMultiblock(m, s,
 						MultiblockMarx.INSTANCE));
 		splitter.split(text);
 		m.entryRenderPost();
 		m.fontRenderer.setUnicodeFlag(uni);
 		List<ManualPages> marxEntry = splitter.toManualEntry();
 		m.addEntry("industrialwires.marx", IndustrialWires.MODID, marxEntry.toArray(new ManualPages[marxEntry.size()]));
-
 	}
 
 	private static final ResourceLocation TINNITUS_LOC = new ResourceLocation(IndustrialWires.MODID, "tinnitus");

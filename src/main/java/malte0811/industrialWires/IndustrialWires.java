@@ -17,6 +17,7 @@
  */
 package malte0811.industrialWires;
 
+import blusunrize.immersiveengineering.ImmersiveEngineering;
 import blusunrize.immersiveengineering.api.MultiblockHandler;
 import malte0811.industrialWires.blocks.BlockIWBase;
 import malte0811.industrialWires.blocks.controlpanel.*;
@@ -114,11 +115,23 @@ public class IndustrialWires {
 	public static CommonProxy proxy;
 	public static boolean hasIC2;
 	public static boolean hasTechReborn;
+	public static boolean isOldIE;
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent e) {
 		hasIC2 = Loader.isModLoaded("ic2");
 		hasTechReborn = Loader.isModLoaded("techreborn");
+		{
+			double ieThreshold = 12.74275;
+			String ieVer = ImmersiveEngineering.VERSION;
+			int firstDash = ieVer.indexOf('-');
+			String end = ieVer.substring(firstDash+1);
+			String start = ieVer.substring(0, firstDash);
+			end = end.replaceAll("[^0-9]", "");
+			start = start.replaceAll("[^0-9]", "");
+			double ieVerDouble = Double.parseDouble(start+"."+end);
+			isOldIE = ieVerDouble<ieThreshold;
+		}
 		logger = e.getModLog();
 		new IWConfig();
 		if (hasIC2) {
