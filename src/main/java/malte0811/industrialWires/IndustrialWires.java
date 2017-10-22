@@ -123,7 +123,7 @@ public class IndustrialWires {
 		hasTechReborn = Loader.isModLoaded("techreborn");
 		{
 			double ieThreshold = 12.74275;
-			String ieVer = ImmersiveEngineering.VERSION;
+			String ieVer = Loader.instance().getIndexedModList().get(ImmersiveEngineering.MODID).getDisplayVersion();
 			int firstDash = ieVer.indexOf('-');
 			String end = ieVer.substring(firstDash+1);
 			String start = ieVer.substring(0, firstDash);

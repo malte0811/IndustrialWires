@@ -532,8 +532,8 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	public double insertEnergy(double eu, boolean simulate) {
 		TileEntityMarx master = master(this);
 		if (master!=null) {
-			double ret = master.storage.insertEU(eu, leftover, !simulate);
-			leftover -= ret;
+			double ret = master.storage.insertEU(eu, master.leftover, !simulate);
+			master.leftover -= ret;
 			return eu-ret;
 		} else {
 			return 0;

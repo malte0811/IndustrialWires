@@ -1,3 +1,10 @@
+#####Version 1.6-21
+ - Added shaders for the Marx generator and Jacob's ladder
+ - Fixed wires connected to a Marx generator on a server being invisible
+ - The Marx generator actually gives output when processing ores now. Oops...
+ - The "safe distance" formulas for the Marx generator in the manual now match the real safe distance
+ - Improved rendering of the Marx generator in the manual. Some of this is only enabled with maven build 275+ or official build 75+ (not released yet)
+
 #####Version 1.6-20
  - Added the Marx Generator, an alternative ore processing method
    - Hearing protection absolutely required!

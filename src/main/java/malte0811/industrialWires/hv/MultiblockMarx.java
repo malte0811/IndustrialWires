@@ -141,7 +141,7 @@ public class MultiblockMarx implements IMultiblock {
 				new IngredientStack(new ItemStack(blockConnectors, 10, RELAY_HV.getMeta())),
 				new IngredientStack(new ItemStack(itemWireCoil, 8, 2)),
 				new IngredientStack(new ItemStack(blockMetalDecoration2, 8, STEEL_WALLMOUNT.getMeta())),
-				new IngredientStack("fenceSteel", 7),
+				new IngredientStack("fenceSteel", 8),
 				new IngredientStack("blockSteel", 1)
 		};
 	}
