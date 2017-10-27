@@ -78,7 +78,6 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 		nbt.setInteger(RS_ID, rsId);
 		nbt.setByte(RS_CHANNEL2, rsChannel2);
 		nbt.setInteger(RS_ID2, rsId2);
-		nbt.setBoolean(HAS_SECOND_CHANNEL, hasSecond);
 		nbt.setBoolean(HORIZONTAL, horizontal);
 	}
 
@@ -86,13 +85,17 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 	protected void readCustomNBT(NBTTagCompound nbt) {
 		color = nbt.getInteger(COLOR);
 		length = nbt.getFloat(LENGTH);
+		horizontal = nbt.getBoolean(HORIZONTAL);
 		out = nbt.getInteger("output");
 		rsChannel = nbt.getByte(RS_CHANNEL);
 		rsId = nbt.getInteger(RS_ID);
 		rsChannel2 = nbt.getByte(RS_CHANNEL2);
 		rsId2 = nbt.getInteger(RS_ID2);
-		hasSecond = nbt.getBoolean(HAS_SECOND_CHANNEL);
-		horizontal = nbt.getBoolean(HORIZONTAL);
+		hasSecond = rsId2>=0&&rsChannel2>=0;
+		if (!hasSecond) {
+			rsChannel2 = -1;
+			rsId2 = -1;
+		}
 	}
 
 	@Override

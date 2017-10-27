@@ -18,7 +18,6 @@
 
 package malte0811.industrialWires.blocks.controlpanel;
 
-import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.controlpanel.PropertyComponents;
 import malte0811.industrialWires.items.ItemPanelComponent;
@@ -51,8 +50,10 @@ public class TileEntityComponentPanel extends TileEntityPanel {
 				PanelComponent pc = components.get(0);
 				pc.registerRSOutput(-1, (channel, value, pcTmp)->{
 					rsOut = value;
-					markBlockForUpdate(pos);
-					markBlockForUpdate(pos.offset(components.getTop(), -1));
+					if (!isInvalid()) {
+						markBlockForUpdate(pos);
+						markBlockForUpdate(pos.offset(components.getTop(), -1));
+					}
 				});
 				rsIn = pc.getRSInputHandler(-1, this);
 				updateRS();

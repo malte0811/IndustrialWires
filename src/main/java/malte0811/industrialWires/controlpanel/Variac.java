@@ -83,7 +83,6 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 		nbt.setInteger(RS_ID, rsId);
 		nbt.setByte(RS_CHANNEL2, rsChannel2);
 		nbt.setInteger(RS_ID2, rsId2);
-		nbt.setBoolean(HAS_SECOND_CHANNEL, hasSecond);
 	}
 
 	@Override
@@ -93,7 +92,11 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 		rsId = nbt.getInteger(RS_ID);
 		rsChannel2 = nbt.getByte(RS_CHANNEL2);
 		rsId2 = nbt.getInteger(RS_ID2);
-		hasSecond = nbt.getBoolean(HAS_SECOND_CHANNEL);
+		hasSecond = rsChannel2>=0&&rsId2>=0;
+		if (!hasSecond) {
+			rsChannel2 = -1;
+			rsId2 = -1;
+		}
 	}
 
 	@Override

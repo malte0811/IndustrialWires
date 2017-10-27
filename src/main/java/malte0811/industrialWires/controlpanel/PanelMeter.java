@@ -41,7 +41,6 @@ import org.lwjgl.util.vector.Vector3f;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -72,11 +71,8 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 	protected void writeCustomNBT(NBTTagCompound nbt, boolean toItem) {
 		nbt.setInteger(RS_ID, rsInputId);
 		nbt.setByte(RS_CHANNEL, rsInputChannel);
-		nbt.setBoolean(HAS_SECOND_CHANNEL, hasSecond);
-		if (hasSecond) {
-			nbt.setInteger(RS_ID2, rsInputId2);
-			nbt.setByte(RS_CHANNEL2, rsInputChannel2);
-		}
+		nbt.setInteger(RS_ID2, rsInputId2);
+		nbt.setByte(RS_CHANNEL2, rsInputChannel2);
 		nbt.setBoolean(WIDE, wide);
 		if (!toItem) {
 			nbt.setInteger("rsInput", rsInput);
@@ -89,11 +85,14 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 		rsInputChannel = nbt.getByte(RS_CHANNEL);
 		rsInput = nbt.getInteger("rsInput");
 		wide = nbt.getBoolean(WIDE);
-		hasSecond = nbt.getBoolean(HAS_SECOND_CHANNEL);
-		if (hasSecond) {
+		if (nbt.hasKey(RS_ID2)) {
 			rsInputId2 = nbt.getInteger(RS_ID2);
 			rsInputChannel2 = nbt.getByte(RS_CHANNEL2);
+			hasSecond = rsInputId2>=0&&rsInputChannel2>=0;
 		} else {
+			hasSecond = false;
+		}
+		if (!hasSecond) {
 			rsInputId2 = -1;
 			rsInputChannel2 = -1;
 		}
