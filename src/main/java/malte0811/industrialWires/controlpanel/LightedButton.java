@@ -158,7 +158,7 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 
 	@Override
 	public void invalidate(TileEntityPanel te) {
-		setOut(false, te);
+		setOut(rsOutputChannel, 0);
 	}
 
 	private void setOut(boolean on, TileEntityPanel tile) {

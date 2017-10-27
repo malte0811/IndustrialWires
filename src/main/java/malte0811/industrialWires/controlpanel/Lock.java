@@ -241,7 +241,7 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 
 	@Override
 	public void invalidate(TileEntityPanel te) {
-		setOut(te);
+		setOut(rsOutputChannel, 0);
 	}
 
 	private void setOut(TileEntityPanel tile) {
