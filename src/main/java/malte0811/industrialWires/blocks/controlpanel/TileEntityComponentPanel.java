@@ -33,6 +33,8 @@ import net.minecraft.util.math.BlockPos;
 import javax.annotation.Nonnull;
 import java.util.function.Consumer;
 
+import static malte0811.industrialWires.util.MiscUtils.apply;
+
 public class TileEntityComponentPanel extends TileEntityPanel {
 	private int rsOut = 0;
 	private Consumer<byte[]> rsIn;
