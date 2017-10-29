@@ -24,7 +24,6 @@ import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import malte0811.industrialWires.client.panelmodel.RawModelFontRenderer;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -114,7 +113,7 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 		PanelUtils.addColoredQuad(ret, new Vector3f(BORDER, antiZOffset, BORDER), new Vector3f(BORDER, antiZOffset, SIZE-BORDER),
 				new Vector3f(width-BORDER, antiZOffset, SIZE-BORDER), new Vector3f(width-BORDER, antiZOffset, BORDER), EnumFacing.UP, WHITE);
 
-		RawModelFontRenderer r = fontRenderer();
+		RawModelFontRenderer r = RawModelFontRenderer.get();
 		r.transform = new Matrix4();
 		for (int i = 0;i<=3;i++) {
 			transformNumber(r.transform, 5*17*i);
@@ -132,15 +131,6 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 		PanelUtils.addColoredQuad(ret, new Vector3f(wHalf, 0, 0),new Vector3f(-wHalf, 0, 0), new Vector3f(-wHalf, 0, length),
 				new Vector3f(wHalf, 0, length), EnumFacing.UP, BLACK, mat);
 		return ret;
-	}
-
-	private RawModelFontRenderer renderer;
-	private RawModelFontRenderer fontRenderer() {
-		if (renderer == null) {
-			renderer = new RawModelFontRenderer(Minecraft.getMinecraft().gameSettings, Label.FONT, Minecraft.getMinecraft().getTextureManager(),
-					false, .5F);
-		}
-		return renderer;
 	}
 
 	private void transformNumber(Matrix4 mat, int value) {

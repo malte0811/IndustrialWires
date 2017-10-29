@@ -32,17 +32,29 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.util.vector.Vector3f;
 
 import javax.annotation.Nonnull;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 public class RawModelFontRenderer extends FontRenderer {
+	public static final ResourceLocation FONT = new ResourceLocation("minecraft", "textures/font/ascii.png");
+	private static final Map<Thread, RawModelFontRenderer> instances = new WeakHashMap<>();
 	float[] colorA = new float[4];
 	private ImmutableList.Builder<RawQuad> builder = ImmutableList.builder();
 	private final Vector3f normal = new Vector3f(0, 1, 0);
 	public final float scale;
 	public Matrix4 transform = null;
 
-	private TextureAtlasSprite sprite;
+	private static TextureAtlasSprite sprite = null;
 
-	public RawModelFontRenderer(GameSettings settings, ResourceLocation font, TextureManager manager, boolean isUnicode, float scale) {
+	public static RawModelFontRenderer get() {
+		Thread current = Thread.currentThread();
+		if (!instances.containsKey(current)) {
+			instances.put(current, new RawModelFontRenderer(Minecraft.getMinecraft().gameSettings, FONT, Minecraft.getMinecraft().getTextureManager(),
+					false, 1));
+		}
+		return instances.get(current);
+	}
+	private RawModelFontRenderer(GameSettings settings, ResourceLocation font, TextureManager manager, boolean isUnicode, float scale) {
 		super(settings, font, manager, isUnicode);
 		this.scale = scale / (9 * 16);
 		onResourceManagerReload(null);

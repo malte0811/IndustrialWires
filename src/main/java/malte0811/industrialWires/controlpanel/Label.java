@@ -23,14 +23,12 @@ import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import malte0811.industrialWires.client.panelmodel.RawModelFontRenderer;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagString;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -41,9 +39,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public class Label extends PanelComponent implements IConfigurableComponent {
-	public static final ResourceLocation FONT = new ResourceLocation("minecraft", "textures/font/ascii.png");
 	private String text = "Test";
-	private RawModelFontRenderer renderer;
 	private int color = 0x808080;
 
 	public Label(String text, int color) {
@@ -70,7 +66,7 @@ public class Label extends PanelComponent implements IConfigurableComponent {
 
 	@Override
 	public List<RawQuad> getQuads() {
-		RawModelFontRenderer render = fontRenderer();
+		RawModelFontRenderer render = RawModelFontRenderer.get();
 		render.drawString(text, 0, 0, 0xff000000 | color);
 		return render.build();
 	}
@@ -90,7 +86,7 @@ public class Label extends PanelComponent implements IConfigurableComponent {
 	public AxisAlignedBB getBlockRelativeAABB() {
 		if (aabb == null) {
 			if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT) {
-				RawModelFontRenderer fr = fontRenderer();
+				RawModelFontRenderer fr = RawModelFontRenderer.get();
 				float width = fr.getStringWidth(text) * fr.scale;
 				float height = fr.FONT_HEIGHT * fr.scale;
 				aabb = new AxisAlignedBB(getX(), 0, getY(), getX() + width, 0, getY() + height);
@@ -118,14 +114,6 @@ public class Label extends PanelComponent implements IConfigurableComponent {
 	@Override
 	public float getHeight() {
 		return 0;
-	}
-
-	private RawModelFontRenderer fontRenderer() {
-		if (renderer == null) {
-			renderer = new RawModelFontRenderer(Minecraft.getMinecraft().gameSettings, FONT, Minecraft.getMinecraft().getTextureManager(),
-					false, 1);
-		}
-		return renderer;
 	}
 
 	@Override
