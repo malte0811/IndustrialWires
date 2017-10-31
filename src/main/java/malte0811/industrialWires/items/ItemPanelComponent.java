@@ -240,4 +240,9 @@ public class ItemPanelComponent extends Item implements INetGUIItem {
 			}
 		}
 	}
+
+	@Override
+	public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+		return !ItemStack.areItemsEqual(oldStack, newStack);
+	}
 }
