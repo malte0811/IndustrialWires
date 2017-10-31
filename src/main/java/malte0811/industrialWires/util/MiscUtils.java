@@ -23,10 +23,10 @@ import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.api.energy.wires.IImmersiveConnectable;
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
-import blusunrize.immersiveengineering.common.util.IELogger;
 import blusunrize.immersiveengineering.common.util.Utils;
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import com.google.common.collect.ImmutableSet;
+import com.sun.javafx.geom.Vec2f;
 import malte0811.industrialWires.IndustrialWires;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -40,6 +40,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.property.IExtendedBlockState;
+import org.lwjgl.util.vector.Vector3f;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -221,4 +222,26 @@ public final class MiscUtils {
 		return false;
 	}
 	//End of code from TEImmersiveConnectable
+
+	public static Vec2f rotate90(Vec2f in) {
+		//Yes, when rotating by 90 degrees, x becomes y!
+		//noinspection SuspiciousNameCombination
+		return new Vec2f(-in.y, in.x);
+	}
+
+	public static Vec2f subtract(Vec2f a, Vec2f b) {
+		return new Vec2f(a.x-b.x, a.y-b.y);
+	}
+
+	public static Vec2f add(Vec2f a, Vec2f b) {
+		return new Vec2f(a.x+b.x, a.y+b.y);
+	}
+
+	public static Vec2f scale(Vec2f a, float f) {
+		return new Vec2f(a.x*f, a.y*f);
+	}
+
+	public static Vector3f withNewY(Vec2f in, float y) {
+		return new Vector3f(in.x, y, in.y);
+	}
 }

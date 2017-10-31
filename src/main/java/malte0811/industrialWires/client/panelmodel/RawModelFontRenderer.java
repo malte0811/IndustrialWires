@@ -41,7 +41,7 @@ public class RawModelFontRenderer extends FontRenderer {
 	float[] colorA = new float[4];
 	private ImmutableList.Builder<RawQuad> builder = ImmutableList.builder();
 	private final Vector3f normal = new Vector3f(0, 1, 0);
-	public final float scale;
+	private float scale;
 	public Matrix4 transform = null;
 
 	private static TextureAtlasSprite sprite = null;
@@ -58,6 +58,10 @@ public class RawModelFontRenderer extends FontRenderer {
 		super(settings, font, manager, isUnicode);
 		this.scale = scale / (9 * 16);
 		onResourceManagerReload(null);
+	}
+
+	public void setScale(float scale) {
+		this.scale =  scale / (9 * 16);
 	}
 
 	@Override
@@ -123,5 +127,9 @@ public class RawModelFontRenderer extends FontRenderer {
 	@Override
 	protected void bindTexture(@Nonnull ResourceLocation location) {
 		//NO-OP
+	}
+
+	public float getScale() {
+		return scale;
 	}
 }

@@ -28,6 +28,8 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.util.vector.Vector3f;
 
 import javax.annotation.Nonnull;
@@ -43,6 +45,7 @@ public class CoveredToggleSwitch extends ToggleSwitch {
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public List<RawQuad> getQuads() {
 		float[] color = PanelUtils.getFloatColor(true, this.color);
 		active = state.active;
@@ -72,6 +75,7 @@ public class CoveredToggleSwitch extends ToggleSwitch {
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void renderInGUI(GuiPanelCreator gui) {
 		super.renderInGUIDefault(gui, 0xff000000 | this.color);
 		super.renderInGUI(gui);

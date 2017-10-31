@@ -22,7 +22,6 @@ import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
-import malte0811.industrialWires.util.MiscUtils;
 import malte0811.industrialWires.util.TriConsumer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
@@ -33,7 +32,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import org.apache.logging.log4j.Level;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -42,12 +40,15 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public abstract class PanelComponent {
+	public static final float Y_DELTA = .001F;
 	protected float panelHeight;
 	protected AxisAlignedBB aabb = null;
 	protected float x, y;
 	private final String type;
 	protected final static float[] GRAY = {.8F, .8F, .8F};
 	protected final static int GRAY_INT = 0xFFD0D0D0;
+	protected static final float[] BLACK = {0, 0, 0, 1};
+
 	private Set<TriConsumer<Integer, Byte, PanelComponent>> outputs = new HashSet<>();
 
 	protected PanelComponent(String type) {
@@ -58,7 +59,6 @@ public abstract class PanelComponent {
 	public final static String COLOR = "color";
 	public final static String RS_CHANNEL = "rsChannel";
 	public final static String RS_ID = "rsId";
-	public final static String HAS_SECOND_CHANNEL = "has2ndChannel";
 	public final static String RS_CHANNEL2 = "rsChannel2";
 	public final static String RS_ID2 = "rsId2";
 	public final static String TEXT = "text";
@@ -66,7 +66,7 @@ public abstract class PanelComponent {
 	public static final String LENGTH = "length";
 	public static final String LATCHING = "latching";
 
-	static {
+	public static void init() {
 		baseCreaters.put("lighted_button", LightedButton::new);
 		baseCreaters.put("label", Label::new);
 		baseCreaters.put("indicator_light", IndicatorLight::new);
@@ -76,6 +76,20 @@ public abstract class PanelComponent {
 		baseCreaters.put("toggle_switch_covered", CoveredToggleSwitch::new);
 		baseCreaters.put("lock", Lock::new);
 		baseCreaters.put("panel_meter", PanelMeter::new);
+		baseCreaters.put(SevenSegDisplay.NAME, SevenSegDisplay::new);
+		//Check that all components implement equals+hashCode if in a dev env
+		boolean isDevEnv = "NBTTagCompound".equals(NBTTagCompound.class.getSimpleName());
+		if (isDevEnv) {
+			for (Supplier<PanelComponent> sup:baseCreaters.values()) {
+				PanelComponent comp = sup.get();
+				try {
+					comp.getClass().getDeclaredMethod("equals", Object.class);
+					comp.getClass().getDeclaredMethod("hashCode");
+				} catch (NoSuchMethodException e) {
+					throw new RuntimeException(comp.getClass()+" lacks equals or hasCode! This will break the cache!", e);
+				}
+			}
+		}
 	}
 
 	protected abstract void writeCustomNBT(NBTTagCompound nbt, boolean toItem);
@@ -83,6 +97,7 @@ public abstract class PanelComponent {
 	protected abstract void readCustomNBT(NBTTagCompound nbt);
 
 	// DON'T OFFSET BY x, y IN THIS METHOD!
+	@SideOnly(Side.CLIENT)
 	public abstract List<RawQuad> getQuads();
 
 	@Nonnull
@@ -189,8 +204,10 @@ public abstract class PanelComponent {
 		GlStateManager.popMatrix();
 	}
 
+	@SideOnly(Side.CLIENT)
 	public abstract void renderInGUI(GuiPanelCreator gui);
 
+	@SideOnly(Side.CLIENT)
 	public void renderInGUIDefault(GuiPanelCreator gui, int color) {
 		color |= 0xff000000;
 		AxisAlignedBB aabb = getBlockRelativeAABB();

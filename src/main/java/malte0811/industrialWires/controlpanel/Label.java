@@ -33,6 +33,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -65,8 +66,10 @@ public class Label extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public List<RawQuad> getQuads() {
 		RawModelFontRenderer render = RawModelFontRenderer.get();
+		render.setScale(1);
 		render.drawString(text, 0, 0, 0xff000000 | color);
 		return render.build();
 	}
@@ -87,8 +90,8 @@ public class Label extends PanelComponent implements IConfigurableComponent {
 		if (aabb == null) {
 			if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT) {
 				RawModelFontRenderer fr = RawModelFontRenderer.get();
-				float width = fr.getStringWidth(text) * fr.scale;
-				float height = fr.FONT_HEIGHT * fr.scale;
+				float width = fr.getStringWidth(text) * fr.getScale();
+				float height = fr.FONT_HEIGHT * fr.getScale();
 				aabb = new AxisAlignedBB(getX(), 0, getY(), getX() + width, 0, getY() + height);
 			} else {
 				aabb = new AxisAlignedBB(getX(), 0, getY(), getX() + .001, 0, getY() + .001);
@@ -117,6 +120,7 @@ public class Label extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void renderInGUI(GuiPanelCreator gui) {
 		int left = (int) (gui.getX0() + getX() * gui.panelSize);
 		int top = (int) (gui.getY0() + getY() * gui.panelSize);

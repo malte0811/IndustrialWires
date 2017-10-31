@@ -31,6 +31,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.util.vector.Vector3f;
 
 import javax.annotation.Nonnull;
@@ -83,6 +85,7 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 	private final static float size = .0625F;
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public List<RawQuad> getQuads() {
 		float[] color = PanelUtils.getFloatColor(active, this.color);
 		List<RawQuad> ret = new ArrayList<>(5);
@@ -152,6 +155,7 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void renderInGUI(GuiPanelCreator gui) {
 		renderInGUIDefault(gui, 0xff000000 | color);
 	}

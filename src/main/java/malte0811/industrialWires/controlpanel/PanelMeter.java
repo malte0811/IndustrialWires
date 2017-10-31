@@ -35,6 +35,8 @@ import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.util.vector.Vector3f;
 
 import javax.annotation.Nonnull;
@@ -100,26 +102,27 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 	private static final float SIZE = .25F;
 	private static final float WIDTH = 1.5F*SIZE;
 	private static final float BORDER = SIZE /20;
-	private static final float antiZOffset = .001F;
 	private static final float[] BLACK = {0, 0, 0, 1};
 	private static final float[] WHITE = {1, 1, 1, 1};
 	@Override
+	@SideOnly(Side.CLIENT)
 	public List<RawQuad> getQuads() {
 		List<RawQuad> ret = new ArrayList<>();
 		float width = wide?WIDTH:SIZE;
 		//main panel
 		PanelUtils.addColoredQuad(ret, new Vector3f(), new Vector3f(0, 0, SIZE), new Vector3f(width, 0, SIZE),
 				new Vector3f(width, 0, 0), EnumFacing.UP, BLACK);
-		PanelUtils.addColoredQuad(ret, new Vector3f(BORDER, antiZOffset, BORDER), new Vector3f(BORDER, antiZOffset, SIZE-BORDER),
-				new Vector3f(width-BORDER, antiZOffset, SIZE-BORDER), new Vector3f(width-BORDER, antiZOffset, BORDER), EnumFacing.UP, WHITE);
+		PanelUtils.addColoredQuad(ret, new Vector3f(BORDER, Y_DELTA, BORDER), new Vector3f(BORDER, Y_DELTA, SIZE-BORDER),
+				new Vector3f(width-BORDER, Y_DELTA, SIZE-BORDER), new Vector3f(width-BORDER, Y_DELTA, BORDER), EnumFacing.UP, WHITE);
 
 		RawModelFontRenderer r = RawModelFontRenderer.get();
+		r.setScale(.5F);
 		r.transform = new Matrix4();
 		for (int i = 0;i<=3;i++) {
 			transformNumber(r.transform, 5*17*i);
 			String asString = Integer.toString(5*i);
 			int lengthHalf = r.getStringWidth(asString)/2;
-			r.transform.translate(-lengthHalf*r.scale, 0, -3.5*r.scale);
+			r.transform.translate(-lengthHalf*r.getScale(), 0, -3.5*r.getScale());
 			r.drawString(asString, 0, 0, 0xff000000);
 			ret.addAll(r.build());
 		}
@@ -139,7 +142,7 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 			mat.translate(0, 0, getLength()+1.5*BORDER);
 			mat.scale(-1, 1, -1);
 		} else {
-			mat.setIdentity().translate(0, antiZOffset, SIZE);
+			mat.setIdentity().translate(0, Y_DELTA, SIZE);
 			mat.translate(SIZE-3*BORDER, 0, -3*BORDER);
 			float angle = 90*(1-value/255F);
 			angle = (float) (angle*Math.PI/180);
@@ -149,7 +152,7 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 	}
 
 	private void transformNeedle(Matrix4 mat, int value) {
-		mat.setIdentity().translate(0, 2*antiZOffset, SIZE);
+		mat.setIdentity().translate(0, 2*Y_DELTA, SIZE);
 		float angle;
 		if (wide) {
 			mat.translate(WIDTH/2, 0, -2*BORDER);
@@ -266,6 +269,7 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void renderInGUI(GuiPanelCreator gui) {
 		renderInGUIDefault(gui, 0);
 		AxisAlignedBB aabb = getBlockRelativeAABB();

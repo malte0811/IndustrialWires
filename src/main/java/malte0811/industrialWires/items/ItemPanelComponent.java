@@ -27,6 +27,7 @@ import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.controlpanel.IConfigurableComponent;
 import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.controlpanel.PanelUtils;
+import malte0811.industrialWires.controlpanel.SevenSegDisplay;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;
@@ -55,7 +56,7 @@ import java.util.List;
 public class ItemPanelComponent extends Item implements INetGUIItem {
 	public static final String[] types = {
 			"lighted_button", "label", "indicator_light", "slider", "variac", "toggle_switch", "toggle_switch_covered",
-			"lock", "panel_meter"
+			"lock", "panel_meter", SevenSegDisplay.NAME
 	};
 	public static final String TYPE = "type";
 	public static final String ID = "cfgId";

@@ -1,0 +1,7 @@
+{
+  "parent":"item/generated",
+  "textures": {
+    "layer0":"industrialwires:items/background_odd",
+    "layer1":"industrialwires:items/7seg"
+  }
+}

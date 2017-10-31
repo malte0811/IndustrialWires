@@ -31,6 +31,7 @@ import malte0811.industrialWires.blocks.hv.TileEntityJacobsLadder;
 import malte0811.industrialWires.blocks.hv.TileEntityMarx;
 import malte0811.industrialWires.blocks.wire.*;
 import malte0811.industrialWires.compat.Compat;
+import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.controlpanel.PanelUtils;
 import malte0811.industrialWires.crafting.Recipes;
 import malte0811.industrialWires.hv.MarxOreHandler;
@@ -212,6 +213,7 @@ public class IndustrialWires {
 		IWPotions.init();
 		Compat.init();
 		MarxOreHandler.init();
+		PanelComponent.init();
 	}
 
 	@EventHandler

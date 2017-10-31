@@ -83,7 +83,7 @@ public final class PanelUtils {
 		//noinspection ForLoopReplaceableByForEach
 		for (int i = 0; i < components.size(); i++) {
 			PanelComponent pc = components.get(i);
-			Matrix4 m4Here = m4.copy().translate(pc.getX(), .0001, pc.getY());
+			Matrix4 m4Here = m4.copy().translate(pc.getX(), PanelComponent.Y_DELTA, pc.getY());
 			List<RawQuad> compQuads = pc.getQuads();
 			for (RawQuad bq : compQuads) {
 				ret.add(bakeQuad(bq, m4Here, m4RotOnly));
@@ -277,52 +277,54 @@ public final class PanelUtils {
 
 	public static void addInfo(ItemStack stack, List<String> list, NBTTagCompound data) {
 		switch (stack.getMetadata()) {
-		case 0: //button
-			addCommonInfo(data, list, true, true);
-			if (data.hasKey(LATCHING)) {
-				list.add(I18n.format(IndustrialWires.MODID + ".tooltip." + (data.getBoolean(LATCHING) ? "latching" : "instantaneous")));
-			}
-			break;
-		case 1: //label
-			if (data.hasKey(TEXT)) {
-				list.add(I18n.format(IndustrialWires.MODID + ".tooltip.text", data.getString(TEXT)));
-			}
-			addCommonInfo(data, list, true, false);
-			break;
-		case 2: //indicator light
-			addCommonInfo(data, list, true, true);
-			break;
-		case 3: //slider
-			addCommonInfo(data, list, true, true);
-			if (data.hasKey(HORIZONTAL)) {
-				list.add(I18n.format(IndustrialWires.MODID + ".tooltip." + (data.getBoolean(HORIZONTAL) ? "horizontal" : "vertical")));
-			}
-			if (data.hasKey(LENGTH)) {
-				list.add(I18n.format(IndustrialWires.MODID + ".tooltip.length", data.getFloat(LENGTH)));
-			}
+			case 0: //button
+				addCommonInfo(data, list, true, true);
+				if (data.hasKey(LATCHING)) {
+					list.add(I18n.format(IndustrialWires.MODID + ".tooltip." + (data.getBoolean(LATCHING) ? "latching" : "instantaneous")));
+				}
+				break;
+			case 1: //label
+				if (data.hasKey(TEXT)) {
+					list.add(I18n.format(IndustrialWires.MODID + ".tooltip.text", data.getString(TEXT)));
+				}
+				addCommonInfo(data, list, true, false);
+				break;
+			case 2: //indicator light
+				addCommonInfo(data, list, true, true);
+				break;
+			case 3: //slider
+				addCommonInfo(data, list, true, true);
+				if (data.hasKey(HORIZONTAL)) {
+					list.add(I18n.format(IndustrialWires.MODID + ".tooltip." + (data.getBoolean(HORIZONTAL) ? "horizontal" : "vertical")));
+				}
+				if (data.hasKey(LENGTH)) {
+					list.add(I18n.format(IndustrialWires.MODID + ".tooltip.length", data.getFloat(LENGTH)));
+				}
 
-			break;
-		case 4://variac
-			addCommonInfo(data, list, false, true);
-			break;
-		case 5://Toggle switch
-			addCommonInfo(data, list, false, true);
-			break;
-		case 6://Covered toggle switch
-			addCommonInfo(data, list, true, true);
-			break;
-		case 7://Lock
-			addCommonInfo(data, list, false, true);
-			if (data.hasKey(LATCHING)) {
-				list.add(I18n.format(IndustrialWires.MODID + ".tooltip." + (data.getBoolean(LATCHING) ? "latching" : "instantaneous")));
-			}
-			break;
-		case 8://Panel meter
-			addCommonInfo(data, list, false, true);
-			if (data.hasKey(PanelMeter.WIDE)) {
-				list.add(I18n.format(IndustrialWires.MODID + ".tooltip." + (data.getBoolean(PanelMeter.WIDE) ? "wide" : "narrow")));
-			}
-			break;
+				break;
+			case 4://variac
+				addCommonInfo(data, list, false, true);
+				break;
+			case 5://Toggle switch
+				addCommonInfo(data, list, false, true);
+				break;
+			case 6://Covered toggle switch
+				addCommonInfo(data, list, true, true);
+				break;
+			case 7://Lock
+				addCommonInfo(data, list, false, true);
+				if (data.hasKey(LATCHING)) {
+					list.add(I18n.format(IndustrialWires.MODID + ".tooltip." + (data.getBoolean(LATCHING) ? "latching" : "instantaneous")));
+				}
+				break;
+			case 8://Panel meter
+				addCommonInfo(data, list, false, true);
+				if (data.hasKey(PanelMeter.WIDE)) {
+					list.add(I18n.format(IndustrialWires.MODID + ".tooltip." + (data.getBoolean(PanelMeter.WIDE) ? "wide" : "narrow")));
+				}
+				break;
+			case 9://7-digit display
+				addCommonInfo(data, list, true, true);
 		}
 	}
 

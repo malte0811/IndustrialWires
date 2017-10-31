@@ -30,6 +30,8 @@ import net.minecraft.nbt.*;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.util.vector.Vector3f;
 
 import javax.annotation.Nonnull;
@@ -99,13 +101,13 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public List<RawQuad> getQuads() {
 		List<RawQuad> ret = new ArrayList<>();
-		final float yOff = .001F;
 		float xSize = horizontal ? length : WIDTH;
 		float ySize = horizontal ? WIDTH : length;
-		PanelUtils.addColoredQuad(ret, new Vector3f(0, yOff, 0), new Vector3f(0, yOff, ySize), new Vector3f(xSize, yOff, ySize), new Vector3f(xSize, yOff, 0),
-				EnumFacing.UP, GRAY);
+		PanelUtils.addColoredQuad(ret, new Vector3f(0, 0, 0), new Vector3f(0, 0, ySize), new Vector3f(xSize, 0, ySize),
+				new Vector3f(xSize, 0, 0), EnumFacing.UP, GRAY);
 		float[] color = new float[4];
 		color[3] = 1;
 		for (int i = 0; i < 3; i++) {
@@ -186,6 +188,7 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void renderInGUI(GuiPanelCreator gui) {
 		renderInGUIDefault(gui, GRAY_INT);
 		double middleX = (getX() + (horizontal ? length : .0625) / 2);
