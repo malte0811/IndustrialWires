@@ -26,7 +26,6 @@ import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
 import blusunrize.immersiveengineering.common.util.Utils;
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import com.google.common.collect.ImmutableSet;
-import com.sun.javafx.geom.Vec2f;
 import malte0811.industrialWires.IndustrialWires;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -37,9 +36,12 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.property.IExtendedBlockState;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.util.vector.Vector3f;
 
 import javax.annotation.Nonnull;
@@ -223,24 +225,29 @@ public final class MiscUtils {
 	}
 	//End of code from TEImmersiveConnectable
 
+	@SideOnly(Side.CLIENT)
 	public static Vec2f rotate90(Vec2f in) {
 		//Yes, when rotating by 90 degrees, x becomes y!
 		//noinspection SuspiciousNameCombination
 		return new Vec2f(-in.y, in.x);
 	}
 
+	@SideOnly(Side.CLIENT)
 	public static Vec2f subtract(Vec2f a, Vec2f b) {
 		return new Vec2f(a.x-b.x, a.y-b.y);
 	}
 
+	@SideOnly(Side.CLIENT)
 	public static Vec2f add(Vec2f a, Vec2f b) {
 		return new Vec2f(a.x+b.x, a.y+b.y);
 	}
 
+	@SideOnly(Side.CLIENT)
 	public static Vec2f scale(Vec2f a, float f) {
 		return new Vec2f(a.x*f, a.y*f);
 	}
 
+	@SideOnly(Side.CLIENT)
 	public static Vector3f withNewY(Vec2f in, float y) {
 		return new Vector3f(in.x, y, in.y);
 	}

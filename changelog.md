@@ -1,3 +1,11 @@
+#####Version 1.6-22
+ - Added a Seven-Segment display for control panels
+ - Panel components update their values as soon as they are changed in the GUI
+ - Fixed a crash when breaking a panel with buttons, locks or toggle switches on it under special circumstances
+ - Fixed server crashes when using panel components with a second controller id, but no channel set
+ - Fixed various NPE crashes with control panel models under heavy load
+ - Fixed wrong panel component ordering with raytracing
+
 #####Version 1.6-21
  - Added shaders for the Marx generator and Jacob's ladder
  - Fixed wires connected to a Marx generator on a server being invisible
