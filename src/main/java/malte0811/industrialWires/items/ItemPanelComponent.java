@@ -180,24 +180,28 @@ public class ItemPanelComponent extends Item implements INetGUIItem {
 	 */
 	@Nonnull
 	public EnumActionResult onItemUse(EntityPlayer player, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-		IBlockState iblockstate = worldIn.getBlockState(pos);
-		Block block = iblockstate.getBlock();
+		if (player.isCreative()&&player.isSneaking()) {
+			IBlockState iblockstate = worldIn.getBlockState(pos);
+			Block block = iblockstate.getBlock();
 
-		if (!block.isReplaceable(worldIn, pos)) {
-			pos = pos.offset(facing);
-		}
+			if (!block.isReplaceable(worldIn, pos)) {
+				pos = pos.offset(facing);
+			}
 
-		ItemStack itemstack = player.getHeldItem(hand);
+			ItemStack itemstack = player.getHeldItem(hand);
 
-		if (!itemstack.isEmpty() && player.canPlayerEdit(pos, facing, itemstack) && worldIn.mayPlace(IndustrialWires.panel, pos, false, facing, (Entity) null)) {
-			placeBlockAt(itemstack, player, worldIn, pos, facing, hitX, hitY, hitZ);
-			SoundType soundtype = worldIn.getBlockState(pos).getBlock().getSoundType(worldIn.getBlockState(pos), worldIn, pos, player);
-			worldIn.playSound(player, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
-			itemstack.shrink(1);
+			if (!itemstack.isEmpty() && player.canPlayerEdit(pos, facing, itemstack) && worldIn.mayPlace(IndustrialWires.panel, pos, false, facing, (Entity) null)) {
+				placeBlockAt(itemstack, player, worldIn, pos, facing, hitX, hitY, hitZ);
+				SoundType soundtype = worldIn.getBlockState(pos).getBlock().getSoundType(worldIn.getBlockState(pos), worldIn, pos, player);
+				worldIn.playSound(player, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+				itemstack.shrink(1);
 
-			return EnumActionResult.SUCCESS;
+				return EnumActionResult.SUCCESS;
+			} else {
+				return EnumActionResult.FAIL;
+			}
 		} else {
-			return EnumActionResult.FAIL;
+			return onItemRightClick(worldIn, player, hand).getType();
 		}
 	}
 
