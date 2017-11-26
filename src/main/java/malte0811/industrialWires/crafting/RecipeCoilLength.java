@@ -17,7 +17,6 @@
  */
 package malte0811.industrialWires.crafting;
 
-import blusunrize.immersiveengineering.api.ApiUtils;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import malte0811.industrialWires.IndustrialWires;
@@ -28,7 +27,6 @@ import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
-import net.minecraftforge.common.crafting.IngredientNBT;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
@@ -48,8 +46,8 @@ public class RecipeCoilLength extends IForgeRegistryEntry.Impl<IRecipe> implemen
 	}
 
 	@Override
-	public boolean matches(@Nonnull InventoryCrafting inv, World worldIn) {
-		int l = 0;//getLength(inv);
+	public boolean matches(@Nonnull InventoryCrafting inv, @Nonnull World worldIn) {
+		int l = getLength(inv);
 		return l > 0;
 	}
 
