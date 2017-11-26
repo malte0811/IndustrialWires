@@ -22,6 +22,7 @@ import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import malte0811.industrialWires.blocks.IWProperties;
 import malte0811.industrialWires.blocks.hv.TileEntityMarx;
 import malte0811.industrialWires.blocks.hv.TileEntityMarx.Discharge;
+import malte0811.industrialWires.client.ClientEventHandler;
 import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -37,6 +38,7 @@ import org.lwjgl.opengl.GL11;
 import static malte0811.industrialWires.blocks.hv.TileEntityMarx.FiringState.FIRE;
 
 public class TileRenderMarx extends TileEntitySpecialRenderer<TileEntityMarx> {
+	public static boolean screenShot = false;
 	@Override
 	public void render(TileEntityMarx te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
 		final boolean debug = false;
@@ -66,6 +68,10 @@ public class TileRenderMarx extends TileEntitySpecialRenderer<TileEntityMarx> {
 			}
 			cleanUp();
 			te.state = TileEntityMarx.FiringState.CHARGING;
+			if (screenShot) {
+				ClientEventHandler.shouldScreenshot = true;
+				screenShot = false;
+			}
 		}
 	}
 

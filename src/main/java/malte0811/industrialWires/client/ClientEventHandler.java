@@ -45,14 +45,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.ScreenShotHelper;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.client.GuiIngameForge;
-import net.minecraftforge.client.event.DrawBlockHighlightEvent;
-import net.minecraftforge.client.event.ModelBakeEvent;
-import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.oredict.OreDictionary;
@@ -64,6 +64,7 @@ import java.util.Map;
 
 @Mod.EventBusSubscriber(modid = IndustrialWires.MODID, value = Side.CLIENT)
 public class ClientEventHandler {
+	public static boolean shouldScreenshot = false;
 	@SubscribeEvent
 	public static void renderOverlayPost(RenderGameOverlayEvent.Post e) {
 		if (ClientUtils.mc().player != null && e.getType() == RenderGameOverlayEvent.ElementType.TEXT) {
@@ -170,5 +171,15 @@ public class ClientEventHandler {
 						getPropertyString(properties));
 			}
 		});
+	}
+
+	@SubscribeEvent(priority = EventPriority.LOWEST)
+	public static void renderWorldLastLow(RenderWorldLastEvent ev) {
+		if (shouldScreenshot) {
+			Minecraft mc = Minecraft.getMinecraft();
+			ITextComponent comp = ScreenShotHelper.saveScreenshot(mc.mcDataDir, mc.displayWidth, mc.displayHeight, mc.getFramebuffer());//TODO
+			mc.player.sendMessage(comp);
+			shouldScreenshot = false;
+		}
 	}
 }

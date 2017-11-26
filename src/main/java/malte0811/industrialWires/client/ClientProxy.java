@@ -51,6 +51,7 @@ import malte0811.industrialWires.hv.MarxOreHandler;
 import malte0811.industrialWires.hv.MultiblockMarx;
 import malte0811.industrialWires.items.ItemIC2Coil;
 import malte0811.industrialWires.items.ItemPanelComponent;
+import malte0811.industrialWires.util.CommandIWClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.MovingSound;
@@ -68,6 +69,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -260,6 +262,7 @@ public class ClientProxy extends CommonProxy {
 		m.fontRenderer.setUnicodeFlag(uni);
 		List<ManualPages> marxEntry = splitter.toManualEntry();
 		m.addEntry("industrialwires.marx", IndustrialWires.MODID, marxEntry.toArray(new ManualPages[marxEntry.size()]));
+		ClientCommandHandler.instance.registerCommand(new CommandIWClient());
 	}
 
 	private static final ResourceLocation TINNITUS_LOC = new ResourceLocation(IndustrialWires.MODID, "tinnitus");
