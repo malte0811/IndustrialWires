@@ -62,15 +62,14 @@ import java.util.Set;
 })
 public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable implements IEnergySource, IEnergySink, IDirectionalTile,
 		ITickable, IIC2Connector, IBlockBoundsIW {
+	private static final double MIN_ENERGY = 1e-5;
 	EnumFacing facing = EnumFacing.NORTH;
 	boolean relay;
 	private boolean first = true;
 	//IC2 net to IE net buffer
 	double inBuffer = 0;
-	double maxToNet = 0;
 	//IE net to IC2 net buffer
 	double outBuffer = 0;
-	double maxToMachine = 0;
 	double maxStored = IC2Wiretype.IC2_TYPES[0].getTransferRate() / 8;
 	int tier = 1;
 
@@ -89,7 +88,7 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 			first = false;
 		}
 		if (!world.isRemote) {
-			if (inBuffer > .1) {
+			if (inBuffer > 2*MIN_ENERGY) {
 				transferPower();
 			}
 			if (outBuffer>.1&&IndustrialWires.hasTechReborn) {
@@ -97,7 +96,7 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 				if (output instanceof IEnergyInterfaceTile) {
 					IEnergyInterfaceTile out = (IEnergyInterfaceTile) output;
 					if (out.canAcceptEnergy(facing.getOpposite())) {
-						outBuffer -= out.addEnergy(Math.min(outBuffer, maxToMachine));
+						outBuffer -= out.addEnergy(outBuffer);
 					}
 				}
 			}
@@ -107,36 +106,35 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	private void transferPower() {
 		Set<AbstractConnection> conns = new HashSet<>(ImmersiveNetHandler.INSTANCE.getIndirectEnergyConnections(pos, world));
 		Map<AbstractConnection, Pair<IIC2Connector, Double>> maxOutputs = new HashMap<>();
-		double outputMax = Math.min(inBuffer, maxToNet);
 		double sum = 0;
 		for (AbstractConnection c : conns) {
 			IImmersiveConnectable iic = ApiUtils.toIIC(c.end, world);
 			if (iic instanceof IIC2Connector) {
-				double tmp = outputMax - ((IIC2Connector) iic).insertEnergy(outputMax, true);
-				if (tmp > .00000001) {
+				double tmp = inBuffer - ((IIC2Connector) iic).insertEnergy(inBuffer, true);
+				if (tmp > MIN_ENERGY) {
 					maxOutputs.put(c, new ImmutablePair<>((IIC2Connector) iic, tmp));
 					sum += tmp;
 				}
 			}
 		}
-		if (sum < .0001) {
+		if (sum < MIN_ENERGY) {
 			return;
 		}
-		final double oldInBuf = outputMax;
+		final double oldInBuf = inBuffer;
 		HashMap<Connection, Integer> transferedPerConn = ImmersiveNetHandler.INSTANCE.getTransferedRates(world.provider.getDimension());
 		for (AbstractConnection c : maxOutputs.keySet()) {
 			Pair<IIC2Connector, Double> p = maxOutputs.get(c);
 			double out = oldInBuf * p.getRight() / sum;
 			double loss = getAverageLossRate(c);
 			double inserted = out - p.getLeft().insertEnergy(out - loss, false);
-			inBuffer -= inserted;
+			this.inBuffer -= inserted;
 			float intermediaryLoss = 0;
 			HashSet<IImmersiveConnectable> passedConnectors = new HashSet<>();
 			double energyAtConn = inserted + loss;
 			for (Connection sub : c.subConnections) {
 				int transferredPerCon = transferedPerConn.getOrDefault(sub, 0);
 				energyAtConn -= sub.cableType.getLossRatio() * sub.length;
-				ImmersiveNetHandler.INSTANCE.getTransferedRates(world.provider.getDimension()).put(sub, (int) (transferredPerCon + energyAtConn));
+				transferedPerConn.put(sub, (int) (transferredPerCon + energyAtConn));
 				IImmersiveConnectable subStart = ApiUtils.toIIC(sub.start, world);
 				IImmersiveConnectable subEnd = ApiUtils.toIIC(sub.end, world);
 				if (subStart != null && passedConnectors.add(subStart))
@@ -155,18 +153,10 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 		return f;
 	}
 
-	//Input through the net
+	//Input through the IE net
 	@Override
 	public double insertEnergy(double eu, boolean simulate) {
-		final double insert = Math.min(maxStored - outBuffer, eu);
-		if (insert > 0) {
-			if (outBuffer < maxToMachine) {
-				maxToMachine = outBuffer;
-			}
-			if (eu > maxToMachine) {
-				maxToMachine = eu;
-			}
-		}
+		final double insert = simulate?Math.min(Math.max(0, eu-outBuffer), maxStored-outBuffer):eu;
 		if (!simulate) {
 			outBuffer += insert;
 		}
@@ -241,8 +231,8 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	@Override
 	@Optional.Method(modid="ic2")
 	public double getDemandedEnergy() {
-		double ret = maxStored + .5 - inBuffer;
-		if (ret < .1)
+		double ret = maxStored;
+		if (ret-inBuffer < MIN_ENERGY)
 			ret = 0;
 		return ret;
 	}
@@ -256,18 +246,17 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	@Override
 	@Optional.Method(modid="ic2")
 	public double injectEnergy(EnumFacing directionFrom, double amount, double voltage) {
-		if (inBuffer < maxStored) {
-			addToIn(amount);
-			markDirty();
-			return 0;
+		double consume = Math.min(Math.max(0, amount-inBuffer), maxStored-inBuffer);
+		if (consume>0) {
+			inBuffer += consume;
 		}
-		return amount;
+		return amount-consume-amount*1e-9;
 	}
 
 	@Override
 	@Optional.Method(modid="ic2")
 	public double getOfferedEnergy() {
-		return Math.min(maxToMachine, outBuffer);
+		return outBuffer;
 	}
 
 	@Override
@@ -283,16 +272,6 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 		return tier;
 	}
 
-	private void addToIn(double amount) {
-		if (inBuffer < maxToNet) {
-			maxToNet = inBuffer;
-		}
-		inBuffer += amount;
-		if (amount > maxToNet) {
-			maxToNet = amount;
-		}
-	}
-
 	@Override
 	public void readCustomNBT(NBTTagCompound nbt, boolean descPacket) {
 		super.readCustomNBT(nbt, descPacket);
@@ -301,14 +280,10 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 		inBuffer = nbt.getDouble("inBuffer");
 		outBuffer = nbt.getDouble("outBuffer");
 		if (nbt.hasKey("maxToNet")) {
-			maxToNet = nbt.getDouble("maxToNet");
-		} else {
-			maxToNet = inBuffer;
+			inBuffer = Math.min(nbt.getDouble("maxToNet"), inBuffer);
 		}
 		if (nbt.hasKey("maxToMachine")) {
-			maxToMachine = nbt.getDouble("maxToMachine");
-		} else {
-			maxToMachine = outBuffer;
+			outBuffer = Math.min(nbt.getDouble("maxToMachine"), outBuffer);
 		}
 	}
 
@@ -319,8 +294,6 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 		nbt.setBoolean("relay", relay);
 		nbt.setDouble("inBuffer", inBuffer);
 		nbt.setDouble("outBuffer", outBuffer);
-		nbt.setDouble("maxToNet", maxToNet);
-		nbt.setDouble("maxToMachine", maxToMachine);
 	}
 
 	@Nonnull
