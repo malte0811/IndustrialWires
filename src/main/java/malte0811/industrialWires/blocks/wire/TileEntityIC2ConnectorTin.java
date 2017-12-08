@@ -26,7 +26,6 @@ import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler.Conn
 import blusunrize.immersiveengineering.api.energy.wires.TileEntityImmersiveConnectable;
 import blusunrize.immersiveengineering.api.energy.wires.WireType;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDirectionalTile;
-import blusunrize.immersiveengineering.common.util.Utils;
 import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergyAcceptor;
@@ -39,7 +38,6 @@ import malte0811.industrialWires.blocks.IBlockBoundsIW;
 import malte0811.industrialWires.wires.IC2Wiretype;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -48,7 +46,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Optional;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import reborncore.api.power.IEnergyInterfaceTile;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -91,15 +88,6 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 			if (inBuffer > 2*MIN_ENERGY) {
 				transferPower();
 			}
-			if (outBuffer>.1&&IndustrialWires.hasTechReborn) {
-				TileEntity output = Utils.getExistingTileEntity(world, pos.offset(facing));
-				if (output instanceof IEnergyInterfaceTile) {
-					IEnergyInterfaceTile out = (IEnergyInterfaceTile) output;
-					if (out.canAcceptEnergy(facing.getOpposite())) {
-						outBuffer -= out.addEnergy(outBuffer);
-					}
-				}
-			}
 		}
 	}
 
@@ -124,7 +112,7 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 		HashMap<Connection, Integer> transferedPerConn = ImmersiveNetHandler.INSTANCE.getTransferedRates(world.provider.getDimension());
 		for (AbstractConnection c : maxOutputs.keySet()) {
 			Pair<IIC2Connector, Double> p = maxOutputs.get(c);
-			double out = oldInBuf * p.getRight() / sum;
+			double out = oldInBuf * p.getRight() / Math.max(sum, oldInBuf);
 			double loss = getAverageLossRate(c);
 			double inserted = out - p.getLeft().insertEnergy(out - loss, false);
 			this.inBuffer -= inserted;
