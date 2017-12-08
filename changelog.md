@@ -1,3 +1,9 @@
+#####Version 1.6-23
+ - Added a command to allow taking screenshots of Marx generator discharges (/ciw triggermarxscreenshot)
+ - Panel components have to be shift-clicked to place them in the world
+ - Fixed wire coil crafting
+ - Added a recipe for the Seven-Segment displays
+
 #####Version 1.6-22
  - Added a Seven-Segment display for control panels
  - Panel components update their values as soon as they are changed in the GUI

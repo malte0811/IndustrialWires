@@ -169,7 +169,7 @@ public class ItemPanelComponent extends Item implements INetGUIItem {
 	@Override
 	@Nonnull
 	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, @Nonnull EnumHand hand) {
-		if (!worldIn.isRemote) {
+		if (!worldIn.isRemote&&!playerIn.isSneaking()) {
 			playerIn.openGui(IndustrialWires.MODID, 1, worldIn, 0, 0, hand == EnumHand.MAIN_HAND ? 1 : 0);
 		}
 		return new ActionResult<>(EnumActionResult.SUCCESS, playerIn.getHeldItem(hand));
@@ -180,25 +180,26 @@ public class ItemPanelComponent extends Item implements INetGUIItem {
 	 */
 	@Nonnull
 	public EnumActionResult onItemUse(EntityPlayer player, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-		IBlockState iblockstate = worldIn.getBlockState(pos);
-		Block block = iblockstate.getBlock();
+		if (player.isSneaking()) {
+			IBlockState iblockstate = worldIn.getBlockState(pos);
+			Block block = iblockstate.getBlock();
 
-		if (!block.isReplaceable(worldIn, pos)) {
-			pos = pos.offset(facing);
+			if (!block.isReplaceable(worldIn, pos)) {
+				pos = pos.offset(facing);
+			}
+
+			ItemStack itemstack = player.getHeldItem(hand);
+
+			if (!itemstack.isEmpty() && player.canPlayerEdit(pos, facing, itemstack) && worldIn.mayPlace(IndustrialWires.panel, pos, false, facing, (Entity) null)) {
+				placeBlockAt(itemstack, player, worldIn, pos, facing, hitX, hitY, hitZ);
+				SoundType soundtype = worldIn.getBlockState(pos).getBlock().getSoundType(worldIn.getBlockState(pos), worldIn, pos, player);
+				worldIn.playSound(player, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+				itemstack.shrink(1);
+
+				return EnumActionResult.SUCCESS;
+			}
 		}
-
-		ItemStack itemstack = player.getHeldItem(hand);
-
-		if (!itemstack.isEmpty() && player.canPlayerEdit(pos, facing, itemstack) && worldIn.mayPlace(IndustrialWires.panel, pos, false, facing, (Entity) null)) {
-			placeBlockAt(itemstack, player, worldIn, pos, facing, hitX, hitY, hitZ);
-			SoundType soundtype = worldIn.getBlockState(pos).getBlock().getSoundType(worldIn.getBlockState(pos), worldIn, pos, player);
-			worldIn.playSound(player, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
-			itemstack.shrink(1);
-
-			return EnumActionResult.SUCCESS;
-		} else {
-			return EnumActionResult.FAIL;
-		}
+		return EnumActionResult.FAIL;
 	}
 
 	private void placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ) {
