@@ -7,6 +7,8 @@ public final class DummyTEs {
 			TileEntityIC2ConnectorTin newTe = getRaw();
 			newTe.inBuffer = inBuffer;
 			newTe.outBuffer = outBuffer;
+			newTe.maxToNet = maxToNet;
+			newTe.maxToMachine = maxToMachine;
 			newTe.relay = relay;
 			newTe.facing = facing;
 			world.setTileEntity(pos, newTe);
