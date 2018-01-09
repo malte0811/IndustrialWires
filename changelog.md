@@ -1,4 +1,8 @@
 #####Version 1.6-23
+ - Fixed an infinite energy bug
+ - Changed the default value for maximum energy conversion
+
+#####Version 1.6-23
  - Added a command to allow taking screenshots of Marx generator discharges (/ciw triggermarxscreenshot)
  - Panel components have to be shift-clicked to place them in the world
  - Fixed wire coil crafting
