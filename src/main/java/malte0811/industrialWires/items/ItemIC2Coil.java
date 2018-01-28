@@ -27,7 +27,6 @@ import blusunrize.immersiveengineering.api.energy.wires.WireType;
 import blusunrize.immersiveengineering.common.IESaveData;
 import blusunrize.immersiveengineering.common.util.ItemNBTHelper;
 import blusunrize.immersiveengineering.common.util.Utils;
-import ic2.api.item.IC2Items;
 import malte0811.industrialWires.IWConfig;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.wires.IC2Wiretype;
@@ -61,7 +60,7 @@ public class ItemIC2Coil extends Item implements IWireCoil {
 		setUnlocalizedName(IndustrialWires.MODID + "."+NAME);
 		setHasSubtypes(true);
 		this.setCreativeTab(IndustrialWires.creativeTab);
-		setMaxStackSize(64);
+		setMaxStackSize(1);
 		setRegistryName(new ResourceLocation(IndustrialWires.MODID, NAME));
 		IndustrialWires.items.add(this);
 	}
@@ -223,7 +222,7 @@ public class ItemIC2Coil extends Item implements IWireCoil {
 		if (i.getTagCompound() == null) {
 			setLength(i, 4);
 		}
-		return i.getTagCompound().getInteger(lengthKey);
+		return i.getTagCompound().getInteger(lengthKey)*i.getCount();
 	}
 
 	public static int getMaxWireLength(ItemStack i) {

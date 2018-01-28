@@ -285,12 +285,6 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		}
 	}
 
-	public void triggerRenderUpdate() {
-		IBlockState state = world.getBlockState(pos);
-		world.notifyBlockUpdate(pos, state, state, 3);
-		world.addBlockEvent(pos, state.getBlock(), 255, 0);
-	}
-
 	public void registerRS(TileEntityRSPanelConn te) {
 		rsPorts.add(te);
 	}

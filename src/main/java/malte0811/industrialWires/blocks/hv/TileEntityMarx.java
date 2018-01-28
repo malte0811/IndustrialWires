@@ -38,6 +38,7 @@ import malte0811.industrialWires.blocks.IBlockBoundsIW;
 import malte0811.industrialWires.blocks.ISyncReceiver;
 import malte0811.industrialWires.blocks.IWProperties;
 import malte0811.industrialWires.blocks.TileEntityIWMultiblock;
+import malte0811.industrialWires.hv.IMarxTarget;
 import malte0811.industrialWires.hv.MarxOreHandler;
 import malte0811.industrialWires.network.MessageTileSyncIW;
 import malte0811.industrialWires.util.DualEnergyStorage;
@@ -55,6 +56,7 @@ import net.minecraft.nbt.NBTTagDouble;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -286,7 +288,6 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 
 	private void handleOreProcessing(double energyStored) {
 		BlockPos bottom = getBottomElectrode();
-		Vec3d origin = new Vec3d(bottom).addVector(.5, 1, .5);
 		Set<BlockPos> toBreak = new HashSet<>(stageCount-2);
 		int ores = 0;
 		for (int i = 1;i<stageCount-1;i++) {
@@ -304,6 +305,12 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 					continue;
 				}
 				if (!world.isAirBlock(here)) {
+					TileEntity te = world.getTileEntity(here);
+					if (te instanceof IMarxTarget) {
+						if (((IMarxTarget) te).onHit(energyPerOre, this)) {
+							continue;
+						}
+					}
 					ItemStack[] out = MarxOreHandler.getYield(world, here, energyPerOre);
 					for (ItemStack stack : out) {
 						EntityItem item = new EntityItem(world, here.getX() + .5, here.getY() + .5, here.getZ() + .5, stack);

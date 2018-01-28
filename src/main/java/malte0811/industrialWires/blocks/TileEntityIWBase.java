@@ -17,6 +17,7 @@
  */
 package malte0811.industrialWires.blocks;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
@@ -60,6 +61,12 @@ public abstract class TileEntityIWBase extends TileEntity {
 	public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
 		super.onDataPacket(net, pkt);
 		readNBT(pkt.getNbtCompound(), true);
+	}
+
+	public void triggerRenderUpdate() {
+		IBlockState state = world.getBlockState(pos);
+		world.notifyBlockUpdate(pos, state, state, 3);
+		world.addBlockEvent(pos, state.getBlock(), 255, 0);
 	}
 
 	public abstract void writeNBT(NBTTagCompound out, boolean updatePacket);

@@ -19,6 +19,7 @@
 package malte0811.industrialWires.blocks.hv;
 
 import blusunrize.immersiveengineering.api.ApiUtils;
+import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDirectionalTile;
 import blusunrize.immersiveengineering.common.blocks.TileEntityIEBase;
 import com.elytradev.mirage.lighting.IColoredLight;
@@ -73,18 +74,18 @@ import static malte0811.industrialWires.util.MiscUtils.interpolate;
 		@Optional.Interface(modid = "mirage", iface = "com.elytradev.mirage.lighting.IColoredLight")
 })
 public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickable, IHasDummyBlocksIW, ISyncReceiver,
-		IEnergySink, IBlockBoundsIW, IDirectionalTile, IColoredLight {
+		IEnergySink, IBlockBoundsIW, IDirectionalTile, IColoredLight, IEBlockInterfaces.IPlayerInteraction {
 	public EnumFacing facing = EnumFacing.NORTH;
 	private DualEnergyStorage energy;
 	public LadderSize size;
 
 	public Vec3d[] controls;
 	//first and last move along the "rails", only the middle points move in bezier curves
-	public Vec3d[][] controlControls;
+	private Vec3d[][] controlControls;
 	// movement of the controls in blocks/tick
 	public Vec3d[] controlMovement;
 	private double t = 0;
-	public int dummy = 0;
+	private int dummy = 0;
 	public int timeTillActive = -1;
 	private double tStep = 0;
 	private double consumtionEU;
@@ -93,7 +94,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 	private Vec3d soundPos;
 	public double salt;
 
-	public TileEntityJacobsLadder(LadderSize s) {
+	TileEntityJacobsLadder(LadderSize s) {
 		size = s;
 		initControl();
 	}
@@ -334,7 +335,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 		}
 	}
 
-	public boolean isActive() {
+	private boolean isActive() {
 		if (isDummy()) {
 			TileEntity master = world.getTileEntity(pos.down(dummy));
 			return master instanceof TileEntityJacobsLadder && ((TileEntityJacobsLadder) master).isActive();
@@ -355,8 +356,9 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 		e.attackEntityFrom(IWDamageSources.dmg_jacobs, IWConfig.HVStuff.jacobsBaseDmg * (size.ordinal() + 1));
 	}
 
-	public boolean onActivated(EntityPlayer player, EnumHand hand) {
-		ItemStack heldItem = player.getHeldItem(hand);
+	@Override
+	public boolean interact(@Nonnull EnumFacing side, @Nonnull EntityPlayer player,@Nonnull EnumHand hand,
+							@Nonnull ItemStack heldItem, float hitX, float hitY, float hitZ) {
 		TileEntity masterTE = dummy == 0 ? this : world.getTileEntity(pos.down(dummy));
 		if (masterTE instanceof TileEntityJacobsLadder) {
 			TileEntityJacobsLadder master = (TileEntityJacobsLadder) masterTE;
@@ -545,8 +547,8 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 		return false;
 	}
 
-	public static final float[] saltColor = {1, 190 / 255F, 50 / 255F};
-	public static final float[] airColor = {1, .85F, 1};
+	private static final float[] saltColor = {1, 190 / 255F, 50 / 255F};
+	private static final float[] airColor = {1, .85F, 1};
 
 	private static final int factor = 20;
 	private static final double smallMin = Math.exp(-.5);

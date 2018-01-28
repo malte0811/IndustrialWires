@@ -25,10 +25,7 @@ import malte0811.industrialWires.blocks.converter.BlockMechanicalConverter;
 import malte0811.industrialWires.blocks.converter.TileEntityIEMotor;
 import malte0811.industrialWires.blocks.converter.TileEntityMechICtoIE;
 import malte0811.industrialWires.blocks.converter.TileEntityMechIEtoIC;
-import malte0811.industrialWires.blocks.hv.BlockHVMultiblocks;
-import malte0811.industrialWires.blocks.hv.BlockJacobsLadder;
-import malte0811.industrialWires.blocks.hv.TileEntityJacobsLadder;
-import malte0811.industrialWires.blocks.hv.TileEntityMarx;
+import malte0811.industrialWires.blocks.hv.*;
 import malte0811.industrialWires.blocks.wire.*;
 import malte0811.industrialWires.compat.Compat;
 import malte0811.industrialWires.controlpanel.PanelComponent;
@@ -89,6 +86,8 @@ public class IndustrialWires {
 	public static BlockPanel panel = null;
 	@GameRegistry.ObjectHolder(MODID+":"+BlockHVMultiblocks.NAME)
 	public static BlockHVMultiblocks hvMultiblocks = null;
+	@GameRegistry.ObjectHolder(MODID+":"+ BlockGeneralHV.NAME)
+	public static BlockGeneralHV generalHV = null;
 
 	@GameRegistry.ObjectHolder(MODID+":"+ItemIC2Coil.NAME)
 	public static ItemIC2Coil coil = null;
@@ -161,6 +160,7 @@ public class IndustrialWires {
 		GameRegistry.registerTileEntity(TileEntityPanelCreator.class, MODID + ":panel_creator");
 		GameRegistry.registerTileEntity(TileEntityUnfinishedPanel.class, MODID + ":unfinished_panel");
 		GameRegistry.registerTileEntity(TileEntityComponentPanel.class, MODID + ":single_component_panel");
+		GameRegistry.registerTileEntity(TileEntityDischargeMeter.class, MODID + ":discharge_meter");
 
 		proxy.preInit();
 		Compat.preInit();
@@ -179,6 +179,7 @@ public class IndustrialWires {
 		event.getRegistry().register(new BlockJacobsLadder());
 		event.getRegistry().register(new BlockPanel());
 		event.getRegistry().register(new BlockHVMultiblocks());
+		event.getRegistry().register(new BlockGeneralHV());
 	}
 
 	@SubscribeEvent

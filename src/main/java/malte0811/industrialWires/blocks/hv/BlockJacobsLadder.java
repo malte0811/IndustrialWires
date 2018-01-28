@@ -156,15 +156,6 @@ public class BlockJacobsLadder extends BlockIWBase implements IMetaEnum, IPlacem
 	}
 
 	@Override
-	public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) {
-		TileEntity te = worldIn.getTileEntity(pos);
-		if (te instanceof TileEntityJacobsLadder) {
-			return ((TileEntityJacobsLadder) te).onActivated(playerIn, hand);
-		}
-		return super.onBlockActivated(worldIn, pos, state, playerIn, hand, side, hitX, hitY, hitZ);
-	}
-
-	@Override
 	public boolean canPlaceBlockAt(World w, BlockPos pos, ItemStack stack) {
 		int dummyCount = LadderSize.values()[stack.getMetadata()].dummyCount;
 		for (int i = 1; i <= dummyCount; i++) {
