@@ -74,7 +74,7 @@ public class ClientEventHandler {
 				if (!player.getHeldItem(hand).isEmpty()) {
 					ItemStack equipped = player.getHeldItem(hand);
 					if (OreDictionary.itemMatches(new ItemStack(IndustrialWires.coil, 1, OreDictionary.WILDCARD_VALUE), equipped, false)) {
-						IC2Wiretype type = IC2Wiretype.IC2_TYPES[equipped.getItemDamage()];
+						IC2Wiretype type = IC2Wiretype.ALL[equipped.getItemDamage()];
 						int color = type.getColour(null);
 						String s = I18n.format(IndustrialWires.MODID + ".desc.wireLength", ItemIC2Coil.getLength(equipped));
 						ClientUtils.font().drawString(s, e.getResolution().getScaledWidth() / 2 - ClientUtils.font().getStringWidth(s) / 2, e.getResolution().getScaledHeight() - GuiIngameForge.left_height - 40, color, true);

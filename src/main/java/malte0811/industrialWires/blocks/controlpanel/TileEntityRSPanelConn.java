@@ -50,6 +50,8 @@ import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.function.Consumer;
 
+import static blusunrize.immersiveengineering.api.energy.wires.WireType.REDSTONE_CATEGORY;
+
 public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implements IRedstoneConnector, ITickable, INetGUI, IEBlockInterfaces.IDirectionalTile, IBlockBoundsIW {
 	private byte[] out = new byte[16];
 	private boolean dirty = true;
@@ -237,7 +239,7 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 
 	@Override
 	public boolean canConnectCable(WireType wire, TargetingInfo targetingInfo) {
-		return wire == WireType.REDSTONE && !hasConn;
+		return REDSTONE_CATEGORY.equals(wire.getCategory()) && !hasConn;
 	}
 
 	@Override

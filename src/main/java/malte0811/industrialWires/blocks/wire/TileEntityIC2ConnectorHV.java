@@ -24,6 +24,8 @@ import malte0811.industrialWires.wires.IC2Wiretype;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3d;
 
+import static malte0811.industrialWires.wires.IC2Wiretype.IC2_HV_CAT;
+
 public class TileEntityIC2ConnectorHV extends TileEntityIC2ConnectorTin {
 
 	public TileEntityIC2ConnectorHV(boolean rel) {
@@ -35,12 +37,12 @@ public class TileEntityIC2ConnectorHV extends TileEntityIC2ConnectorTin {
 
 	{
 		tier = 4;
-		maxStored = IC2Wiretype.IC2_TYPES[3].getTransferRate() / 8;
+		maxStored = IC2Wiretype.HV.getTransferRate() / 8;
 	}
 
 	@Override
 	public boolean canConnect(WireType t) {
-		return t == IC2Wiretype.IC2_TYPES[3];
+		return IC2_HV_CAT.equals(t.getCategory());
 	}
 
 	@Override

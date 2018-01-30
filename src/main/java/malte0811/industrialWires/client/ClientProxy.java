@@ -19,8 +19,8 @@ package malte0811.industrialWires.client;
 
 import blusunrize.immersiveengineering.api.ManualHelper;
 import blusunrize.immersiveengineering.api.ManualPageMultiblock;
+import blusunrize.immersiveengineering.api.energy.wires.WireApi;
 import blusunrize.immersiveengineering.client.ClientUtils;
-import blusunrize.immersiveengineering.client.models.smart.ConnLoader;
 import blusunrize.immersiveengineering.common.Config;
 import blusunrize.immersiveengineering.common.util.Utils;
 import blusunrize.lib.manual.ManualInstance;
@@ -84,42 +84,42 @@ public class ClientProxy extends CommonProxy {
 	public void preInit() {
 		super.preInit();
 		if (IndustrialWires.hasIC2) {
-			ConnLoader.baseModels.put("ic2_conn_tin", new ResourceLocation("immersiveengineering:block/connector/connector_lv.obj"));
-			ConnLoader.textureReplacements.put("ic2_conn_tin", ImmutableMap.of("#immersiveengineering:blocks/connector_connector_lv",
+			WireApi.registerConnectorForRender("ic2_conn_tin", new ResourceLocation("immersiveengineering:block/connector/connector_lv.obj"),
+					ImmutableMap.of("#immersiveengineering:blocks/connector_connector_lv",
 					IndustrialWires.MODID + ":blocks/ic2_conn_tin"));
-			ConnLoader.baseModels.put("ic2_relay_tin", new ResourceLocation("immersiveengineering:block/connector/connector_lv.obj"));
-			ConnLoader.textureReplacements.put("ic2_relay_tin", ImmutableMap.of("#immersiveengineering:blocks/connector_connector_lv",
+			WireApi.registerConnectorForRender("ic2_relay_tin", new ResourceLocation("immersiveengineering:block/connector/connector_lv.obj"),
+					ImmutableMap.of("#immersiveengineering:blocks/connector_connector_lv",
 					IndustrialWires.MODID + ":blocks/ic2_relay_tin"));
 
-			ConnLoader.baseModels.put("ic2_conn_copper", new ResourceLocation("immersiveengineering:block/connector/connector_lv.obj"));
-			ConnLoader.textureReplacements.put("ic2_conn_copper", ImmutableMap.of("#immersiveengineering:blocks/connector_connector_lv",
+			WireApi.registerConnectorForRender("ic2_conn_copper", new ResourceLocation("immersiveengineering:block/connector/connector_lv.obj"),
+					ImmutableMap.of("#immersiveengineering:blocks/connector_connector_lv",
 					IndustrialWires.MODID + ":blocks/ic2_conn_copper"));
-			ConnLoader.baseModels.put("ic2_relay_copper", new ResourceLocation("immersiveengineering:block/connector/connector_lv.obj"));
-			ConnLoader.textureReplacements.put("ic2_relay_copper", ImmutableMap.of("#immersiveengineering:blocks/connector_connector_lv",
+			WireApi.registerConnectorForRender("ic2_relay_copper", new ResourceLocation("immersiveengineering:block/connector/connector_lv.obj"),
+					ImmutableMap.of("#immersiveengineering:blocks/connector_connector_lv",
 					IndustrialWires.MODID + ":blocks/ic2_relay_copper"));
 
-			ConnLoader.baseModels.put("ic2_conn_gold", new ResourceLocation("immersiveengineering:block/connector/connector_mv.obj"));
-			ConnLoader.textureReplacements.put("ic2_conn_gold", ImmutableMap.of("#immersiveengineering:blocks/connector_connector_mv",
+			WireApi.registerConnectorForRender("ic2_conn_gold", new ResourceLocation("immersiveengineering:block/connector/connector_mv.obj"),
+					ImmutableMap.of("#immersiveengineering:blocks/connector_connector_mv",
 					IndustrialWires.MODID + ":blocks/ic2_conn_gold"));
-			ConnLoader.baseModels.put("ic2_relay_gold", new ResourceLocation("immersiveengineering:block/connector/connector_mv.obj"));
-			ConnLoader.textureReplacements.put("ic2_relay_gold", ImmutableMap.of("#immersiveengineering:blocks/connector_connector_mv",
+			WireApi.registerConnectorForRender("ic2_relay_gold", new ResourceLocation("immersiveengineering:block/connector/connector_mv.obj"),
+					ImmutableMap.of("#immersiveengineering:blocks/connector_connector_mv",
 					IndustrialWires.MODID + ":blocks/ic2_relay_gold"));
 
-			ConnLoader.baseModels.put("ic2_conn_hv", new ResourceLocation("immersiveengineering:block/connector/connector_hv.obj"));
-			ConnLoader.textureReplacements.put("ic2_conn_hv", ImmutableMap.of("#immersiveengineering:blocks/connector_connector_hv",
+			WireApi.registerConnectorForRender("ic2_conn_hv", new ResourceLocation("immersiveengineering:block/connector/connector_hv.obj"),
+					ImmutableMap.of("#immersiveengineering:blocks/connector_connector_hv",
 					IndustrialWires.MODID + ":blocks/ic2_conn_hv"));
-			ConnLoader.baseModels.put("ic2_relay_hv", new ResourceLocation("immersiveengineering:block/connector/relay_hv.obj"));
+			WireApi.registerConnectorForRender("ic2_relay_hv", new ResourceLocation("immersiveengineering:block/connector/relay_hv.obj"), null);
 
-			ConnLoader.baseModels.put("ic2_conn_glass", new ResourceLocation("immersiveengineering:block/connector/connector_hv.obj"));
-			ConnLoader.textureReplacements.put("ic2_conn_glass", ImmutableMap.of("#immersiveengineering:blocks/connector_connector_hv",
+			WireApi.registerConnectorForRender("ic2_conn_glass", new ResourceLocation("immersiveengineering:block/connector/connector_hv.obj"),
+					ImmutableMap.of("#immersiveengineering:blocks/connector_connector_hv",
 					IndustrialWires.MODID + ":blocks/ic2_conn_glass"));
-			ConnLoader.baseModels.put("ic2_relay_glass", new ResourceLocation("immersiveengineering:block/connector/relay_hv.obj"));
-			ConnLoader.textureReplacements.put("ic2_relay_glass", ImmutableMap.of("#immersiveengineering:blocks/connector_relay_hv",
+			WireApi.registerConnectorForRender("ic2_relay_glass", new ResourceLocation("immersiveengineering:block/connector/relay_hv.obj"),
+					ImmutableMap.of("#immersiveengineering:blocks/connector_relay_hv",
 					IndustrialWires.MODID + ":blocks/ic2_relay_glass"));
 		}
-		ConnLoader.baseModels.put("rs_panel_conn", new ResourceLocation("industrialwires:block/rs_panel_conn.obj"));
+		WireApi.registerConnectorForRender("rs_panel_conn", new ResourceLocation("industrialwires:block/rs_panel_conn.obj"), null);
 
-		ConnLoader.baseModels.put("empty", new ResourceLocation("builtin/generated"));
+		WireApi.registerConnectorForRender("empty", new ResourceLocation("builtin/generated"), null);
 
 		OBJLoader.INSTANCE.addDomain(IndustrialWires.MODID);
 		ModelLoaderRegistry.registerLoader(new PanelModelLoader());

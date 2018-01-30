@@ -71,10 +71,13 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.function.Consumer;
 
+import static blusunrize.immersiveengineering.api.energy.wires.WireType.REDSTONE_CATEGORY;
 import static malte0811.industrialWires.blocks.hv.TileEntityMarx.FiringState.FIRE;
 import static malte0811.industrialWires.util.MiscUtils.getOffset;
 import static malte0811.industrialWires.util.MiscUtils.offset;
+import static malte0811.industrialWires.wires.IC2Wiretype.IC2_HV_CAT;
 import static net.minecraft.item.EnumDyeColor.*;
 
 /**
@@ -546,6 +549,11 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 			return 0;
 		}
 	}
+//TODO
+	@Override
+	public void addAvailableEnergy(double amount, Consumer<Double> consume) {
+
+	}
 
 	@Override
 	public BlockPos getConnectionMaster(@Nullable WireType cableType, TargetingInfo target) {
@@ -558,9 +566,9 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 			return false;
 		}
 		if (getRight()==0) {
-			return cableType==WireType.REDSTONE;
+			return REDSTONE_CATEGORY.equals(cableType.getCategory());
 		} else {
-			return cableType==WireType.STEEL||cableType== IC2Wiretype.IC2_TYPES[3];
+			return WireType.HV_CATEGORY.equals(cableType.getCategory())|| IC2_HV_CAT.equals(cableType.getCategory());
 		}
 	}
 
@@ -571,7 +579,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 
 	@Override
 	public WireType getCableLimiter(TargetingInfo target) {
-		return getRight()==0?WireType.REDSTONE:IC2Wiretype.IC2_TYPES[3];
+		return getRight()==0?WireType.REDSTONE:IC2Wiretype.HV;
 	}
 
 	@Override

@@ -47,7 +47,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
-	private static final PropertyEnum<BlockTypes_IC2_Connector> type = PropertyEnum.create("type", BlockTypes_IC2_Connector.class);
+	public static final PropertyEnum<BlockTypes_IC2_Connector> TYPE = PropertyEnum.create("type", BlockTypes_IC2_Connector.class);
 	public static final String NAME = "ic2_connector";
 
 	public BlockIC2Connector() {
@@ -71,7 +71,7 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 
 	@Override
 	public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> list) {
-		for (int i = 0; i < type.getAllowedValues().size(); i++) {
+		for (int i = 0; i < TYPE.getAllowedValues().size(); i++) {
 			list.add(new ItemStack(this, 1, i));
 		}
 	}
@@ -88,7 +88,7 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 
 	@Override
 	protected IProperty<?>[] getProperties() {
-		return new IProperty[]{type, IEProperties.FACING_ALL};
+		return new IProperty[]{TYPE, IEProperties.FACING_ALL};
 	}
 
 	@Nonnull
@@ -105,7 +105,7 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 	@Nonnull
 	@Override
 	public IBlockState getStateFromMeta(int meta) {
-		return super.getStateFromMeta(meta).withProperty(type, BlockTypes_IC2_Connector.values()[meta]);
+		return super.getStateFromMeta(meta).withProperty(TYPE, BlockTypes_IC2_Connector.values()[meta]);
 	}
 
 	@Override
@@ -120,7 +120,7 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 
 	@Override
 	public TileEntity createTileEntity(@Nonnull World world, @Nonnull IBlockState state) {
-		switch (state.getValue(type)) {
+		switch (state.getValue(TYPE)) {
 		case TIN_CONN:
 			return new TileEntityIC2ConnectorTin(false);
 		case TIN_RELAY:
@@ -151,7 +151,7 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 		if (!stack.isEmpty() && stack.getMetadata() % 2 == 0) {
 			int type = stack.getMetadata() / 2;
 			tooltip.add(I18n.format(IndustrialWires.MODID + ".tooltip.power_tier", type + 1));
-			tooltip.add(I18n.format(IndustrialWires.MODID + ".tooltip.eu_per_tick", IC2Wiretype.IC2_TYPES[type].getTransferRate() / 8));
+			tooltip.add(I18n.format(IndustrialWires.MODID + ".tooltip.eu_per_tick", IC2Wiretype.ALL[type].getTransferRate() / 8));
 		}
 	}
 
@@ -191,6 +191,6 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 
 	@Override
 	public int getMetaFromState(IBlockState state) {
-		return state.getValue(type).ordinal();
+		return state.getValue(TYPE).ordinal();
 	}
 }
