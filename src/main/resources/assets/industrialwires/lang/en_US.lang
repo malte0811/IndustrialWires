@@ -9,6 +9,8 @@ tile.industrialwires.ic2_connector.hv_relay.name=IC2 HV Wire Relay
 tile.industrialwires.ic2_connector.glass_conn.name=Glass Fiber Wire Connector
 tile.industrialwires.ic2_connector.glass_relay.name=Glass Fiber Wire Relay
 
+tile.industrialwires.general_hv.discharge_meter.name=Discharge Energy Meter
+
 tile.industrialwires.mechanical_converter.ie_motor.name=Rotational Motor
 tile.industrialwires.mechanical_converter.ie_to_ic2.name=Converter: Rotational To Kinetic
 tile.industrialwires.mechanical_converter.ic2_to_ie.name=Converter: Kinetic To Rotational
@@ -28,6 +30,9 @@ item.industrialwires.ic2_wire_coil.copper.name=Copper Wire Coil
 item.industrialwires.ic2_wire_coil.gold.name=Gold Wire Coil
 item.industrialwires.ic2_wire_coil.hv.name=IC2 HV Wire Coil
 item.industrialwires.ic2_wire_coil.glass.name=Glass Fiber Wire Coil
+item.industrialwires.ic2_wire_coil.tin_ins.name=Insulated Tin Wire Coil
+item.industrialwires.ic2_wire_coil.copper_ins.name=Insulated Copper Wire Coil
+item.industrialwires.ic2_wire_coil.gold_ins.name=Insulated Gold Wire Coil
 
 item.industrialwires.panel_component.lighted_button.name=Lighted Button
 item.industrialwires.panel_component.label.name=Label

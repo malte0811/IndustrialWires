@@ -20,10 +20,10 @@ package malte0811.industrialWires.blocks.wire;
 import blusunrize.immersiveengineering.api.energy.wires.IImmersiveConnectable;
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler.Connection;
 import blusunrize.immersiveengineering.api.energy.wires.WireType;
-import malte0811.industrialWires.wires.IC2Wiretype;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3d;
 
+import static malte0811.industrialWires.wires.IC2Wiretype.HV;
 import static malte0811.industrialWires.wires.IC2Wiretype.IC2_HV_CAT;
 
 public class TileEntityIC2ConnectorHV extends TileEntityIC2ConnectorTin {
@@ -37,7 +37,7 @@ public class TileEntityIC2ConnectorHV extends TileEntityIC2ConnectorTin {
 
 	{
 		tier = 4;
-		maxStored = IC2Wiretype.HV.getTransferRate() / 8;
+		maxStored = HV.getTransferRate() / HV.getFactor();
 	}
 
 	@Override

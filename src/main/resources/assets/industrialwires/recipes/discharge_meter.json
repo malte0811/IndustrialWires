@@ -1,0 +1,21 @@
+{
+  "result": {
+    "item": "industrialwires:general_hv",
+    "data": 0
+  },
+  "pattern": [
+    "ss",
+    "c ",
+    "ss"
+  ],
+  "type": "forge:ore_shaped",
+  "key": {
+    "c": {
+      "item": "immersiveengineering:connector",
+      "data": 4
+    },
+    "s": {
+      "type": "forge:ore_dict", "ore": "stickSteel"
+    }
+  }
+}

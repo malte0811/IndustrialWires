@@ -1,0 +1,18 @@
+{
+  "type": "industrialwires:wire_coil",
+  "cable": {
+    "type": "industrialwires:ic2_item",
+    "name": "cable",
+    "variant": "type:gold,insulation:2"
+  },
+  "coil": {
+    "item": "industrialwires:ic2_wire_coil",
+    "data": 7
+  },
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "ic2"
+    }
+  ]
+}

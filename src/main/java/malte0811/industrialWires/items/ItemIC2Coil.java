@@ -55,7 +55,9 @@ import java.util.List;
 import java.util.Set;
 
 public class ItemIC2Coil extends Item implements IWireCoil {
-	public final static String[] subNames = {"tin", "copper", "gold", "hv", "glass"};
+	public final static String[] subNames = {
+			"tin", "copper", "gold", "hv", "glass", "tin_ins", "copper_ins", "gold_ins"
+	};
 	public final static String lengthKey = "wireLength";
 	public final static String NAME = "ic2_wire_coil";
 
@@ -95,9 +97,11 @@ public class ItemIC2Coil extends Item implements IWireCoil {
 	public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
 
 		tooltip.add(I18n.format(IndustrialWires.MODID + ".desc.wireLength", getLength(stack)));
-		int transferRate = IC2Wiretype.ALL[stack.getMetadata()].getTransferRate();
+		IC2Wiretype wireType = IC2Wiretype.ALL[stack.getMetadata()];
+		int transferRate = wireType.getTransferRate();
 		tooltip.add(I18n.format(IndustrialWires.MODID + ".tooltip.transfer_rate", transferRate));
-		tooltip.add(I18n.format(IndustrialWires.MODID + ".tooltip.input_rate", transferRate / 8));
+		tooltip.add(I18n.format(IndustrialWires.MODID + ".tooltip.input_rate",
+				transferRate / wireType.getFactor()));
 		if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("linkingPos")) {
 			int[] link = stack.getTagCompound().getIntArray("linkingPos");
 			if (link.length > 3) {
@@ -247,6 +251,6 @@ public class ItemIC2Coil extends Item implements IWireCoil {
 	}
 
 	public static int getMaxWireLength(ItemStack i) {
-		return IWConfig.maxLengthOnCoil[i.getItemDamage()];
+		return IWConfig.maxLengthOnCoil[i.getItemDamage()%5];
 	}
 }

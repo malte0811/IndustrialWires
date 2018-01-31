@@ -150,8 +150,10 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 		super.addInformation(stack, world, tooltip, advanced);
 		if (!stack.isEmpty() && stack.getMetadata() % 2 == 0) {
 			int type = stack.getMetadata() / 2;
-			tooltip.add(I18n.format(IndustrialWires.MODID + ".tooltip.power_tier", type + 1));
-			tooltip.add(I18n.format(IndustrialWires.MODID + ".tooltip.eu_per_tick", IC2Wiretype.ALL[type].getTransferRate() / 8));
+			tooltip.add(I18n.format(IndustrialWires.MODID + ".tooltip.power_tier", (type%5) + 1));
+			IC2Wiretype wire = IC2Wiretype.ALL[type];
+			tooltip.add(I18n.format(IndustrialWires.MODID + ".tooltip.eu_per_tick",
+					wire.getTransferRate() / wire.getFactor()));
 		}
 	}
 

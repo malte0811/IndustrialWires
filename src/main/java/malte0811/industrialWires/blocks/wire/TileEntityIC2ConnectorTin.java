@@ -32,7 +32,6 @@ import ic2.api.energy.tile.IEnergySource;
 import malte0811.industrialWires.IIC2Connector;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.IBlockBoundsIW;
-import malte0811.industrialWires.wires.IC2Wiretype;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -52,6 +51,7 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import static malte0811.industrialWires.wires.IC2Wiretype.IC2_TIN_CAT;
+import static malte0811.industrialWires.wires.IC2Wiretype.TIN;
 
 @Optional.InterfaceList({
 		@Optional.Interface(iface = "ic2.api.energy.tile.IEnergySource", modid = "ic2"),
@@ -68,7 +68,7 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	//IE net to IC2 net buffer
 	double outBuffer = 0;
 	double maxToMachine = 0;
-	double maxStored = IC2Wiretype.TIN.getTransferRate() / 8;
+	double maxStored = TIN.getTransferRate() / TIN.getFactor();
 	int tier = 1;
 
 	TileEntityIC2ConnectorTin(boolean rel) {

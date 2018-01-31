@@ -38,19 +38,25 @@ public class IC2Wiretype extends WireType {
 	public static final String IC2_HV_CAT = "IC_HV";
 	public static final String IC2_GLASS_CAT = "IC_GLASS";
 	private final int type;
-	private final int[] ic2Rates = {32 * 8, 128 * 8, 512 * 8, 2048 * 8, 8192 * 8};
+	private final int[] ic2Rates = {32, 128, 512, 2048, 8192};
 	private final int[] ic2Colors = {0xa5bcc7, 0xbc7945, 0xfeff73, 0xb9d6d9, 0xf1f1f1};
-	private final String[] ic2Names = {"ic2Tin", "ic2Copper", "ic2Gold", "ic2Hv", "ic2Glass"};
+	private final String[] ic2Names = {"ic2Tin", "ic2Copper", "ic2Gold", "ic2Hv", "ic2Glass",
+			"ic2TinIns", "ic2CopperIns", "ic2GoldIns"};
 	private final double[] lossPerBlock = {.2, .2, .4, .8, .025};
-	private final double[] ic2RenderDiameter = {.03125, .03125, .046875, .0625, .75 * .03125};
+	private final double[] ic2RenderDiameter = {
+			.03125, .03125, .046875, .0625, .75 * .03125, .0625, .0625, 2*.046875
+	};
 
 	public static final IC2Wiretype TIN = new IC2Wiretype(0);
 	public static final IC2Wiretype COPPER_IC2 = new IC2Wiretype(1);
 	public static final IC2Wiretype GOLD = new IC2Wiretype(2);
 	public static final IC2Wiretype HV = new IC2Wiretype(3);
 	public static final IC2Wiretype GLASS = new IC2Wiretype(4);
+	public static final IC2Wiretype TIN_INSULATED = new IC2Wiretype(5);
+	public static final IC2Wiretype COPPER_IC2_INSULATED = new IC2Wiretype(6);
+	public static final IC2Wiretype GOLD_INSULATED = new IC2Wiretype(7);
 	public static final IC2Wiretype[] ALL = {
-		TIN, COPPER_IC2, GOLD, HV, GLASS
+		TIN, COPPER_IC2, GOLD, HV, GLASS, TIN_INSULATED, COPPER_IC2_INSULATED, GOLD_INSULATED
 	};
 
 	public IC2Wiretype(int ordinal) {
@@ -64,22 +70,22 @@ public class IC2Wiretype extends WireType {
 	 */
 	@Override
 	public double getLossRatio() {
-		return lossPerBlock[type];
+		return lossPerBlock[type%5];
 	}
 
 	@Override
 	public int getTransferRate() {
-		return ic2Rates[type];
+		return ic2Rates[type%5]*getFactor();
 	}
 
 	@Override
 	public int getColour(Connection connection) {
-		return ic2Colors[type];
+		return type<5?ic2Colors[type]:0x2c2c2c;
 	}
 
 	@Override
 	public double getSlack() {
-		return type == 2 ? 1.03 : 1.005;
+		return type%5 == 2 ? 1.03 : 1.005;
 	}
 
 	@Override
@@ -90,7 +96,7 @@ public class IC2Wiretype extends WireType {
 
 	@Override
 	public int getMaxLength() {
-		return IWConfig.maxLengthPerConn[type];
+		return IWConfig.maxLengthPerConn[type%5];
 	}
 
 	@Override
@@ -136,7 +142,7 @@ public class IC2Wiretype extends WireType {
 	@Nullable
 	@Override
 	public String getCategory() {
-		switch (type) {
+		switch (type%5) {
 			case 0:
 				return IC2_TIN_CAT;
 			case 1:
@@ -149,5 +155,10 @@ public class IC2Wiretype extends WireType {
 				return IC2_GLASS_CAT;
 		}
 		return null;
+	}
+
+	//Factor between transfer- and input rate
+	public int getFactor() {
+		return type<5?8:4;
 	}
 }

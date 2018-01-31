@@ -30,7 +30,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 minecraft {
-    version = "14.22.1.2479"
+    version = "14.23.1.2555"
     runDir = "run"
 
     replace '${version}', project.version

@@ -18,8 +18,8 @@
 package malte0811.industrialWires.blocks.wire;
 
 import blusunrize.immersiveengineering.api.energy.wires.WireType;
-import malte0811.industrialWires.wires.IC2Wiretype;
 
+import static malte0811.industrialWires.wires.IC2Wiretype.GLASS;
 import static malte0811.industrialWires.wires.IC2Wiretype.IC2_GLASS_CAT;
 
 public class TileEntityIC2ConnectorGlass extends TileEntityIC2ConnectorHV {
@@ -32,7 +32,7 @@ public class TileEntityIC2ConnectorGlass extends TileEntityIC2ConnectorHV {
 
 	{
 		tier = 5;
-		maxStored = IC2Wiretype.GLASS.getTransferRate() / 8;
+		maxStored = GLASS.getTransferRate() / GLASS.getFactor();
 	}
 
 	@Override
