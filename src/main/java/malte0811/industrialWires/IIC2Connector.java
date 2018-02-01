@@ -17,9 +17,12 @@
  */
 package malte0811.industrialWires;
 
+import java.util.function.Consumer;
+
 public interface IIC2Connector {
 	/**
 	 * @return leftover energy.
 	 */
 	double insertEnergy(double eu, boolean simulate);
+	void addAvailableEnergy(double amount, Consumer<Double> consume);
 }

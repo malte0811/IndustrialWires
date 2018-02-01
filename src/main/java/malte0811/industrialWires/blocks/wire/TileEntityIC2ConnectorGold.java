@@ -20,9 +20,11 @@ package malte0811.industrialWires.blocks.wire;
 import blusunrize.immersiveengineering.api.energy.wires.IImmersiveConnectable;
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler.Connection;
 import blusunrize.immersiveengineering.api.energy.wires.WireType;
-import malte0811.industrialWires.wires.IC2Wiretype;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3d;
+
+import static malte0811.industrialWires.wires.IC2Wiretype.GOLD;
+import static malte0811.industrialWires.wires.IC2Wiretype.IC2_GOLD_CAT;
 
 public class TileEntityIC2ConnectorGold extends TileEntityIC2ConnectorTin {
 
@@ -35,12 +37,12 @@ public class TileEntityIC2ConnectorGold extends TileEntityIC2ConnectorTin {
 
 	{
 		tier = 3;
-		maxStored = IC2Wiretype.IC2_TYPES[2].getTransferRate() / 8;
+		maxStored = GOLD.getTransferRate() / GOLD.getFactor();
 	}
 
 	@Override
 	public boolean canConnect(WireType t) {
-		return t == IC2Wiretype.IC2_TYPES[2];
+		return IC2_GOLD_CAT.equals(t.getCategory());
 	}
 
 	@Override

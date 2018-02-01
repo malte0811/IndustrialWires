@@ -40,12 +40,15 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public abstract class PanelComponent {
+	public static final float Y_DELTA = .001F;
 	protected float panelHeight;
 	protected AxisAlignedBB aabb = null;
 	protected float x, y;
 	private final String type;
 	protected final static float[] GRAY = {.8F, .8F, .8F};
 	protected final static int GRAY_INT = 0xFFD0D0D0;
+	protected static final float[] BLACK = {0, 0, 0, 1};
+
 	private Set<TriConsumer<Integer, Byte, PanelComponent>> outputs = new HashSet<>();
 
 	protected PanelComponent(String type) {
@@ -54,7 +57,7 @@ public abstract class PanelComponent {
 
 	public static final Map<String, Supplier<PanelComponent>> baseCreaters = new HashMap<>();
 
-	static {
+	public static void init() {
 		baseCreaters.put("lighted_button", LightedButton::new);
 		baseCreaters.put("label", Label::new);
 		baseCreaters.put("indicator_light", IndicatorLight::new);
@@ -64,6 +67,20 @@ public abstract class PanelComponent {
 		baseCreaters.put("toggle_switch_covered", CoveredToggleSwitch::new);
 		baseCreaters.put("lock", Lock::new);
 		baseCreaters.put("panel_meter", PanelMeter::new);
+		baseCreaters.put(SevenSegDisplay.NAME, SevenSegDisplay::new);
+		//Check that all components implement equals+hashCode if in a dev env
+		boolean isDevEnv = "NBTTagCompound".equals(NBTTagCompound.class.getSimpleName());
+		if (isDevEnv) {
+			for (Supplier<PanelComponent> sup:baseCreaters.values()) {
+				PanelComponent comp = sup.get();
+				try {
+					comp.getClass().getDeclaredMethod("equals", Object.class);
+					comp.getClass().getDeclaredMethod("hashCode");
+				} catch (NoSuchMethodException e) {
+					throw new RuntimeException(comp.getClass()+" lacks equals or hasCode! This will break the cache!", e);
+				}
+			}
+		}
 	}
 
 	protected abstract void writeCustomNBT(NBTTagCompound nbt, boolean toItem);
@@ -71,6 +88,7 @@ public abstract class PanelComponent {
 	protected abstract void readCustomNBT(NBTTagCompound nbt);
 
 	// DON'T OFFSET BY x, y IN THIS METHOD!
+	@SideOnly(Side.CLIENT)
 	public abstract List<RawQuad> getQuads();
 
 	@Nonnull
@@ -177,8 +195,10 @@ public abstract class PanelComponent {
 		GlStateManager.popMatrix();
 	}
 
+	@SideOnly(Side.CLIENT)
 	public abstract void renderInGUI(GuiPanelCreator gui);
 
+	@SideOnly(Side.CLIENT)
 	public void renderInGUIDefault(GuiPanelCreator gui, int color) {
 		color |= 0xff000000;
 		AxisAlignedBB aabb = getBlockRelativeAABB();

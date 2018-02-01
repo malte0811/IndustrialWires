@@ -38,6 +38,8 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.util.vector.Vector3f;
 
 import javax.annotation.Nonnull;
@@ -107,7 +109,7 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 
 	private final static float size = .0625F;
 	private final static float keyWidth = .125F * size;
-	private final static float yOffset = size / 2 + .0001F;
+	private final static float yOffset = size / 2 + Y_DELTA;
 	private final static float xOffset = (size - keyWidth) / 2;
 	private final static float[] DARK_GRAY = {.4F, .4F, .4F};
 	private final static int DARK_GRAY_INT = 0xFF686868;
@@ -117,6 +119,7 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public List<RawQuad> getQuads() {
 		List<RawQuad> ret = new ArrayList<>(5);
 		PanelUtils.addColoredBox(GRAY, GRAY, null, new Vector3f(0, 0, 0), new Vector3f(size, size / 2, size), ret, false);
@@ -231,6 +234,7 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void renderInGUI(GuiPanelCreator gui) {
 		renderInGUIDefault(gui, GRAY_INT);
 		AxisAlignedBB aabb = getBlockRelativeAABB();
@@ -243,7 +247,7 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 
 	@Override
 	public void invalidate(TileEntityPanel te) {
-		setOut(te);
+		setOut(rsOutputChannel, 0);
 	}
 
 	private void setOut(TileEntityPanel tile) {

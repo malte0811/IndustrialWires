@@ -108,8 +108,9 @@ public class RecipeComponentCopy extends IForgeRegistryEntry.Impl<IRecipe> imple
 		return null;
 	}
 
+
 	@Override
-	public boolean isHidden() {
+	public boolean isDynamic() {
 		return true;
 	}
 }

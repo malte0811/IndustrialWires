@@ -31,6 +31,8 @@ import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.util.vector.Vector3f;
 
 import javax.annotation.Nonnull;
@@ -79,6 +81,7 @@ public class IndicatorLight extends PanelComponent implements IConfigurableCompo
 	private static final float size = .0625F;
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public List<RawQuad> getQuads() {
 		float[] color = new float[4];
 		color[3] = 1;
@@ -167,6 +170,7 @@ public class IndicatorLight extends PanelComponent implements IConfigurableCompo
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void renderInGUI(GuiPanelCreator gui) {
 		renderInGUIDefault(gui, colorA);
 	}

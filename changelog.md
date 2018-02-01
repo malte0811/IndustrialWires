@@ -1,3 +1,28 @@
+#####Version 1.6-23
+ - Fixed an infinite energy bug
+ - Changed the default value for maximum energy conversion
+
+#####Version 1.6-23
+ - Added a command to allow taking screenshots of Marx generator discharges (/ciw triggermarxscreenshot)
+ - Panel components have to be shift-clicked to place them in the world
+ - Fixed wire coil crafting
+ - Added a recipe for the Seven-Segment displays
+
+#####Version 1.6-22
+ - Added a Seven-Segment display for control panels
+ - Panel components update their values as soon as they are changed in the GUI
+ - Fixed a crash when breaking a panel with buttons, locks or toggle switches on it under special circumstances
+ - Fixed server crashes when using panel components with a second controller id, but no channel set
+ - Fixed various NPE crashes with control panel models under heavy load
+ - Fixed wrong panel component ordering with raytracing
+
+#####Version 1.6-21
+ - Added shaders for the Marx generator and Jacob's ladder
+ - Fixed wires connected to a Marx generator on a server being invisible
+ - The Marx generator actually gives output when processing ores now. Oops...
+ - The "safe distance" formulas for the Marx generator in the manual now match the real safe distance
+ - Improved rendering of the Marx generator in the manual. Some of this is only enabled with maven build 275+ or official build 75+ (not released yet)
+
 #####Version 1.6-20
  - Added the Marx Generator, an alternative ore processing method
    - Hearing protection absolutely required!

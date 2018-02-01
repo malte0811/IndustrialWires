@@ -18,19 +18,31 @@
 
 package malte0811.industrialWires.util;
 
+import blusunrize.immersiveengineering.ImmersiveEngineering;
 import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.api.energy.wires.IImmersiveConnectable;
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
+import blusunrize.immersiveengineering.common.util.Utils;
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import com.google.common.collect.ImmutableSet;
+import malte0811.industrialWires.IndustrialWires;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.common.property.IExtendedBlockState;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import org.lwjgl.util.vector.Vector3f;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -41,37 +53,6 @@ import java.util.function.BiPredicate;
 
 public final class MiscUtils {
 	private MiscUtils() {
-	}
-
-	public static Set<ImmersiveNetHandler.Connection> genConnBlockstate(Set<ImmersiveNetHandler.Connection> conns, World world) {
-		if (conns == null)
-			return ImmutableSet.of();
-		Set<ImmersiveNetHandler.Connection> ret = new HashSet<ImmersiveNetHandler.Connection>() {
-			@Override
-			public boolean equals(Object o) {
-				if (o == this)
-					return true;
-				if (!(o instanceof HashSet))
-					return false;
-				HashSet<ImmersiveNetHandler.Connection> other = (HashSet<ImmersiveNetHandler.Connection>) o;
-				if (other.size() != this.size())
-					return false;
-				for (ImmersiveNetHandler.Connection c : this)
-					if (!other.contains(c))
-						return false;
-				return true;
-			}
-		};
-		for (ImmersiveNetHandler.Connection c : conns) {
-			IImmersiveConnectable end = ApiUtils.toIIC(c.end, world, false);
-			if (end == null)
-				continue;
-			// generate subvertices
-			c.getSubVertices(world);
-			ret.add(c);
-		}
-
-		return ret;
 	}
 
 	public static List<BlockPos> discoverLocal(World w, BlockPos here, BiPredicate<BlockPos, Integer> isValid) {
@@ -107,14 +88,15 @@ public final class MiscUtils {
 
 	/**
 	 * Calculates the parameters for offset to generate here from origin
+	 *
 	 * @return right, forward, up
 	 */
 	public static BlockPos getOffset(BlockPos origin, EnumFacing f, boolean mirror, BlockPos here) {
-		int dX = origin.getZ()-here.getZ();
-		int dZ = origin.getX()-here.getX();
+		int dX = origin.getZ() - here.getZ();
+		int dZ = origin.getX() - here.getX();
 		int forward = 0;
 		int right = 0;
-		int up = here.getY()-origin.getY();
+		int up = here.getY() - origin.getY();
 		switch (f) {
 			case NORTH:
 				forward = dZ;
@@ -138,6 +120,7 @@ public final class MiscUtils {
 		}
 		return new BlockPos(right, forward, up);
 	}
+
 	@Nonnull
 	public static AxisAlignedBB apply(@Nonnull Matrix4 mat, @Nonnull AxisAlignedBB in) {
 		Vec3d min = new Vec3d(in.minX, in.minY, in.minZ);
@@ -161,5 +144,114 @@ public final class MiscUtils {
 			ret[i] = (float) (a * cA[i] + b * cB[i]);
 		}
 		return ret;
+	}
+
+	// Taken from TEImmersiveConnectable
+
+
+	public static Set<ImmersiveNetHandler.Connection> genConnBlockstate(Set<ImmersiveNetHandler.Connection> conns, World world) {
+		if (conns == null)
+			return ImmutableSet.of();
+		Set<ImmersiveNetHandler.Connection> ret = new HashSet<ImmersiveNetHandler.Connection>() {
+			@Override
+			public boolean equals(Object o) {
+				if (o == this)
+					return true;
+				if (!(o instanceof HashSet))
+					return false;
+				HashSet<ImmersiveNetHandler.Connection> other = (HashSet<ImmersiveNetHandler.Connection>) o;
+				if (other.size() != this.size())
+					return false;
+				for (ImmersiveNetHandler.Connection c : this)
+					if (!other.contains(c))
+						return false;
+				return true;
+			}
+		};
+		for (ImmersiveNetHandler.Connection c : conns) {
+			IImmersiveConnectable end = ApiUtils.toIIC(c.end, world, false);
+			if (end == null)
+				continue;
+			// generate subvertices
+			c.getSubVertices(world);
+			ret.add(c);
+		}
+
+		return ret;
+	}
+
+	public static void writeConnsToNBT(NBTTagCompound nbt, TileEntity te) {
+		World world = te.getWorld();
+		if (world != null && !world.isRemote && nbt != null) {
+			NBTTagList connectionList = new NBTTagList();
+			Set<ImmersiveNetHandler.Connection> conL = ImmersiveNetHandler.INSTANCE.getConnections(world, Utils.toCC(te));
+			if (conL != null)
+				for (ImmersiveNetHandler.Connection con : conL)
+					connectionList.appendTag(con.writeToNBT());
+			nbt.setTag("connectionList", connectionList);
+		}
+	}
+
+	public static void loadConnsFromNBT(NBTTagCompound nbt, TileEntity te) {
+		World world = te.getWorld();
+		if (world != null && world.isRemote && !Minecraft.getMinecraft().isSingleplayer() && nbt != null) {
+			NBTTagList connectionList = nbt.getTagList("connectionList", 10);
+			ImmersiveNetHandler.INSTANCE.clearConnectionsOriginatingFrom(Utils.toCC(te), world);
+			for (int i = 0; i < connectionList.tagCount(); i++) {
+				NBTTagCompound conTag = connectionList.getCompoundTagAt(i);
+				ImmersiveNetHandler.Connection con = ImmersiveNetHandler.Connection.readFromNBT(conTag);
+				if (con != null) {
+					ImmersiveNetHandler.INSTANCE.addConnection(world, Utils.toCC(te), con);
+				} else
+					IndustrialWires.logger.error("CLIENT read connection as null");
+			}
+		}
+	}
+
+	public static boolean handleUpdate(int id, BlockPos pos, World world) {
+		if (id == -1 || id == 255) {
+			IBlockState state = world.getBlockState(pos);
+			world.notifyBlockUpdate(pos, state, state, 3);
+			return true;
+		} else if (id == 254) {
+			IBlockState state = world.getBlockState(pos);
+			if (state instanceof IExtendedBlockState) {
+				state = state.getActualState(world, pos);
+				state = state.getBlock().getExtendedState(state, world, pos);
+				ImmersiveEngineering.proxy.removeStateFromSmartModelCache((IExtendedBlockState) state);
+				ImmersiveEngineering.proxy.removeStateFromConnectionModelCache((IExtendedBlockState) state);
+			}
+			world.notifyBlockUpdate(pos, state, state, 3);
+			return true;
+		}
+		return false;
+	}
+	//End of code from TEImmersiveConnectable
+
+	@SideOnly(Side.CLIENT)
+	public static Vec2f rotate90(Vec2f in) {
+		//Yes, when rotating by 90 degrees, x becomes y!
+		//noinspection SuspiciousNameCombination
+		return new Vec2f(-in.y, in.x);
+	}
+
+	@SideOnly(Side.CLIENT)
+	public static Vec2f subtract(Vec2f a, Vec2f b) {
+		return new Vec2f(a.x-b.x, a.y-b.y);
+	}
+
+	@SideOnly(Side.CLIENT)
+	public static Vec2f add(Vec2f a, Vec2f b) {
+		return new Vec2f(a.x+b.x, a.y+b.y);
+	}
+
+	@SideOnly(Side.CLIENT)
+	public static Vec2f scale(Vec2f a, float f) {
+		return new Vec2f(a.x*f, a.y*f);
+	}
+
+	@SideOnly(Side.CLIENT)
+	public static Vector3f withNewY(Vec2f in, float y) {
+		return new Vector3f(in.x, y, in.y);
 	}
 }

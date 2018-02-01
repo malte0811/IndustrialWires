@@ -19,6 +19,7 @@ package malte0811.industrialWires.wires;
 
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler;
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler.Connection;
+import blusunrize.immersiveengineering.api.energy.wires.WireApi;
 import blusunrize.immersiveengineering.api.energy.wires.WireType;
 import malte0811.industrialWires.IWConfig;
 import malte0811.industrialWires.IndustrialWires;
@@ -28,18 +29,40 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nullable;
+
 public class IC2Wiretype extends WireType {
-	final int type;
-	final int[] ic2Rates = {32 * 8, 128 * 8, 512 * 8, 2048 * 8, 8192 * 8};
-	final int[] ic2Colors = {0xa5bcc7, 0xbc7945, 0xfeff73, 0xb9d6d9, 0xf1f1f1};
-	final String[] ic2Names = {"ic2Tin", "ic2Copper", "ic2Gold", "ic2Hv", "ic2Glass"};
-	final double[] lossPerBlock = {.2, .2, .4, .8, .025};
-	final double[] ic2RenderDiameter = {.03125, .03125, .046875, .0625, .75 * .03125};
-	public static final IC2Wiretype[] IC2_TYPES = {new IC2Wiretype(0), new IC2Wiretype(1), new IC2Wiretype(2), new IC2Wiretype(3), new IC2Wiretype(4)};
+	public static final String IC2_TIN_CAT = "IC_TIN";
+	public static final String IC2_COPPER_CAT = "IC_COPPER";
+	public static final String IC2_GOLD_CAT = "IC_GOLD";
+	public static final String IC2_HV_CAT = "IC_HV";
+	public static final String IC2_GLASS_CAT = "IC_GLASS";
+	private final int type;
+	private final int[] ic2Rates = {32, 128, 512, 2048, 8192};
+	private final int[] ic2Colors = {0xa5bcc7, 0xbc7945, 0xfeff73, 0xb9d6d9, 0xf1f1f1};
+	private final String[] ic2Names = {"ic2Tin", "ic2Copper", "ic2Gold", "ic2Hv", "ic2Glass",
+			"ic2TinIns", "ic2CopperIns", "ic2GoldIns"};
+	private final double[] lossPerBlock = {.2, .2, .4, .8, .025};
+	private final double[] ic2RenderDiameter = {
+			.03125, .03125, .046875, .0625, .75 * .03125, .0625, .0625, 2*.046875
+	};
+
+	public static final IC2Wiretype TIN = new IC2Wiretype(0);
+	public static final IC2Wiretype COPPER_IC2 = new IC2Wiretype(1);
+	public static final IC2Wiretype GOLD = new IC2Wiretype(2);
+	public static final IC2Wiretype HV = new IC2Wiretype(3);
+	public static final IC2Wiretype GLASS = new IC2Wiretype(4);
+	public static final IC2Wiretype TIN_INSULATED = new IC2Wiretype(5);
+	public static final IC2Wiretype COPPER_IC2_INSULATED = new IC2Wiretype(6);
+	public static final IC2Wiretype GOLD_INSULATED = new IC2Wiretype(7);
+	public static final IC2Wiretype[] ALL = {
+		TIN, COPPER_IC2, GOLD, HV, GLASS, TIN_INSULATED, COPPER_IC2_INSULATED, GOLD_INSULATED
+	};
 
 	public IC2Wiretype(int ordinal) {
 		super();
 		this.type = ordinal;
+		WireApi.registerWireType(this);
 	}
 
 	/**
@@ -47,22 +70,22 @@ public class IC2Wiretype extends WireType {
 	 */
 	@Override
 	public double getLossRatio() {
-		return lossPerBlock[type];
+		return lossPerBlock[type%5];
 	}
 
 	@Override
 	public int getTransferRate() {
-		return ic2Rates[type];
+		return ic2Rates[type%5]*getFactor();
 	}
 
 	@Override
 	public int getColour(Connection connection) {
-		return ic2Colors[type];
+		return type<5?ic2Colors[type]:0x2c2c2c;
 	}
 
 	@Override
 	public double getSlack() {
-		return type == 2 ? 1.03 : 1.005;
+		return type%5 == 2 ? 1.03 : 1.005;
 	}
 
 	@Override
@@ -73,7 +96,7 @@ public class IC2Wiretype extends WireType {
 
 	@Override
 	public int getMaxLength() {
-		return IWConfig.maxLengthPerConn[type];
+		return IWConfig.maxLengthPerConn[type%5];
 	}
 
 	@Override
@@ -101,5 +124,41 @@ public class IC2Wiretype extends WireType {
 	@Override
 	public boolean isEnergyWire() {
 		return true;
+	}
+
+	@Override
+	public boolean canCauseDamage() {
+		return type<4;
+	}
+
+	@Override
+	public double getDamageRadius() {
+		if (type>=4) {
+			return 0;
+		}
+		return .3/4*(type+1);
+	}
+
+	@Nullable
+	@Override
+	public String getCategory() {
+		switch (type%5) {
+			case 0:
+				return IC2_TIN_CAT;
+			case 1:
+				return IC2_COPPER_CAT;
+			case 2:
+				return IC2_GOLD_CAT;
+			case 3:
+				return IC2_HV_CAT;
+			case 4:
+				return IC2_GLASS_CAT;
+		}
+		return null;
+	}
+
+	//Factor between transfer- and input rate
+	public int getFactor() {
+		return type<5?8:4;
 	}
 }

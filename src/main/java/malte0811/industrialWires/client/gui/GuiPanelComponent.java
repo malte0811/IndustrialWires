@@ -12,6 +12,7 @@ import malte0811.industrialWires.containers.ContainerPanelComponent;
 import malte0811.industrialWires.controlpanel.IConfigurableComponent;
 import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.network.MessageItemSync;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -207,8 +208,13 @@ public class GuiPanelComponent extends GuiContainer {
 		for (GuiIntChooser choose : intChoosers) {
 			choose.drawChooser();
 		}
-		for (GuiSliderIE choose : floatSliders) {
-			choose.drawButton(mc, mouseX, mouseY, partialTicks);
+		for (int i = 0; i < floatSliders.size(); i++) {
+			GuiSliderIE slider = floatSliders.get(i);
+			double oldV = slider.getValue();
+			slider.drawButton(mc, mouseX, mouseY, partialTicks);
+			if (oldV != slider.getValue()) {
+				sync(i, (float) slider.getValue());
+			}
 		}
 		GuiChannelPickerSmall openPicker = null;
 		for (GuiChannelPicker pick : rsChannelChoosers) {
@@ -355,5 +361,6 @@ public class GuiPanelComponent extends GuiContainer {
 		NBTTagCompound nbt = new NBTTagCompound();
 		nbt.setTag("data", list);
 		IndustrialWires.packetHandler.sendToServer(new MessageItemSync(container.hand, nbt));
+		IndustrialWires.panelComponent.onChange(nbt, Minecraft.getMinecraft().player, container.hand);
 	}
 }

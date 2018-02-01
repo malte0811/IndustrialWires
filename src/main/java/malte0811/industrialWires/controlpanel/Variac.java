@@ -35,6 +35,8 @@ import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.util.vector.Vector3f;
 
 import javax.annotation.Nonnull;
@@ -85,7 +87,6 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 		nbt.setInteger(RS_ID, rsId);
 		nbt.setByte(RS_CHANNEL2, rsChannel2);
 		nbt.setInteger(RS_ID2, rsId2);
-		nbt.setBoolean(HAS_SECOND_CHANNEL, hasSecond);
 	}
 
 	@Override
@@ -95,10 +96,15 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 		rsId = nbt.getInteger(RS_ID);
 		rsChannel2 = nbt.getByte(RS_CHANNEL2);
 		rsId2 = nbt.getInteger(RS_ID2);
-		hasSecond = nbt.getBoolean(HAS_SECOND_CHANNEL);
+		hasSecond = rsChannel2>=0&&rsId2>=0;
+		if (!hasSecond) {
+			rsChannel2 = -1;
+			rsId2 = -1;
+		}
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public List<RawQuad> getQuads() {
 		List<RawQuad> ret = new ArrayList<>();
 		float angle = -(float) (2 * Math.PI * (8.5 + out) / (17F*16F));
@@ -117,7 +123,7 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 				new Vector3f(innerSize, getHeight() / 2, innerSize), ret, false, mat);
 		mat.translate(SIZE / 2, 0, SIZE / 2);
 		mat.rotate(Math.PI / 2, 0, 1, 0);
-		mat.translate(-SIZE / 2, .0001, -SIZE / 2);
+		mat.translate(-SIZE / 2, Y_DELTA, -SIZE / 2);
 		PanelUtils.addColoredQuad(ret, new Vector3f(offset, getHeight(), offset), new Vector3f(offset, getHeight(), offset),
 				new Vector3f(offset + arrowSize / 2, getHeight(), offset + arrowSize),
 				new Vector3f(offset + arrowSize, getHeight(), offset + arrowSize / 2), EnumFacing.UP, white, mat);
@@ -203,6 +209,7 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void renderInGUI(GuiPanelCreator gui) {
 		AxisAlignedBB aabb = getBlockRelativeAABB();
 		int left = (int) Math.ceil(gui.getX0() + (offset + aabb.minX) * gui.panelSize);

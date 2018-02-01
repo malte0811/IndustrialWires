@@ -31,7 +31,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -222,45 +221,49 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		return components;
 	}
 
-	public AxisAlignedBB apply(Matrix4 mat, AxisAlignedBB in) {
-		Vec3d min = new Vec3d(in.minX, in.minY, in.minZ);
-		Vec3d max = new Vec3d(in.maxX, in.maxY, in.maxZ);
-		min = mat.apply(min);
-		max = mat.apply(max);
-		return new AxisAlignedBB(min.x, min.y, min.z, max.x, max.y, max.z);
-	}
-
 	@Nullable
-	public Pair<PanelComponent, RayTraceResult> getSelectedComponent(EntityPlayer player, Vec3d hit, boolean hitAbs) {
-		//TODO prevent clicking through the back of the panel
+	public Pair<PanelComponent, RayTraceResult> getSelectedComponent(EntityPlayer player, Vec3d hitVec, boolean hitAbs) {
 		Matrix4 mat = components.getPanelTopTransformInverse();
 		PanelComponent retPc = null;
 		RayTraceResult retRay = null;
 		Vec3d playerPosRelative = player.getPositionVector().addVector(-pos.getX(), player.getEyeHeight() - pos.getY(), -pos.getZ());
 		Vec3d playerPosTransformed = mat.apply(playerPosRelative);
+		Vec3d hitRel = hitAbs ? hitVec.addVector(-pos.getX(), -pos.getY(), -pos.getZ()) : hitVec;
+		RayTraceResult r = getBoundingBox().calculateIntercept(playerPosRelative, playerPosRelative.add(player.getLookVec().scale(200)));
+		if (r != null && r.hitVec != null) {
+			hitRel = r.hitVec;
+		}
+		Vec3d ray = hitRel.subtract(playerPosRelative.subtract(hitRel).scale(10));
+		Vec3d rayTransformed = mat.apply(ray);
+		{
+			//Check whether the player is clicking on the back of the panel
+			Vec3d hitTransformed = mat.apply(new Vec3d(hitRel.x, hitRel.y, hitRel.z));
+			if (hitTransformed.y < 0) {
+				return null;
+			}
+		}
 		for (PanelComponent pc : components) {
 			AxisAlignedBB box = pc.getBlockRelativeAABB();
 			if (box.maxY > box.minY) {
 				box = box.grow(.002);
-				Vec3d hitVec = hitAbs ? hit.addVector(-pos.getX(), -pos.getY(), -pos.getZ()) : hit;
-				hitVec = hitVec.subtract(playerPosRelative.subtract(hitVec).scale(10));
-				RayTraceResult ray = box.calculateIntercept(playerPosTransformed, mat.apply(hitVec));
-				if (ray != null) {
+				RayTraceResult hit = box.calculateIntercept(playerPosTransformed, rayTransformed);
+				if (hit != null) {
 					if (retPc == null) {
-						ray.hitVec = ray.hitVec.subtract(pc.getX(), 0, pc.getY());
 						retPc = pc;
-						retRay = ray;
+						retRay = hit;
 					} else {
 						double oldDist = retRay.hitVec.subtract(playerPosRelative).lengthSquared();
-						double newDist = ray.hitVec.subtract(playerPosRelative).lengthSquared();
+						double newDist = hit.hitVec.subtract(playerPosRelative).lengthSquared();
 						if (newDist < oldDist) {
-							ray.hitVec = ray.hitVec.subtract(pc.getX(), 0, pc.getY());
 							retPc = pc;
-							retRay = ray;
+							retRay = hit;
 						}
 					}
 				}
 			}
+		}
+		if (retRay != null) {
+			retRay.hitVec = retRay.hitVec.subtract(retPc.getX(), 0, retPc.getY());
 		}
 		return retPc != null ? new ImmutablePair<>(retPc, retRay) : null;
 	}
@@ -280,12 +283,6 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 		if (pcId >= 0 && pcId < components.size()) {
 			components.get(pcId).interactWith(hitRelative, this, player);
 		}
-	}
-
-	public void triggerRenderUpdate() {
-		IBlockState state = world.getBlockState(pos);
-		world.notifyBlockUpdate(pos, state, state, 3);
-		world.addBlockEvent(pos, state.getBlock(), 255, 0);
 	}
 
 	public void registerRS(TileEntityRSPanelConn te) {

@@ -22,6 +22,7 @@ import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import malte0811.industrialWires.blocks.IWProperties;
 import malte0811.industrialWires.blocks.hv.TileEntityMarx;
 import malte0811.industrialWires.blocks.hv.TileEntityMarx.Discharge;
+import malte0811.industrialWires.client.ClientEventHandler;
 import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -37,6 +38,7 @@ import org.lwjgl.opengl.GL11;
 import static malte0811.industrialWires.blocks.hv.TileEntityMarx.FiringState.FIRE;
 
 public class TileRenderMarx extends TileEntitySpecialRenderer<TileEntityMarx> {
+	public static boolean screenShot = false;
 	@Override
 	public void render(TileEntityMarx te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
 		final boolean debug = false;
@@ -66,6 +68,10 @@ public class TileRenderMarx extends TileEntitySpecialRenderer<TileEntityMarx> {
 			}
 			cleanUp();
 			te.state = TileEntityMarx.FiringState.CHARGING;
+			if (screenShot) {
+				ClientEventHandler.shouldScreenshot = true;
+				screenShot = false;
+			}
 		}
 	}
 
@@ -94,7 +100,8 @@ public class TileRenderMarx extends TileEntitySpecialRenderer<TileEntityMarx> {
 		}
 		GlStateManager.rotate(angle, 0, 1, 0);
 		vb.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-		drawDischargeSection(new Vec3d(0, -.2F, 0), new Vec3d(0, .2F, 0), .25F, vb);
+		drawDischargeSection(new Vec3d(0, -.2F, 0), new Vec3d(0, .2F, 0), .25F,
+				.4F, .45F, vb);
 		tes.draw();
 		GlStateManager.popMatrix();
 	}
@@ -116,6 +123,7 @@ public class TileRenderMarx extends TileEntitySpecialRenderer<TileEntityMarx> {
 		Matrix4 ret = new Matrix4();
 		ret.rotate(-angle, 0, 1, 0);
 		GlStateManager.rotate((float) Math.toDegrees(angle), 0, 1, 0);
+		Shaders.useShader(Shaders.MARX);
 		return ret;
 	}
 	private void cleanUp() {
@@ -125,29 +133,35 @@ public class TileRenderMarx extends TileEntitySpecialRenderer<TileEntityMarx> {
 		GlStateManager.enableLighting();
 		GlStateManager.shadeModel(GL11.GL_FLAT);
 		GlStateManager.disableBlend();
+		Shaders.stopUsingShaders();
 	}
-	private static final float[] WHITE = {1, 1, 1, 1};
-	private static final float[] WHITE_TRANSPARENT = {1, 1, 1, 0};
 	private void drawDischarge(Discharge d, BufferBuilder vb, Tessellator tes, Matrix4 mat) {
 		if (d!=null&&d.vertices!=null) {
 			vb.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 			for (int i = 0;i<d.vertices.length-1;i++) {
-				drawDischargeSection(mat.apply(d.vertices[i]), mat.apply(d.vertices[i+1]), d.diameter, vb);
+				drawDischargeSection(mat.apply(d.vertices[i]), mat.apply(d.vertices[i+1]), d.diameter,
+						i/(float)(d.vertices.length-1), (i+1)/(float)(d.vertices.length-1), vb);
 			}
 			tes.draw();
 		}
 	}
-	private void drawDischargeSection(Vec3d start, Vec3d end, float diameter, BufferBuilder vb) {
-		drawPart(start, end, diameter/3, diameter/3, WHITE_TRANSPARENT, WHITE, vb);
-		drawPart(start, end, 0, diameter/3, WHITE, WHITE, vb);
-		drawPart(start, end, -diameter/3, diameter/3, WHITE, WHITE_TRANSPARENT, vb);
+	private void drawDischargeSection(Vec3d start, Vec3d end, float diameter, float aMin, float aMax, BufferBuilder vb) {
+		if (Shaders.areShadersEnabled()) {
+			drawPart(0, diameter, start, end, aMin, aMax, vb);
+		} else {
+			drawPart(-diameter/3, diameter/3, start, end, 0, 1, vb);
+			drawPart(0, diameter/3, start, end, 1, 1, vb);
+			drawPart(diameter/3, diameter/3, start, end, 1, 0, vb);
+		}
 	}
-	private void drawPart(Vec3d start, Vec3d end, float offset, float width, float[] color1, float[] color2, BufferBuilder vb) {
-		vb.setTranslation(-offset-width/2, 0, 0);
-		vb.pos(start.x, start.y, start.z).color(color1[0], color1[1], color1[2], color1[3]).endVertex();
-		vb.pos(start.x+width, start.y, start.z).color(color2[0], color2[1], color2[2], color2[3]).endVertex();
-		vb.pos(end.x+width, end.y, end.z).color(color2[0], color2[1], color2[2], color2[3]).endVertex();
-		vb.pos(end.x, end.y, end.z).color(color1[0], color1[1], color1[2], color1[3]).endVertex();
+	private void drawPart(double offset, double diameter, Vec3d start, Vec3d end, float aMin, float aMax, BufferBuilder vb) {
+		boolean shaders = Shaders.areShadersEnabled();
+		float red1 = shaders?0:1;
+		vb.setTranslation(offset-diameter/2, 0, 0);
+		vb.pos(start.x, start.y, start.z).color(red1, 1, 1, aMin).endVertex();
+		vb.pos(start.x+diameter, start.y, start.z).color(1, 1, 1, shaders?aMin:aMax).endVertex();
+		vb.pos(end.x+diameter, end.y, end.z).color(1, 1, 1, aMax).endVertex();
+		vb.pos(end.x, end.y, end.z).color(red1, 1, 1, shaders?aMax:aMin).endVertex();
 		vb.setTranslation(0, 0, 0);
 	}
 }

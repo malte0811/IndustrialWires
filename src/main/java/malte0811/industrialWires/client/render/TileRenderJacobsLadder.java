@@ -41,17 +41,20 @@ public class TileRenderJacobsLadder extends TileEntitySpecialRenderer<TileEntity
 			GlStateManager.translate(x + .5, y + tile.size.heightOffset, z + .5);
 			GlStateManager.rotate(tile.facing.getHorizontalAngle(), 0, 1, 0);
 			GlStateManager.translate(-tile.size.bottomDistance / 2, 0, 0);
-
 			GlStateManager.disableTexture2D();
 			GlStateManager.disableLighting();
 			GlStateManager.shadeModel(GL11.GL_SMOOTH);
+			if (Shaders.areShadersEnabled()) {
+				GlStateManager.enableBlend();
+				GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+			}
 
 			setLightmapDisabled(true);
 			GlStateManager.color(1, .85F, 1, 1);
 			Vec3d[] controls = new Vec3d[tile.size.arcPoints];
 			for (int i = 0; i < tile.size.arcPoints; i++) {
-				Vec3d speed = tile.controlMovement[i];
-				controls[i] = tile.controls[i].addVector(speed.x * partialTicks, speed.y * partialTicks, speed.z * partialTicks);
+				Vec3d speed = tile.controlMovement[i].scale(partialTicks);
+				controls[i] = tile.controls[i].add(speed);
 			}
 			drawBezier(controls, tile.salt, tile.size);
 			//DEBUG CODE
@@ -74,12 +77,14 @@ public class TileRenderJacobsLadder extends TileEntitySpecialRenderer<TileEntity
 			GlStateManager.enableTexture2D();
 			GlStateManager.enableLighting();
 			GlStateManager.shadeModel(GL11.GL_FLAT);
+			GlStateManager.disableBlend();
 
 			GlStateManager.popMatrix();
 		}
 	}
 
 	private void drawBezier(Vec3d[] controls, double salt, LadderSize size) {
+		Shaders.useShader(Shaders.JACOBS_ARC);
 		int steps = size.renderPoints;
 		double diameter = size.renderDiameter;
 		Vec3d radY = new Vec3d(0, diameter / 2, 0);
@@ -90,31 +95,41 @@ public class TileRenderJacobsLadder extends TileEntitySpecialRenderer<TileEntity
 		vertBuffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 		Vec3d last = Beziers.getPoint(0, controls);
 		colors[0] = getColor(0, salt, size);
+		if (Shaders.areShadersEnabled()) {
+			colors[0][0] = 0;
+		}
 		for (int i = 1; i <= steps; i++) {
 			double d = i / (double) steps;
 			colors[i] = getColor(d, salt, size);
 			Vec3d pos = Beziers.getPoint(d, controls);
-			drawQuad(last, pos, radY, colors[i - 1], colors[i], vertBuffer);
-			drawQuad(last, pos, radZ, colors[i - 1], colors[i], vertBuffer);
+			if (Shaders.areShadersEnabled()) {
+				colors[i][0] = (float) d;
+			}
+			drawQuad(last, pos, radY, colors[i - 1], colors[i], vertBuffer, false);
+			drawQuad(last, pos, radZ, colors[i - 1], colors[i], vertBuffer, false);
 			last = pos;
 		}
 		tes.draw();
+		Shaders.stopUsingShaders();
 	}
 
-	private void drawQuad(Vec3d v0, Vec3d v1, Vec3d rad, float[] color0, float[] color1, BufferBuilder vertexBuffer) {
-		color(color1, vertexBuffer.pos(v1.x - rad.x, v1.y - rad.y, v1.z - rad.z)).endVertex();
-		color(color0, vertexBuffer.pos(v0.x - rad.x, v0.y - rad.y, v0.z - rad.z)).endVertex();
-		color(color0, vertexBuffer.pos(v0.x + rad.x, v0.y + rad.y, v0.z + rad.z)).endVertex();
-		color(color1, vertexBuffer.pos(v1.x + rad.x, v1.y + rad.y, v1.z + rad.z)).endVertex();
+	private void drawQuad(Vec3d v0, Vec3d v1, Vec3d rad, float[] color0, float[] color1, BufferBuilder vertexBuffer,
+						  boolean horizontal) {
+		float alpha0 = horizontal?.5F:0;
+		float alpha1 = horizontal?.5F:1;
+		color(color1, alpha0, vertexBuffer.pos(v1.x - rad.x, v1.y - rad.y, v1.z - rad.z)).endVertex();
+		color(color0, alpha0, vertexBuffer.pos(v0.x - rad.x, v0.y - rad.y, v0.z - rad.z)).endVertex();
+		color(color0, alpha1, vertexBuffer.pos(v0.x + rad.x, v0.y + rad.y, v0.z + rad.z)).endVertex();
+		color(color1, alpha1, vertexBuffer.pos(v1.x + rad.x, v1.y + rad.y, v1.z + rad.z)).endVertex();
 
-		color(color1, vertexBuffer.pos(v1.x + rad.x, v1.y + rad.y, v1.z + rad.z)).endVertex();
-		color(color0, vertexBuffer.pos(v0.x + rad.x, v0.y + rad.y, v0.z + rad.z)).endVertex();
-		color(color0, vertexBuffer.pos(v0.x - rad.x, v0.y - rad.y, v0.z - rad.z)).endVertex();
-		color(color1, vertexBuffer.pos(v1.x - rad.x, v1.y - rad.y, v1.z - rad.z)).endVertex();
+		color(color1, alpha1, vertexBuffer.pos(v1.x + rad.x, v1.y + rad.y, v1.z + rad.z)).endVertex();
+		color(color0, alpha1, vertexBuffer.pos(v0.x + rad.x, v0.y + rad.y, v0.z + rad.z)).endVertex();
+		color(color0, alpha0, vertexBuffer.pos(v0.x - rad.x, v0.y - rad.y, v0.z - rad.z)).endVertex();
+		color(color1, alpha0, vertexBuffer.pos(v1.x - rad.x, v1.y - rad.y, v1.z - rad.z)).endVertex();
 	}
 
-	private BufferBuilder color(float[] color, BufferBuilder vb) {
-		vb.color(color[0], color[1], color[2], 1);
+	private BufferBuilder color(float[] color, float alpha, BufferBuilder vb) {
+		vb.color(color[0], color[1], color[2], alpha);
 		return vb;
 	}
 }

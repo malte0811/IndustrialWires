@@ -23,18 +23,17 @@ import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import malte0811.industrialWires.client.panelmodel.RawModelFontRenderer;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagString;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -44,9 +43,7 @@ import static malte0811.industrialWires.util.NBTKeys.COLOR;
 import static malte0811.industrialWires.util.NBTKeys.TEXT;
 
 public class Label extends PanelComponent implements IConfigurableComponent {
-	public static final ResourceLocation FONT = new ResourceLocation("minecraft", "textures/font/ascii.png");
 	private String text = "Test";
-	private RawModelFontRenderer renderer;
 	private int color = 0x808080;
 
 	public Label(String text, int color) {
@@ -72,8 +69,10 @@ public class Label extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public List<RawQuad> getQuads() {
-		RawModelFontRenderer render = fontRenderer();
+		RawModelFontRenderer render = RawModelFontRenderer.get();
+		render.setScale(1);
 		render.drawString(text, 0, 0, 0xff000000 | color);
 		return render.build();
 	}
@@ -93,9 +92,9 @@ public class Label extends PanelComponent implements IConfigurableComponent {
 	public AxisAlignedBB getBlockRelativeAABB() {
 		if (aabb == null) {
 			if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT) {
-				RawModelFontRenderer fr = fontRenderer();
-				float width = fr.getStringWidth(text) * fr.scale;
-				float height = fr.FONT_HEIGHT * fr.scale;
+				RawModelFontRenderer fr = RawModelFontRenderer.get();
+				float width = fr.getStringWidth(text) * fr.getScale();
+				float height = fr.FONT_HEIGHT * fr.getScale();
 				aabb = new AxisAlignedBB(getX(), 0, getY(), getX() + width, 0, getY() + height);
 			} else {
 				aabb = new AxisAlignedBB(getX(), 0, getY(), getX() + .001, 0, getY() + .001);
@@ -123,15 +122,8 @@ public class Label extends PanelComponent implements IConfigurableComponent {
 		return 0;
 	}
 
-	private RawModelFontRenderer fontRenderer() {
-		if (renderer == null) {
-			renderer = new RawModelFontRenderer(Minecraft.getMinecraft().gameSettings, FONT, Minecraft.getMinecraft().getTextureManager(),
-					false, 1);
-		}
-		return renderer;
-	}
-
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void renderInGUI(GuiPanelCreator gui) {
 		int left = (int) (gui.getX0() + getX() * gui.panelSize);
 		int top = (int) (gui.getY0() + getY() * gui.panelSize);

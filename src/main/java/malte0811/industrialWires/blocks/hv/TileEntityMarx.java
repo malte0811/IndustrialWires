@@ -28,9 +28,7 @@ import blusunrize.immersiveengineering.api.energy.wires.redstone.IRedstoneConnec
 import blusunrize.immersiveengineering.api.energy.wires.redstone.RedstoneWireNetwork;
 import blusunrize.immersiveengineering.common.IEContent;
 import blusunrize.immersiveengineering.common.blocks.BlockTypes_MetalsIE;
-import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDirectionalTile;
 import blusunrize.immersiveengineering.common.blocks.metal.*;
-import blusunrize.immersiveengineering.common.blocks.wooden.TileEntityWallmount;
 import blusunrize.immersiveengineering.common.util.Utils;
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import com.elytradev.mirage.event.GatherLightsEvent;
@@ -40,6 +38,7 @@ import malte0811.industrialWires.blocks.IBlockBoundsIW;
 import malte0811.industrialWires.blocks.ISyncReceiver;
 import malte0811.industrialWires.blocks.IWProperties;
 import malte0811.industrialWires.blocks.TileEntityIWMultiblock;
+import malte0811.industrialWires.hv.IMarxTarget;
 import malte0811.industrialWires.hv.MarxOreHandler;
 import malte0811.industrialWires.network.MessageTileSyncIW;
 import malte0811.industrialWires.util.DualEnergyStorage;
@@ -50,6 +49,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagDouble;
@@ -71,12 +71,14 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
+import static blusunrize.immersiveengineering.api.energy.wires.WireType.REDSTONE_CATEGORY;
 import static malte0811.industrialWires.blocks.hv.TileEntityMarx.FiringState.FIRE;
 import static malte0811.industrialWires.util.MiscUtils.getOffset;
 import static malte0811.industrialWires.util.MiscUtils.offset;
 import static malte0811.industrialWires.util.NBTKeys.*;
+import static malte0811.industrialWires.wires.IC2Wiretype.IC2_HV_CAT;
 import static net.minecraft.item.EnumDyeColor.*;
 
 /**
@@ -98,8 +100,8 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	private double rcTimeConst;
 	private double timeFactor;
 	private double timeFactorBottom;
-	private final static double CAPACITANCE = 0.000_001_6;
-	private final static double MAX_VOLTAGE = 250_000;
+	private final static double CAPACITANCE = 1.6e-6;
+	private final static double MAX_VOLTAGE = 250e3;
 
 	public IWProperties.MarxType type = IWProperties.MarxType.NO_MODEL;
 	private int stageCount = 0;
@@ -124,6 +126,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	@Override
 	public void writeNBT(NBTTagCompound out, boolean updatePacket) {
 		super.writeNBT(out, updatePacket);
+		MiscUtils.writeConnsToNBT(out, this);
 		out.setInteger(TYPE, type.ordinal());
 		out.setInteger(STAGES, stageCount);
 		out.setBoolean(HAS_CONN, hasConnection);
@@ -140,6 +143,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	@Override
 	public void readNBT(NBTTagCompound in, boolean updatePacket) {
 		super.readNBT(in, updatePacket);
+		MiscUtils.loadConnsFromNBT(in, this);
 		type = IWProperties.MarxType.values()[in.getInteger(TYPE)];
 		setStageCount(in.getInteger(STAGES));
 		NBTTagList voltages = in.getTagList(CAP_VOLTAGES, 6);//DOUBLE
@@ -192,37 +196,18 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	}
 
 	@Override
-	public BiConsumer<World, BlockPos> getOriginalBlockPlacer() {
-		IBlockState original = getOriginalBlock();
-		if (original!=null) {
-			return (w, p) -> {
-				w.setBlockState(p, original);
-				TileEntity te = w.getTileEntity(p);
-				if (te instanceof IDirectionalTile&&original.getProperties().containsKey(IEProperties.FACING_ALL)) {
-					((IDirectionalTile) te).setFacing(original.getValue(IEProperties.FACING_ALL));
-					te.markDirty();
-				}
-				if (te instanceof TileEntityWallmount) {
-					((TileEntityWallmount) te).orientation = original.getValue(IEProperties.INT_4);
-				}
-			};
-		}
-		return (a, b)->IndustrialWires.logger.warn(a+", "+b+" wasn't found");//NOP
-	}
-
-	@Override
 	public void update() {
 		ApiUtils.checkForNeedlessTicking(this);
 		FIRING_GENERATORS.remove(this);
 		switch (state) {
 			case NEXT_TICK:
-				state = FIRE;
 				if (world.isRemote) {
 					FIRING_GENERATORS.add(this);
 					IndustrialWires.proxy.playMarxBang(this, getMiddle(), (float) getNormedEnergy(dischargeData.energy));
 				} else {
 					fire();
 				}
+				state = FIRE;
 				break;
 			case FIRE:
 				state = FiringState.CHARGING;
@@ -291,7 +276,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 				energyStored = -energyStored;
 			} else {
 				int seed = Utils.RAND.nextInt();
-				genDischarge((float) energyStored, seed);//TODO test on a dedicated server
+				genDischarge((float) energyStored, seed);
 				data.setInteger("randSeed", seed);
 				handleEntities(energyStored);
 				handleOreProcessing(energyStored);//After entities to prevent killing the newly dropped items
@@ -303,12 +288,10 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 
 	private void handleOreProcessing(double energyStored) {
 		BlockPos bottom = getBottomElectrode();
-		Vec3d origin = new Vec3d(bottom).addVector(.5, 1, .5);
-		Set<BlockPos> toBreak = new HashSet<>(dischargeData.vertices.length);
+		Set<BlockPos> toBreak = new HashSet<>(stageCount-2);
 		int ores = 0;
-		for (int i = 1;i<dischargeData.vertices.length;i++) {
-			Vec3d vecHere = origin.add(dischargeData.vertices[i]);
-			BlockPos blockHere = new BlockPos(vecHere);
+		for (int i = 1;i<stageCount-1;i++) {
+			BlockPos blockHere = bottom.up(i);
 			if (!world.isAirBlock(blockHere) && canBreak(blockHere)) {
 				toBreak.add(blockHere);
 				ores++;
@@ -322,6 +305,12 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 					continue;
 				}
 				if (!world.isAirBlock(here)) {
+					TileEntity te = world.getTileEntity(here);
+					if (te instanceof IMarxTarget) {
+						if (((IMarxTarget) te).onHit(energyPerOre, this)) {
+							continue;
+						}
+					}
 					ItemStack[] out = MarxOreHandler.getYield(world, here, energyPerOre);
 					for (ItemStack stack : out) {
 						EntityItem item = new EntityItem(world, here.getX() + .5, here.getY() + .5, here.getZ() + .5, stack);
@@ -338,15 +327,13 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	}
 
 	private void handleEntities(double energyStored) {
+		double damageDistSqu = Math.sqrt(energyStored/50e3);
+		double tinnitusDistSqu = Math.sqrt(energyStored)/50;
 		Vec3d v0 = getMiddle();
 		AxisAlignedBB aabb = new AxisAlignedBB(v0.x, v0.y, v0.z, v0.x, v0.y, v0.z);
 		aabb = aabb.grow(0, stageCount/2-1,0);
-		final double sqrtStages = Math.sqrt(stageCount);
-		aabb = aabb.grow(5*sqrtStages);
+		aabb = aabb.grow(tinnitusDistSqu);
 		List<Entity> fools = world.getEntitiesWithinAABB(Entity.class, aabb);
-		double energyNormed = getNormedEnergy(energyStored);
-		double damageDistSqu = energyNormed * stageCount;
-		double tinnitusDistSqu = 5 * energyNormed * stageCount;
 		damageDistSqu *= damageDistSqu;
 		tinnitusDistSqu *= tinnitusDistSqu;
 		if (IWConfig.HVStuff.marxSoundDamage == 2) {
@@ -407,7 +394,6 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 
 	@Override
 	public void onSync(NBTTagCompound nbt) {
-		state = FiringState.NEXT_TICK;
 		float energy = nbt.getFloat("energy");
 		if (energy>0) {
 			genDischarge(energy, nbt.getInteger("randSeed"));
@@ -417,6 +403,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 			}
 			dischargeData.energy = energy;
 		}
+		state = FiringState.NEXT_TICK;
 	}
 
 	private void genDischarge(float energy, int seed) {
@@ -552,12 +539,17 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	public double insertEnergy(double eu, boolean simulate) {
 		TileEntityMarx master = master(this);
 		if (master!=null) {
-			double ret = master.storage.insertEU(eu, leftover, !simulate);
-			leftover -= ret;
+			double ret = master.storage.insertEU(eu, master.leftover, !simulate);
+			master.leftover -= ret;
 			return eu-ret;
 		} else {
 			return 0;
 		}
+	}
+//TODO
+	@Override
+	public void addAvailableEnergy(double amount, Consumer<Double> consume) {
+
 	}
 
 	@Override
@@ -571,9 +563,9 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 			return false;
 		}
 		if (getRight()==0) {
-			return cableType==WireType.REDSTONE;
+			return REDSTONE_CATEGORY.equals(cableType.getCategory());
 		} else {
-			return cableType==WireType.STEEL||cableType== IC2Wiretype.IC2_TYPES[3];
+			return WireType.HV_CATEGORY.equals(cableType.getCategory())|| IC2_HV_CAT.equals(cableType.getCategory());
 		}
 	}
 
@@ -584,7 +576,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 
 	@Override
 	public WireType getCableLimiter(TargetingInfo target) {
-		return getRight()==0?WireType.REDSTONE:IC2Wiretype.IC2_TYPES[3];
+		return getRight()==0?WireType.REDSTONE:IC2Wiretype.HV;
 	}
 
 	@Override
@@ -600,6 +592,11 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	@Override
 	public void removeCable(ImmersiveNetHandler.Connection connection) {
 		hasConnection = false;
+		if(world != null)
+		{
+			IBlockState state = world.getBlockState(pos);
+			world.notifyBlockUpdate(pos, state,state, 3);
+		}
 	}
 
 	@Override
@@ -617,6 +614,28 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		return getRaytraceOffset(null);
 	}
 
+
+	@Override
+	public void validate()
+	{
+		super.validate();
+		ImmersiveNetHandler.INSTANCE.resetCachedIndirectConnections();
+	}
+
+	@Override
+	public void invalidate()
+	{
+		super.invalidate();
+		if (world.isRemote)
+			ImmersiveNetHandler.INSTANCE.clearConnectionsOriginatingFrom(pos, world);
+	}
+
+	@Override
+	public boolean receiveClientEvent(int id, int type) {
+		return MiscUtils.handleUpdate(id, pos, world)||super.receiveClientEvent(id, type);
+	}
+
+	// Redstone wire stuff
 	private RedstoneWireNetwork net = new RedstoneWireNetwork();
 	@Override
 	public void setNetwork(RedstoneWireNetwork net) {
@@ -657,15 +676,15 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		if (master.capVoltages!=null&&master.capVoltages.length==stageCount) {
 			int signalTop = getRSSignalFromVoltage(master.capVoltages[stageCount-1]);
 			int signalBottom = getRSSignalFromVoltage(master.capVoltages[0]);
-			setSignal(ORANGE.getMetadata(), (signalBottom>>4)&0xf, signals);
-			setSignal(MAGENTA.getMetadata(), (signalTop>>4)&0xf, signals);
-			setSignal(LIME.getMetadata(), signalBottom&0xf, signals);
-			setSignal(PINK.getMetadata(), signalTop&0xf, signals);
+			setSignal(ORANGE, (signalBottom>>4)&0xf, signals);
+			setSignal(MAGENTA, (signalTop>>4)&0xf, signals);
+			setSignal(LIME, signalBottom&0xf, signals);
+			setSignal(PINK, signalTop&0xf, signals);
 		}
 	}
 
-	private void setSignal(int channel, int value, byte[] signals) {
-		signals[channel] = (byte) Math.max(value, signals[channel]);
+	private void setSignal(EnumDyeColor channel, int value, byte[] signals) {
+		signals[channel.getMetadata()] = (byte) Math.max(value, signals[channel.getMetadata()]);
 	}
 
 	public void setStageCount(int stageCount) {
@@ -729,11 +748,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		final int stageCount;
 		Discharge(int stages) {
 			stageCount = stages;
-			int count = 1;
-			while (count<stageCount) {
-				count <<= 1;
-			}
-			count = 8;
+			int count = stages/5+1;
 			vertices = new Vec3d[2*count];
 			vertices[0] = new Vec3d(0, -.5F, 0);
 			for (int i = 1;i<vertices.length;i++) {
@@ -745,10 +760,6 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 
 		// Meant to be const
 		private final Vec3d side = new Vec3d(0, 0, 1);
-		//used for calculation buffering
-		private Vec3d diff;
-		private Vec3d center;
-		private Vec3d v0;
 		private Matrix4 transform = new Matrix4();
 
 		void genMarxPoint(int randSeed) {
@@ -760,8 +771,8 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		 */
 		void genMarxPoint(int min, int max, Random rand) {
 			int toGenerate = (min+max)/2;
-			diff = vertices[max].subtract(vertices[min]);
-			v0 = diff.crossProduct(side);
+			Vec3d diff = vertices[max].subtract(vertices[min]);
+			Vec3d v0 = diff.crossProduct(side);
 			transform.setIdentity();
 			double diffLength = diff.lengthVector();
 			double noise = Math.sqrt(diffLength)*rand.nextDouble()*1/(1+Math.abs(stageCount/2.0-toGenerate))*.75;
@@ -771,7 +782,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 			v0 = v0.scale((float) (noise/v0.lengthVector()));
 			diff = diff.scale(1/diffLength);
 			transform.rotate(Math.PI*2*rand.nextDouble(), diff.x, diff.y, diff.z);
-			center = vertices[max].add(vertices[min]).scale(.5);
+			Vec3d center = vertices[max].add(vertices[min]).scale(.5);
 			vertices[toGenerate] = transform.apply(v0);
 			vertices[toGenerate] = center.add(vertices[toGenerate]);
 

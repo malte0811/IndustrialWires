@@ -19,14 +19,10 @@ package malte0811.industrialWires.blocks.wire;
 
 import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.api.TargetingInfo;
-import blusunrize.immersiveengineering.api.energy.wires.IImmersiveConnectable;
-import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler;
+import blusunrize.immersiveengineering.api.energy.wires.*;
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler.AbstractConnection;
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler.Connection;
-import blusunrize.immersiveengineering.api.energy.wires.TileEntityImmersiveConnectable;
-import blusunrize.immersiveengineering.api.energy.wires.WireType;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDirectionalTile;
-import blusunrize.immersiveengineering.common.util.Utils;
 import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergyAcceptor;
@@ -36,25 +32,26 @@ import ic2.api.energy.tile.IEnergySource;
 import malte0811.industrialWires.IIC2Connector;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.IBlockBoundsIW;
-import malte0811.industrialWires.wires.IC2Wiretype;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Optional;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import reborncore.api.power.IEnergyInterfaceTile;
 
 import javax.annotation.Nonnull;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import javax.annotation.Nullable;
+import java.util.*;
+import java.util.function.Consumer;
+
+import static malte0811.industrialWires.wires.IC2Wiretype.IC2_TIN_CAT;
+import static malte0811.industrialWires.wires.IC2Wiretype.TIN;
 
 @Optional.InterfaceList({
 		@Optional.Interface(iface = "ic2.api.energy.tile.IEnergySource", modid = "ic2"),
@@ -71,7 +68,7 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	//IE net to IC2 net buffer
 	double outBuffer = 0;
 	double maxToMachine = 0;
-	double maxStored = IC2Wiretype.IC2_TYPES[0].getTransferRate() / 8;
+	double maxStored = TIN.getTransferRate() / TIN.getFactor();
 	int tier = 1;
 
 	TileEntityIC2ConnectorTin(boolean rel) {
@@ -86,32 +83,24 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 		if (first) {
 			if (!world.isRemote&& IndustrialWires.hasIC2)
 				MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
+			ImmersiveNetHandler.INSTANCE.onTEValidated(this);
 			first = false;
 		}
 		if (!world.isRemote) {
 			if (inBuffer > .1) {
 				transferPower();
 			}
-			if (outBuffer>.1&&IndustrialWires.hasTechReborn) {
-				TileEntity output = Utils.getExistingTileEntity(world, pos.offset(facing));
-				if (output instanceof IEnergyInterfaceTile) {
-					IEnergyInterfaceTile out = (IEnergyInterfaceTile) output;
-					if (out.canAcceptEnergy(facing.getOpposite())) {
-						outBuffer -= out.addEnergy(Math.min(outBuffer, maxToMachine));
-					}
-				}
-			}
 		}
 	}
 
 	private void transferPower() {
-		Set<AbstractConnection> conns = new HashSet<>(ImmersiveNetHandler.INSTANCE.getIndirectEnergyConnections(pos, world));
+		Set<AbstractConnection> conns = ImmersiveNetHandler.INSTANCE.getIndirectEnergyConnections(pos, world, true);
 		Map<AbstractConnection, Pair<IIC2Connector, Double>> maxOutputs = new HashMap<>();
 		double outputMax = Math.min(inBuffer, maxToNet);
 		double sum = 0;
 		for (AbstractConnection c : conns) {
 			IImmersiveConnectable iic = ApiUtils.toIIC(c.end, world);
-			if (iic instanceof IIC2Connector) {
+			if (iic instanceof IIC2Connector&&iic.isEnergyOutput()) {
 				double tmp = outputMax - ((IIC2Connector) iic).insertEnergy(outputMax, true);
 				if (tmp > .00000001) {
 					maxOutputs.put(c, new ImmutablePair<>((IIC2Connector) iic, tmp));
@@ -119,31 +108,39 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 				}
 			}
 		}
-		if (sum < .0001) {
-			return;
-		}
-		final double oldInBuf = outputMax;
-		HashMap<Connection, Integer> transferedPerConn = ImmersiveNetHandler.INSTANCE.getTransferedRates(world.provider.getDimension());
-		for (AbstractConnection c : maxOutputs.keySet()) {
-			Pair<IIC2Connector, Double> p = maxOutputs.get(c);
-			double out = oldInBuf * p.getRight() / sum;
-			double loss = getAverageLossRate(c);
-			double inserted = out - p.getLeft().insertEnergy(out - loss, false);
-			inBuffer -= inserted;
-			float intermediaryLoss = 0;
-			HashSet<IImmersiveConnectable> passedConnectors = new HashSet<>();
-			double energyAtConn = inserted + loss;
-			for (Connection sub : c.subConnections) {
-				int transferredPerCon = transferedPerConn.getOrDefault(sub, 0);
-				energyAtConn -= sub.cableType.getLossRatio() * sub.length;
-				ImmersiveNetHandler.INSTANCE.getTransferedRates(world.provider.getDimension()).put(sub, (int) (transferredPerCon + energyAtConn));
-				IImmersiveConnectable subStart = ApiUtils.toIIC(sub.start, world);
-				IImmersiveConnectable subEnd = ApiUtils.toIIC(sub.end, world);
-				if (subStart != null && passedConnectors.add(subStart))
-					subStart.onEnergyPassthrough((int) (inserted - inserted * intermediaryLoss));
-				if (subEnd != null && passedConnectors.add(subEnd))
-					subEnd.onEnergyPassthrough((int) (inserted - inserted * intermediaryLoss));
+		if (sum > .0001) {
+			final double oldInBuf = outputMax;
+			HashMap<Connection, Integer> transferedPerConn = ImmersiveNetHandler.INSTANCE.getTransferedRates(world.provider.getDimension());
+			for (Map.Entry<AbstractConnection, Pair<IIC2Connector, Double>> entry : maxOutputs.entrySet()) {
+				Pair<IIC2Connector, Double> p = entry.getValue();
+				AbstractConnection c = entry.getKey();
+				double out = oldInBuf * p.getRight() / sum;
+				double loss = getAverageLossRate(c);
+				double inserted = out - p.getLeft().insertEnergy(out - loss, false);
+				inBuffer -= inserted;
+				float intermediaryLoss = 0;
+				HashSet<IImmersiveConnectable> passedConnectors = new HashSet<>();
+				double energyAtConn = inserted + loss;
+				for (Connection sub : c.subConnections) {
+					int transferredPerCon = transferedPerConn.getOrDefault(sub, 0);
+					energyAtConn -= sub.cableType.getLossRatio() * sub.length;
+					ImmersiveNetHandler.INSTANCE.getTransferedRates(world.provider.getDimension()).put(sub, (int) (transferredPerCon + energyAtConn));
+					IImmersiveConnectable subStart = ApiUtils.toIIC(sub.start, world);
+					IImmersiveConnectable subEnd = ApiUtils.toIIC(sub.end, world);
+					if (subStart != null && passedConnectors.add(subStart))
+						subStart.onEnergyPassthrough((int) (inserted - inserted * intermediaryLoss));
+					if (subEnd != null && passedConnectors.add(subEnd))
+						subEnd.onEnergyPassthrough((int) (inserted - inserted * intermediaryLoss));
+				}
 			}
+		}
+		if (inBuffer>0) {
+			conns.stream().map((ac)->ApiUtils.toIIC(ac.end, world)).forEach((iic)-> {
+				if (iic instanceof IIC2Connector) {
+					((IIC2Connector) iic).addAvailableEnergy(inBuffer, (d)->inBuffer-=d);
+				}
+			});
+			addAvailableEnergy(0D, null);
 		}
 	}
 
@@ -190,12 +187,6 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	}
 
 	@Override
-	public Vec3d getRaytraceOffset(IImmersiveConnectable link) {
-		EnumFacing side = facing.getOpposite();
-		return new Vec3d(.5 + side.getFrontOffsetX() * .0625, .5 + side.getFrontOffsetY() * .0625, .5 + side.getFrontOffsetZ() * .0625);
-	}
-
-	@Override
 	public Vec3d getConnectionOffset(Connection con) {
 		EnumFacing side = facing.getOpposite();
 		double conRadius = con.cableType.getRenderDiameter() / 2;
@@ -213,12 +204,12 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	}
 
 	@Override
-	public boolean canConnectCable(WireType cableType, TargetingInfo target) {
-		return (limitType == null || (this.isRelay() && limitType == cableType)) && canConnect(cableType);
+	public boolean canConnectCable(WireType cableType, TargetingInfo target, Vec3i offset) {
+		return (limitType == null || (this.isRelay() && WireApi.canMix(cableType, limitType))) && canConnect(cableType);
 	}
 
 	public boolean canConnect(WireType t) {
-		return t == IC2Wiretype.IC2_TYPES[0];
+		return IC2_TIN_CAT.equals(t.getCategory());
 	}
 
 	@Override
@@ -275,6 +266,50 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	public void drawEnergy(double amount) {
 		outBuffer -= amount;
 		markDirty();
+	}
+
+
+	private List<Pair<Double, Consumer<Double>>> sources = new ArrayList<>();
+	private long lastSourceUpdate = 0;
+	@Override
+	public void addAvailableEnergy(double amount, Consumer<Double> consume) {
+		long currentTime = world.getTotalWorldTime();
+		if (lastSourceUpdate!=currentTime)
+		{
+			sources.clear();
+			Pair<Double, Consumer<Double>> own = getOwnEnergyIC2();
+			if (own!=null)
+				sources.add(own);
+			lastSourceUpdate = currentTime;
+		}
+		if (amount>0&&consume!=null)
+			sources.add(new ImmutablePair<>(amount, consume));
+	}
+
+	@Nullable
+	protected Pair<Double,Consumer<Double>> getOwnEnergyIC2()
+	{
+		if (isRelay())
+			return null;
+		return new ImmutablePair<>(inBuffer, (d)->inBuffer -= d);
+	}
+
+	@Override
+	public float getDamageAmount(Entity e, Connection c)
+	{
+		float max = getMaxDamage(c);
+		if (max==0||world.getTotalWorldTime()-lastSourceUpdate>1)
+			return 0;
+		float energy = 0;
+		for (int i = 0;i<sources.size()&&energy<max;i++) {
+			energy += Math.min(sources.get(i).getLeft(), max-energy);
+		}
+		return (float) Math.ceil(energy/64);//Same as IC2 uses
+	}
+
+	@Override
+	protected float getMaxDamage(Connection c) {
+		return c.cableType.getTransferRate()/8;
 	}
 
 	@Override

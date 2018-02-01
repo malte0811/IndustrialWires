@@ -30,6 +30,8 @@ import net.minecraft.nbt.*;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.util.vector.Vector3f;
 
 import javax.annotation.Nonnull;
@@ -80,7 +82,6 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 		nbt.setInteger(RS_ID, rsId);
 		nbt.setByte(RS_CHANNEL2, rsChannel2);
 		nbt.setInteger(RS_ID2, rsId2);
-		nbt.setBoolean(HAS_SECOND_CHANNEL, hasSecond);
 		nbt.setBoolean(HORIZONTAL, horizontal);
 	}
 
@@ -88,23 +89,27 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 	protected void readCustomNBT(NBTTagCompound nbt) {
 		color = nbt.getInteger(COLOR);
 		length = nbt.getFloat(LENGTH);
+		horizontal = nbt.getBoolean(HORIZONTAL);
 		out = nbt.getInteger("output");
 		rsChannel = nbt.getByte(RS_CHANNEL);
 		rsId = nbt.getInteger(RS_ID);
 		rsChannel2 = nbt.getByte(RS_CHANNEL2);
 		rsId2 = nbt.getInteger(RS_ID2);
-		hasSecond = nbt.getBoolean(HAS_SECOND_CHANNEL);
-		horizontal = nbt.getBoolean(HORIZONTAL);
+		hasSecond = rsId2>=0&&rsChannel2>=0;
+		if (!hasSecond) {
+			rsChannel2 = -1;
+			rsId2 = -1;
+		}
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public List<RawQuad> getQuads() {
 		List<RawQuad> ret = new ArrayList<>();
-		final float yOff = .001F;
 		float xSize = horizontal ? length : WIDTH;
 		float ySize = horizontal ? WIDTH : length;
-		PanelUtils.addColoredQuad(ret, new Vector3f(0, yOff, 0), new Vector3f(0, yOff, ySize), new Vector3f(xSize, yOff, ySize), new Vector3f(xSize, yOff, 0),
-				EnumFacing.UP, GRAY);
+		PanelUtils.addColoredQuad(ret, new Vector3f(0, 0, 0), new Vector3f(0, 0, ySize), new Vector3f(xSize, 0, ySize),
+				new Vector3f(xSize, 0, 0), EnumFacing.UP, GRAY);
 		float[] color = new float[4];
 		color[3] = 1;
 		for (int i = 0; i < 3; i++) {
@@ -185,6 +190,7 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void renderInGUI(GuiPanelCreator gui) {
 		renderInGUIDefault(gui, GRAY_INT);
 		double middleX = (getX() + (horizontal ? length : .0625) / 2);

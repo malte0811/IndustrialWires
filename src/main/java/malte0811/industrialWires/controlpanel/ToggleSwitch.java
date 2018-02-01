@@ -34,6 +34,8 @@ import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.util.vector.Vector3f;
 
 import javax.annotation.Nonnull;
@@ -83,15 +85,15 @@ public class ToggleSwitch extends PanelComponent implements IConfigurableCompone
 	protected float sizeY = 1.5F * sizeX;
 	protected float rodRadius = sizeX * .25F;
 	protected float rodLength = 3 / 32F;
-	protected float yOffset = .0001F;
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public List<RawQuad> getQuads() {
 		List<RawQuad> ret = new ArrayList<>();
-		PanelUtils.addColoredQuad(ret, new Vector3f(sizeX, yOffset, (sizeY - sizeX) / 2),
-				new Vector3f(0, yOffset, (sizeY - sizeX) / 2),
-				new Vector3f(0, yOffset, (sizeY + sizeX) / 2),
-				new Vector3f(sizeX, yOffset, (sizeY + sizeX) / 2), EnumFacing.UP, GRAY);
+		PanelUtils.addColoredQuad(ret, new Vector3f(sizeX, 0, (sizeY - sizeX) / 2),
+				new Vector3f(0, 0, (sizeY - sizeX) / 2),
+				new Vector3f(0, 0, (sizeY + sizeX) / 2),
+				new Vector3f(sizeX, 0, (sizeY + sizeX) / 2), EnumFacing.UP, GRAY);
 		Matrix4 rot = new Matrix4();
 		rot.translate((sizeX) / 2, -.01F, sizeY / 2);
 		rot.rotate(Math.PI * 1 / 16 * (active ? -1 : 1), 1, 0, 0);
@@ -145,6 +147,7 @@ public class ToggleSwitch extends PanelComponent implements IConfigurableCompone
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void renderInGUI(GuiPanelCreator gui) {
 		AxisAlignedBB aabb = getBlockRelativeAABB();
 		double zOffset = (aabb.maxZ - aabb.minZ - sizeX) / 2;
@@ -164,7 +167,7 @@ public class ToggleSwitch extends PanelComponent implements IConfigurableCompone
 
 	@Override
 	public void invalidate(TileEntityPanel te) {
-		setOut(false, te);
+		setOut(rsOutputChannel, 0);
 	}
 
 	protected void setOut(boolean on, TileEntityPanel tile) {

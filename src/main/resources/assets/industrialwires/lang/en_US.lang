@@ -9,6 +9,8 @@ tile.industrialwires.ic2_connector.hv_relay.name=IC2 HV Wire Relay
 tile.industrialwires.ic2_connector.glass_conn.name=Glass Fiber Wire Connector
 tile.industrialwires.ic2_connector.glass_relay.name=Glass Fiber Wire Relay
 
+tile.industrialwires.general_hv.discharge_meter.name=Discharge Energy Meter
+
 tile.industrialwires.mechanical_converter.ie_motor.name=Rotational Motor
 tile.industrialwires.mechanical_converter.ie_to_ic2.name=Converter: Rotational To Kinetic
 tile.industrialwires.mechanical_converter.ic2_to_ie.name=Converter: Kinetic To Rotational
@@ -28,6 +30,9 @@ item.industrialwires.ic2_wire_coil.copper.name=Copper Wire Coil
 item.industrialwires.ic2_wire_coil.gold.name=Gold Wire Coil
 item.industrialwires.ic2_wire_coil.hv.name=IC2 HV Wire Coil
 item.industrialwires.ic2_wire_coil.glass.name=Glass Fiber Wire Coil
+item.industrialwires.ic2_wire_coil.tin_ins.name=Insulated Tin Wire Coil
+item.industrialwires.ic2_wire_coil.copper_ins.name=Insulated Copper Wire Coil
+item.industrialwires.ic2_wire_coil.gold_ins.name=Insulated Gold Wire Coil
 
 item.industrialwires.panel_component.lighted_button.name=Lighted Button
 item.industrialwires.panel_component.label.name=Label
@@ -38,6 +43,7 @@ item.industrialwires.panel_component.toggle_switch.name=Toggle Switch
 item.industrialwires.panel_component.toggle_switch_covered.name=Covered Toggle Switch
 item.industrialwires.panel_component.lock.name=Lock Switch
 item.industrialwires.panel_component.panel_meter.name=Panel Meter
+item.industrialwires.panel_component.7seg.name=7-Segment Display
 item.industrialwires.key.key.name=Key
 item.industrialwires.key.key_named.name=Key for
 item.industrialwires.key.blank_key.name=Blank Key
@@ -100,6 +106,7 @@ industrialwires.tooltip.input_rate=%s EU/t per connector
 
 industrialwires.chat.tooLong=This coil does not contain enough wire for this connection
 industrialwires.chat.stackSize=Linking is only possible with a stack of size 1
+industrialwires.chat.marxEnergy=Last discharge was %s kJ per block
 
 death.attack.industrialwires.jacobs_ladder=%1$s was electrocuted by a Jacob's Ladder
 death.attack.industrialwires.marx=%1$s was struck by lightning produced by a Marx generator
@@ -131,14 +138,7 @@ ie.manual.entry.industrialwires.jacobs1=These are the required power values in E
 
 ie.manual.entry.industrialwires.marx.name=Marx Generator
 ie.manual.entry.industrialwires.marx.subtext=I'm Erwin-Otto, not Karl!
-ie.manual.entry.industrialwires.marx0=A Marx Generator is a device use to produce high-voltage high-energy pulses. These pulses are visible as lightning between the output terminals and can be used to process ores. Each type of ore has an ideal amount of processing energy (see <link;industrialwires.marx;§oAppendix B§r;7>). The precise values are unknown, estimate values with 10%% accuracy can be found at the end of this entry. The factor between the actual value and the estimate is the same for all types of ore.
-ie.manual.entry.industrialwires.marx1=§lConstruction§r<br>The above plan shows a 5-stage generator capable of producing 3 block lightning. An arbitrary amount of stages can be added by increasing the number of
-ie.manual.entry.industrialwires.marx2="middle" layers. Power (either IF or EU) is connected to the HV connector, the redstone wire for the control signals is connected to the redstone connector<br>§lEnergy§r<br>Each stage of the Marx generator consists of a 1.6μF capacitor that is charged to up to 250kV (see <link;industrialwires.marx;§oAppendix A§r;6>). When the generator is fully charged the voltage of each capacitor is roughly equal to the charging voltage. The total energy is the sum of the energy stored in the individual
-ie.manual.entry.industrialwires.marx3=capacitors and is split equally between the ores to be processed.<br>§lControl signals§r<br>Voltages are represented by 2 signals: The first signal is simply proportional to the voltage to represent. The second signal is proportional to the voltage in the "gap" between 2 values of the first signal, thus allowing more precise control/measurements. Panel components capable of interacting with analog signals usually support this dual-channel setup.
-ie.manual.entry.industrialwires.marx4=The charging voltage is controlled by the white and yellow signals. The voltages of the top and bottom capacitor are output to the magenta and pink resp. the orange and lime signals. The light blue signal is a firing control. If it is high the generator will attempt to fire. If the voltage of the bottom capacitor is lower than 125 kV or the total voltage is lower than 30%% of the maximum output voltage the generator will misfire, discharging the capacitors without actually producing lightning.
-ie.manual.entry.industrialwires.marx5=§lSafety§r<br>Due to the high voltages and energies involved in firing a Marx generator a safe distance should be maintained to avoid injury or death. Even outside of this area hearing protection (As provided by Immersive Engineering) is obligatory. Formulas to calculate the safe distances can be found in <link;industrialwires.marx;§oAppendix A§r;6>.
-ie.manual.entry.industrialwires.marx6=§lAppendix A: Formulas§r<br>Energy stored in a capacitor:<br>E=0.5*C*U^2<br>E: Energy, C: Capacitance, U: Voltage<br>Voltage from redstone signals:<br>U=250/255*(16*a+b)<br>U: Voltage, a: First signal, b: Second signal<br>Safe distance (Physical damage):<br>r=sqrt(e/50,000)<br>r: Safe distance, e: Energy stored<br>Safe distance (Ear damage):<br>r=sqrt(e)/100<br>r: Safe distance, e: Energy stored
-ie.manual.entry.industrialwires.marx7=§lAppendix B: Ore Energy Values§r
+ie.manual.entry.industrialwires.marx=A Marx Generator is a device use to produce high-voltage high-energy pulses. These pulses are visible as lightning between the output terminals and can be used to process ores. Each type of ore has an ideal amount of processing energy (see <link;industrialwires.marx;§oAppendix B§r;7>). The precise values are unknown, estimate values with 10%% accuracy can be found at the end of this entry. The factor between the actual value and the estimate is the same for all types of ore.<br>§lConstruction§r<&0><br>The above plan shows a 5-stage generator capable of producing 3 block lightning. An arbitrary amount of stages can be added by increasing the number of "middle" layers. Power (either IF or EU) is connected to the HV connector, the redstone wire for the control signals is connected to the redstone connector<br>§lEnergy§r<br>Each stage of the Marx generator consists of a 1.6μF capacitor that is charged to up to 250kV (see <link;industrialwires.marx;§oAppendix A§r;6>). When the generator is fully charged the voltage of each capacitor is roughly equal to the charging voltage. The total energy is the sum of the energy stored in the individual capacitors and is split equally between the ores to be processed.<br>§lControl signals§r<br>Voltages are represented by 2 signals: The first signal is simply proportional to the voltage to represent. The second signal is proportional to the voltage in the "gap" between 2 values of the first signal, thus allowing more precise control/measurements. Panel components capable of interacting with analog signals usually support this dual-channel setup. The charging voltage is controlled by the white and yellow signals. The voltages of the top and bottom capacitor are output to the magenta and pink resp. the orange and lime signals. The light blue signal is a firing control. If it is high the generator will attempt to fire. If the voltage of the bottom capacitor is lower than 125 kV or the total voltage is lower than 30%% of the maximum output voltage the generator will misfire, discharging the capacitors without actually producing lightning.<br>§lSafety§r<br>Due to the high voltages and energies involved in firing a Marx generator a safe distance should be maintained to avoid injury or death. Even outside of this area hearing protection (As provided by Immersive Engineering) is obligatory. Formulas to calculate the safe distances can be found in <link;industrialwires.marx;§oAppendix A§r;6>.<np>§lAppendix A: Formulas§r<br>Energy stored in a capacitor:<br>E=0.5*C*U^2<br>E: Energy, C: Capacitance, U: Voltage<br><br>Voltage from redstone signals:<br>U=250/255*(16*a+b)<br>U: Voltage (kV), a: First signal, b: Second signal<br><br>Safe distance (Physical damage):<br>r=sqrt(e/50,000)<br>r: Safe distance, e: Energy stored<br><br>Safe distance (Ear damage):<br>r=sqrt(e)/50<br>r: Safe distance, e: Energy stored<np>§lAppendix B: Ore Energy Values§r<br>
 
 ie.manual.entry.industrialwires.intro.name=Introduction
 ie.manual.entry.industrialwires.intro.subtext=
@@ -162,7 +162,7 @@ ie.manual.entry.industrialwires.redstone1=connectors from Immersive Engineering.
 
 ie.manual.entry.industrialwires.components.name=Panel Components
 ie.manual.entry.industrialwires.components.subtext=More than just two
-ie.manual.entry.industrialwires.components.general=The settings of any component can be copied to a component of the same type by placing the components directly above each other in a crafting bench. The settings of the upper component will be copied to the lower.<br>Components can be placed in the world to create small control panels containing just that component. These interact with redstone signals in the world directly, just like a lever does, rather than through redstone wire controllers, like normal control panels.
+ie.manual.entry.industrialwires.components.general=The settings of any component can be copied to a component of the same type by placing the components directly above each other in a crafting bench. The settings of the upper component will be copied to the lower.<br>Components can be placed in the world by shift-right-clicking to create small control panels containing just that component. These interact with redstone signals in the world directly, just like a lever does, rather than through redstone wire controllers like normal control panels would.
 ie.manual.entry.industrialwires.button=A simple button that activates a redstone signal when pressed. Its color can be changed. The button either stays on until clicked again (latching) or tuns off after half a second (non-latching).
 ie.manual.entry.industrialwires.label=A text that can be placed on the control panel, for example to indicate the purpose of some other component. The color and obviously the text can be edited.
 ie.manual.entry.industrialwires.indicator_light=A small indicator that brightens as the input redstone signal is increased. The color can be changed.
@@ -172,4 +172,5 @@ ie.manual.entry.industrialwires.toggle_switch1=the switch. The color of the cove
 ie.manual.entry.industrialwires.variac=A Variac® is a variable autotransformer. The output signal of the transformer increases as the knob is turned to the right. The signal strenght can only be increased by one unit per click.
 ie.manual.entry.industrialwires.lock=A lock switch activates a redstone signal when a key is inserted and turned. A newly crafted lock will have a unique key configuration. By placing a blank key and a lock in a crafting table a key for the lock can be created. Multiple locks fitting the same key can be created using component copying (see page 1). Keys can be named in a GUI opened by right-clicking with them.
 ie.manual.entry.industrialwires.lock1=Up to <config;I;iwKeysOnRing> can be combined on a key ring. Keys are added to the ring by placing both in a crafting table. Shift-right-click the key ring to cycle through the keys on the ring. The selected key can be removed from the ring by placing the ring in a crafting table. The key ring will work just as the selected key would on lock switches.
-ie.manual.entry.industrialwires.panel_meter=A panel meter can be used to show display analog redstone signals with some accuracy. Panel meters are available in two different formats, wide and narrow. The wide format gives a slightly bigger angle between redstone level 0 and 15, but is more typical for Multimeters that for panel meters.
+ie.manual.entry.industrialwires.panel_meter=A panel meter can be used to show display analog redstone signals with some accuracy. Panel meters are available in two different formats, wide and narrow. The difference between the formats is purely visual.
+ie.manual.entry.industrialwires.7seg=Seven-Segment Displays are a way of displaying analog redstone signals precisely. Signal strengths 0-9 are displayed as one would expect, levels 10-15 are represented by the letters A-E. Some of the letters are lower-case to differentiate them from digits (e.g. 8 vs B).

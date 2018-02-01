@@ -82,7 +82,8 @@ public class TileEntityMechIEtoIC extends TileEntityIWBase implements IDirection
 	@Override
 	public int maxrequestkineticenergyTick(EnumFacing f) {
 		if (f == dir) {
-			return maxOutput;
+			int stored = (int) (ConversionUtil.kinPerRot() * rotBuffer);
+			return Math.min(maxOutput, stored);
 		} else {
 			return 0;
 		}

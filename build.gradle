@@ -1,5 +1,5 @@
-def mainVersion = "1.6"
-def buildNumber = "22"
+def mainVersion = "1.7"
+def buildNumber = "26-pre"
 
 // For those who want the bleeding edge
 buildscript {
@@ -30,11 +30,11 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 minecraft {
-    version = "14.22.1.2479"
+    version = "14.23.1.2555"
     runDir = "run"
 
     replace '${version}', project.version
-    mappings = "snapshot_20170628"
+    mappings = "snapshot_20171003"
 }
 
 repositories {
@@ -70,12 +70,20 @@ repositories {
 
 dependencies {
     deobfCompile 'net.industrial-craft:industrialcraft-2:2.8.+'
+<<<<<<< HEAD
     deobfCompile "blusunrize:ImmersiveEngineering:0.12-+:deobf"
+=======
+    //TODO readd when the wirechanges are on master deobfCompile "blusunrize:ImmersiveEngineering:0.12-+:deobf"
+>>>>>>> MC1.12
     compileOnly "TechReborn:TechReborn-1.12:2.6.+:dev"
     compileOnly "RebornCore:RebornCore-1.12:3.2.+:dev"
     deobfCompile 'com.elytradev:mirage:2.0.1-SNAPSHOT'
     compileOnly "mezz.jei:jei_1.12:4.+"
+<<<<<<< HEAD
     compileOnly "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.0.10.306"
+=======
+    compileOnly "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.+"
+>>>>>>> MC1.12
 }
 
 jar {

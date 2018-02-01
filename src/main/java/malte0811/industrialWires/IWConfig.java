@@ -46,12 +46,12 @@ public class IWConfig {
 		public static double ifMotorEfficiency = .9;
 
 		@Comment({"The maximum amount of IE rotational energy that can be converted into IC2 kinetic energy", "by one converter in one tick"})
-		public static double maxRotToKin = 50;
+		public static double maxRotToKin = 200;
 		@Comment({"The efficiency of the conversion from IE rotational energy to IC2 kinetic energy"})
 		public static double rotToKinEfficiency = .7;
 
 		@Comment({"The maximum amount of IC2 kinetic energy that can be converted into IE rotational energy", "by one converter in one tick"})
-		public static int maxKinToRot = 2400;
+		public static int maxKinToRot = 600;
 		@Comment({"The efficiency of the conversion from IC2 kinetic energy to IE rotational energy"})
 		public static double kinToRotEfficiency = .8;
 	}
@@ -66,5 +66,7 @@ public class IWConfig {
 		@Comment({"The effect of standing somewhat close to a Marx generator discharge.",
 				"0: Tinnitus, 1: Nausea, 2: normal damage"})
 		public static int marxSoundDamage = 0;
+		@Comment({"Set to false to disable shaders. They are used for rendering the Marx generator and the Jacob's ladder."})
+		public static boolean enableShaders = true;
 	}
 }
