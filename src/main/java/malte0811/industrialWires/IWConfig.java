@@ -17,6 +17,7 @@
  */
 package malte0811.industrialWires;
 
+import blusunrize.immersiveengineering.common.Config.IEConfig;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.Config.Comment;
 
@@ -54,6 +55,9 @@ public class IWConfig {
 		public static int maxKinToRot = 600;
 		@Comment({"The efficiency of the conversion from IC2 kinetic energy to IE rotational energy"})
 		public static double kinToRotEfficiency = .8;
+		@Comment({"The conversion factor between Joules (the SI unit) and RF. Used for the Marx generator and the rotary converters"})
+		//Default value assumes the IE diesel generator is 2000kW
+		public static double joulesPerRF = 2000e3/(20*IEConfig.Machines.dieselGen_output);
 	}
 
 	public static HVStuff hv;

@@ -23,7 +23,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 
 public class MechPartFlywheel extends MechMBPart {
-	private static final double VOLUME = 7e6;//~7 cubic meters
+	private static final double VOLUME = 7;//~7 cubic meters
 	private Material material;
 	//A flywheel simply adds mass (lots of mass!), it doesn't actively change speeds/energy
 	@Override
@@ -39,7 +39,7 @@ public class MechPartFlywheel extends MechMBPart {
 
 	@Override
 	public double getWeight() {
-		return material.density*VOLUME;
+		return .5*material.density*VOLUME;
 	}
 
 	@Override

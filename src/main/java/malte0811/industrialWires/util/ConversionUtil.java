@@ -41,7 +41,7 @@ public class ConversionUtil {
 	}
 
 	public static double euPerKin() {
-		return 1 / euPerKin();
+		return 1 / kinPerEu();
 	}
 
 	public static double kinPerEu() {
@@ -54,5 +54,13 @@ public class ConversionUtil {
 
 	public static double rotPerKin() {
 		return 1 / kinPerRot();
+	}
+
+	public static double joulesPerIf() {
+		return MechConversion.joulesPerRF;
+	}
+
+	public static double ifPerJoule() {
+		return 1/joulesPerIf();
 	}
 }

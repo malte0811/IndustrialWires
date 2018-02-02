@@ -9,6 +9,7 @@ import malte0811.industrialWires.converter.MechMBPart;
 import malte0811.industrialWires.network.MessageTileSyncIW;
 import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -28,8 +29,8 @@ import static malte0811.industrialWires.util.NBTKeys.SPEED;
 
 public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implements ITickable, ISyncReceiver {
 	private static final double DECAY_BASE = .99;
-	public static final double TICK_ANGLE_PER_SPEED = 180/1e3;
-	private static final double SYNC_THRESHOLD = .999;
+	public static final double TICK_ANGLE_PER_SPEED = 180/20/Math.PI;
+	private static final double SYNC_THRESHOLD = 1-1e-9;
 	public MechMBPart[] mechanical;
 	public MechEnergy energyState;
 	private double lastSyncedSpeed = 0;
@@ -103,6 +104,7 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 	}
 
 	public void setMechanical(MechMBPart[] mech, double speed) {
+		Minecraft.getMinecraft().mouseHelper.ungrabMouseCursor();
 		mechanical = mech;
 		double weight = 0;
 		for (int i = 0; i < mech.length; i++) {

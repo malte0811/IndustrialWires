@@ -70,20 +70,12 @@ repositories {
 
 dependencies {
     deobfCompile 'net.industrial-craft:industrialcraft-2:2.8.+'
-<<<<<<< HEAD
-    deobfCompile "blusunrize:ImmersiveEngineering:0.12-+:deobf"
-=======
     //TODO readd when the wirechanges are on master deobfCompile "blusunrize:ImmersiveEngineering:0.12-+:deobf"
->>>>>>> MC1.12
     compileOnly "TechReborn:TechReborn-1.12:2.6.+:dev"
     compileOnly "RebornCore:RebornCore-1.12:3.2.+:dev"
     deobfCompile 'com.elytradev:mirage:2.0.1-SNAPSHOT'
     compileOnly "mezz.jei:jei_1.12:4.+"
-<<<<<<< HEAD
-    compileOnly "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.0.10.306"
-=======
     compileOnly "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.+"
->>>>>>> MC1.12
 }
 
 jar {

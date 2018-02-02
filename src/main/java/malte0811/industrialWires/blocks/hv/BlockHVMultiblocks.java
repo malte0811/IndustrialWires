@@ -93,7 +93,6 @@ public class BlockHVMultiblocks extends BlockIWMultiblock implements IMetaEnum {
 		TileEntity te = worldIn.getTileEntity(pos);
 		if (te instanceof TileEntityMarx) {
 			ret = ret.withProperty(IWProperties.MARX_TYPE, ((TileEntityMarx) te).type);
-			ret = ret.withProperty(IEProperties.FACING_HORIZONTAL, ((TileEntityMarx)te).facing);
 			ret = ret.withProperty(IEProperties.BOOLEANS[0], ((TileEntityMarx)te).mirrored);
 		}
 		return ret;

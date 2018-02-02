@@ -34,11 +34,13 @@ public enum Material {
 	ELECTRUM((SILVER.density + GOLD.density) / 2, 1e3),
 	STEEL(7.874, 1e4),
 	IRON(7.874, 1e3);
+	//in kg/m^3
 	public double density;
 	public double maxSpeed;
 
+	//density as parameter: g/cm^3
 	Material(double density, double maxSpeed) {
-		this.density = density;
+		this.density = density*1e3;
 		this.maxSpeed = maxSpeed;
 	}
 

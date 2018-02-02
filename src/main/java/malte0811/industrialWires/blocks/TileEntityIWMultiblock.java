@@ -18,9 +18,11 @@
 
 package malte0811.industrialWires.blocks;
 
+import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDirectionalTile;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IGeneralMultiblock;
 import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -34,7 +36,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.function.BiConsumer;
 
-public abstract class TileEntityIWMultiblock extends TileEntityIWBase implements IGeneralMultiblock {
+public abstract class TileEntityIWMultiblock extends TileEntityIWBase implements IGeneralMultiblock,
+		IDirectionalTile {
 	protected final static String OFFSET = "offset";
 	protected final static String FORMED = "formed";
 	protected final static String MIRRORED = "mirrored";
@@ -135,5 +138,37 @@ public abstract class TileEntityIWMultiblock extends TileEntityIWBase implements
 
 	protected int dot(Vec3i a, Vec3i b) {
 		return a.getX()*b.getX()+a.getY()*b.getY()+a.getZ()*b.getZ();
+	}
+
+
+	@Nonnull
+	@Override
+	public EnumFacing getFacing() {
+		return facing;
+	}
+
+	@Override
+	public void setFacing(@Nonnull EnumFacing facing) {
+		this.facing = facing;
+	}
+
+	@Override
+	public int getFacingLimitation() {
+		return 2;
+	}
+
+	@Override
+	public boolean mirrorFacingOnPlacement(@Nonnull EntityLivingBase placer) {
+		return false;
+	}
+
+	@Override
+	public boolean canHammerRotate(@Nonnull EnumFacing side, float hitX, float hitY, float hitZ, @Nonnull EntityLivingBase entity) {
+		return false;
+	}
+
+	@Override
+	public boolean canRotate(@Nonnull EnumFacing axis) {
+		return false;
 	}
 }

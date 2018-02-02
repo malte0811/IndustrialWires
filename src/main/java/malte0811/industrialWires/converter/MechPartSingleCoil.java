@@ -19,6 +19,7 @@ import blusunrize.immersiveengineering.common.IEContent;
 import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
+import malte0811.industrialWires.util.ConversionUtil;
 import malte0811.industrialWires.util.LocalSidedWorld;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
@@ -52,7 +53,8 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 
 	@Override
 	public void produceRotation(MechEnergy e) {
-		e.addEnergy(1e11);
+		double rf = 4e3;
+		e.addEnergy(rf* ConversionUtil.joulesPerIf());
 	}
 
 	@Override
@@ -67,7 +69,7 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 
 	@Override
 	public double getWeight() {
-		return Material.IRON.density*1e6+Material.COPPER.density*1e5;
+		return Material.IRON.density+Material.COPPER.density;
 	}
 
 	@Override
