@@ -223,8 +223,11 @@ public class ItemIC2Coil extends Item implements IWireCoil {
 											world.addBlockEvent(linkPos, ((TileEntity) nodeLink).getBlockType(), -1, 0);
 											state = world.getBlockState(linkPos);
 											world.notifyBlockUpdate(linkPos, state, state, 3);
-										} else
-											player.sendMessage(new TextComponentTranslation(Lib.CHAT_WARN + "cantSee"));
+										} else {
+											player.sendMessage(new TextComponentTranslation(Lib.CHAT_WARN + "tooFar"));
+										}
+									} else {
+										player.sendMessage(new TextComponentTranslation(Lib.CHAT_WARN + "cantSee"));
 									}
 								}
 							}
