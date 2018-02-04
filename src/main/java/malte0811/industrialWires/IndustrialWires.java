@@ -71,7 +71,7 @@ import java.util.List;
 import static malte0811.industrialWires.blocks.wire.BlockTypes_IC2_Connector.*;
 import static malte0811.industrialWires.wires.IC2Wiretype.*;
 
-@Mod(modid = IndustrialWires.MODID, version = IndustrialWires.VERSION, dependencies = "required-after:immersiveengineering@[0.12-72,);after:ic2",
+@Mod(modid = IndustrialWires.MODID, version = IndustrialWires.VERSION, dependencies = "required-after:immersiveengineering@[0.12-77,);after:ic2",
 		certificateFingerprint = "7e11c175d1e24007afec7498a1616bef0000027d")
 @Mod.EventBusSubscriber
 public class IndustrialWires {

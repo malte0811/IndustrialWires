@@ -32,7 +32,6 @@ import ic2.api.energy.tile.IEnergySource;
 import malte0811.industrialWires.IIC2Connector;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.IBlockBoundsIW;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -47,7 +46,10 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import static malte0811.industrialWires.wires.IC2Wiretype.IC2_TIN_CAT;
@@ -135,12 +137,9 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 			}
 		}
 		if (inBuffer>0) {
-			conns.stream().map((ac)->ApiUtils.toIIC(ac.end, world)).forEach((iic)-> {
-				if (iic instanceof IIC2Connector) {
-					((IIC2Connector) iic).addAvailableEnergy(inBuffer, (d)->inBuffer-=d);
-				}
-			});
-			addAvailableEnergy(0D, null);
+			conns.stream().map((ac)->ApiUtils.toIIC(ac.end, world))
+					.forEach((iic)-> iic.addAvailableEnergy((float) inBuffer, (d)->inBuffer-=d));
+			addAvailableEnergy(0, null);
 		}
 	}
 
@@ -268,48 +267,16 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 		markDirty();
 	}
 
-
-	private List<Pair<Double, Consumer<Double>>> sources = new ArrayList<>();
-	private long lastSourceUpdate = 0;
-	@Override
-	public void addAvailableEnergy(double amount, Consumer<Double> consume) {
-		long currentTime = world.getTotalWorldTime();
-		if (lastSourceUpdate!=currentTime)
-		{
-			sources.clear();
-			Pair<Double, Consumer<Double>> own = getOwnEnergyIC2();
-			if (own!=null)
-				sources.add(own);
-			lastSourceUpdate = currentTime;
-		}
-		if (amount>0&&consume!=null)
-			sources.add(new ImmutablePair<>(amount, consume));
-	}
-
 	@Nullable
-	protected Pair<Double,Consumer<Double>> getOwnEnergyIC2()
+	protected Pair<Float,Consumer<Float>> getOwnEnergy()
 	{
 		if (isRelay())
 			return null;
-		return new ImmutablePair<>(inBuffer, (d)->inBuffer -= d);
+		return new ImmutablePair<>((float)inBuffer, (d)->inBuffer -= d);
 	}
-
 	@Override
-	public float getDamageAmount(Entity e, Connection c)
-	{
-		float max = getMaxDamage(c);
-		if (max==0||world.getTotalWorldTime()-lastSourceUpdate>1)
-			return 0;
-		float energy = 0;
-		for (int i = 0;i<sources.size()&&energy<max;i++) {
-			energy += Math.min(sources.get(i).getLeft(), max-energy);
-		}
-		return (float) Math.ceil(energy/64);//Same as IC2 uses
-	}
-
-	@Override
-	protected float getMaxDamage(Connection c) {
-		return c.cableType.getTransferRate()/8;
+	protected float getBaseDamage(ImmersiveNetHandler.Connection c) {
+		return 1/64F;
 	}
 
 	@Override
@@ -414,6 +381,8 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	 */
 	@Override
 	public int hashCode() {
+		if (world==null)
+			return 0;
 		int ret = world.provider.getDimension();
 		ret = 31 * ret + pos.hashCode();
 		return ret;

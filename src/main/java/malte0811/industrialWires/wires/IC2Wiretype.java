@@ -161,4 +161,8 @@ public class IC2Wiretype extends WireType {
 	public int getFactor() {
 		return type<5?8:4;
 	}
+
+	public boolean isHV() {
+		return this==HV||this==GLASS;
+	}
 }
