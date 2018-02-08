@@ -448,12 +448,13 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 		return !isDummy() && from == facing && capability == CapabilityEnergy.ENERGY;
 	}
 
+	private EnergyCap energyCap = new EnergyCap();
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing) {
 		if (hasCapability(capability, facing)) {
 			if (capability == CapabilityEnergy.ENERGY) {
-				return (T) new EnergyCap();
+				return CapabilityEnergy.ENERGY.cast(energyCap);
 			}
 		}
 		return null;

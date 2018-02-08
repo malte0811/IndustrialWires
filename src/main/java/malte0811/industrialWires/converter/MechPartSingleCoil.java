@@ -19,7 +19,6 @@ import blusunrize.immersiveengineering.common.IEContent;
 import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
-import malte0811.industrialWires.util.ConversionUtil;
 import malte0811.industrialWires.util.LocalSidedWorld;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
@@ -28,63 +27,73 @@ import net.minecraft.util.math.BlockPos;
 
 import java.util.function.Predicate;
 
-//TODO electrical side of things. Currently a creative energy source
+import static malte0811.industrialWires.util.NBTKeys.BUFFER_IN;
+import static malte0811.industrialWires.util.NBTKeys.BUFFER_OUT;
+
 public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
-	double inBuffer;
-	double outBuffer;
+	private static final double MAX_BUFFER = 10e3;
+	private double bufferToMech;
+	private double bufferToE;
 	@Override
 	public Waveform getProduced() {
 		return Waveform.AC;
 	}
 	@Override
-	public double getAvailableCurrent() {
-		return 0;
+	public double getAvailableEEnergy() {
+		return bufferToE;
 	}
 
 	@Override
-	public double requestCurrent(double total) {
-		return 0;
+	public void extractEEnergy(double energy) {
+		bufferToE -= energy;
 	}
 
 	@Override
-	public void consumeCurrent(double given) {
-
+	public double requestEEnergy() {
+		return MAX_BUFFER- bufferToMech;
 	}
 
 	@Override
-	public void produceRotation(MechEnergy e) {
-		double rf = 4e3;
-		e.addEnergy(rf* ConversionUtil.joulesPerIf());
+	public void insertEEnergy(double given) {
+		bufferToMech += given;
 	}
 
 	@Override
-	public double requestEnergy(MechEnergy e) {
-		return 0;
+	public void createMEnergy(MechEnergy e) {
+		e.addEnergy(bufferToMech);
+		bufferToMech = 0;
 	}
 
 	@Override
-	public void consumeRotation(double added) {
-
+	public double requestMEnergy(MechEnergy e) {
+		return MAX_BUFFER-bufferToE;
 	}
 
 	@Override
-	public double getWeight() {
+	public void insertMEnergy(double added) {
+		bufferToE += added;
+	}
+
+	@Override
+	public double getInertia() {
 		return Material.IRON.density+Material.COPPER.density;
 	}
 
 	@Override
 	public double getMaxSpeed() {
-		return Double.MAX_VALUE;
+		return Double.MAX_VALUE;//TODO
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound out) {
-
+		out.setDouble(BUFFER_IN, bufferToMech);
+		out.setDouble(BUFFER_OUT, bufferToE);
 	}
 
 	@Override
 	public void readFromNBT(NBTTagCompound out) {
-
+		bufferToMech = out.getDouble(BUFFER_IN);
+		bufferToE = out.getDouble(BUFFER_OUT);
 	}
 
 	@Override

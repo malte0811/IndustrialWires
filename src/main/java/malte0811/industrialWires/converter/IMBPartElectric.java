@@ -24,10 +24,11 @@ public interface IMBPartElectric {
 	 * 2. Consume a lot of mechanical energy
 	 */
 	Waveform getProduced();
-	// This is EU
-	double getAvailableCurrent();
-	double requestCurrent(double total);
-	void consumeCurrent(double given);
+	// All four in Joules
+	double getAvailableEEnergy();
+	void extractEEnergy(double energy);
+	double requestEEnergy();
+	void insertEEnergy(double given);
 
 	enum Waveform {
 		NONE(null, 0, 0),
@@ -38,12 +39,12 @@ public interface IMBPartElectric {
 		DC(false, 1, 6),
 		SQUARE(true, Math.PI/4, 5);
 		@Nullable
-		public Boolean isEu;
+		public Boolean isAC;
 		public double efficiency;
 		private int dualId;
 		public Waveform dual;
-		Waveform(@Nullable Boolean eu, double efficiency, int dualId) {
-			isEu = eu;
+		Waveform(@Nullable Boolean ac, double efficiency, int dualId) {
+			isAC = ac;
 			this.efficiency = efficiency;
 			this.dualId = dualId;
 		}

@@ -28,8 +28,11 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3i;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -43,15 +46,15 @@ import static malte0811.industrialWires.util.NBTKeys.TYPE;
 
 public abstract class MechMBPart {
 	public static final Map<String, MechMBPart> INSTANCES = new HashMap<>();
-	private TileEntityMultiblockConverter master;
+	public LocalSidedWorld world;
 
 	// These 3 are called once per tick in bulk in this order
-	public abstract void produceRotation(MechEnergy e);
-	public abstract double requestEnergy(MechEnergy e);
+	public abstract void createMEnergy(MechEnergy e);
+	public abstract double requestMEnergy(MechEnergy e);
 	// This should do any misc ticking as well
-	public abstract void consumeRotation(double added);
+	public abstract void insertMEnergy(double added);
 
-	public abstract double getWeight();
+	public abstract double getInertia();
 	public abstract double getMaxSpeed();
 	public abstract void writeToNBT(NBTTagCompound out);
 	public abstract void readFromNBT(NBTTagCompound out);
@@ -71,12 +74,22 @@ public abstract class MechMBPart {
 
 	public abstract MechanicalMBBlockType getType();
 
+	public <T> boolean hasCapability(Capability<T> cap, EnumFacing side, Vec3i pos) {
+		return false;
+	}
+
+	public <T> T getCapability(Capability<T> cap, EnumFacing side, Vec3i pos) {
+		return null;
+	}
+
 	private static final BiMap<String, Class<? extends MechMBPart>> REGISTRY = HashBiMap.create();
 	public static void init() {
 		IMBPartElectric.Waveform.init();
 
 		REGISTRY.put("flywheel", MechPartFlywheel.class);
 		REGISTRY.put("singleCoil", MechPartSingleCoil.class);
+		//REGISTRY.put("twoElectrodes", MechPartTwoElectrodes.class);
+		REGISTRY.put("commutator", MechPartCommutator.class);
 
 		for (String key : REGISTRY.keySet()) {
 			cacheNewInstance(key);
@@ -92,13 +105,15 @@ public abstract class MechMBPart {
 		}
 	}
 
-	public static MechMBPart fromNBT(NBTTagCompound nbt, TileEntityMultiblockConverter master) {
+	public static MechMBPart fromNBT(NBTTagCompound nbt, LocalSidedWorld w) {
 		String name = nbt.getString(TYPE);
 		Class<? extends MechMBPart> clazz = REGISTRY.get(name);
 		try {
 			MechMBPart ret = clazz.newInstance();
 			ret.readFromNBT(nbt);
-			ret.master = master;
+			if (w==null)
+				throw new NullPointerException();
+			ret.world = w;
 			return ret;
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new RuntimeException("While creating mechanical MB part", e);
@@ -120,6 +135,7 @@ public abstract class MechMBPart {
 
 
 	public void form(LocalSidedWorld w, Consumer<TileEntityMultiblockConverter> initializer) {
+		world = w;
 		BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain();
 		short pattern = getFormPattern();
 		int i = 0;

@@ -33,8 +33,11 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.energy.IEnergyStorage;
 
 import javax.annotation.Nonnull;
+import java.util.HashMap;
+import java.util.Map;
 
 import static malte0811.industrialWires.util.NBTKeys.*;
 
@@ -152,11 +155,14 @@ public class TileEntityIEMotor extends TileEntityIWBase implements ITickable, IF
 		return super.hasCapability(capability, facing);
 	}
 
+	private Map<EnumFacing, IEnergyStorage> energies = new HashMap<>();
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T getCapability(@Nonnull Capability<T> capability, EnumFacing facing) {
 		if (capability == CapabilityEnergy.ENERGY && canConnectEnergy(facing)) {
-			return (T) new EnergyAdapter(this, facing);
+			if (!energies.containsKey(facing))
+				energies.put(facing, new EnergyAdapter(this, facing));
+			return CapabilityEnergy.ENERGY.cast(energies.get(facing));
 		}
 		return super.getCapability(capability, facing);
 	}

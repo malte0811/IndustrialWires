@@ -1,4 +1,4 @@
-/*
+ /*
  * This file is part of Industrial Wires.
  * Copyright (C) 2016-2017 malte0811
  *
@@ -17,58 +17,58 @@
  */
 package malte0811.industrialWires;
 
-import blusunrize.immersiveengineering.ImmersiveEngineering;
-import blusunrize.immersiveengineering.api.MultiblockHandler;
-import blusunrize.immersiveengineering.api.energy.wires.WireApi;
-import com.google.common.collect.ImmutableMap;
-import malte0811.industrialWires.blocks.BlockIWBase;
-import malte0811.industrialWires.blocks.controlpanel.*;
-import malte0811.industrialWires.blocks.converter.*;
-import malte0811.industrialWires.blocks.hv.*;
-import malte0811.industrialWires.blocks.wire.*;
-import malte0811.industrialWires.compat.Compat;
-import malte0811.industrialWires.controlpanel.PanelComponent;
-import malte0811.industrialWires.controlpanel.PanelUtils;
-import malte0811.industrialWires.converter.MechMBPart;
-import malte0811.industrialWires.converter.MultiblockConverter;
-import malte0811.industrialWires.crafting.Recipes;
-import malte0811.industrialWires.hv.MarxOreHandler;
-import malte0811.industrialWires.hv.MultiblockMarx;
-import malte0811.industrialWires.items.ItemIC2Coil;
-import malte0811.industrialWires.items.ItemKey;
-import malte0811.industrialWires.items.ItemPanelComponent;
-import malte0811.industrialWires.network.MessageGUIInteract;
-import malte0811.industrialWires.network.MessageItemSync;
-import malte0811.industrialWires.network.MessagePanelInteract;
-import malte0811.industrialWires.network.MessageTileSyncIW;
-import malte0811.industrialWires.util.CommandIW;
-import net.minecraft.block.Block;
-import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.relauncher.Side;
-import org.apache.logging.log4j.Logger;
+ import blusunrize.immersiveengineering.ImmersiveEngineering;
+ import blusunrize.immersiveengineering.api.MultiblockHandler;
+ import blusunrize.immersiveengineering.api.energy.wires.WireApi;
+ import com.google.common.collect.ImmutableMap;
+ import malte0811.industrialWires.blocks.BlockIWBase;
+ import malte0811.industrialWires.blocks.controlpanel.*;
+ import malte0811.industrialWires.blocks.converter.*;
+ import malte0811.industrialWires.blocks.hv.*;
+ import malte0811.industrialWires.blocks.wire.*;
+ import malte0811.industrialWires.compat.Compat;
+ import malte0811.industrialWires.controlpanel.PanelComponent;
+ import malte0811.industrialWires.controlpanel.PanelUtils;
+ import malte0811.industrialWires.converter.MechMBPart;
+ import malte0811.industrialWires.converter.MultiblockConverter;
+ import malte0811.industrialWires.crafting.Recipes;
+ import malte0811.industrialWires.hv.MarxOreHandler;
+ import malte0811.industrialWires.hv.MultiblockMarx;
+ import malte0811.industrialWires.items.ItemIC2Coil;
+ import malte0811.industrialWires.items.ItemKey;
+ import malte0811.industrialWires.items.ItemPanelComponent;
+ import malte0811.industrialWires.network.MessageGUIInteract;
+ import malte0811.industrialWires.network.MessageItemSync;
+ import malte0811.industrialWires.network.MessagePanelInteract;
+ import malte0811.industrialWires.network.MessageTileSyncIW;
+ import malte0811.industrialWires.util.CommandIW;
+ import net.minecraft.block.Block;
+ import net.minecraft.creativetab.CreativeTabs;
+ import net.minecraft.item.Item;
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.item.crafting.IRecipe;
+ import net.minecraft.util.ResourceLocation;
+ import net.minecraftforge.event.RegistryEvent;
+ import net.minecraftforge.fml.common.Loader;
+ import net.minecraftforge.fml.common.Mod;
+ import net.minecraftforge.fml.common.Mod.EventHandler;
+ import net.minecraftforge.fml.common.SidedProxy;
+ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+ import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+ import net.minecraftforge.fml.common.network.NetworkRegistry;
+ import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+ import net.minecraftforge.fml.common.registry.GameRegistry;
+ import net.minecraftforge.fml.relauncher.Side;
+ import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
+ import java.util.ArrayList;
+ import java.util.List;
 
-import static malte0811.industrialWires.blocks.wire.BlockTypes_IC2_Connector.*;
-import static malte0811.industrialWires.wires.IC2Wiretype.*;
+ import static malte0811.industrialWires.blocks.wire.BlockTypes_IC2_Connector.*;
+ import static malte0811.industrialWires.wires.IC2Wiretype.*;
 
 @Mod(modid = IndustrialWires.MODID, version = IndustrialWires.VERSION, dependencies = "required-after:immersiveengineering@[0.12-72,);after:ic2",
 		certificateFingerprint = "7e11c175d1e24007afec7498a1616bef0000027d")

@@ -16,6 +16,7 @@
 package malte0811.industrialWires.client.render;
 
 import blusunrize.immersiveengineering.client.ClientUtils;
+import com.google.common.collect.ImmutableMap;
 import malte0811.industrialWires.blocks.converter.TileEntityMultiblockConverter;
 import malte0811.industrialWires.converter.MechMBPart;
 import net.minecraft.client.Minecraft;
@@ -34,6 +35,7 @@ import net.minecraft.client.resources.IResourceManagerReloadListener;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.IModel;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
+import net.minecraftforge.client.model.obj.OBJModel;
 import org.lwjgl.opengl.GL11;
 
 import java.util.*;
@@ -42,13 +44,18 @@ import static malte0811.industrialWires.blocks.converter.TileEntityMultiblockCon
 
 public class TileRenderMBConverter extends TileEntitySpecialRenderer<TileEntityMultiblockConverter> implements IResourceManagerReloadListener {
 	public static final Map<ResourceLocation, IBakedModel> BASE_MODELS = new HashMap<>();
+	public static final Set<TileEntityMultiblockConverter> TES_WITH_MODELS = Collections.newSetFromMap(new WeakHashMap<>());
 	@Override
 	public void render(TileEntityMultiblockConverter te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
-		if (BASE_MODELS.isEmpty()) {
+		if (BASE_MODELS.isEmpty())
+		{
 			for (MechMBPart type:MechMBPart.INSTANCES.values()) {
 				ResourceLocation loc = type.getRotatingBaseModel();
 				try {
 					IModel model = ModelLoaderRegistry.getModel(loc);
+					if (model instanceof OBJModel) {
+						model = ((OBJModel)model).process(ImmutableMap.of("flip-v", "true"));
+					}
 					IBakedModel b = model.bake(model.getDefaultState(), DefaultVertexFormats.BLOCK, (rl)->Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(rl.toString()));
 					BASE_MODELS.put(loc, b);
 				} catch (Exception e) {
@@ -85,6 +92,7 @@ public class TileRenderMBConverter extends TileEntitySpecialRenderer<TileEntityM
 					}
 					offset += part.getLength();
 				}
+				TES_WITH_MODELS.add(te);
 			}
 			GlStateManager.enableBlend();
 			GlStateManager.disableCull();
@@ -100,6 +108,7 @@ public class TileRenderMBConverter extends TileEntitySpecialRenderer<TileEntityM
 			Tessellator tes = Tessellator.getInstance();
 			BufferBuilder bb = tes.getBuffer();
 			bb.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+			//TODO fix that and probably remove the AT entry
 			ClientUtils.renderModelTESRFast(te.rotatingModel, bb, te.getWorld(), te.getPos());
 			tes.draw();
 			GlStateManager.popMatrix();
@@ -110,5 +119,8 @@ public class TileRenderMBConverter extends TileEntitySpecialRenderer<TileEntityM
 	@Override
 	public void onResourceManagerReload(IResourceManager resourceManager) {
 		BASE_MODELS.clear();
+		for (TileEntityMultiblockConverter te:TES_WITH_MODELS)
+			te.rotatingModel = null;
+		TES_WITH_MODELS.clear();
 	}
 }

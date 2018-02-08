@@ -16,13 +16,14 @@
 package malte0811.industrialWires.util;
 
 public final class NBTKeys {
-	private NBTKeys() {}
 
 	//General
 	public static final String ENERGY_TAG = "energy";
 	public static final String BUFFER_TAG = "buffer";
 	public static final String DIR_TAG = "dir";
 	public static final String TYPE = "type";
+	public static final String BUFFER_IN = "inBuffer";
+	public static final String BUFFER_OUT = "outBuffer";
 
 	//Control panels
 	public static final String HEIGHT = "height";
@@ -53,4 +54,6 @@ public final class NBTKeys {
 	public static final String PARTS = "parts";
 	public static final String POS = "pos";
 	public static final String SPEED = "speed";
+
+	private NBTKeys() {}
 }

@@ -34,10 +34,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec2f;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.*;
 import net.minecraft.world.World;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.fml.relauncher.Side;
@@ -73,7 +70,7 @@ public final class MiscUtils {
 		return ret;
 	}
 
-	public static BlockPos offset(BlockPos p, EnumFacing f, boolean mirror, BlockPos relative) {
+	public static BlockPos offset(BlockPos p, EnumFacing f, boolean mirror, Vec3i relative) {
 		return offset(p, f, mirror, relative.getX(), relative.getZ(), relative.getY());
 	}
 	/**
@@ -91,9 +88,9 @@ public final class MiscUtils {
 	 *
 	 * @return right, forward, up
 	 */
-	public static BlockPos getOffset(BlockPos origin, EnumFacing f, boolean mirror, BlockPos here) {
-		int dX = origin.getZ() - here.getZ();
-		int dZ = origin.getX() - here.getX();
+	public static BlockPos getOffset(Vec3i origin, EnumFacing f, boolean mirror, Vec3i here) {
+		int dX = here.getX()-origin.getX();
+		int dZ = here.getZ()-origin.getZ();
 		int forward = 0;
 		int right = 0;
 		int up = here.getY() - origin.getY();

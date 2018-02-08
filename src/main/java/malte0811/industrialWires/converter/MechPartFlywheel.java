@@ -23,28 +23,30 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 
 public class MechPartFlywheel extends MechMBPart {
-	private static final double VOLUME = 7;//~7 cubic meters
+	private static final double RADIUS = 1.25;
+	private static final double THICKNESS = 1;//TODO exact value from model?
+	private static final double VOLUME = Math.PI*RADIUS*RADIUS*THICKNESS;
 	private Material material;
 	//A flywheel simply adds mass (lots of mass!), it doesn't actively change speeds/energy
 	@Override
-	public void produceRotation(MechEnergy e) {}
+	public void createMEnergy(MechEnergy e) {}
 
 	@Override
-	public double requestEnergy(MechEnergy e) {
+	public double requestMEnergy(MechEnergy e) {
 		return 0;
 	}
 
 	@Override
-	public void consumeRotation(double added) {}
+	public void insertMEnergy(double added) {}
 
 	@Override
-	public double getWeight() {
-		return .5*material.density*VOLUME;
+	public double getInertia() {
+		return .5*material.density*VOLUME*RADIUS*RADIUS;
 	}
 
 	@Override
 	public double getMaxSpeed() {
-		return Double.MAX_VALUE;//material.maxSpeed;
+		return Math.sqrt(material.tensileStrength /material.density)/RADIUS;
 	}
 
 	@Override

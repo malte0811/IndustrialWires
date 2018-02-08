@@ -63,4 +63,12 @@ public class ConversionUtil {
 	public static double ifPerJoule() {
 		return 1/joulesPerIf();
 	}
+
+	public static double joulesPerEu() {
+		return joulesPerIf()*ifPerEuIdeal();
+	}
+
+	public static double euPerJoule() {
+		return euPerIfIdeal()*ifPerJoule();
+	}
 }

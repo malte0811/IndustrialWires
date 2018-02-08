@@ -24,6 +24,9 @@
       },
       "coil_1_phase": {
         "model": "industrialwires:mech_mb/mag_ring.obj"
+      },
+      "shaft_commutator": {
+        "model": "industrialwires:mech_mb/commutator.obj"
       }
     },
     "facing":

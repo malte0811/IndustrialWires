@@ -22,7 +22,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class LocalSidedWorld {
-	private final World world;
+	private World world;
 	private BlockPos origin;
 	private EnumFacing facing;
 	private boolean mirror;
@@ -71,5 +71,9 @@ public class LocalSidedWorld {
 
 	public BlockPos getRealPos(BlockPos relative) {
 		return MiscUtils.offset(origin, facing, mirror, relative);
+	}
+
+	public void setWorld(World world) {
+		this.world = world;
 	}
 }

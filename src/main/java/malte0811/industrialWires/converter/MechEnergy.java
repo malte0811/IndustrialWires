@@ -44,6 +44,8 @@ public final class MechEnergy {
 
 	public void decaySpeed(double decay) {
 		speed *= decay;
+		if (speed<.1)
+			speed = 0;
 	}
 
 	//ONLY USE FOR SYNCING

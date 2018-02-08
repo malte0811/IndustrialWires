@@ -23,25 +23,28 @@ import net.minecraftforge.oredict.OreDictionary;
 
 public enum Material {
 	//TODO max speed
-	COPPER(8.96, 1e3),
-	ALUMINUM(2.7, 1e3),
-	LEAD(11.34, 1e3),
-	SILVER(10.49, 1e3),
-	NICKEL(8.908, 1e3),
-	GOLD(19.3, 1e3),
-	URANIUM(19.1, 1e3),// This is a bit silly. But why not.
-	CONSTANTAN(8.885, 1e3),
-	ELECTRUM((SILVER.density + GOLD.density) / 2, 1e3),
-	STEEL(7.874, 1e4),
-	IRON(7.874, 1e3);
+	COPPER(8.96, 220),
+	ALUMINUM(2.7, 45),
+	LEAD(11.34, 12),
+	SILVER(10.49, 170),
+	NICKEL(8.908, 165),
+	GOLD(19.3, 100),
+	URANIUM(19.1, 400),// This is a bit silly. But why not.
+	CONSTANTAN(8.885, 600),
+	ELECTRUM((SILVER.density + GOLD.density) / 2, (SILVER.tensileStrength + GOLD.tensileStrength) / 2),//Tensile strength is a guess ((GOLD+SILVER)/2), if anyone has better data I'll put it in
+	STEEL(7.874, 1250),
+	IRON(7.874, 350),
+	DIAMOND(3.5, 2800);
 	//in kg/m^3
 	public double density;
 	public double maxSpeed;
+	public double tensileStrength;
 
-	//density as parameter: g/cm^3
-	Material(double density, double maxSpeed) {
+	// density as parameter: g/cm^3
+	// tStrength: MPa
+	Material(double density, double tensileStrength) {
 		this.density = density*1e3;
-		this.maxSpeed = maxSpeed;
+		this.tensileStrength = tensileStrength*1e6;
 	}
 
 	public boolean matchesBlock(ItemStack block, String prefix) {

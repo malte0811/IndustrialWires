@@ -106,7 +106,7 @@ public class MultiblockConverter implements MultiblockHandler.IMultiblock {
 					if (next!=null) {
 						parts.add(next);
 						lastLength = next.getLength();
-						weight += next.getWeight();
+						weight += next.getInertia();
 					} else {
 						if (parts.size()>0&&checkEnd(w, mutPos)) {
 							done = true;
@@ -134,7 +134,7 @@ public class MultiblockConverter implements MultiblockHandler.IMultiblock {
 				};
 				for (MechMBPart part:parts) {
 					mutPos.setPos(0, 0, lastLength);
-					w.setOrigin(w.getRealPos(mutPos));
+					w = new LocalSidedWorld(world, w.getRealPos(mutPos), side.getOpposite(), false);
 					part.form(w, init);
 					lastLength = part.getLength();
 				}
