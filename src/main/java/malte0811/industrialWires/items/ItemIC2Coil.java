@@ -17,6 +17,7 @@
  */
 package malte0811.industrialWires.items;
 
+import blusunrize.immersiveengineering.ImmersiveEngineering;
 import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.api.Lib;
 import blusunrize.immersiveengineering.api.TargetingInfo;
@@ -30,6 +31,7 @@ import blusunrize.immersiveengineering.common.util.ItemNBTHelper;
 import blusunrize.immersiveengineering.common.util.Utils;
 import malte0811.industrialWires.IWConfig;
 import malte0811.industrialWires.IndustrialWires;
+import malte0811.industrialWires.entities.EntityBrokenPart;
 import malte0811.industrialWires.wires.IC2Wiretype;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
@@ -237,6 +239,22 @@ public class ItemIC2Coil extends Item implements IWireCoil {
 			return EnumActionResult.PASS;
 		}
 		return EnumActionResult.PASS;
+	}
+
+	//TODO remove. This is for debugging
+	@Override
+	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
+		if (!worldIn.isRemote) {
+			EntityBrokenPart e = new EntityBrokenPart(worldIn);
+			e.setPositionAndRotation(playerIn.posX, playerIn.posY+2, playerIn.posZ, playerIn.rotationYaw, playerIn.rotationPitch);
+			Vec3d look = playerIn.getLookVec();
+			e.motionX = look.x;
+			e.motionY = look.y;
+			e.motionZ = look.z;
+			e.texture = new ResourceLocation(ImmersiveEngineering.MODID, "blocks/storage_steel");
+			worldIn.spawnEntity(e);
+		}
+		return new ActionResult<>(EnumActionResult.SUCCESS, playerIn.getHeldItem(handIn));
 	}
 
 	public static void setLength(ItemStack i, int blocks) {

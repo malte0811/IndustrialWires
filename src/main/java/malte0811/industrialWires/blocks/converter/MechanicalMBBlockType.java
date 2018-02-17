@@ -8,7 +8,7 @@ public enum MechanicalMBBlockType implements IStringSerializable {
     OTHER_END,
 	COIL_4_PHASE,
 	COIL_1_PHASE,
-    SHAFT_INSULATING,
+	SHAFT_BASIC,
     SHAFT_4_PHASE,
     SHAFT_1_PHASE,
     SHAFT_COMMUTATOR,

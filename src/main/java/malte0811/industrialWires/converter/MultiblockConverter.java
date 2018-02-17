@@ -22,7 +22,6 @@ import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
 import malte0811.industrialWires.blocks.converter.TileEntityMultiblockConverter;
 import malte0811.industrialWires.util.LocalSidedWorld;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -46,16 +45,16 @@ public class MultiblockConverter implements MultiblockHandler.IMultiblock {
 
 	@Override
 	public boolean isBlockTrigger(IBlockState state) {
-		return MechMBPart.isValidCenter(state);
+		return MechMBPart.isValidDefaultCenter(state);
 	}
 
 	private boolean checkEnd(LocalSidedWorld w, BlockPos.PooledMutableBlockPos p) {
 		p.setPos(0, 0, 0);
-		if (!MechMBPart.isValidCenter(w.getBlockState(p))) {
+		if (!MechMBPart.isValidDefaultCenter(w.getBlockState(p))) {
 			return false;
 		}
 		p.setPos(0, -1, 0);
-		return MechMBPart.isValidCenter(w.getBlockState(p));
+		return MechMBPart.isValidDefaultCenter(w.getBlockState(p));
 	}
 
 	private void formEnd(LocalSidedWorld w, BlockPos.PooledMutableBlockPos p, MechanicalMBBlockType type,
@@ -78,7 +77,6 @@ public class MultiblockConverter implements MultiblockHandler.IMultiblock {
 	public boolean createStructure(World world, BlockPos pos, EnumFacing side, EntityPlayer player) {
 		boolean b = true;
 		BlockPos.PooledMutableBlockPos mutPos = BlockPos.PooledMutableBlockPos.retain();
-		Minecraft.getMinecraft().mouseHelper.ungrabMouseCursor();
 		try {
 			LocalSidedWorld w = new LocalSidedWorld(world, pos, side.getOpposite(), false);
 			if (!checkEnd(w, mutPos)) {
@@ -126,20 +124,22 @@ public class MultiblockConverter implements MultiblockHandler.IMultiblock {
 						te.offset = new BlockPos(0, -1, 0);
 					}
 					te.facing = side;
+					te.formed = true;
 				});
 				lastLength = 1;
 				Consumer<TileEntityMultiblockConverter> init = (te)-> {
 					te.offset = te.getPos().subtract(pos);
 					te.facing = side;
+					te.formed = true;
 				};
 				for (MechMBPart part:parts) {
 					mutPos.setPos(0, 0, lastLength);
-					w = new LocalSidedWorld(world, w.getRealPos(mutPos), side.getOpposite(), false);
+					w = new LocalSidedWorld(world, w.getRealPos(mutPos), w.getFacing(), w.isMirrored());
 					part.form(w, init);
 					lastLength = part.getLength();
 				}
 				mutPos.setPos(0, 0, lastLength);
-				w.setOrigin(w.getRealPos(mutPos));
+				w = new LocalSidedWorld(w.getWorld(), w.getRealPos(mutPos), w.getFacing(), w.isMirrored());
 				formEnd(w, mutPos, OTHER_END, (te, __)->init.accept(te));
 				break;
 			} while (!b);

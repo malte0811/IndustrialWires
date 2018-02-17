@@ -15,7 +15,6 @@
 
 package malte0811.industrialWires.converter;
 
-import blusunrize.immersiveengineering.common.IEContent;
 import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
@@ -27,6 +26,9 @@ import net.minecraft.util.math.BlockPos;
 
 import java.util.function.Predicate;
 
+import static blusunrize.immersiveengineering.common.IEContent.blockMetalDecoration0;
+import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.COIL_LV;
+import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.LIGHT_ENGINEERING;
 import static malte0811.industrialWires.util.NBTKeys.BUFFER_IN;
 import static malte0811.industrialWires.util.NBTKeys.BUFFER_OUT;
 
@@ -36,7 +38,7 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 	private double bufferToE;
 	@Override
 	public Waveform getProduced() {
-		return Waveform.AC;
+		return Waveform.AC_SYNC;
 	}
 	@Override
 	public double getAvailableEEnergy() {
@@ -49,13 +51,17 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 	}
 
 	@Override
-	public double requestEEnergy() {
+	public double requestEEnergy(Waveform waveform) {
 		return MAX_BUFFER- bufferToMech;
 	}
 
 	@Override
-	public void insertEEnergy(double given) {
-		bufferToMech += given;
+	public void insertEEnergy(double given, Waveform waveform) {
+		if (waveform.isDC()) {
+			bufferToMech = 0;//TODO something more spectacular
+		} else {
+			bufferToMech += given;
+		}
 	}
 
 	@Override
@@ -102,13 +108,13 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 	}
 
 	private static final Predicate<IBlockState> IS_COIL = (b)->
-			b.getBlock()== IEContent.blockMetalDecoration0&&
-					b.getValue(IEContent.blockMetalDecoration0.property)== BlockTypes_MetalDecoration0.COIL_LV;
+			b.getBlock()== blockMetalDecoration0&&
+					b.getValue(blockMetalDecoration0.property)== BlockTypes_MetalDecoration0.COIL_LV;
 	@Override
 	public boolean canForm(LocalSidedWorld w) {
 		BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain(0, 0, 0);
 		try {
-			if (!isValidCenter(w.getBlockState(pos))) {
+			if (!isValidDefaultCenter(w.getBlockState(pos))) {
 				return false;
 			}
 			pos.setPos(0, 1, 0);
@@ -137,6 +143,18 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 	@Override
 	public short getFormPattern() {
 		return 0b111_111_111;
+	}
+
+	@Override
+	public void disassemble(boolean failed, MechEnergy energy) {
+		world.setBlockState(BlockPos.ORIGIN,
+				blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, LIGHT_ENGINEERING));
+		if (!failed) {
+			for (int i = -1;i<=1;i+=2) {
+				world.setBlockState(BlockPos.ORIGIN.up(i),
+						blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, COIL_LV));
+			}
+		}
 	}
 
 	@Override

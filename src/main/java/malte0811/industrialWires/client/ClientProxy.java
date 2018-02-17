@@ -43,12 +43,10 @@ import malte0811.industrialWires.client.gui.GuiRSPanelConn;
 import malte0811.industrialWires.client.gui.GuiRenameKey;
 import malte0811.industrialWires.client.manual.TextSplitter;
 import malte0811.industrialWires.client.panelmodel.PanelModelLoader;
-import malte0811.industrialWires.client.render.Shaders;
-import malte0811.industrialWires.client.render.TileRenderJacobsLadder;
-import malte0811.industrialWires.client.render.TileRenderMBConverter;
-import malte0811.industrialWires.client.render.TileRenderMarx;
+import malte0811.industrialWires.client.render.*;
 import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.crafting.IC2TRHelper;
+import malte0811.industrialWires.entities.EntityBrokenPart;
 import malte0811.industrialWires.hv.MarxOreHandler;
 import malte0811.industrialWires.hv.MultiblockMarx;
 import malte0811.industrialWires.items.ItemIC2Coil;
@@ -76,6 +74,7 @@ import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.client.registry.RenderingRegistry;
 
 import java.util.Arrays;
 import java.util.List;
@@ -131,6 +130,8 @@ public class ClientProxy extends CommonProxy {
 		TileRenderMBConverter tesr = new TileRenderMBConverter();
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMultiblockConverter.class, tesr);
 		((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(tesr);
+		RenderingRegistry.registerEntityRenderingHandler(EntityBrokenPart.class, EntityRenderBrokenPart::new);
+
 		Shaders.initShaders(true);
 	}
 

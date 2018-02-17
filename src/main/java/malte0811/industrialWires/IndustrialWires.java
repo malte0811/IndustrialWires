@@ -32,6 +32,7 @@ package malte0811.industrialWires;
  import malte0811.industrialWires.converter.MechMBPart;
  import malte0811.industrialWires.converter.MultiblockConverter;
  import malte0811.industrialWires.crafting.Recipes;
+ import malte0811.industrialWires.entities.EntityBrokenPart;
  import malte0811.industrialWires.hv.MarxOreHandler;
  import malte0811.industrialWires.hv.MultiblockMarx;
  import malte0811.industrialWires.items.ItemIC2Coil;
@@ -60,6 +61,7 @@ package malte0811.industrialWires;
  import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
  import net.minecraftforge.fml.common.network.NetworkRegistry;
  import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+ import net.minecraftforge.fml.common.registry.EntityRegistry;
  import net.minecraftforge.fml.common.registry.GameRegistry;
  import net.minecraftforge.fml.relauncher.Side;
  import org.apache.logging.log4j.Logger;
@@ -169,6 +171,8 @@ public class IndustrialWires {
 		GameRegistry.registerTileEntity(TileEntityUnfinishedPanel.class, MODID + ":unfinished_panel");
 		GameRegistry.registerTileEntity(TileEntityComponentPanel.class, MODID + ":single_component_panel");
 		GameRegistry.registerTileEntity(TileEntityDischargeMeter.class, MODID + ":discharge_meter");
+		EntityRegistry.registerModEntity(new ResourceLocation(MODID, "broken_part"), EntityBrokenPart.class,
+				"broken_part", 0, this, 64, 1, true);
 
 		proxy.preInit();
 		Compat.preInit();

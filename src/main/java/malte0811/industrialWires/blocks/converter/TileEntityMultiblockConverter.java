@@ -1,18 +1,19 @@
 package malte0811.industrialWires.blocks.converter;
 
 import blusunrize.immersiveengineering.api.ApiUtils;
-import blusunrize.immersiveengineering.common.IEContent;
+import com.google.common.collect.ImmutableSet;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.ISyncReceiver;
 import malte0811.industrialWires.blocks.TileEntityIWMultiblock;
 import malte0811.industrialWires.converter.IMBPartElectric;
+import malte0811.industrialWires.converter.IMBPartElectric.Waveform;
 import malte0811.industrialWires.converter.MechEnergy;
 import malte0811.industrialWires.converter.MechMBPart;
 import malte0811.industrialWires.network.MessageTileSyncIW;
 import malte0811.industrialWires.util.LocalSidedWorld;
-import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumFacing;
@@ -27,11 +28,13 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.IdentityHashMap;
-import java.util.List;
+import java.util.*;
 
+import static blusunrize.immersiveengineering.common.IEContent.blockMetalDecoration0;
+import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.LIGHT_ENGINEERING;
+import static malte0811.industrialWires.converter.IMBPartElectric.Waveform.*;
 import static malte0811.industrialWires.util.MiscUtils.getOffset;
+import static malte0811.industrialWires.util.MiscUtils.offset;
 import static malte0811.industrialWires.util.NBTKeys.PARTS;
 import static malte0811.industrialWires.util.NBTKeys.SPEED;
 
@@ -66,7 +69,7 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 			int offset = 1;
 			for (MechMBPart part:mechanical) {
 				part.world.setWorld(world);
-				part.world.setOrigin(MiscUtils.offset(pos, facing, mirrored, 0, -offset, 0));
+				part.world.setOrigin(offset(pos, facing, mirrored, 0, -offset, 0));
 				offset += part.getLength();
 			}
 			shouldInitWorld = false;
@@ -88,42 +91,55 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 		for (MechMBPart part:mechanical) {
 			part.insertMEnergy(factor*individualRequests.get(part));
 		}
-		//TODO proper failure!
+		Set<MechMBPart> failed = new HashSet<>();
 		for (MechMBPart part:mechanical) {
 			if (energyState.getSpeed()>part.getMaxSpeed()) {
-				energyState.setSpeed(0);//TODO
-				break;
+				failed.add(part);
 			}
+		}
+		if (!failed.isEmpty()) {
+			disassemble(failed);
+			return;
 		}
 
 		//Electrical
-		electricMain: for (int[] section:electricalStartEnd) {
-			Boolean ac = null;
+		for (int[] section:electricalStartEnd) {
 			double[] available = new double[section[1]-section[0]];
 			double totalAvailable = 0;
+			double[] availablePerWf = new double[Waveform.VALUES.length];
 			double[] requested = new double[section[1]-section[0]];
 			double totalRequested = 0;
 			for (int i = section[0];i<section[1];i++) {
-				IMBPartElectric electricalComp = ((IMBPartElectric)mechanical[i]);
-				if (ac==null) {
-					ac = electricalComp.getProduced().isAC;
-				} else {
-					Boolean acLocal = electricalComp.getProduced().isAC;
-					if (acLocal!=null&&acLocal!=ac) {
-						//TODO break things!
-						IndustrialWires.logger.info("This should break. Currently only breaks the loop, because NYI");
-						break electricMain;
-					}
+				IMBPartElectric electricalComp = ((IMBPartElectric) mechanical[i]);
+				Waveform localWf = electricalComp.getProduced();
+				if (localWf==NONE) {
+					continue;
+				}
+				if (localWf == AC_ASYNC&&Math.abs(energyState.getSpeed() - ASYNC_SPEED) >= SYNC_TOLERANCE * ASYNC_SPEED) {
+					localWf = AC_SYNC;
 				}
 				double availableLocal = electricalComp.getAvailableEEnergy();
-				availableLocal *= electricalComp.getProduced().efficiency;
 				totalAvailable += availableLocal;
-				available[i-section[0]] = availableLocal;
-				double requestedLocal = electricalComp.requestEEnergy();
-				totalRequested += requestedLocal;
-				requested[i-section[0]] = requestedLocal;
+				available[i - section[0]] = availableLocal;
+				availablePerWf[localWf.ordinal()] += availableLocal;
 			}
-			//TODO this isn't quite ideal. It's a lot better than before though
+			Waveform maxWf = NONE;
+			{
+				double max = 0;
+				for (int i = 0;i<availablePerWf.length;i++) {
+					if (availablePerWf[i]>max) {
+						maxWf = Waveform.VALUES[i];
+						max = availablePerWf[i];
+					}
+				}
+			}
+			for (int i = section[0];i<section[1];i++) {
+				IMBPartElectric electricalComp = ((IMBPartElectric) mechanical[i]);
+				double requestedLocal = electricalComp.requestEEnergy(maxWf);
+				totalRequested += requestedLocal;
+				requested[i - section[0]] = requestedLocal;
+			}
+			// this isn't ideal. It's a lot better than before though
 			if (totalAvailable>0&&totalRequested>0) {
 				for (int i = section[0]; i < section[1]; i++) {
 					IMBPartElectric electricalComp = ((IMBPartElectric) mechanical[i]);
@@ -132,12 +148,12 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 						double otherAvailable = totalAvailable-available[i0];
 						double ins = Math.min(requested[i0], otherAvailable);
 						double extractFactor = ins/otherAvailable;
-						electricalComp.insertEEnergy(ins);
+						electricalComp.insertEEnergy(ins, maxWf);
 						for (int j = section[0];j<section[1];j++) {
 							if (i!=j) {
 								IMBPartElectric compJ = (IMBPartElectric) mechanical[j];
 								double extractRaw = extractFactor * available[j - section[0]];
-								compJ.extractEEnergy(extractRaw/compJ.getProduced().efficiency);
+								compJ.extractEEnergy(extractRaw);
 								available[j-section[0]] -= extractFactor * available[j - section[0]];
 							}
 						}
@@ -178,7 +194,7 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 			MechMBPart[] mech = new MechMBPart[mechParts.tagCount()];
 			int offset = 1;
 			for (int i = 0; i < mechParts.tagCount(); i++) {
-				mech[i] = MechMBPart.fromNBT(mechParts.getCompoundTagAt(i), new LocalSidedWorld(world, MiscUtils.offset(pos, facing, mirrored, 0, -offset, 0), facing, mirrored));
+				mech[i] = MechMBPart.fromNBT(mechParts.getCompoundTagAt(i), new LocalSidedWorld(world, offset(pos, facing, mirrored, 0, -offset, 0), facing, mirrored));
 				offset += mech[i].getLength();
 			}
 			setMechanical(mech, in.getDouble(SPEED));
@@ -231,12 +247,12 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
     @Nonnull
     @Override
     protected BlockPos getOrigin() {
-        return pos;//TODO
+        return pos;//Irrelevant, since this uses a custome disassembly method
     }
 
     @Override
     public IBlockState getOriginalBlock() {
-        return IEContent.blockMetalDecoration0.getDefaultState();//TODO
+        return Blocks.AIR.getDefaultState();//Mostly irrelevant, since this uses a custome disassembly method
     }
 
 	@Override
@@ -252,8 +268,8 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 			if (isLogicDummy()) {
 				rBB = new AxisAlignedBB(pos, pos);
 			} else {
-				rBB = new AxisAlignedBB(MiscUtils.offset(pos, facing, mirrored, -1, 0, -1),
-						MiscUtils.offset(pos, facing, mirrored, 2, mechanical.length, 2));
+				rBB = new AxisAlignedBB(offset(pos, facing, mirrored, -1, 0, -1),
+						offset(pos, facing, mirrored, 2, mechanical.length, 2));
 			}
 		}
 		return rBB;
@@ -284,5 +300,53 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 		MechMBPart part = master.mechanical[id];
 		Vec3i offsetPart = new Vec3i(offsetDirectional.getX(), offsetDirectional.getY()-master.offsets[id], offsetDirectional.getZ());
 		return part.getCapability(capability, facing, offsetPart);
+	}
+
+	@Override
+	public void disassemble() {
+		if (formed) {
+			TileEntityMultiblockConverter master = master(this);
+			if (master!=null) {
+				boolean disassembled = false;
+				int part = master.getPart(offset.getX(), master);
+				if (part>=0) {
+					MechMBPart m = master.mechanical[part];
+					if (master.energyState.getSpeed()>.05*m.getMaxSpeed()) {
+						master.disassemble(ImmutableSet.of(m));
+						disassembled = true;
+					}
+				}
+				if (!disassembled)
+					master.disassemble(ImmutableSet.of());
+			}
+		}
+	}
+
+	private void disassemble(Set<MechMBPart> failed) {
+		if (!world.isRemote&&formed) {
+			formed = false;
+			world.setBlockState(pos,
+					blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, LIGHT_ENGINEERING));
+			world.setBlockState(pos.down(),
+					blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, LIGHT_ENGINEERING));
+			for (MechMBPart mech:mechanical) {
+				mech.disassemble(failed.contains(mech), energyState);
+				short pattern = mech.getFormPattern();
+				for (int i = 0;i<9;i++) {
+					if (((pattern>>i)&1)!=0) {
+						BlockPos pos = new BlockPos(i%3-1, i/3-1, 0);
+						if (mech.world.getBlockState(pos).getBlock()==IndustrialWires.mechanicalMB) {
+							mech.world.setBlockState(pos, Blocks.AIR.getDefaultState());
+						}
+					}
+				}
+			}
+			BlockPos otherEnd = offset(pos, facing.getOpposite(), mirrored, 0,
+					offsets[offsets.length-1]+mechanical[mechanical.length-1].getLength(), 0);
+			world.setBlockState(otherEnd,
+					blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, LIGHT_ENGINEERING));
+			world.setBlockState(otherEnd.down(),
+					blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, LIGHT_ENGINEERING));
+		}
 	}
 }

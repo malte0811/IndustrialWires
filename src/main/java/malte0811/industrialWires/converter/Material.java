@@ -15,36 +15,45 @@
 
 package malte0811.industrialWires.converter;
 
+import blusunrize.immersiveengineering.ImmersiveEngineering;
 import blusunrize.immersiveengineering.common.util.Utils;
 import malte0811.industrialWires.util.LocalSidedWorld;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.oredict.OreDictionary;
 
 public enum Material {
 	//TODO max speed
-	COPPER(8.96, 220),
-	ALUMINUM(2.7, 45),
-	LEAD(11.34, 12),
-	SILVER(10.49, 170),
-	NICKEL(8.908, 165),
-	GOLD(19.3, 100),
-	URANIUM(19.1, 400),// This is a bit silly. But why not.
-	CONSTANTAN(8.885, 600),
-	ELECTRUM((SILVER.density + GOLD.density) / 2, (SILVER.tensileStrength + GOLD.tensileStrength) / 2),//Tensile strength is a guess ((GOLD+SILVER)/2), if anyone has better data I'll put it in
-	STEEL(7.874, 1250),
-	IRON(7.874, 350),
-	DIAMOND(3.5, 2800);
+	COPPER(8.96, 220, "blocks/storage_copper"),
+	ALUMINUM(2.7, 45, "blocks/storage_aluminum"),
+	LEAD(11.34, 12, "blocks/storage_lead"),
+	SILVER(10.49, 170, "blocks/storage_silver"),
+	NICKEL(8.908, 165, "blocks/storage_nickel"),
+	GOLD(19.3, 100, new ResourceLocation("minecraft", "blocks/gold_block")),
+	URANIUM(19.1, 400, "blocks/storage_uranium"),// This is a bit silly. But why not.
+	CONSTANTAN(8.885, 600, "blocks/storage_constantan"),
+	ELECTRUM((SILVER.density + GOLD.density) / 2, (SILVER.tensileStrength + GOLD.tensileStrength) / 2, "blocks/storage_electrum"),//Tensile strength is a guess ((GOLD+SILVER)/2), if anyone has better data I'll put it in
+	STEEL(7.874, 1250, "blocks/storage_steel"),
+	IRON(7.874, 350, new ResourceLocation("minecraft", "blocks/iron_block")),
+	DIAMOND(3.5, 2800, new ResourceLocation("minecraft", "blocks/diamond_block"));
 	//in kg/m^3
-	public double density;
-	public double maxSpeed;
-	public double tensileStrength;
+	public final double density;
+	public final double tensileStrength;
+	public final ResourceLocation blockTexture;
 
 	// density as parameter: g/cm^3
 	// tStrength: MPa
-	Material(double density, double tensileStrength) {
+	// assumes that resource domain is IE
+	Material(double density, double tensileStrength, String path) {
 		this.density = density*1e3;
 		this.tensileStrength = tensileStrength*1e6;
+		this.blockTexture = new ResourceLocation(ImmersiveEngineering.MODID, path);
+	}
+	Material(double density, double tensileStrength, ResourceLocation loc) {
+		this.density = density*1e3;
+		this.tensileStrength = tensileStrength*1e6;
+		this.blockTexture = loc;
 	}
 
 	public boolean matchesBlock(ItemStack block, String prefix) {
@@ -57,7 +66,7 @@ public enum Material {
 		return false;
 	}
 
-	private String oreName() {
+	public String oreName() {
 		return name().substring(0, 1)+name().substring(1).toLowerCase();
 	}
 

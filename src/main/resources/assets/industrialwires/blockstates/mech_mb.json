@@ -27,6 +27,8 @@
       },
       "shaft_commutator": {
         "model": "industrialwires:mech_mb/commutator.obj"
+      },
+      "shaft_basic": {
       }
     },
     "facing":

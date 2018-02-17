@@ -72,6 +72,12 @@ public abstract class MechMBPart {
 
 	public abstract short getFormPattern();
 
+	/**
+	 * @param failed whether the MB is being disassembled because this part failed
+	 * @param energy
+	 */
+	public abstract void disassemble(boolean failed, MechEnergy energy);
+
 	public abstract MechanicalMBBlockType getType();
 
 	public <T> boolean hasCapability(Capability<T> cap, EnumFacing side, Vec3i pos) {
@@ -89,7 +95,8 @@ public abstract class MechMBPart {
 		REGISTRY.put("flywheel", MechPartFlywheel.class);
 		REGISTRY.put("singleCoil", MechPartSingleCoil.class);
 		//REGISTRY.put("twoElectrodes", MechPartTwoElectrodes.class);
-		REGISTRY.put("commutator", MechPartCommutator.class);
+		REGISTRY.put("commutator", MechPartTwoElectrodes.class);//TODO rename
+		REGISTRY.put("shaft", MechPartShaft.class);
 
 		for (String key : REGISTRY.keySet()) {
 			cacheNewInstance(key);
@@ -128,7 +135,7 @@ public abstract class MechMBPart {
 		return nbt;
 	}
 
-	public static boolean isValidCenter(IBlockState state) {
+	public static boolean isValidDefaultCenter(IBlockState state) {
 		return state.getBlock()== IEContent.blockMetalDecoration0&&
 				state.getValue(IEContent.blockMetalDecoration0.property)==BlockTypes_MetalDecoration0.LIGHT_ENGINEERING;
 	}

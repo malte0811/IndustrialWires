@@ -15,16 +15,35 @@
 
 package malte0811.industrialWires.converter;
 
+import blusunrize.immersiveengineering.common.util.Utils;
+import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
+import malte0811.industrialWires.entities.EntityBrokenPart;
 import malte0811.industrialWires.util.LocalSidedWorld;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.BakedQuadRetextured;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.oredict.OreDictionary;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static blusunrize.immersiveengineering.common.IEContent.blockMetalDecoration0;
+import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.LIGHT_ENGINEERING;
 
 public class MechPartFlywheel extends MechMBPart {
 	private static final double RADIUS = 1.25;
-	private static final double THICKNESS = 1;//TODO exact value from model?
+	private static final double THICKNESS = 1;
 	private static final double VOLUME = Math.PI*RADIUS*RADIUS*THICKNESS;
 	private Material material;
 	//A flywheel simply adds mass (lots of mass!), it doesn't actively change speeds/energy
@@ -65,6 +84,13 @@ public class MechPartFlywheel extends MechMBPart {
 	}
 
 	@Override
+	public List<BakedQuad> getRotatingQuads() {
+		List<BakedQuad> orig = super.getRotatingQuads();
+		TextureAtlasSprite newTex = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(material.blockTexture.toString());
+		return orig.stream().map((quad)->new BakedQuadRetextured(quad, newTex)).collect(Collectors.toList());
+	}
+
+	@Override
 	public boolean canForm(LocalSidedWorld w) {
 		BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain(-1, 1, 0);
 		try {
@@ -87,12 +113,48 @@ public class MechPartFlywheel extends MechMBPart {
 				}
 			}
 			pos.setPos(0, 0, 0);
-			if (!isValidCenter(w.getBlockState(pos))) {
-				return false;
-			}
-			return true;
+			return isValidDefaultCenter(w.getBlockState(pos));
 		} finally {
 			pos.release();
+		}
+	}
+
+	@Override
+	public void disassemble(boolean failed, MechEnergy energy) {
+		world.setBlockState(BlockPos.ORIGIN,
+				blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, LIGHT_ENGINEERING));
+		IBlockState state = Blocks.AIR.getDefaultState();
+		if (!failed) {
+			for (ItemStack block: OreDictionary.getOres("block"+material.oreName())) {
+				if (block.getItem() instanceof ItemBlock) {
+					ItemBlock ib = (ItemBlock) block.getItem();
+					state = ib.getBlock().getStateFromMeta(block.getMetadata());
+				}
+			}
+		}
+		for (int x = -1; x <= 1; x++) {
+			for (int y = -1; y <= 1; y++) {
+				if (x != 0 || y != 0) {
+					world.setBlockState(new BlockPos(x, y, 0), state);
+				}
+			}
+		}
+		if (failed) {
+			Matrix4 mat = new Matrix4();
+			mat.rotate(Utils.RAND.nextDouble(), 0, 0, 1);
+			Vec3d baseVec = new Vec3d(0, 1.5, 0);
+			for (int i = 0;i<8;i++) {
+				mat.rotate(Math.PI/4, 0, 0, 1);
+				Vec3d pos = mat.apply(baseVec);
+				EntityBrokenPart e = new EntityBrokenPart(world.getWorld(), material.blockTexture);
+				e.setPosition(pos.x, pos.y, .5);
+				double speed = (energy.getSpeed()/getMaxSpeed())/1.5;
+				e.motionX = pos.y*speed;
+				e.motionY = -pos.x*speed;
+				e.motionZ = (Utils.RAND.nextDouble()-.5)*speed/10;
+				world.spawnEntity(e);
+				e.breakBlocks(speed*speed*1.5*1.5);
+			}
 		}
 	}
 

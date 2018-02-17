@@ -54,6 +54,9 @@ public final class NBTKeys {
 	public static final String PARTS = "parts";
 	public static final String POS = "pos";
 	public static final String SPEED = "speed";
+	public static final String TEXTURE = "texture";
+	public static final String AC = "Ac";
+
 
 	private NBTKeys() {}
 }

@@ -21,7 +21,6 @@ package malte0811.industrialWires.blocks;
 import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;

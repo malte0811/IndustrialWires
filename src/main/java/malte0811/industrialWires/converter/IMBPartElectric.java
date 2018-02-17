@@ -27,25 +27,35 @@ public interface IMBPartElectric {
 	// All four in Joules
 	double getAvailableEEnergy();
 	void extractEEnergy(double energy);
-	double requestEEnergy();
-	void insertEEnergy(double given);
+	double requestEEnergy(Waveform waveform);
+	void insertEEnergy(double given, Waveform waveform);
 
 	enum Waveform {
-		NONE(null, 0, 0),
-		AC(true, 1, 2),
-		PULSED_DC(false, 2/Math.PI, 1),
-		MULTI_AC(true, 1, 4),//"4-phase" AC, magically transported by a single wire
-		MULTI_AC_RECT(true, 2*Math.sqrt(2)/Math.PI, 6),
-		DC(false, 1, 6),
-		SQUARE(true, Math.PI/4, 5);
+		NONE(null, 0),
+		//Sync/async refers to multiblock rotation speed, not to line frequency
+		AC_SYNC(true, 3),
+		AC_ASYNC(true, 4) {
+			@Override
+			public Waveform getCommutated(double speed) {
+				if (Math.abs(speed-ASYNC_SPEED)<SYNC_TOLERANCE*ASYNC_SPEED) {
+					return DC;
+				}
+				return super.getCommutated(speed);
+			}
+		},
+		AC_4PHASE(true, 4),//TODO what should this rectify into? If anything at all
+		DC(false, 1),
+		MESS(null, 4);
+
+		public static final double ASYNC_SPEED = 10;//TODO is this a good value
+		public static final double SYNC_TOLERANCE = .1;//TODO is this a good value
+		public static final Waveform[] VALUES = values();
 		@Nullable
-		public Boolean isAC;
-		public double efficiency;
+		private Boolean isAC;
 		private int dualId;
 		public Waveform dual;
-		Waveform(@Nullable Boolean ac, double efficiency, int dualId) {
+		Waveform(@Nullable Boolean ac, int dualId) {
 			isAC = ac;
-			this.efficiency = efficiency;
 			this.dualId = dualId;
 		}
 
@@ -54,6 +64,18 @@ public interface IMBPartElectric {
 			for (Waveform f:values) {
 				f.dual = values[f.dualId];
 			}
+		}
+
+		public Waveform getCommutated(double speed) {
+			return dual;
+		}
+
+		public boolean isAC() {
+			return isAC==Boolean.TRUE;
+		}
+
+		public boolean isDC() {
+			return isAC==Boolean.FALSE;
 		}
 	}
 }

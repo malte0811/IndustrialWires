@@ -47,8 +47,7 @@ public class TileRenderMBConverter extends TileEntitySpecialRenderer<TileEntityM
 	public static final Set<TileEntityMultiblockConverter> TES_WITH_MODELS = Collections.newSetFromMap(new WeakHashMap<>());
 	@Override
 	public void render(TileEntityMultiblockConverter te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
-		if (BASE_MODELS.isEmpty())
-		{
+		if (BASE_MODELS.isEmpty()) {
 			for (MechMBPart type:MechMBPart.INSTANCES.values()) {
 				ResourceLocation loc = type.getRotatingBaseModel();
 				try {
@@ -64,7 +63,8 @@ public class TileRenderMBConverter extends TileEntitySpecialRenderer<TileEntityM
 			}
 		}
 		if (te.mechanical!=null) {
-			if (te.rotatingModel == null) {
+			if (te.rotatingModel == null)
+			{
 				te.rotatingModel = new ArrayList<>();
 				int offset = 0;
 				for (MechMBPart part : te.mechanical) {

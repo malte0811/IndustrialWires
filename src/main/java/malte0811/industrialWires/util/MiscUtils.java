@@ -83,6 +83,24 @@ public final class MiscUtils {
 		return p.offset(f, forward).offset(f.rotateY(), right).add(0, up, 0);
 	}
 
+	public static Vec3d offset(Vec3d p, EnumFacing f, boolean mirror, Vec3d relative) {
+		return offset(p, f, mirror, relative.x, relative.z, relative.y);
+	}
+
+	public static Vec3d offset(Vec3d p, EnumFacing f, boolean mirror, double right, double forward, double up) {
+		if (mirror) {
+			right *= -1;
+		}
+		return offset(offset(p, f, forward), f.rotateY(), right).addVector(0, up, 0);
+	}
+
+	public static Vec3d offset(Vec3d in, EnumFacing f, double amount) {
+		if (amount==0) {
+			return in;
+		}
+		return in.addVector(f.getFrontOffsetX()*amount, f.getFrontOffsetY()*amount, f.getFrontOffsetZ()*amount);
+	}
+
 	/**
 	 * Calculates the parameters for offset to generate here from origin
 	 *
