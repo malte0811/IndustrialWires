@@ -1,4 +1,12 @@
-#####Version 1.6-23
+#####Version 1.6-25
+ - Updated to IE build 77
+   - IC2 wires cause damage
+   - Added insulated versions of gold, copper and tin wires. Due to heat sensitive insulation the transfer capacity is half of the normal capacity
+   - Added feedthrough insulators for all IC2 wire types
+ - Wire coils now automatically "merge" when picked up
+ - Config values are applied to the game directly now
+
+#####Version 1.6-24
  - Fixed an infinite energy bug
  - Changed the default value for maximum energy conversion
 

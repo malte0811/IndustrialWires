@@ -32,6 +32,7 @@ import ic2.api.energy.tile.IEnergySource;
 import malte0811.industrialWires.IIC2Connector;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.IBlockBoundsIW;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -61,6 +62,7 @@ import static malte0811.industrialWires.wires.IC2Wiretype.TIN;
 })
 public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable implements IEnergySource, IEnergySink, IDirectionalTile,
 		ITickable, IIC2Connector, IBlockBoundsIW {
+	private static final double EPS = .1;
 	EnumFacing facing = EnumFacing.NORTH;
 	boolean relay;
 	private boolean first = true;
@@ -89,8 +91,11 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 			first = false;
 		}
 		if (!world.isRemote) {
-			if (inBuffer > .1) {
+			if (inBuffer > EPS) {
 				transferPower();
+			}
+			if (inBuffer>EPS) {
+				notifyAvailableEnergy(inBuffer);
 			}
 		}
 	}
@@ -101,24 +106,26 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 		double outputMax = Math.min(inBuffer, maxToNet);
 		double sum = 0;
 		for (AbstractConnection c : conns) {
-			IImmersiveConnectable iic = ApiUtils.toIIC(c.end, world);
-			if (iic instanceof IIC2Connector&&iic.isEnergyOutput()) {
-				double tmp = outputMax - ((IIC2Connector) iic).insertEnergy(outputMax, true);
-				if (tmp > .00000001) {
-					maxOutputs.put(c, new ImmutablePair<>((IIC2Connector) iic, tmp));
-					sum += tmp;
+			if (c.isEnergyOutput) {
+				IImmersiveConnectable iic = ApiUtils.toIIC(c.end, world);
+				if (iic instanceof IIC2Connector) {
+					double tmp = outputMax - ((IIC2Connector) iic).insertEnergy(outputMax, true);
+					if (tmp > EPS) {
+						maxOutputs.put(c, new ImmutablePair<>((IIC2Connector) iic, tmp));
+						sum += tmp;
+					}
 				}
 			}
 		}
-		if (sum > .0001) {
-			final double oldInBuf = outputMax;
+		if (sum > EPS) {
 			HashMap<Connection, Integer> transferedPerConn = ImmersiveNetHandler.INSTANCE.getTransferedRates(world.provider.getDimension());
 			for (Map.Entry<AbstractConnection, Pair<IIC2Connector, Double>> entry : maxOutputs.entrySet()) {
 				Pair<IIC2Connector, Double> p = entry.getValue();
 				AbstractConnection c = entry.getKey();
-				double out = oldInBuf * p.getRight() / sum;
+				double out = outputMax * p.getRight() / sum;
 				double loss = getAverageLossRate(c);
-				double inserted = out - p.getLeft().insertEnergy(out - loss, false);
+				out -= loss;
+				double inserted = out - p.getLeft().insertEnergy(out, false);
 				inBuffer -= inserted;
 				float intermediaryLoss = 0;
 				HashSet<IImmersiveConnectable> passedConnectors = new HashSet<>();
@@ -136,11 +143,36 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 				}
 			}
 		}
-		if (inBuffer>0) {
-			conns.stream().map((ac)->ApiUtils.toIIC(ac.end, world))
-					.forEach((iic)-> iic.addAvailableEnergy((float) inBuffer, (d)->inBuffer-=d));
-			addAvailableEnergy(0, null);
+	}
+
+	private void notifyAvailableEnergy(double storedNew)
+	{
+		Set<AbstractConnection> outputs = ImmersiveNetHandler.INSTANCE.getIndirectEnergyConnections(pos, world, true);
+		for(AbstractConnection con : outputs)
+		{
+			IImmersiveConnectable end = ApiUtils.toIIC(con.end, world);
+			if(con.cableType!=null && end!=null && end.allowEnergyToPass(null))
+			{
+				Pair<Float, Consumer<Float>> e = getEnergyForConnection(con, storedNew);
+				end.addAvailableEnergy(e.getKey(), e.getValue());
+			}
 		}
+		addAvailableEnergy(-1, null);
+	}
+
+	private Pair<Float, Consumer<Float>> getEnergyForConnection(@Nullable AbstractConnection c, double storedNew)
+	{
+		float loss = c!=null?c.getAverageLossRate():0;
+		float max = (float) (storedNew-loss);
+		Consumer<Float> extract = (energy)->{
+			inBuffer -= energy+loss;
+		};
+		return new ImmutablePair<>(max, extract);
+	}
+
+	@Override
+	public float getDamageAmount(Entity e, Connection c) {
+		return (float) Math.ceil(super.getDamageAmount(e, c));
 	}
 
 	private double getAverageLossRate(AbstractConnection conn) {
@@ -293,10 +325,11 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 		if (amount > maxToNet) {
 			maxToNet = amount;
 		}
+		notifyAvailableEnergy(amount);
 	}
 
 	@Override
-	public void readCustomNBT(NBTTagCompound nbt, boolean descPacket) {
+	public void readCustomNBT(@Nonnull NBTTagCompound nbt, boolean descPacket) {
 		super.readCustomNBT(nbt, descPacket);
 		facing = EnumFacing.getFront(nbt.getInteger("facing"));
 		relay = nbt.getBoolean("relay");
@@ -315,7 +348,7 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	}
 
 	@Override
-	public void writeCustomNBT(NBTTagCompound nbt, boolean descPacket) {
+	public void writeCustomNBT(@Nonnull NBTTagCompound nbt, boolean descPacket) {
 		super.writeCustomNBT(nbt, descPacket);
 		nbt.setInteger("facing", facing.getIndex());
 		nbt.setBoolean("relay", relay);
