@@ -25,8 +25,9 @@ import blusunrize.immersiveengineering.api.energy.wires.IImmersiveConnectable;
 import blusunrize.immersiveengineering.api.energy.wires.IWireCoil;
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler;
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler.Connection;
-import blusunrize.immersiveengineering.api.energy.wires.WireType;
 import blusunrize.immersiveengineering.common.IESaveData;
+import blusunrize.immersiveengineering.common.blocks.metal.TileEntityBreakerSwitch;
+import blusunrize.immersiveengineering.common.blocks.metal.TileEntityRedstoneBreaker;
 import blusunrize.immersiveengineering.common.util.ItemNBTHelper;
 import blusunrize.immersiveengineering.common.util.Utils;
 import malte0811.industrialWires.IWConfig;
@@ -91,7 +92,7 @@ public class ItemIC2Coil extends Item implements IWireCoil {
 	}
 
 	@Override
-	public WireType getWireType(ItemStack stack) {
+	public IC2Wiretype getWireType(ItemStack stack) {
 		return IC2Wiretype.ALL[stack.getMetadata()];
 	}
 
@@ -126,14 +127,18 @@ public class ItemIC2Coil extends Item implements IWireCoil {
 			TileEntity tileEntity = world.getTileEntity(pos);
 			if (tileEntity instanceof IImmersiveConnectable && ((IImmersiveConnectable) tileEntity).canConnect()) {
 				TargetingInfo target = new TargetingInfo(side, hitX, hitY, hitZ);
-				WireType wire = getWireType(stack);
+				IC2Wiretype wire = getWireType(stack);
 				BlockPos masterPos = ((IImmersiveConnectable) tileEntity).getConnectionMaster(wire, target);
 				Vec3i offset = pos.subtract(masterPos);
 				tileEntity = world.getTileEntity(masterPos);
 				if (!(tileEntity instanceof IImmersiveConnectable) || !((IImmersiveConnectable) tileEntity).canConnect())
 					return EnumActionResult.PASS;
 
-				if (!((IImmersiveConnectable) tileEntity).canConnectCable(wire, target, offset)) {
+				boolean canConnect = ((IImmersiveConnectable) tileEntity).canConnectCable(wire, target, offset);
+				if (canConnect&&tileEntity instanceof TileEntityBreakerSwitch) {
+					canConnect = !wire.isHV()||tileEntity instanceof TileEntityRedstoneBreaker;
+				}
+				if (!canConnect) {
 					if (!world.isRemote)
 						player.sendMessage(new TextComponentTranslation(Lib.CHAT_WARN + "wrongCable"));
 					return EnumActionResult.FAIL;
@@ -225,8 +230,11 @@ public class ItemIC2Coil extends Item implements IWireCoil {
 											world.addBlockEvent(linkPos, ((TileEntity) nodeLink).getBlockType(), -1, 0);
 											state = world.getBlockState(linkPos);
 											world.notifyBlockUpdate(linkPos, state, state, 3);
-										} else
-											player.sendMessage(new TextComponentTranslation(Lib.CHAT_WARN + "cantSee"));
+										} else {
+											player.sendMessage(new TextComponentTranslation(Lib.CHAT_WARN + "tooFar"));
+										}
+									} else {
+										player.sendMessage(new TextComponentTranslation(Lib.CHAT_WARN + "cantSee"));
 									}
 								}
 							}

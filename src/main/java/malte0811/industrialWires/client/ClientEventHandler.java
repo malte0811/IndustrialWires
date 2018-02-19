@@ -65,7 +65,7 @@ import java.util.Map;
 @Mod.EventBusSubscriber(modid = IndustrialWires.MODID, value = Side.CLIENT)
 public class ClientEventHandler {
 	public static boolean shouldScreenshot = false;
-	@SubscribeEvent
+	@SubscribeEvent(priority = EventPriority.LOW)
 	public static void renderOverlayPost(RenderGameOverlayEvent.Post e) {
 		if (ClientUtils.mc().player != null && e.getType() == RenderGameOverlayEvent.ElementType.TEXT) {
 			EntityPlayer player = ClientUtils.mc().player;
@@ -76,8 +76,15 @@ public class ClientEventHandler {
 					if (OreDictionary.itemMatches(new ItemStack(IndustrialWires.coil, 1, OreDictionary.WILDCARD_VALUE), equipped, false)) {
 						IC2Wiretype type = IC2Wiretype.ALL[equipped.getItemDamage()];
 						int color = type.getColour(null);
+						final int threshold = 0x40-1;
+						for (int i = 0;i<3;i++) {
+							if (((color>>(8*i))&255)<threshold) {
+								color |= threshold<<(8*i);
+							}
+						}
 						String s = I18n.format(IndustrialWires.MODID + ".desc.wireLength", ItemIC2Coil.getLength(equipped));
-						ClientUtils.font().drawString(s, e.getResolution().getScaledWidth() / 2 - ClientUtils.font().getStringWidth(s) / 2, e.getResolution().getScaledHeight() - GuiIngameForge.left_height - 40, color, true);
+						ClientUtils.font().drawString(s, e.getResolution().getScaledWidth() / 2 - ClientUtils.font().getStringWidth(s) / 2,
+								e.getResolution().getScaledHeight() - GuiIngameForge.left_height - 40, color, true);
 						if (ItemNBTHelper.hasKey(equipped, "linkingPos")) {
 							int[] link = ItemNBTHelper.getIntArray(equipped, "linkingPos");
 							if (link != null && link.length > 3) {
@@ -93,7 +100,8 @@ public class ClientEventHandler {
 								if (length * length < distSquared) {
 									color = 0xdd3333;
 								}
-								ClientUtils.font().drawString(s, e.getResolution().getScaledWidth() / 2 - ClientUtils.font().getStringWidth(s) / 2, e.getResolution().getScaledHeight() - GuiIngameForge.left_height - 20, color, true);
+								ClientUtils.font().drawString(s, e.getResolution().getScaledWidth() / 2 - ClientUtils.font().getStringWidth(s) / 2,
+										e.getResolution().getScaledHeight() - GuiIngameForge.left_height - 20, color, true);
 							}
 						}
 					}

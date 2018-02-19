@@ -64,7 +64,7 @@ industrialwires.desc.output=Main Output
 industrialwires.desc.alt=Replacement
 industrialwires.desc.ideal_e=Ideal Energy
 
-industrialwires.desc.wireLength=Wire length: %1s block(s)
+industrialwires.desc.wireLength=Wire length: %s block(s)
 industrialwires.desc.recipe=Please check the Engineer's manual for recipe details
 industrialwires.desc.remove_all=Remove all components from this panel
 industrialwires.desc.create_panel=Create a new control panel
@@ -111,7 +111,6 @@ industrialwires.chat.marxEnergy=Last discharge was %s kJ per block
 death.attack.industrialwires.jacobs_ladder=%1$s was electrocuted by a Jacob's Ladder
 death.attack.industrialwires.marx=%1$s was struck by lightning produced by a Marx generator
 
- 
 itemGroup.industrialwires=Industrial Wires
 
 ie.manual.category.industrialwires.name=Industrial Wires

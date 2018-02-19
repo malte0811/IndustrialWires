@@ -72,7 +72,7 @@ package malte0811.industrialWires;
  import static malte0811.industrialWires.blocks.wire.BlockTypes_IC2_Connector.*;
  import static malte0811.industrialWires.wires.IC2Wiretype.*;
 
-@Mod(modid = IndustrialWires.MODID, version = IndustrialWires.VERSION, dependencies = "required-after:immersiveengineering@[0.12-72,);after:ic2",
+@Mod(modid = IndustrialWires.MODID, version = IndustrialWires.VERSION, dependencies = "required-after:immersiveengineering@[0.12-77,);after:ic2",
 		certificateFingerprint = "7e11c175d1e24007afec7498a1616bef0000027d")
 @Mod.EventBusSubscriber
 public class IndustrialWires {
@@ -231,27 +231,32 @@ public class IndustrialWires {
 			WireApi.registerFeedthroughForWiretype(TIN, new ResourceLocation("immersiveengineering:block/connector/connector_lv.obj"),
 					ImmutableMap.of("#immersiveengineering:blocks/connector_connector_lv",
 							IndustrialWires.MODID + ":blocks/ic2_conn_tin"), tex, uvs, .5, .5,
-					(state) -> state.getBlock() == ic2conn && state.getValue(BlockIC2Connector.TYPE) == TIN_CONN);
+					(state) -> state.getBlock() == ic2conn && state.getValue(BlockIC2Connector.TYPE) == TIN_CONN,
+					1/64F, TIN.getTransferRate(), f->(float)Math.ceil(f));
 
 			WireApi.registerFeedthroughForWiretype(COPPER_IC2, new ResourceLocation("immersiveengineering:block/connector/connector_lv.obj"),
 					ImmutableMap.of("#immersiveengineering:blocks/connector_connector_lv",
 							IndustrialWires.MODID + ":blocks/ic2_conn_copper"), tex, uvs, .5, .5,
-					(state) -> state.getBlock() == ic2conn && state.getValue(BlockIC2Connector.TYPE) == COPPER_CONN);
+					(state) -> state.getBlock() == ic2conn && state.getValue(BlockIC2Connector.TYPE) == COPPER_CONN,
+					1/64F, COPPER_IC2.getTransferRate(), f->(float)Math.ceil(f));
 
 			WireApi.registerFeedthroughForWiretype(GOLD, new ResourceLocation("immersiveengineering:block/connector/connector_mv.obj"),
 					ImmutableMap.of("#immersiveengineering:blocks/connector_connector_mv",
 							IndustrialWires.MODID + ":blocks/ic2_conn_gold"), tex, uvs, .5625, .5625,
-					(state) -> state.getBlock() == ic2conn && state.getValue(BlockIC2Connector.TYPE) == GOLD_CONN);
+					(state) -> state.getBlock() == ic2conn && state.getValue(BlockIC2Connector.TYPE) == GOLD_CONN,
+					1/64F, GOLD.getTransferRate(), f->(float)Math.ceil(f));
 
 			WireApi.registerFeedthroughForWiretype(HV, new ResourceLocation("immersiveengineering:block/connector/connector_hv.obj"),
 					ImmutableMap.of("#immersiveengineering:blocks/connector_connector_hv",
 							IndustrialWires.MODID + ":blocks/ic2_conn_hv"), tex, uvs, .75, .75,
-					(state) -> state.getBlock() == ic2conn && state.getValue(BlockIC2Connector.TYPE) == HV_CONN);
+					(state) -> state.getBlock() == ic2conn && state.getValue(BlockIC2Connector.TYPE) == HV_CONN,
+					1/64F, HV.getTransferRate(), f->(float)Math.ceil(f));
 
 			WireApi.registerFeedthroughForWiretype(GLASS, new ResourceLocation("immersiveengineering:block/connector/connector_hv.obj"),
 					ImmutableMap.of("#immersiveengineering:blocks/connector_connector_hv",
 							IndustrialWires.MODID + ":blocks/ic2_conn_glass"), tex, uvs, .75, .75,
-					(state) -> state.getBlock() == ic2conn && state.getValue(BlockIC2Connector.TYPE) == GLASS_CONN);
+					(state) -> state.getBlock() == ic2conn && state.getValue(BlockIC2Connector.TYPE) == GLASS_CONN,
+					1/64F, GLASS.getTransferRate(), f->(float)Math.ceil(f));
 		}
 		NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
 		IWPotions.init();

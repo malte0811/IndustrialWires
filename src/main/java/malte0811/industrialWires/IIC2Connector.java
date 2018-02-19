@@ -17,12 +17,20 @@
  */
 package malte0811.industrialWires;
 
-import java.util.function.Consumer;
+import blusunrize.immersiveengineering.api.energy.wires.IImmersiveConnectable;
+import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler;
+import net.minecraft.entity.Entity;
 
-public interface IIC2Connector {
+public interface IIC2Connector extends IImmersiveConnectable {
 	/**
 	 * @return leftover energy.
 	 */
 	double insertEnergy(double eu, boolean simulate);
-	void addAvailableEnergy(double amount, Consumer<Double> consume);
+
+	@Override
+	default float getDamageAmount(Entity e, ImmersiveNetHandler.Connection c)
+	{
+		return (float) Math.ceil(IImmersiveConnectable.super.getDamageAmount(e, c));//Same as IC2 uses
+	}
+
 }

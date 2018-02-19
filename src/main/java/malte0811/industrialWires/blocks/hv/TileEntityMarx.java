@@ -71,7 +71,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.function.Consumer;
 
 import static blusunrize.immersiveengineering.api.energy.wires.WireType.REDSTONE_CATEGORY;
 import static malte0811.industrialWires.blocks.hv.TileEntityMarx.FiringState.FIRE;
@@ -545,11 +544,6 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		} else {
 			return 0;
 		}
-	}
-//TODO
-	@Override
-	public void addAvailableEnergy(double amount, Consumer<Double> consume) {
-
 	}
 
 	@Override

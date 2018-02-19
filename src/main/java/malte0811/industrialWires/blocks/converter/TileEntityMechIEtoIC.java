@@ -78,9 +78,15 @@ public class TileEntityMechIEtoIC extends TileEntityIWBase implements IDirection
 		return true;
 	}
 
+	@Override
+	@Deprecated
+	public int maxrequestkineticenergyTick(EnumFacing enumFacing) {
+		return 0;
+	}
+
 	//IC2 kinetic
 	@Override
-	public int maxrequestkineticenergyTick(EnumFacing f) {
+	public int getConnectionBandwidth(EnumFacing f) {
 		if (f == dir) {
 			int stored = (int) (ConversionUtil.kinPerRot() * rotBuffer);
 			return Math.min(maxOutput, stored);
@@ -90,12 +96,20 @@ public class TileEntityMechIEtoIC extends TileEntityIWBase implements IDirection
 	}
 
 	@Override
-	public int requestkineticenergy(EnumFacing f, int requested) {
+	@Deprecated
+	public int requestkineticenergy(EnumFacing enumFacing, int i) {
+		return 0;
+	}
+
+	@Override
+	public int drawKineticEnergy(EnumFacing f, int requested, boolean simulate) {
 		if (f == dir) {
 			int stored = (int) (ConversionUtil.kinPerRot() * rotBuffer);
 			int out = Math.min(maxOutput, stored);
 			out = Math.min(requested, out);
-			rotBuffer -= out * ConversionUtil.rotPerKin();
+			if (!simulate) {
+				rotBuffer -= out * ConversionUtil.rotPerKin();
+			}
 			return (int) (out * MechConversion.rotToKinEfficiency);
 		} else {
 			return 0;

@@ -47,8 +47,8 @@ repositories {
         url 'http://maven.modmuss50.me'
     }
     maven {
-    	name 'jared maven'
-    	url 'http://blamejared.com/maven'
+        name 'jared maven'
+        url 'http://blamejared.com/maven'
     }
     maven { // Albedo/Mirage Lights
         url 'https://repo.elytradev.com/'
@@ -59,7 +59,8 @@ repositories {
     }
     // dependencies of TR...
     maven {
-        url 'http://maven.epoxide.xyz'
+
+        url 'http://maven.mcmoddev.com'
     }
     maven {
         // HWYLA

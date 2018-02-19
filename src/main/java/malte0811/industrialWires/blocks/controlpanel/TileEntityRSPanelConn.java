@@ -26,6 +26,7 @@ import blusunrize.immersiveengineering.api.energy.wires.WireType;
 import blusunrize.immersiveengineering.api.energy.wires.redstone.IRedstoneConnector;
 import blusunrize.immersiveengineering.api.energy.wires.redstone.RedstoneWireNetwork;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
+import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.IBlockBoundsIW;
 import malte0811.industrialWires.blocks.INetGUI;
 import malte0811.industrialWires.controlpanel.PanelComponent;
@@ -42,6 +43,7 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
@@ -95,7 +97,7 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 	}
 
 	@Override
-	public void writeCustomNBT(NBTTagCompound out, boolean updatePacket) {
+	public void writeCustomNBT(@Nonnull NBTTagCompound out, boolean updatePacket) {
 		super.writeCustomNBT(out, updatePacket);
 		out.setByteArray("out", this.out);
 		out.setBoolean("hasConn", hasConn);
@@ -104,7 +106,7 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 	}
 
 	@Override
-	public void readCustomNBT(NBTTagCompound in, boolean updatePacket) {
+	public void readCustomNBT(@Nonnull NBTTagCompound in, boolean updatePacket) {
 		super.readCustomNBT(in, updatePacket);
 		out = in.getByteArray("out");
 		hasConn = in.getBoolean("hasConn");
@@ -238,7 +240,7 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 	}
 
 	@Override
-	public boolean canConnectCable(WireType wire, TargetingInfo targetingInfo) {
+	public boolean canConnectCable(WireType wire, TargetingInfo targetingInfo, Vec3i offset) {
 		return REDSTONE_CATEGORY.equals(wire.getCategory()) && !hasConn;
 	}
 
@@ -269,12 +271,6 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 			IBlockState state = world.getBlockState(pos);
 			world.notifyBlockUpdate(pos, state, state, 3);
 		}
-	}
-
-	@Override
-	public Vec3d getRaytraceOffset(IImmersiveConnectable other) {
-		EnumFacing side = facing.getOpposite();
-		return new Vec3d(.5 + side.getFrontOffsetX() * .0625, .5 + side.getFrontOffsetY() * .0625, .5 + side.getFrontOffsetZ() * .0625);
 	}
 
 	@Override

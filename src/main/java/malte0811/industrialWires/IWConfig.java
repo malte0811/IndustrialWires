@@ -20,8 +20,14 @@ package malte0811.industrialWires;
 import blusunrize.immersiveengineering.common.Config.IEConfig;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.Config.Comment;
+import net.minecraftforge.common.config.Config.RequiresMcRestart;
+import net.minecraftforge.common.config.ConfigManager;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 @Config(modid = IndustrialWires.MODID)
+@Mod.EventBusSubscriber
 public class IWConfig {
 	@Comment({"The maximum length of a single connection.", "Order: Tin, Copper, Gold, HV, Glass Fiber"})
 	public static int[] maxLengthPerConn = {16, 16, 16, 32, 32};
@@ -29,6 +35,7 @@ public class IWConfig {
 	public static int[] maxLengthOnCoil = {1024, 1024, 1024, 2048, 2048};
 
 	@Comment({"Set this to false to completely disable any conversion between IF and EU (default: true)"})
+	@RequiresMcRestart
 	public static boolean enableConversion = true;
 
 	public static MechConversion mech;
@@ -72,5 +79,12 @@ public class IWConfig {
 		public static int marxSoundDamage = 0;
 		@Comment({"Set to false to disable shaders. They are used for rendering the Marx generator and the Jacob's ladder."})
 		public static boolean enableShaders = true;
+	}
+
+	@SubscribeEvent
+	public static void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent ev) {
+		if (ev.getModID().equals(IndustrialWires.MODID)) {
+			ConfigManager.sync(IndustrialWires.MODID, Config.Type.INSTANCE);
+		}
 	}
 }
