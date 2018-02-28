@@ -53,7 +53,7 @@ public class MechPartShaft extends MechMBPart {
 	public void writeToNBT(NBTTagCompound out) {}
 
 	@Override
-	public void readFromNBT(NBTTagCompound out) {}
+	public void readFromNBT(NBTTagCompound in) {}
 
 	@Override
 	public ResourceLocation getRotatingBaseModel() {

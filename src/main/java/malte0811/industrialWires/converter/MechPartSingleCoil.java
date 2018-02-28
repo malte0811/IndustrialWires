@@ -37,7 +37,7 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 	private double bufferToMech;
 	private double bufferToE;
 	@Override
-	public Waveform getProduced() {
+	public Waveform getProduced(MechEnergy state) {
 		return Waveform.AC_SYNC;
 	}
 	@Override
@@ -51,12 +51,12 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 	}
 
 	@Override
-	public double requestEEnergy(Waveform waveform) {
+	public double requestEEnergy(Waveform waveform, MechEnergy energy) {
 		return MAX_BUFFER- bufferToMech;
 	}
 
 	@Override
-	public void insertEEnergy(double given, Waveform waveform) {
+	public void insertEEnergy(double given, Waveform waveform, MechEnergy energy) {
 		if (waveform.isDC()) {
 			bufferToMech = 0;//TODO something more spectacular
 		} else {
@@ -87,7 +87,7 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 
 	@Override
 	public double getMaxSpeed() {
-		return Double.MAX_VALUE;//TODO
+		return Double.MAX_VALUE;//TODO I'm fine with shafts having infinite max speed. Not coils though.
 	}
 
 	@Override
@@ -97,9 +97,9 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 	}
 
 	@Override
-	public void readFromNBT(NBTTagCompound out) {
-		bufferToMech = out.getDouble(BUFFER_IN);
-		bufferToE = out.getDouble(BUFFER_OUT);
+	public void readFromNBT(NBTTagCompound in) {
+		bufferToMech = in.getDouble(BUFFER_IN);
+		bufferToE = in.getDouble(BUFFER_OUT);
 	}
 
 	@Override

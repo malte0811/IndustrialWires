@@ -31,7 +31,7 @@ public enum Material {
 	SILVER(10.49, 170, "blocks/storage_silver"),
 	NICKEL(8.908, 165, "blocks/storage_nickel"),
 	GOLD(19.3, 100, new ResourceLocation("minecraft", "blocks/gold_block")),
-	URANIUM(19.1, 400, "blocks/storage_uranium"),// This is a bit silly. But why not.
+	URANIUM(19.1, 400, "blocks/storage_uranium_side"),// This is a bit silly. But why not.
 	CONSTANTAN(8.885, 600, "blocks/storage_constantan"),
 	ELECTRUM((SILVER.density + GOLD.density) / 2, (SILVER.tensileStrength + GOLD.tensileStrength) / 2, "blocks/storage_electrum"),//Tensile strength is a guess ((GOLD+SILVER)/2), if anyone has better data I'll put it in
 	STEEL(7.874, 1250, "blocks/storage_steel"),

@@ -29,6 +29,7 @@ package malte0811.industrialWires;
  import malte0811.industrialWires.compat.Compat;
  import malte0811.industrialWires.controlpanel.PanelComponent;
  import malte0811.industrialWires.controlpanel.PanelUtils;
+ import malte0811.industrialWires.converter.EUCapability;
  import malte0811.industrialWires.converter.MechMBPart;
  import malte0811.industrialWires.converter.MultiblockConverter;
  import malte0811.industrialWires.crafting.Recipes;
@@ -104,6 +105,11 @@ public class IndustrialWires {
 	public static ItemPanelComponent panelComponent = null;
 	@GameRegistry.ObjectHolder(MODID+":"+ItemKey.ITEM_NAME)
 	public static ItemKey key = null;
+
+
+	@GameRegistry.ObjectHolder("ic2:te")
+	public static Block ic2TeBlock = null;
+
 	public static final SimpleNetworkWrapper packetHandler = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
 
 	public static Logger logger;
@@ -177,6 +183,7 @@ public class IndustrialWires {
 		proxy.preInit();
 		Compat.preInit();
 		MarxOreHandler.preInit();
+		MechMBPart.preInit();
 	}
 
 	@SubscribeEvent
@@ -262,8 +269,10 @@ public class IndustrialWires {
 		IWPotions.init();
 		Compat.init();
 		MarxOreHandler.init();
-		MechMBPart.init();
 		PanelComponent.init();
+		if (hasIC2) {
+			EUCapability.register();
+		}
 	}
 
 	@EventHandler

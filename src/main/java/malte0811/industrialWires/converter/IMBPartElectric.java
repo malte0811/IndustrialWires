@@ -23,18 +23,18 @@ public interface IMBPartElectric {
 	 * 1. Heat up the sources, possibly destroying them (TODO do I want to do that?)
 	 * 2. Consume a lot of mechanical energy
 	 */
-	Waveform getProduced();
+	Waveform getProduced(MechEnergy state);
 	// All four in Joules
 	double getAvailableEEnergy();
 	void extractEEnergy(double energy);
-	double requestEEnergy(Waveform waveform);
-	void insertEEnergy(double given, Waveform waveform);
+	double requestEEnergy(Waveform waveform, MechEnergy energy);
+	void insertEEnergy(double given, Waveform waveform, MechEnergy energy);
 
 	enum Waveform {
 		NONE(null, 0),
 		//Sync/async refers to multiblock rotation speed, not to line frequency
-		AC_SYNC(true, 3),
-		AC_ASYNC(true, 4) {
+		AC_SYNC(true, 4),
+		AC_ASYNC(true, 5) {
 			@Override
 			public Waveform getCommutated(double speed) {
 				if (Math.abs(speed-ASYNC_SPEED)<SYNC_TOLERANCE*ASYNC_SPEED) {
@@ -45,10 +45,11 @@ public interface IMBPartElectric {
 		},
 		AC_4PHASE(true, 4),//TODO what should this rectify into? If anything at all
 		DC(false, 1),
-		MESS(null, 4);
+		MESS(null, 5);
 
 		public static final double ASYNC_SPEED = 10;//TODO is this a good value
 		public static final double SYNC_TOLERANCE = .1;//TODO is this a good value
+		public static final double MIN_COMM_SPEED = 4;//TODO is this a good value
 		public static final Waveform[] VALUES = values();
 		@Nullable
 		private Boolean isAC;
@@ -67,7 +68,7 @@ public interface IMBPartElectric {
 		}
 
 		public Waveform getCommutated(double speed) {
-			return dual;
+			return speed<MIN_COMM_SPEED?this:dual;
 		}
 
 		public boolean isAC() {

@@ -1,10 +1,16 @@
 package malte0811.industrialWires.blocks.converter;
 
 import blusunrize.immersiveengineering.api.ApiUtils;
-import com.google.common.collect.ImmutableSet;
+import ic2.api.energy.event.EnergyTileLoadEvent;
+import ic2.api.energy.event.EnergyTileUnloadEvent;
+import ic2.api.energy.tile.IEnergyAcceptor;
+import ic2.api.energy.tile.IEnergyEmitter;
+import ic2.api.energy.tile.IEnergySink;
+import ic2.api.energy.tile.IEnergySource;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.ISyncReceiver;
 import malte0811.industrialWires.blocks.TileEntityIWMultiblock;
+import malte0811.industrialWires.converter.EUCapability;
 import malte0811.industrialWires.converter.IMBPartElectric;
 import malte0811.industrialWires.converter.IMBPartElectric.Waveform;
 import malte0811.industrialWires.converter.MechEnergy;
@@ -21,8 +27,10 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -32,18 +40,24 @@ import java.util.*;
 
 import static blusunrize.immersiveengineering.common.IEContent.blockMetalDecoration0;
 import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.LIGHT_ENGINEERING;
+import static malte0811.industrialWires.converter.EUCapability.ENERGY_IC2;
 import static malte0811.industrialWires.converter.IMBPartElectric.Waveform.*;
 import static malte0811.industrialWires.util.MiscUtils.getOffset;
 import static malte0811.industrialWires.util.MiscUtils.offset;
 import static malte0811.industrialWires.util.NBTKeys.PARTS;
 import static malte0811.industrialWires.util.NBTKeys.SPEED;
 
-public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implements ITickable, ISyncReceiver {
+@net.minecraftforge.fml.common.Optional.InterfaceList({
+		@net.minecraftforge.fml.common.Optional.Interface(iface = "ic2.api.energy.tile.IEnergySource", modid = "ic2"),
+		@Optional.Interface(iface = "ic2.api.energy.tile.IEnergySink", modid = "ic2")
+})
+public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implements ITickable, ISyncReceiver,
+		IEnergySource, IEnergySink {
 	private static final double DECAY_BASE = Math.exp(Math.log(.5)/(2*60*60*20));
 	public static final double TICK_ANGLE_PER_SPEED = 180/20/Math.PI;
 	private static final double SYNC_THRESHOLD = .95;
 	public MechMBPart[] mechanical = null;
-	public int[] offsets = null;
+	private int[] offsets = null;
 
 	private int[][] electricalStartEnd = null;
 
@@ -54,10 +68,18 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 	@SideOnly(Side.CLIENT)
 	public List<BakedQuad> rotatingModel;
 	private boolean shouldInitWorld;
+	private boolean firstTick = true;
 
 	@Override
 	public void update() {
 		ApiUtils.checkForNeedlessTicking(this);
+		if (firstTick) {
+			//TODO make safe for when IC2 isn't installed
+			if (!world.isRemote&& IndustrialWires.hasIC2) {
+				MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
+			}
+			firstTick = false;
+		}
 		if (world.isRemote&&mechanical!=null) {
 			angle += energyState.getSpeed()*TICK_ANGLE_PER_SPEED;
 			angle %= 360;
@@ -67,12 +89,11 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 		}
 		if (shouldInitWorld) {
 			int offset = 1;
-			for (MechMBPart part:mechanical) {
+			for (MechMBPart part : mechanical) {
 				part.world.setWorld(world);
 				part.world.setOrigin(offset(pos, facing, mirrored, 0, -offset, 0));
 				offset += part.getLength();
 			}
-			shouldInitWorld = false;
 		}
 		// Mechanical
 		for (MechMBPart part:mechanical) {
@@ -104,41 +125,74 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 
 		//Electrical
 		for (int[] section:electricalStartEnd) {
-			double[] available = new double[section[1]-section[0]];
-			double totalAvailable = 0;
+			final int sectionLength = section[1]-section[0];
+			double[] available = new double[sectionLength];
+			Waveform[] availableWf = new Waveform[sectionLength];
 			double[] availablePerWf = new double[Waveform.VALUES.length];
-			double[] requested = new double[section[1]-section[0]];
-			double totalRequested = 0;
 			for (int i = section[0];i<section[1];i++) {
 				IMBPartElectric electricalComp = ((IMBPartElectric) mechanical[i]);
-				Waveform localWf = electricalComp.getProduced();
+				Waveform localWf = electricalComp.getProduced(energyState);
 				if (localWf==NONE) {
+					availableWf[i-section[0]] = NONE;
 					continue;
 				}
-				if (localWf == AC_ASYNC&&Math.abs(energyState.getSpeed() - ASYNC_SPEED) >= SYNC_TOLERANCE * ASYNC_SPEED) {
+				if (localWf == AC_ASYNC&&Math.abs(energyState.getSpeed() - ASYNC_SPEED) <= SYNC_TOLERANCE * ASYNC_SPEED) {
 					localWf = AC_SYNC;
 				}
 				double availableLocal = electricalComp.getAvailableEEnergy();
-				totalAvailable += availableLocal;
 				available[i - section[0]] = availableLocal;
 				availablePerWf[localWf.ordinal()] += availableLocal;
+				availableWf[i-section[0]] = localWf;
 			}
 			Waveform maxWf = NONE;
+			double totalAvailable = 0;
+			double totalRequested = 0;
 			{
-				double max = 0;
-				for (int i = 0;i<availablePerWf.length;i++) {
-					if (availablePerWf[i]>max) {
-						maxWf = Waveform.VALUES[i];
-						max = availablePerWf[i];
+				List<Waveform> candidates = new ArrayList<>();
+				for (int i = 0; i < availablePerWf.length; i++) {
+					if (availablePerWf[i] > totalAvailable) {
+						candidates.clear();
+						candidates.add(Waveform.VALUES[i]);
+						totalAvailable = availablePerWf[i];
+					} else if (availablePerWf[i] == totalAvailable) {
+						candidates.add(Waveform.VALUES[i]);
+					}
+				}
+				if (candidates.size()==1) {
+					maxWf = candidates.iterator().next();//There is only one anyways
+				} else if (candidates.size()>1) {
+					double[] requestedPerWfSum = new double[candidates.size()];
+					for (int i = 0;i<sectionLength;i++) {
+						for (int j = 0;j<candidates.size();j++) {
+							double req = ((IMBPartElectric)mechanical[i+section[0]]).requestEEnergy(candidates.get(j), energyState);
+							if (availableWf[i]!=candidates.get(j)) {
+								requestedPerWfSum[j] += req;
+							} else {
+								requestedPerWfSum[j] += Math.max(req-available[i], 0);
+							}
+						}
+					}
+					for (int i = 0; i < candidates.size(); i++) {
+						if (totalRequested<requestedPerWfSum[i]) {
+							totalRequested = requestedPerWfSum[i];
+							maxWf = candidates.get(i);
+						}
 					}
 				}
 			}
-			for (int i = section[0];i<section[1];i++) {
-				IMBPartElectric electricalComp = ((IMBPartElectric) mechanical[i]);
-				double requestedLocal = electricalComp.requestEEnergy(maxWf);
-				totalRequested += requestedLocal;
-				requested[i - section[0]] = requestedLocal;
+			for (int i = 0;i<sectionLength;i++) {
+				if (availableWf[i]!=maxWf) {
+					available[i] = 0;//TODO should I extract the energy anyway?
+				}
 			}
+			double[] requested = new double[sectionLength];
+				for (int i = section[0]; i < section[1]; i++) {
+					IMBPartElectric electricalComp = ((IMBPartElectric) mechanical[i]);
+					double requestedLocal = electricalComp.requestEEnergy(maxWf, energyState);
+					totalRequested += requestedLocal;
+					requested[i - section[0]] = requestedLocal;
+				}
+
 			// this isn't ideal. It's a lot better than before though
 			if (totalAvailable>0&&totalRequested>0) {
 				for (int i = section[0]; i < section[1]; i++) {
@@ -148,7 +202,7 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 						double otherAvailable = totalAvailable-available[i0];
 						double ins = Math.min(requested[i0], otherAvailable);
 						double extractFactor = ins/otherAvailable;
-						electricalComp.insertEEnergy(ins, maxWf);
+						electricalComp.insertEEnergy(ins, maxWf, energyState);
 						for (int j = section[0];j<section[1];j++) {
 							if (i!=j) {
 								IMBPartElectric compJ = (IMBPartElectric) mechanical[j];
@@ -227,19 +281,24 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 			electrical.add(new int[]{lastEStart, mechanical.length});
 		}
 		electricalStartEnd = electrical.toArray(new int[electrical.size()][]);
-		decay = Math.pow(Math.exp(Math.log(.5)/(2*60*60*20)), mechanical.length);//TODO replace with DECAY_BASE
+		decay = Math.pow(DECAY_BASE, mechanical.length);
 		energyState = new MechEnergy(weight, speed);
 	}
 
 	private int getPart(int offset, TileEntityMultiblockConverter master) {
+		if (offset==0) {
+			return -1;
+		}
 		int pos = 1;
 		MechMBPart[] mechMaster = master.mechanical;
-		for (int i = 0, mechanical1Length = mechMaster.length; i < mechanical1Length; i++) {
-			MechMBPart part = mechMaster[i];
-			if (pos >= offset) {
-				return i;
+		if (mechMaster!=null) {
+			for (int i = 0, mechanical1Length = mechMaster.length; i < mechanical1Length; i++) {
+				MechMBPart part = mechMaster[i];
+				if (pos >= offset) {
+					return i;
+				}
+				pos += part.getLength();
 			}
-			pos += part.getLength();
 		}
 		return -1;
 	}
@@ -252,7 +311,7 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 
     @Override
     public IBlockState getOriginalBlock() {
-        return Blocks.AIR.getDefaultState();//Mostly irrelevant, since this uses a custome disassembly method
+        return Blocks.AIR.getDefaultState();//Mostly irrelevant, since this uses a custom disassembly method
     }
 
 	@Override
@@ -268,8 +327,8 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 			if (isLogicDummy()) {
 				rBB = new AxisAlignedBB(pos, pos);
 			} else {
-				rBB = new AxisAlignedBB(offset(pos, facing, mirrored, -1, 0, -1),
-						offset(pos, facing, mirrored, 2, mechanical.length, 2));
+				rBB = new AxisAlignedBB(offset(pos, facing, mirrored, -2, 0, -2),
+						offset(pos, facing, mirrored, 2, -mechanical.length, 2));
 			}
 		}
 		return rBB;
@@ -304,20 +363,23 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 
 	@Override
 	public void disassemble() {
+		final double MIN_BREAK = .1;
+		final double MIN_BREAK_BROKEN = .5;
 		if (formed) {
 			TileEntityMultiblockConverter master = master(this);
-			if (master!=null) {
-				boolean disassembled = false;
-				int part = master.getPart(offset.getX(), master);
-				if (part>=0) {
-					MechMBPart m = master.mechanical[part];
-					if (master.energyState.getSpeed()>.05*m.getMaxSpeed()) {
-						master.disassemble(ImmutableSet.of(m));
-						disassembled = true;
+			if (master != null) {
+				int partId = master.getPart(offset.getX(), master);
+				MechMBPart broken = null;
+				if (partId >= 0) {
+					broken = master.mechanical[partId];
+				}
+				Set<MechMBPart> failed = new HashSet<>();
+				for (MechMBPart part : master.mechanical) {
+					if (master.energyState.getSpeed() > (part == broken ? MIN_BREAK_BROKEN : MIN_BREAK) * part.getMaxSpeed()) {
+						failed.add(part);
 					}
 				}
-				if (!disassembled)
-					master.disassemble(ImmutableSet.of());
+				master.disassemble(failed);
 			}
 		}
 	}
@@ -348,5 +410,76 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 			world.setBlockState(otherEnd.down(),
 					blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, LIGHT_ENGINEERING));
 		}
+	}
+
+	private EUCapability.IC2EnergyHandler getIC2Cap() {
+		return ENERGY_IC2!=null?getCapability(ENERGY_IC2, null):null;
+	}
+
+	@Override
+	public boolean emitsEnergyTo(IEnergyAcceptor output, EnumFacing side) {
+		EUCapability.IC2EnergyHandler cap = getIC2Cap();
+		return cap!=null&&cap.emitsEnergyTo(side);
+	}
+
+	@Override
+	public double getDemandedEnergy() {
+		EUCapability.IC2EnergyHandler cap = getIC2Cap();
+		return cap!=null?cap.getDemandedEnergy():0;
+	}
+
+	@Override
+	public int getSinkTier() {
+		EUCapability.IC2EnergyHandler cap = getIC2Cap();
+		return cap!=null?cap.getEnergyTier():0;
+	}
+
+	@Override
+	public double injectEnergy(EnumFacing enumFacing, double amount, double voltage) {
+		EUCapability.IC2EnergyHandler cap = getIC2Cap();
+		return cap!=null?cap.injectEnergy(enumFacing, amount, voltage):0;
+	}
+
+	@Override
+	public boolean acceptsEnergyFrom(IEnergyEmitter input, EnumFacing side) {
+		EUCapability.IC2EnergyHandler cap = getIC2Cap();
+		return cap!=null&&cap.acceptsEnergyFrom(side);
+	}
+
+	@Override
+	public double getOfferedEnergy() {
+		EUCapability.IC2EnergyHandler cap = getIC2Cap();
+		return cap!=null?cap.getOfferedEnergy():0;
+	}
+
+	@Override
+	public void drawEnergy(double amount) {
+		EUCapability.IC2EnergyHandler cap = getIC2Cap();
+		if (cap!=null) {
+			cap.drawEnergy(amount);
+		}
+	}
+
+	@Override
+	public int getSourceTier() {
+		EUCapability.IC2EnergyHandler cap = getIC2Cap();
+		return cap!=null?cap.getEnergyTier():0;
+	}
+
+
+	@Override
+	public void invalidate() {
+		if (!world.isRemote && !firstTick)
+			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
+		firstTick = true;
+		super.invalidate();
+	}
+
+	@Override
+	public void onChunkUnload() {
+		super.onChunkUnload();
+		if (!world.isRemote && !firstTick)
+			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
+		firstTick = true;
 	}
 }

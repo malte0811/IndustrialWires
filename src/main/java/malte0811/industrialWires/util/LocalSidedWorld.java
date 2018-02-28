@@ -28,6 +28,7 @@ public class LocalSidedWorld {
 	private BlockPos origin;
 	private EnumFacing facing;
 	private boolean mirror;
+
 	public LocalSidedWorld(World world, BlockPos origin, EnumFacing facing, boolean mirror) {
 		this.world = world;
 		this.facing = facing;
@@ -61,6 +62,10 @@ public class LocalSidedWorld {
 		world.spawnEntity(e);
 	}
 
+	public void setTileEntity(BlockPos pos, TileEntity setTo) {
+		world.setTileEntity(getRealPos(pos), setTo);
+	}
+
 	public BlockPos getRealPos(BlockPos relative) {
 		return MiscUtils.offset(origin, facing, mirror, relative);
 	}
@@ -72,6 +77,7 @@ public class LocalSidedWorld {
 	public Vec3d getRealDirection(Vec3d dir) {
 		return MiscUtils.offset(Vec3d.ZERO, facing, mirror, dir);
 	}
+
 
 	//Getters+Setters
 	public World getWorld() {

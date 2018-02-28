@@ -21,6 +21,7 @@ import blusunrize.immersiveengineering.api.IEProperties;
 import blusunrize.immersiveengineering.api.Lib;
 import blusunrize.immersiveengineering.client.ClientUtils;
 import blusunrize.immersiveengineering.common.util.ItemNBTHelper;
+import com.google.common.collect.ImmutableMap;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.BlockIWBase;
 import malte0811.industrialWires.blocks.IMetaEnum;
@@ -28,6 +29,7 @@ import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.blocks.hv.BlockHVMultiblocks;
 import malte0811.industrialWires.client.panelmodel.PanelModel;
 import malte0811.industrialWires.controlpanel.PanelComponent;
+import malte0811.industrialWires.converter.MechMBPart;
 import malte0811.industrialWires.items.ItemIC2Coil;
 import malte0811.industrialWires.items.ItemKey;
 import malte0811.industrialWires.items.ItemPanelComponent;
@@ -35,9 +37,11 @@ import malte0811.industrialWires.wires.IC2Wiretype;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.block.statemap.StateMapperBase;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -50,7 +54,10 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.client.event.*;
+import net.minecraftforge.client.model.IModel;
 import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.client.model.ModelLoaderRegistry;
+import net.minecraftforge.client.model.obj.OBJModel;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -61,6 +68,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import javax.annotation.Nonnull;
 import java.util.Locale;
 import java.util.Map;
+
+import static malte0811.industrialWires.client.render.TileRenderMBConverter.BASE_MODELS;
 
 @Mod.EventBusSubscriber(modid = IndustrialWires.MODID, value = Side.CLIENT)
 public class ClientEventHandler {
@@ -188,6 +197,24 @@ public class ClientEventHandler {
 			ITextComponent comp = ScreenShotHelper.saveScreenshot(mc.mcDataDir, mc.displayWidth, mc.displayHeight, mc.getFramebuffer());//TODO
 			mc.player.sendMessage(comp);
 			shouldScreenshot = false;
+		}
+	}
+
+	@SubscribeEvent
+	public static void onTextureStitch(TextureStitchEvent event) {
+		for (MechMBPart type:MechMBPart.INSTANCES.values()) {
+			ResourceLocation loc = type.getRotatingBaseModel();
+			try {
+				IModel model = ModelLoaderRegistry.getModel(loc);
+				if (model instanceof OBJModel) {
+					model = model.process(ImmutableMap.of("flip-v", "true"));
+				}
+				model.getTextures().forEach((rl)->event.getMap().registerSprite(rl));
+				IBakedModel b = model.bake(model.getDefaultState(), DefaultVertexFormats.BLOCK, (rl)->Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(rl.toString()));
+				BASE_MODELS.put(loc, b);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 }

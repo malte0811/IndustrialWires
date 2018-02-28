@@ -44,7 +44,7 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 	private double bufferToWorld;
 	private boolean isACInWBuffer;
 	@Override
-	public Waveform getProduced() {
+	public Waveform getProduced(MechEnergy state) {
 		return bufferToMB>0?(isACInMBBuffer? AC_ASYNC: DC): NONE;
 	}
 
@@ -59,12 +59,12 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 	}
 
 	@Override
-	public double requestEEnergy(Waveform waveform) {
+	public double requestEEnergy(Waveform waveform, MechEnergy energy) {
 		return MAX_BUFFER-bufferToWorld;
 	}
 
 	@Override
-	public void insertEEnergy(double given, Waveform waveform) {
+	public void insertEEnergy(double given, Waveform waveform, MechEnergy energy) {
 		if (bufferToWorld > 0 && (isACInWBuffer ^ waveform.isAC())) {
 			bufferToWorld = 0;
 		}
@@ -117,16 +117,16 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 	}
 
 	@Override
-	public void readFromNBT(NBTTagCompound out) {
-		bufferToMB = out.getDouble(BUFFER_IN);
-		isACInMBBuffer = out.getBoolean(BUFFER_IN+AC);
-		bufferToWorld = out.getDouble(BUFFER_OUT);
-		isACInWBuffer = out.getBoolean(BUFFER_OUT+AC);
+	public void readFromNBT(NBTTagCompound in) {
+		bufferToMB = in.getDouble(BUFFER_IN);
+		isACInMBBuffer = in.getBoolean(BUFFER_IN+AC);
+		bufferToWorld = in.getDouble(BUFFER_OUT);
+		isACInWBuffer = in.getBoolean(BUFFER_OUT+AC);
 	}
 
 	@Override
 	public ResourceLocation getRotatingBaseModel() {
-		return new ResourceLocation(IndustrialWires.MODID, "block/mech_mb/shaft.obj");//TODO texture
+		return new ResourceLocation(IndustrialWires.MODID, "block/mech_mb/shaft2.obj");
 	}
 
 
@@ -150,7 +150,7 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 
 	@Override
 	public MechanicalMBBlockType getType() {
-		return MechanicalMBBlockType.SHAFT_COMMUTATOR;
+		return MechanicalMBBlockType.SHAFT_1_PHASE;
 	}
 
 

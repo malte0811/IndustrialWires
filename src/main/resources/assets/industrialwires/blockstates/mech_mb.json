@@ -28,6 +28,9 @@
       "shaft_commutator": {
         "model": "industrialwires:mech_mb/commutator.obj"
       },
+      "shaft_1_phase": {
+        "model": "industrialwires:mech_mb/two_electrodes.obj"
+      },
       "shaft_basic": {
       }
     },

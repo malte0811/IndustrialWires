@@ -1,2 +1,8 @@
-newmtl None
+# Blender MTL File: 'RotaryConverter.blend'
+# Material Count: 2
+
+newmtl Shaft
+map_Ka industrialwires:blocks/converter/shaft
+
+newmtl Wheel
 map_Ka immersiveengineering:blocks/storage_steel

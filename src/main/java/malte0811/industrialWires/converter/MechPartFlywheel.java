@@ -74,8 +74,8 @@ public class MechPartFlywheel extends MechMBPart {
 	}
 
 	@Override
-	public void readFromNBT(NBTTagCompound out) {
-		material = Material.values()[out.getInteger("material")];
+	public void readFromNBT(NBTTagCompound in) {
+		material = Material.values()[in.getInteger("material")];
 	}
 
 	@Override
@@ -87,7 +87,13 @@ public class MechPartFlywheel extends MechMBPart {
 	public List<BakedQuad> getRotatingQuads() {
 		List<BakedQuad> orig = super.getRotatingQuads();
 		TextureAtlasSprite newTex = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(material.blockTexture.toString());
-		return orig.stream().map((quad)->new BakedQuadRetextured(quad, newTex)).collect(Collectors.toList());
+		return orig.stream().map((quad)->{
+			if (quad.getSprite().getIconName().contains("steel")) {
+				return new BakedQuadRetextured(quad, newTex);
+			} else {
+				return quad;
+			}
+		}).collect(Collectors.toList());
 	}
 
 	@Override

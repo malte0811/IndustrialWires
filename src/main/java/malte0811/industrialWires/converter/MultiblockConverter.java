@@ -75,75 +75,69 @@ public class MultiblockConverter implements MultiblockHandler.IMultiblock {
 
 	@Override
 	public boolean createStructure(World world, BlockPos pos, EnumFacing side, EntityPlayer player) {
-		boolean b = true;
 		BlockPos.PooledMutableBlockPos mutPos = BlockPos.PooledMutableBlockPos.retain();
 		try {
 			LocalSidedWorld w = new LocalSidedWorld(world, pos, side.getOpposite(), false);
 			if (!checkEnd(w, mutPos)) {
 				return false;
 			}
-			mirrorLoop:do {
-				b = !b;
-				w.setMirror(b);
-				boolean done = false;
-				List<MechMBPart> parts = new ArrayList<>();
-				int lastLength = 1;
-				double weight = 0;
-				while (!done) {
-					mutPos.setPos(0, 0, lastLength);
-					w.setOrigin(w.getRealPos(mutPos));
-					MechMBPart next = null;
-					for (String key:MechMBPart.INSTANCES.keySet()) {
-						MechMBPart it = MechMBPart.INSTANCES.get(key);
-						if (it.canForm(w)) {
-							next = it;
-							MechMBPart.cacheNewInstance(key);
-							break;
-						}
-					}
-					if (next!=null) {
-						parts.add(next);
-						lastLength = next.getLength();
-						weight += next.getInertia();
-					} else {
-						if (parts.size()>0&&checkEnd(w, mutPos)) {
-							done = true;
-						} else {
-							continue mirrorLoop;
-						}
-					}
-				}
-				double finalWeight = weight;
-				w.setOrigin(pos);
-				formEnd(w, mutPos, END, (te, master)->{
-					if (master) {
-						te.offset = BlockPos.ORIGIN;
-						te.setMechanical(parts.toArray(new MechMBPart[parts.size()]), 0);
-						te.energyState = new MechEnergy(finalWeight, 0);
-					} else {
-						te.offset = new BlockPos(0, -1, 0);
-					}
-					te.facing = side;
-					te.formed = true;
-				});
-				lastLength = 1;
-				Consumer<TileEntityMultiblockConverter> init = (te)-> {
-					te.offset = te.getPos().subtract(pos);
-					te.facing = side;
-					te.formed = true;
-				};
-				for (MechMBPart part:parts) {
-					mutPos.setPos(0, 0, lastLength);
-					w = new LocalSidedWorld(world, w.getRealPos(mutPos), w.getFacing(), w.isMirrored());
-					part.form(w, init);
-					lastLength = part.getLength();
-				}
+			boolean foundAll = false;
+			List<MechMBPart> parts = new ArrayList<>();
+			int lastLength = 1;
+			double weight = 0;
+			while (!foundAll) {
 				mutPos.setPos(0, 0, lastLength);
-				w = new LocalSidedWorld(w.getWorld(), w.getRealPos(mutPos), w.getFacing(), w.isMirrored());
-				formEnd(w, mutPos, OTHER_END, (te, __)->init.accept(te));
-				break;
-			} while (!b);
-			return false;
+				w.setOrigin(w.getRealPos(mutPos));
+				MechMBPart next = null;
+				for (String key : MechMBPart.INSTANCES.keySet()) {
+					MechMBPart it = MechMBPart.INSTANCES.get(key);
+					if (it.canForm(w)) {
+						next = it;
+						MechMBPart.cacheNewInstance(key);
+						break;
+					}
+				}
+				if (next != null) {
+					parts.add(next);
+					lastLength = next.getLength();
+					weight += next.getInertia();
+				} else {
+					if (parts.size() > 0 && checkEnd(w, mutPos)) {
+						foundAll = true;
+					} else {
+						return false;
+					}
+				}
+			}
+			double finalWeight = weight;
+			w.setOrigin(pos);
+			formEnd(w, mutPos, END, (te, master) -> {
+				if (master) {
+					te.offset = BlockPos.ORIGIN;
+					te.setMechanical(parts.toArray(new MechMBPart[parts.size()]), 0);
+					te.energyState = new MechEnergy(finalWeight, 0);
+				} else {
+					te.offset = new BlockPos(0, -1, 0);
+				}
+				te.facing = side;
+				te.formed = true;
+			});
+			lastLength = 1;
+			Consumer<TileEntityMultiblockConverter> init = (te) -> {
+				te.offset = te.getPos().subtract(pos);
+				te.facing = side;
+				te.formed = true;
+			};
+			for (MechMBPart part : parts) {
+				mutPos.setPos(0, 0, lastLength);
+				w = new LocalSidedWorld(world, w.getRealPos(mutPos), w.getFacing(), w.isMirrored());
+				part.form(w, init);
+				lastLength = part.getLength();
+			}
+			mutPos.setPos(0, 0, lastLength);
+			w = new LocalSidedWorld(w.getWorld(), w.getRealPos(mutPos), w.getFacing(), w.isMirrored());
+			formEnd(w, mutPos, OTHER_END, (te, __) -> init.accept(te));
+			return true;
 		} finally {
 			mutPos.release();
 		}

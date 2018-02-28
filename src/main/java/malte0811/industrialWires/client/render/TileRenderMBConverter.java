@@ -16,7 +16,6 @@
 package malte0811.industrialWires.client.render;
 
 import blusunrize.immersiveengineering.client.ClientUtils;
-import com.google.common.collect.ImmutableMap;
 import malte0811.industrialWires.blocks.converter.TileEntityMultiblockConverter;
 import malte0811.industrialWires.converter.MechMBPart;
 import net.minecraft.client.Minecraft;
@@ -33,9 +32,6 @@ import net.minecraft.client.renderer.vertex.VertexFormatElement;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.IResourceManagerReloadListener;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.model.IModel;
-import net.minecraftforge.client.model.ModelLoaderRegistry;
-import net.minecraftforge.client.model.obj.OBJModel;
 import org.lwjgl.opengl.GL11;
 
 import java.util.*;
@@ -47,21 +43,6 @@ public class TileRenderMBConverter extends TileEntitySpecialRenderer<TileEntityM
 	public static final Set<TileEntityMultiblockConverter> TES_WITH_MODELS = Collections.newSetFromMap(new WeakHashMap<>());
 	@Override
 	public void render(TileEntityMultiblockConverter te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
-		if (BASE_MODELS.isEmpty()) {
-			for (MechMBPart type:MechMBPart.INSTANCES.values()) {
-				ResourceLocation loc = type.getRotatingBaseModel();
-				try {
-					IModel model = ModelLoaderRegistry.getModel(loc);
-					if (model instanceof OBJModel) {
-						model = ((OBJModel)model).process(ImmutableMap.of("flip-v", "true"));
-					}
-					IBakedModel b = model.bake(model.getDefaultState(), DefaultVertexFormats.BLOCK, (rl)->Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(rl.toString()));
-					BASE_MODELS.put(loc, b);
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			}
-		}
 		if (te.mechanical!=null) {
 			if (te.rotatingModel == null)
 			{
@@ -118,7 +99,6 @@ public class TileRenderMBConverter extends TileEntitySpecialRenderer<TileEntityM
 
 	@Override
 	public void onResourceManagerReload(IResourceManager resourceManager) {
-		BASE_MODELS.clear();
 		for (TileEntityMultiblockConverter te:TES_WITH_MODELS)
 			te.rotatingModel = null;
 		TES_WITH_MODELS.clear();

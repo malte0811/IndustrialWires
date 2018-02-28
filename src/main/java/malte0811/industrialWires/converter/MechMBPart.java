@@ -57,7 +57,7 @@ public abstract class MechMBPart {
 	public abstract double getInertia();
 	public abstract double getMaxSpeed();
 	public abstract void writeToNBT(NBTTagCompound out);
-	public abstract void readFromNBT(NBTTagCompound out);
+	public abstract void readFromNBT(NBTTagCompound in);
 
 	@SideOnly(Side.CLIENT)
 	public List<BakedQuad> getRotatingQuads() {
@@ -89,13 +89,13 @@ public abstract class MechMBPart {
 	}
 
 	private static final BiMap<String, Class<? extends MechMBPart>> REGISTRY = HashBiMap.create();
-	public static void init() {
+	public static void preInit() {
 		IMBPartElectric.Waveform.init();
 
 		REGISTRY.put("flywheel", MechPartFlywheel.class);
 		REGISTRY.put("singleCoil", MechPartSingleCoil.class);
-		//REGISTRY.put("twoElectrodes", MechPartTwoElectrodes.class);
-		REGISTRY.put("commutator", MechPartTwoElectrodes.class);//TODO rename
+		REGISTRY.put("twoElectrodes", MechPartTwoElectrodes.class);
+		REGISTRY.put("commutator", MechPartCommutator.class);
 		REGISTRY.put("shaft", MechPartShaft.class);
 
 		for (String key : REGISTRY.keySet()) {
