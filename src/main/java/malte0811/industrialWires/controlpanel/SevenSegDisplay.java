@@ -1,6 +1,6 @@
 /*
  * This file is part of Industrial Wires.
- * Copyright (C) 2016-2017 malte0811
+ * Copyright (C) 2016-2018 malte0811
  * Industrial Wires is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -41,9 +41,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static malte0811.industrialWires.util.MiscUtils.*;
-import static malte0811.industrialWires.util.NBTKeys.COLOR;
-import static malte0811.industrialWires.util.NBTKeys.RS_CHANNEL;
-import static malte0811.industrialWires.util.NBTKeys.RS_ID;
+import static malte0811.industrialWires.util.NBTKeys.*;
 
 public class SevenSegDisplay extends PanelComponent implements IConfigurableComponent {
 	public static final String NAME = "7seg";

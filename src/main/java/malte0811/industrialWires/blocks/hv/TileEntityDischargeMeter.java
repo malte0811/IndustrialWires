@@ -1,6 +1,6 @@
 /*
  * This file is part of Industrial Wires.
- * Copyright (C) 2016-2017 malte0811
+ * Copyright (C) 2016-2018 malte0811
  * Industrial Wires is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
