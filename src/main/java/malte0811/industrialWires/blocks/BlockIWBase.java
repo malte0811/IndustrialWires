@@ -19,6 +19,7 @@ import blusunrize.immersiveengineering.api.IEProperties;
 import blusunrize.immersiveengineering.api.energy.wires.IImmersiveConnectable;
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
+import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IPlayerInteraction;
 import blusunrize.immersiveengineering.common.util.Utils;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.util.MiscUtils;
@@ -178,8 +179,9 @@ public abstract class BlockIWBase extends Block {
 				}
 				return true;
 			}
-		} else if (te instanceof IEBlockInterfaces.IPlayerInteraction) {
-			if (((IEBlockInterfaces.IPlayerInteraction) te).interact(side, player, hand, heldItem, hitX, hitY, hitZ)) {
+		}
+		if (te instanceof IPlayerInteraction) {
+			if (((IPlayerInteraction) te).interact(side, player, hand, heldItem, hitX, hitY, hitZ)) {
 				return true;
 			}
 		}
@@ -217,6 +219,35 @@ public abstract class BlockIWBase extends Block {
 	@Override
 	public int damageDropped(IBlockState state) {
 		return getMetaFromState(state);
+	}
+
+	@Override
+	public int getStrongPower(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side) {
+		TileEntity te = world.getTileEntity(pos);
+		if (te instanceof IEBlockInterfaces.IRedstoneOutput) {
+			return ((IEBlockInterfaces.IRedstoneOutput) te).getStrongRSOutput(state, side);
+		}
+		return 0;
+	}
+
+	@Override
+	public int getWeakPower(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side) {
+		TileEntity te = world.getTileEntity(pos);
+		if (te instanceof IEBlockInterfaces.IRedstoneOutput) {
+			return ((IEBlockInterfaces.IRedstoneOutput) te).getWeakRSOutput(state, side);
+		}
+		return 0;
+	}
+
+	@Override
+	public boolean canConnectRedstone(IBlockState state, IBlockAccess world, BlockPos pos, @Nullable EnumFacing side) {
+		if (side!=null) {
+			TileEntity te = world.getTileEntity(pos);
+			if (te instanceof IEBlockInterfaces.IRedstoneOutput) {
+				return ((IEBlockInterfaces.IRedstoneOutput) te).canConnectRedstone(state, side);
+			}
+		}
+		return false;
 	}
 
 	protected abstract IProperty[] getProperties();

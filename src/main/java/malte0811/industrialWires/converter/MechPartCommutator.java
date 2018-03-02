@@ -208,7 +208,7 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 	}
 
 	@Override
-	public double getMaxSpeed() {
+	public double getSpeedFor15RS() {
 		return Double.MAX_VALUE;
 	}
 

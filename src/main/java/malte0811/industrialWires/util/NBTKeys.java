@@ -57,6 +57,7 @@ public final class NBTKeys {
 	public static final String TEXTURE = "texture";
 	public static final String AC = "Ac";
 	public static final String WAVEFORM = "Wf";
+	public static final String MAX_SPEED = "maxSpeed";
 
 
 	private NBTKeys() {}

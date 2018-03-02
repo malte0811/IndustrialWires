@@ -23,17 +23,23 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
+import javax.annotation.Nullable;
+
 public class LocalSidedWorld {
 	private World world;
 	private BlockPos origin;
 	private EnumFacing facing;
 	private boolean mirror;
+	public boolean isRemote;
 
 	public LocalSidedWorld(World world, BlockPos origin, EnumFacing facing, boolean mirror) {
 		this.world = world;
 		this.facing = facing;
 		this.mirror = mirror;
 		this.origin = origin;
+		if (world!=null) {
+			isRemote = world.isRemote;
+		}
 	}
 
 	public IBlockState getBlockState(BlockPos pos) {
@@ -66,6 +72,15 @@ public class LocalSidedWorld {
 		world.setTileEntity(getRealPos(pos), setTo);
 	}
 
+
+	public void markForUpdate(BlockPos rel) {
+		BlockPos pos = getRealPos(rel);
+		IBlockState state = world.getBlockState(pos);
+		world.notifyBlockUpdate(pos, state, state, 3);
+		world.notifyNeighborsOfStateChange(pos, state.getBlock(), true);
+	}
+
+	//Transformation utils
 	public BlockPos getRealPos(BlockPos relative) {
 		return MiscUtils.offset(origin, facing, mirror, relative);
 	}
@@ -78,6 +93,19 @@ public class LocalSidedWorld {
 		return MiscUtils.offset(Vec3d.ZERO, facing, mirror, dir);
 	}
 
+	public EnumFacing realToTransformed(@Nullable EnumFacing f) {
+		if (f==null||f.getAxis()== EnumFacing.Axis.Y) {
+			return f;
+		}
+		return EnumFacing.getHorizontal(f.getHorizontalIndex()+facing.getHorizontalIndex());
+	}
+
+	public EnumFacing transformedToReal(@Nullable EnumFacing f) {
+		if (f==null||f.getAxis()== EnumFacing.Axis.Y) {
+			return f;
+		}
+		return EnumFacing.getHorizontal(f.getHorizontalIndex()-facing.getHorizontalIndex());
+	}
 
 	//Getters+Setters
 	public World getWorld() {
@@ -102,6 +130,9 @@ public class LocalSidedWorld {
 
 	public void setWorld(World world) {
 		this.world = world;
+		if (world!=null) {
+			isRemote = world.isRemote;
+		}
 	}
 
 	public boolean isMirrored() {

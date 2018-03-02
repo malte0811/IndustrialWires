@@ -55,7 +55,7 @@ public abstract class MechMBPart {
 	public abstract void insertMEnergy(double added);
 
 	public abstract double getInertia();
-	public abstract double getMaxSpeed();
+	public abstract double getSpeedFor15RS();
 	public abstract void writeToNBT(NBTTagCompound out);
 	public abstract void readFromNBT(NBTTagCompound in);
 
@@ -97,6 +97,7 @@ public abstract class MechMBPart {
 		REGISTRY.put("twoElectrodes", MechPartTwoElectrodes.class);
 		REGISTRY.put("commutator", MechPartCommutator.class);
 		REGISTRY.put("shaft", MechPartShaft.class);
+		REGISTRY.put("speedometer", MechPartSpeedometer.class);
 
 		for (String key : REGISTRY.keySet()) {
 			cacheNewInstance(key);

@@ -292,8 +292,8 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 
 
 	@Override
-	public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
-		if (blockState.getValue(type)==BlockTypes_Panel.SINGLE_COMP) {
+	public int getWeakPower(IBlockState state, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
+		if (state.getValue(type)==BlockTypes_Panel.SINGLE_COMP) {
 			TileEntity te = blockAccess.getTileEntity(pos);
 			if (te instanceof TileEntityComponentPanel) {
 				return ((TileEntityComponentPanel)te).getRSOutput();

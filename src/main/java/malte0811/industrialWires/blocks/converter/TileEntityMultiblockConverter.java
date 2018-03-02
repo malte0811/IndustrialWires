@@ -16,6 +16,8 @@
 package malte0811.industrialWires.blocks.converter;
 
 import blusunrize.immersiveengineering.api.ApiUtils;
+import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IPlayerInteraction;
+import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IRedstoneOutput;
 import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergyAcceptor;
@@ -34,10 +36,13 @@ import malte0811.industrialWires.network.MessageTileSyncIW;
 import malte0811.industrialWires.util.LocalSidedWorld;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -67,7 +72,7 @@ import static malte0811.industrialWires.util.NBTKeys.SPEED;
 		@Optional.Interface(iface = "ic2.api.energy.tile.IEnergySink", modid = "ic2")
 })
 public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implements ITickable, ISyncReceiver,
-		IEnergySource, IEnergySink {
+		IEnergySource, IEnergySink, IPlayerInteraction, IRedstoneOutput {
 	private static final double DECAY_BASE = Math.exp(Math.log(.5)/(2*60*60*20));
 	public static final double TICK_ANGLE_PER_SPEED = 180/20/Math.PI;
 	private static final double SYNC_THRESHOLD = .95;
@@ -129,7 +134,7 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 		}
 		Set<MechMBPart> failed = new HashSet<>();
 		for (MechMBPart part:mechanical) {
-			if (energyState.getSpeed()>part.getMaxSpeed()) {
+			if (energyState.getSpeed()>part.getSpeedFor15RS()) {
 				failed.add(part);
 			}
 		}
@@ -140,95 +145,44 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 
 		//Electrical
 		for (int[] section:electricalStartEnd) {
-			final int sectionLength = section[1]-section[0];
+			final int sectionLength = section[1] - section[0];
 			double[] available = new double[sectionLength];
 			Waveform[] availableWf = new Waveform[sectionLength];
-			double[] availablePerWf = new double[Waveform.VALUES.length];
-			for (int i = section[0];i<section[1];i++) {
+			boolean hasEnergy = false;
+			for (int i = section[0]; i < section[1]; i++) {
 				IMBPartElectric electricalComp = ((IMBPartElectric) mechanical[i]);
 				Waveform localWf = electricalComp.getProduced(energyState);
-				if (localWf==NONE) {
-					availableWf[i-section[0]] = NONE;
+				if (localWf == NONE) {
+					availableWf[i - section[0]] = NONE;
 					continue;
 				}
-				if (localWf == AC_ASYNC&&Math.abs(energyState.getSpeed() - ASYNC_SPEED) <= SYNC_TOLERANCE * ASYNC_SPEED) {
+				if (localWf == AC_ASYNC && Math.abs(energyState.getSpeed() - ASYNC_SPEED) <= SYNC_TOLERANCE * ASYNC_SPEED) {
 					localWf = AC_SYNC;
 				}
 				double availableLocal = electricalComp.getAvailableEEnergy();
 				available[i - section[0]] = availableLocal;
-				availablePerWf[localWf.ordinal()] += availableLocal;
-				availableWf[i-section[0]] = localWf;
-			}
-			Waveform maxWf = NONE;
-			double totalAvailable = 0;
-			double totalRequested = 0;
-			{
-				List<Waveform> candidates = new ArrayList<>();
-				for (int i = 0; i < availablePerWf.length; i++) {
-					if (availablePerWf[i] > totalAvailable) {
-						candidates.clear();
-						candidates.add(Waveform.VALUES[i]);
-						totalAvailable = availablePerWf[i];
-					} else if (availablePerWf[i] == totalAvailable) {
-						candidates.add(Waveform.VALUES[i]);
-					}
-				}
-				if (candidates.size()==1) {
-					maxWf = candidates.iterator().next();//There is only one anyways
-				} else if (candidates.size()>1) {
-					double[] requestedPerWfSum = new double[candidates.size()];
-					for (int i = 0;i<sectionLength;i++) {
-						for (int j = 0;j<candidates.size();j++) {
-							double req = ((IMBPartElectric)mechanical[i+section[0]]).requestEEnergy(candidates.get(j), energyState);
-							if (availableWf[i]!=candidates.get(j)) {
-								requestedPerWfSum[j] += req;
-							} else {
-								requestedPerWfSum[j] += Math.max(req-available[i], 0);
-							}
-						}
-					}
-					for (int i = 0; i < candidates.size(); i++) {
-						if (totalRequested<requestedPerWfSum[i]) {
-							totalRequested = requestedPerWfSum[i];
-							maxWf = candidates.get(i);
-						}
-					}
+				availableWf[i - section[0]] = localWf;
+				if (availableLocal>0) {
+					hasEnergy = true;
 				}
 			}
-			for (int i = 0;i<sectionLength;i++) {
-				if (availableWf[i]!=maxWf) {
-					available[i] = 0;//TODO should I extract the energy anyway?
-				}
-			}
-			double[] requested = new double[sectionLength];
-				for (int i = section[0]; i < section[1]; i++) {
-					IMBPartElectric electricalComp = ((IMBPartElectric) mechanical[i]);
-					double requestedLocal = electricalComp.requestEEnergy(maxWf, energyState);
-					totalRequested += requestedLocal;
-					requested[i - section[0]] = requestedLocal;
-				}
-
-			// this isn't ideal. It's a lot better than before though
-			if (totalAvailable>0&&totalRequested>0) {
-				for (int i = section[0]; i < section[1]; i++) {
-					IMBPartElectric electricalComp = ((IMBPartElectric) mechanical[i]);
-					int i0 = i-section[0];
-					if (requested[i0] > 0 && totalAvailable!=available[i0]) {
-						double otherAvailable = totalAvailable-available[i0];
-						double ins = Math.min(requested[i0], otherAvailable);
-						double extractFactor = ins/otherAvailable;
-						electricalComp.insertEEnergy(ins, maxWf, energyState);
-						for (int j = section[0];j<section[1];j++) {
-							if (i!=j) {
-								IMBPartElectric compJ = (IMBPartElectric) mechanical[j];
-								double extractRaw = extractFactor * available[j - section[0]];
-								compJ.extractEEnergy(extractRaw);
-								available[j-section[0]] -= extractFactor * available[j - section[0]];
-							}
-						}
-						totalAvailable -= ins;
+			if (hasEnergy) {
+				double[][] requested = new double[VALUES.length][sectionLength];
+				for (int i = 0; i < requested.length; i++) {
+					for (int j = 0; j < sectionLength; j++) {
+						requested[i][j] = ((IMBPartElectric) mechanical[j + section[0]]).requestEEnergy(VALUES[i], energyState);
 					}
 				}
+				Waveform maxWf = NONE;
+				double maxTransferred = 0;
+				for (int i = 0; i < VALUES.length; i++) {
+					double transferred = transferElectric(section, Arrays.copyOf(available, sectionLength), availableWf, VALUES[i], requested[i], true);
+					if (transferred > maxTransferred) {
+						maxTransferred = transferred;
+						maxWf = VALUES[i];
+					}
+				}
+				transferElectric(section, available, availableWf, maxWf, requested[maxWf.ordinal()], false);
 			}
 		}
 
@@ -242,6 +196,48 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 			lastSyncedSpeed = energyState.getSpeed();
 		}
 	}
+
+	private double transferElectric(int[] section, double[] available, Waveform[] availableWf, Waveform waveform, double[] requested,
+									boolean simulate) {
+		double totalAvailable = 0;
+		for (int i = 0; i < available.length; i++) {
+			if (availableWf[i]==waveform) {
+				totalAvailable += available[i];
+			} else {
+				available[i] = 0;
+			}
+		}
+		if (totalAvailable==0) {
+			return 0;
+		}
+		double transferred = 0;
+		for (int i = section[0]; i < section[1]; i++) {
+			int i0 = i - section[0];
+			if (requested[i0] > 0 && totalAvailable != available[i0]) {
+				double otherAvailable = totalAvailable - available[i0];
+				double ins = Math.min(requested[i0], otherAvailable);
+				double extractFactor = ins / otherAvailable;
+				if (!simulate) {
+					IMBPartElectric electricalComp = ((IMBPartElectric) mechanical[i]);
+					electricalComp.insertEEnergy(ins, waveform, energyState);
+				}
+				for (int j = section[0]; j < section[1]; j++) {
+					if (i != j && availableWf[j-section[0]] == waveform) {
+						double extractRaw = extractFactor * available[j - section[0]];
+						available[j - section[0]] -= extractRaw;
+						if (!simulate) {
+							IMBPartElectric compJ = (IMBPartElectric) mechanical[j];
+							compJ.extractEEnergy(extractRaw);
+						}
+					}
+				}
+				totalAvailable -= ins;
+				transferred += ins;
+			}
+		}
+		return transferred;
+	}
+
 	@Override
     public void writeNBT(NBTTagCompound out, boolean updatePacket) {
         super.writeNBT(out, updatePacket);
@@ -351,7 +347,7 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 
 	@Override
 	public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing) {
-		Vec3i offsetDirectional = getOffset(BlockPos.ORIGIN, this.facing, mirrored, offset);
+		Vec3i offsetDirectional = getOffsetDir();
 		TileEntityMultiblockConverter master = masterOr(this, this);
 		int id = getPart(offsetDirectional.getY(), master);
 		if (id<0) {
@@ -359,13 +355,13 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 		}
 		MechMBPart part = master.mechanical[id];
 		Vec3i offsetPart = new Vec3i(offsetDirectional.getX(), offsetDirectional.getY()-master.offsets[id], offsetDirectional.getZ());
-		return part.hasCapability(capability, facing, offsetPart);
+		return part.hasCapability(capability, part.world.realToTransformed(facing), offsetPart);
 	}
 
 	@Nullable
 	@Override
 	public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing) {
-		Vec3i offsetDirectional = getOffset(BlockPos.ORIGIN, this.facing, mirrored, offset);
+		Vec3i offsetDirectional = getOffsetDir();
 		TileEntityMultiblockConverter master = masterOr(this, this);
 		int id = getPart(offsetDirectional.getY(), master);
 		if (id<0) {
@@ -373,7 +369,7 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 		}
 		MechMBPart part = master.mechanical[id];
 		Vec3i offsetPart = new Vec3i(offsetDirectional.getX(), offsetDirectional.getY()-master.offsets[id], offsetDirectional.getZ());
-		return part.getCapability(capability, facing, offsetPart);
+		return part.getCapability(capability, part.world.realToTransformed(facing), offsetPart);
 	}
 
 	@Override
@@ -390,7 +386,7 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 				}
 				Set<MechMBPart> failed = new HashSet<>();
 				for (MechMBPart part : master.mechanical) {
-					if (master.energyState.getSpeed() > (part == broken ? MIN_BREAK_BROKEN : MIN_BREAK) * part.getMaxSpeed()) {
+					if (master.energyState.getSpeed() > (part == broken ? MIN_BREAK_BROKEN : MIN_BREAK) * part.getSpeedFor15RS()) {
 						failed.add(part);
 					}
 				}
@@ -496,5 +492,44 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 		if (!world.isRemote && !firstTick)
 			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
 		firstTick = true;
+	}
+
+	@Override
+	public boolean interact(@Nonnull EnumFacing side, @Nonnull EntityPlayer player, @Nonnull EnumHand hand,
+							@Nonnull ItemStack heldItem, float hitX, float hitY, float hitZ) {
+		TileEntityMultiblockConverter master = masterOr(this, this);
+		int id = getPart(getOffsetDir().getY(), master);
+		if (id>=0&&master.mechanical[id] instanceof IPlayerInteraction) {
+			return ((IPlayerInteraction)master.mechanical[id]).interact(side, player, hand, heldItem, hitX, hitY, hitZ);
+		}
+		return false;
+	}
+
+	private Vec3i getOffsetDir() {
+		return getOffset(BlockPos.NULL_VECTOR, facing, mirrored, offset);
+	}
+
+	@Override
+	public int getStrongRSOutput(@Nonnull IBlockState state, @Nonnull EnumFacing side) {
+		TileEntityMultiblockConverter master = masterOr(this, this);
+		int id = getPart(getOffsetDir().getY(), master);
+		if (id>=0&&master.mechanical[id] instanceof IRedstoneOutput) {
+			MechMBPart part = master.mechanical[id];
+			return ((IRedstoneOutput)part).getStrongRSOutput(state,
+					part.world.realToTransformed(side));
+		}
+		return 0;
+	}
+
+	@Override
+	public boolean canConnectRedstone(@Nonnull IBlockState state, @Nonnull EnumFacing side) {
+		TileEntityMultiblockConverter master = masterOr(this, this);
+		int id = getPart(getOffsetDir().getY(), master);
+		if (id>=0&&master.mechanical[id] instanceof IRedstoneOutput) {
+			MechMBPart part = master.mechanical[id];
+			return ((IRedstoneOutput)part).canConnectRedstone(state,
+					part.world.realToTransformed(side));
+		}
+		return false;
 	}
 }

@@ -164,9 +164,9 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 			super.registerRSOutput(id, out);
 			out.accept((int) rsChannel, (byte) (this.out>>4), this);
 		}
-		if (matchesId(rsId2, id)) {
+		if (matchesId(rsId2, id)&&hasSecond) {
 			secOutputs.add(out);
-			out.accept((int) rsChannel, (byte) (this.out&0xf), this);
+			out.accept((int) rsChannel2, (byte) (this.out&0xf), this);
 		}
 	}
 

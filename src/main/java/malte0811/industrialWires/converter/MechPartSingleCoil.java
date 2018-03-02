@@ -86,7 +86,7 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 	}
 
 	@Override
-	public double getMaxSpeed() {
+	public double getSpeedFor15RS() {
 		return Double.MAX_VALUE;//TODO I'm fine with shafts having infinite max speed. Not coils though.
 	}
 

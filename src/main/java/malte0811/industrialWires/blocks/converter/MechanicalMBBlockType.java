@@ -27,7 +27,8 @@ public enum MechanicalMBBlockType implements IStringSerializable {
     SHAFT_4_PHASE,
     SHAFT_1_PHASE,
     SHAFT_COMMUTATOR,
-    FLYWHEEL;
+    FLYWHEEL,
+	SPEEDOMETER;
     public static final MechanicalMBBlockType[] VALUES = values();
 
     @Override

@@ -45,7 +45,7 @@ public class MechPartShaft extends MechMBPart {
 	}
 
 	@Override
-	public double getMaxSpeed() {
+	public double getSpeedFor15RS() {
 		return Double.MAX_VALUE;
 	}
 

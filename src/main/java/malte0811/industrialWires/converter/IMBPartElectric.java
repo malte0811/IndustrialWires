@@ -37,7 +37,7 @@ public interface IMBPartElectric {
 		AC_ASYNC(true, 5) {
 			@Override
 			public Waveform getCommutated(double speed) {
-				if (Math.abs(speed-ASYNC_SPEED)<SYNC_TOLERANCE*ASYNC_SPEED) {
+				if (Math.abs(speed- ASYNC_SPEED)<SYNC_TOLERANCE* ASYNC_SPEED) {
 					return DC;
 				}
 				return super.getCommutated(speed);
@@ -45,7 +45,7 @@ public interface IMBPartElectric {
 		},
 		AC_4PHASE(true, 4),//TODO what should this rectify into? If anything at all
 		DC(false, 1),
-		MESS(null, 5);
+		MESS(null, 5);//TODO exclude this from providing power
 
 		public static final double ASYNC_SPEED = 10;//TODO is this a good value
 		public static final double SYNC_TOLERANCE = .1;//TODO is this a good value

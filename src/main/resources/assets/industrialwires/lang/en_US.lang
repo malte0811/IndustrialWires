@@ -107,6 +107,7 @@ industrialwires.tooltip.input_rate=%s EU/t per connector
 industrialwires.chat.tooLong=This coil does not contain enough wire for this connection
 industrialwires.chat.stackSize=Linking is only possible with a stack of size 1
 industrialwires.chat.marxEnergy=Last discharge was %s kJ per block
+industrialwires.chat.maxSpeed=Highest measurable speed: %s
 
 death.attack.industrialwires.jacobs_ladder=%1$s was electrocuted by a Jacob's Ladder
 death.attack.industrialwires.marx=%1$s was struck by lightning produced by a Marx generator
