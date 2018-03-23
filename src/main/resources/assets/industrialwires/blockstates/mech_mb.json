@@ -31,6 +31,18 @@
       "shaft_1_phase": {
         "model": "industrialwires:mech_mb/two_electrodes.obj"
       },
+      "coil_4_phase": {
+        "model": "industrialwires:mech_mb/mag_ring.obj"
+      },
+      "shaft_commutator_4": {
+        "model": "industrialwires:mech_mb/four_electrodes.obj"
+      },
+      "shaft_4_phase": {
+        "model": "industrialwires:mech_mb/four_electrodes.obj"
+      },
+      "speedometer": {
+        "model": "industrialwires:mech_mb/speedometer.obj"
+      },
       "shaft_basic": {
       }
     },

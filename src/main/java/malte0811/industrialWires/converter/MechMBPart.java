@@ -24,6 +24,7 @@ import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
 import malte0811.industrialWires.blocks.converter.TileEntityMultiblockConverter;
 import malte0811.industrialWires.client.render.TileRenderMBConverter;
 import malte0811.industrialWires.util.LocalSidedWorld;
+import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.nbt.NBTTagCompound;
@@ -36,11 +37,15 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import static blusunrize.immersiveengineering.common.IEContent.blockMetalDecoration0;
+import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.HEAVY_ENGINEERING;
+import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.LIGHT_ENGINEERING;
 import static malte0811.industrialWires.blocks.converter.MechanicalMBBlockType.NO_MODEL;
 import static malte0811.industrialWires.util.NBTKeys.TYPE;
 
@@ -55,7 +60,7 @@ public abstract class MechMBPart {
 	public abstract void insertMEnergy(double added);
 
 	public abstract double getInertia();
-	public abstract double getSpeedFor15RS();
+	public abstract double getMaxSpeed();
 	public abstract void writeToNBT(NBTTagCompound out);
 	public abstract void readFromNBT(NBTTagCompound in);
 
@@ -70,11 +75,22 @@ public abstract class MechMBPart {
 
 	public abstract boolean canForm(LocalSidedWorld w);
 
+	protected boolean hasSupportPillars(LocalSidedWorld w) {
+		for (int i = 0; i < 2; i++) {
+			for (int j = 0; j < 2; j++) {
+				IBlockState state = w.getBlockState(new BlockPos(2*i-1, j-1, 0));
+				if (!isLightEngineering(state)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	public abstract short getFormPattern();
 
 	/**
 	 * @param failed whether the MB is being disassembled because this part failed
-	 * @param energy
 	 */
 	public abstract void disassemble(boolean failed, MechEnergy energy);
 
@@ -88,7 +104,11 @@ public abstract class MechMBPart {
 		return null;
 	}
 
-	private static final BiMap<String, Class<? extends MechMBPart>> REGISTRY = HashBiMap.create();
+	public static final BiMap<String, Class<? extends MechMBPart>> REGISTRY = HashBiMap.create();
+
+	public static final Comparator<MechMBPart> SORT_BY_COUNT = Comparator.comparingInt(
+			(c)->-MiscUtils.count1Bits(c.getFormPattern())
+	);
 	public static void preInit() {
 		IMBPartElectric.Waveform.init();
 
@@ -98,6 +118,9 @@ public abstract class MechMBPart {
 		REGISTRY.put("commutator", MechPartCommutator.class);
 		REGISTRY.put("shaft", MechPartShaft.class);
 		REGISTRY.put("speedometer", MechPartSpeedometer.class);
+		REGISTRY.put("commFour", MechPartCommutator4Phase.class);
+		REGISTRY.put("fourCoils", MechPartFourCoils.class);
+		REGISTRY.put("fourElectrodes", MechPartFourElectrodes.class);
 
 		for (String key : REGISTRY.keySet()) {
 			cacheNewInstance(key);
@@ -138,7 +161,26 @@ public abstract class MechMBPart {
 
 	public static boolean isValidDefaultCenter(IBlockState state) {
 		return state.getBlock()== IEContent.blockMetalDecoration0&&
+				state.getValue(IEContent.blockMetalDecoration0.property)==BlockTypes_MetalDecoration0.HEAVY_ENGINEERING;
+	}
+
+	public static boolean isHeavyEngineering(IBlockState state) {
+		return isValidDefaultCenter(state);
+	}
+
+	public static boolean isLightEngineering(IBlockState state) {
+		return state.getBlock()== IEContent.blockMetalDecoration0&&
 				state.getValue(IEContent.blockMetalDecoration0.property)==BlockTypes_MetalDecoration0.LIGHT_ENGINEERING;
+	}
+
+	public void setDefaultShaft(BlockPos pos) {
+		world.setBlockState(pos, blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property,
+				HEAVY_ENGINEERING));
+	}
+
+	public void setLightEngineering(BlockPos pos) {
+		world.setBlockState(pos, blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property,
+				LIGHT_ENGINEERING));
 	}
 
 

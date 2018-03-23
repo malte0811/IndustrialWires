@@ -18,62 +18,48 @@ package malte0811.industrialWires.converter;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
 import malte0811.industrialWires.util.LocalSidedWorld;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 
-import static malte0811.industrialWires.blocks.converter.MechanicalMBBlockType.SHAFT_BASIC;
-
-public class MechPartShaft extends MechMBPart {
+public class MechPartFourElectrodes extends MechPartTwoElectrodes {
 	@Override
-	public void createMEnergy(MechEnergy e) {}
-
-	@Override
-	public double requestMEnergy(MechEnergy e) {
-		return 0;
+	protected double getMaxBuffer() {
+		return 8*super.getMaxBuffer();
 	}
 
 	@Override
-	public void insertMEnergy(double added) {}
-
-	@Override
-	public double getInertia() {
-		return 5;//TODO
+	protected boolean has4Phases() {
+		return true;
 	}
 
 	@Override
-	public double getMaxSpeed() {
-		return Double.MAX_VALUE;
-	}
+	public boolean canForm(LocalSidedWorld w) {
+		return super.canForm(w) && hasSupportPillars(w);
 
-	@Override
-	public void writeToNBT(NBTTagCompound out) {}
-
-	@Override
-	public void readFromNBT(NBTTagCompound in) {}
-
-	@Override
-	public ResourceLocation getRotatingBaseModel() {
-		return new ResourceLocation(IndustrialWires.MODID, "block/mech_mb/shaft.obj");
-	}
-
-	@Override
-	public boolean canForm(LocalSidedWorld world) {
-		return isValidDefaultCenter(world.getBlockState(BlockPos.ORIGIN));
 	}
 
 	@Override
 	public short getFormPattern() {
-		return 0b000_010_000;
+		return 0b000_111_101;
 	}
 
 	@Override
 	public void disassemble(boolean failed, MechEnergy energy) {
-		setDefaultShaft(BlockPos.ORIGIN);
+		super.disassemble(failed, energy);
+		for (int i = 0; i < 2; i++) {
+			for (int j = 0; j < 2; j++) {
+				setLightEngineering(new BlockPos(2*i-1, j-1, 0));
+			}
+		}
 	}
 
 	@Override
 	public MechanicalMBBlockType getType() {
-		return SHAFT_BASIC;
+		return MechanicalMBBlockType.SHAFT_4_PHASE;
+	}
+
+	@Override
+	public ResourceLocation getRotatingBaseModel() {
+		return new ResourceLocation(IndustrialWires.MODID, "block/mech_mb/shaft4.obj");
 	}
 }

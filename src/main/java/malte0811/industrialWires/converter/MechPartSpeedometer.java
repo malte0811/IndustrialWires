@@ -24,7 +24,6 @@ import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
 import malte0811.industrialWires.util.LocalSidedWorld;
 import malte0811.industrialWires.util.NBTKeys;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -39,11 +38,11 @@ import static blusunrize.immersiveengineering.common.IEContent.blockMetalDecorat
 import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.RS_ENGINEERING;
 import static malte0811.industrialWires.blocks.converter.MechanicalMBBlockType.SPEEDOMETER;
 import static net.minecraft.util.EnumFacing.Axis.X;
-import static net.minecraft.util.EnumFacing.AxisDirection.NEGATIVE;
+import static net.minecraft.util.EnumFacing.AxisDirection.POSITIVE;
 import static net.minecraft.util.math.BlockPos.ORIGIN;
 
 public class MechPartSpeedometer extends MechMBPart implements IPlayerInteraction, IRedstoneOutput {
-	private double speedFor15RS = 2 * IMBPartElectric.Waveform.ASYNC_SPEED;
+	private double speedFor15RS = 2 * IMBPartElectric.Waveform.EXTERNAL_SPEED;
 	private int currentOutputLin = -1;
 	private int currentOutputLog = -1;
 	private double logFactor = 15 / Math.log(speedFor15RS + 1);
@@ -93,7 +92,7 @@ public class MechPartSpeedometer extends MechMBPart implements IPlayerInteractio
 	}
 
 	@Override
-	public double getSpeedFor15RS() {
+	public double getMaxSpeed() {
 		return 2 * speedFor15RS;
 	}
 
@@ -139,7 +138,6 @@ public class MechPartSpeedometer extends MechMBPart implements IPlayerInteractio
 	@Override
 	public boolean interact(@Nonnull EnumFacing side, @Nonnull EntityPlayer player, @Nonnull EnumHand hand,
 							@Nonnull ItemStack heldItem, float hitX, float hitY, float hitZ) {
-		Minecraft.getMinecraft().mouseHelper.ungrabMouseCursor();
 		if (Utils.isHammer(heldItem)) {
 			if (!world.isRemote) {
 				if (player.isSneaking()) {
@@ -162,7 +160,7 @@ public class MechPartSpeedometer extends MechMBPart implements IPlayerInteractio
 	@Override
 	public int getStrongRSOutput(@Nonnull IBlockState state, @Nonnull EnumFacing side) {
 		if (side.getAxis() == X) {
-			if (side.getAxisDirection() == NEGATIVE) {
+			if (side.getAxisDirection() == POSITIVE) {
 				return currentOutputLog;
 			} else {
 				return currentOutputLin;

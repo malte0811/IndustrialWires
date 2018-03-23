@@ -24,22 +24,20 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.function.Predicate;
-
 import static blusunrize.immersiveengineering.common.IEContent.blockMetalDecoration0;
 import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.COIL_LV;
-import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.LIGHT_ENGINEERING;
 import static malte0811.industrialWires.util.NBTKeys.BUFFER_IN;
 import static malte0811.industrialWires.util.NBTKeys.BUFFER_OUT;
 
 public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
-	private static final double MAX_BUFFER = 10e3;
 	private double bufferToMech;
 	private double bufferToE;
+
 	@Override
 	public Waveform getProduced(MechEnergy state) {
 		return Waveform.AC_SYNC;
 	}
+
 	@Override
 	public double getAvailableEEnergy() {
 		return bufferToE;
@@ -52,7 +50,10 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 
 	@Override
 	public double requestEEnergy(Waveform waveform, MechEnergy energy) {
-		return MAX_BUFFER- bufferToMech;
+		if (has4Phases() ^ waveform.isSinglePhase()) {
+			return getMaxBuffer() - bufferToMech;
+		}
+		return 0;
 	}
 
 	@Override
@@ -72,7 +73,7 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 
 	@Override
 	public double requestMEnergy(MechEnergy e) {
-		return MAX_BUFFER-bufferToE;
+		return getMaxBuffer() - bufferToE;
 	}
 
 	@Override
@@ -82,11 +83,11 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 
 	@Override
 	public double getInertia() {
-		return Material.IRON.density+Material.COPPER.density;
+		return Material.IRON.density + Material.COPPER.density;
 	}
 
 	@Override
-	public double getSpeedFor15RS() {
+	public double getMaxSpeed() {
 		return Double.MAX_VALUE;//TODO I'm fine with shafts having infinite max speed. Not coils though.
 	}
 
@@ -107,9 +108,15 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 		return new ResourceLocation(IndustrialWires.MODID, "block/mech_mb/single_coil.obj");
 	}
 
-	private static final Predicate<IBlockState> IS_COIL = (b)->
-			b.getBlock()== blockMetalDecoration0&&
-					b.getValue(blockMetalDecoration0.property)== BlockTypes_MetalDecoration0.COIL_LV;
+	protected boolean isCoil(IBlockState state) {
+		return state.getBlock() == blockMetalDecoration0 &&
+				state.getValue(blockMetalDecoration0.property) == BlockTypes_MetalDecoration0.COIL_LV;
+	}
+
+	protected void setCoil(BlockPos p) {
+		world.setBlockState(p, blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, COIL_LV));
+	}
+
 	@Override
 	public boolean canForm(LocalSidedWorld w) {
 		BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain(0, 0, 0);
@@ -118,18 +125,17 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 				return false;
 			}
 			pos.setPos(0, 1, 0);
-			if (!IS_COIL.test(w.getBlockState(pos))) {
+			if (!isCoil(w.getBlockState(pos))) {
 				return false;
 			}
 			pos.setPos(0, -1, 0);
-			if (!IS_COIL.test(w.getBlockState(pos))) {
+			if (!isCoil(w.getBlockState(pos))) {
 				return false;
 			}
-			int offset = 1;
-			for (int i = 0; i < 2; i++) {
+			for (int i = -1; i <= 1; i+=2) {
 				for (int y = -1; y <= 1; y++) {
-					pos.setPos(offset, y, 0);
-					if (!w.isAir(pos)) {
+					pos.setPos(i, y, 0);
+					if (!isLightEngineering(w.getBlockState(pos))) {
 						return false;
 					}
 				}
@@ -147,12 +153,15 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 
 	@Override
 	public void disassemble(boolean failed, MechEnergy energy) {
-		world.setBlockState(BlockPos.ORIGIN,
-				blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, LIGHT_ENGINEERING));
+		setDefaultShaft(BlockPos.ORIGIN);
 		if (!failed) {
 			for (int i = -1;i<=1;i+=2) {
-				world.setBlockState(BlockPos.ORIGIN.up(i),
-						blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, COIL_LV));
+				setCoil(BlockPos.ORIGIN.up(i));
+			}
+		}
+		for (int i = -1; i <= 1; i+=2) {
+			for (int y = -1; y <= 1; y++) {
+				setLightEngineering(new BlockPos(i, y, 0));
 			}
 		}
 	}
@@ -160,5 +169,13 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 	@Override
 	public MechanicalMBBlockType getType() {
 		return MechanicalMBBlockType.COIL_1_PHASE;
+	}
+	
+	protected double getMaxBuffer() {
+		return 10e3;
+	}
+	
+	protected boolean has4Phases() {
+		return false;
 	}
 }

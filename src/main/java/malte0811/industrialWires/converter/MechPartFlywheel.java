@@ -64,7 +64,7 @@ public class MechPartFlywheel extends MechMBPart {
 	}
 
 	@Override
-	public double getSpeedFor15RS() {
+	public double getMaxSpeed() {
 		return Math.sqrt(material.tensileStrength /material.density)/RADIUS;
 	}
 
@@ -154,7 +154,7 @@ public class MechPartFlywheel extends MechMBPart {
 				Vec3d pos = mat.apply(baseVec);
 				EntityBrokenPart e = new EntityBrokenPart(world.getWorld(), material.blockTexture);
 				e.setPosition(pos.x, pos.y, .5);
-				double speed = (energy.getSpeed()/ getSpeedFor15RS())/1.5;
+				double speed = (energy.getSpeed()/ getMaxSpeed())/1.5;
 				e.motionX = pos.y*speed;
 				e.motionY = -pos.x*speed;
 				e.motionZ = (Utils.RAND.nextDouble()-.5)*speed/10;

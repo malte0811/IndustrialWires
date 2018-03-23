@@ -20,7 +20,6 @@ import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
 import malte0811.industrialWires.converter.EUCapability.IC2EnergyHandler;
 import malte0811.industrialWires.util.ConversionUtil;
 import malte0811.industrialWires.util.LocalSidedWorld;
-import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -40,8 +39,7 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 	private Waveform wfToWorld = Waveform.NONE;
 	@Override
 	public Waveform getProduced(MechEnergy state) {
-
-		return wfToMB.getCommutated(state.getSpeed());
+		return wfToMB.getCommutated(state.getSpeed(), has4Phases());
 	}
 
 	@Override
@@ -56,17 +54,19 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 
 	@Override
 	public double requestEEnergy(Waveform waveform, MechEnergy energy) {
-		if (waveform == wfToWorld.getCommutated(energy.getSpeed())) {
-			return getMaxBuffer() - bufferToWorld;
+		if (!has4Phases()^waveform.isSinglePhase()) {
+			if (waveform == wfToWorld.getCommutated(energy.getSpeed(), has4Phases())) {
+				return getMaxBuffer() - bufferToWorld;
+			} else {
+				return getMaxBuffer();
+			}
 		}
-		else {
-			return getMaxBuffer();
-		}
+		return 0;
 	}
 
 	@Override
 	public void insertEEnergy(double given, Waveform waveform, MechEnergy energy) {
-		waveform = waveform.getCommutated(energy.getSpeed());
+		waveform = waveform.getCommutated(energy.getSpeed(), has4Phases());
 		if (waveform!=wfToWorld) {
 			wfToWorld = waveform;
 			bufferToWorld = 0;
@@ -208,7 +208,7 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 	}
 
 	@Override
-	public double getSpeedFor15RS() {
+	public double getMaxSpeed() {
 		return Double.MAX_VALUE;
 	}
 
@@ -237,7 +237,6 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 			new ResourceLocation("ic2", "kinetic_generator");
 	@Override
 	public boolean canForm(LocalSidedWorld w) {
-		Minecraft.getMinecraft().mouseHelper.ungrabMouseCursor();
 		//Center is an IC2 kinetic generator
 		TileEntity te = w.getTileEntity(BlockPos.ORIGIN);
 		if (te!=null) {
@@ -271,5 +270,9 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 
 	protected double getMaxBuffer() {
 		return 2.5e3;
+	}
+
+	protected boolean has4Phases() {
+		return false;
 	}
 }

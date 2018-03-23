@@ -21,6 +21,7 @@ import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
 import malte0811.industrialWires.blocks.converter.TileEntityMultiblockConverter;
 import malte0811.industrialWires.util.LocalSidedWorld;
+import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -89,10 +90,19 @@ public class MultiblockConverter implements MultiblockHandler.IMultiblock {
 				mutPos.setPos(0, 0, lastLength);
 				w.setOrigin(w.getRealPos(mutPos));
 				MechMBPart next = null;
-				for (String key : MechMBPart.INSTANCES.keySet()) {
-					MechMBPart it = MechMBPart.INSTANCES.get(key);
-					if (it.canForm(w)) {
-						next = it;
+				List<MechMBPart> instances = new ArrayList<>(MechMBPart.INSTANCES.values());
+				instances.sort(MechMBPart.SORT_BY_COUNT);
+				int lastCount = 0;
+				for (MechMBPart part:instances) {
+					int newCount = MiscUtils.count1Bits(part.getFormPattern());
+					if (newCount==1&&lastCount>1&&checkEnd(w, mutPos)) {
+						foundAll = true;
+						break;
+					}
+					lastCount = newCount;
+					if (part.canForm(w)) {
+						next = part;
+						String key = MechMBPart.REGISTRY.inverse().get(part.getClass());
 						MechMBPart.cacheNewInstance(key);
 						break;
 					}
@@ -101,12 +111,8 @@ public class MultiblockConverter implements MultiblockHandler.IMultiblock {
 					parts.add(next);
 					lastLength = next.getLength();
 					weight += next.getInertia();
-				} else {
-					if (parts.size() > 0 && checkEnd(w, mutPos)) {
-						foundAll = true;
-					} else {
-						return false;
-					}
+				} else if (!foundAll) {
+					return false;
 				}
 			}
 			double finalWeight = weight;

@@ -31,43 +31,62 @@ public interface IMBPartElectric {
 	void insertEEnergy(double given, Waveform waveform, MechEnergy energy);
 
 	enum Waveform {
-		NONE(null, 0),
+		NONE(null, 0, true),
 		//Sync/async refers to multiblock rotation speed, not to line frequency
-		AC_SYNC(true, 4),
-		AC_ASYNC(true, 5) {
+		AC_SYNC(true, 4, true),
+		AC_ASYNC(true, 5, 4, true),
+		AC_4PHASE_SYNC(true, 4, false),
+		AC_4PHASE_ASYNC(true, 4, false),
+		DC(false, 1, true) {
 			@Override
-			public Waveform getCommutated(double speed) {
-				if (Math.abs(speed- ASYNC_SPEED)<SYNC_TOLERANCE* ASYNC_SPEED) {
-					return DC;
+			public Waveform getCommutated(double speed, boolean fourPhase) {
+				if (!fourPhase) {
+					return super.getCommutated(speed, false);
+				} else {
+					if (isSyncSpeed(speed)) {
+						return AC_4PHASE_ASYNC;
+					} else {
+						return AC_4PHASE_SYNC;
+					}
 				}
-				return super.getCommutated(speed);
 			}
 		},
-		AC_4PHASE(true, 4),//TODO what should this rectify into? If anything at all
-		DC(false, 1),
-		MESS(null, 5);//TODO exclude this from providing power
+		MESS(null, 5, true);
 
-		public static final double ASYNC_SPEED = 10;//TODO is this a good value
-		public static final double SYNC_TOLERANCE = .1;//TODO is this a good value
-		public static final double MIN_COMM_SPEED = 4;//TODO is this a good value
+		public static final double EXTERNAL_SPEED = 20;
+		public static final double SYNC_TOLERANCE = .1;
+		public static final double MIN_COMM_SPEED = 4;
 		public static final Waveform[] VALUES = values();
+		public static boolean isSyncSpeed(double speed) {
+			return Math.abs(speed- EXTERNAL_SPEED)<SYNC_TOLERANCE* EXTERNAL_SPEED;
+		}
+
 		@Nullable
 		private Boolean isAC;
-		private int dualId;
-		public Waveform dual;
-		Waveform(@Nullable Boolean ac, int dualId) {
+		boolean single;
+		private int dualId, syncDualId;
+		public Waveform dual, syncDual;
+		Waveform(@Nullable Boolean ac, int dualId, boolean singlePhase) {
+			this(ac, dualId, dualId, singlePhase);
+		}
+		Waveform(@Nullable Boolean ac, int dualId, int syncDual, boolean singlePhase) {
 			isAC = ac;
 			this.dualId = dualId;
+			syncDualId = syncDual;
+			single = singlePhase;
 		}
 
 		public static void init() {
-			Waveform[] values = values();
-			for (Waveform f:values) {
-				f.dual = values[f.dualId];
+			for (Waveform f:VALUES) {
+				f.dual = VALUES[f.dualId];
+				f.syncDual = VALUES[f.syncDualId];
 			}
 		}
 
-		public Waveform getCommutated(double speed) {
+		public Waveform getCommutated(double speed, boolean fourPhase) {
+			if (isSyncSpeed(speed)) {
+				return syncDual;
+			}
 			return speed<MIN_COMM_SPEED?this:dual;
 		}
 
@@ -77,6 +96,14 @@ public interface IMBPartElectric {
 
 		public boolean isDC() {
 			return isAC==Boolean.FALSE;
+		}
+
+		public boolean isEnergyWaveform() {
+			return isAC!=null;
+		}
+
+		public boolean isSinglePhase() {
+			return single;
 		}
 	}
 }

@@ -266,4 +266,12 @@ public final class MiscUtils {
 	public static Vector3f withNewY(Vec2f in, float y) {
 		return new Vector3f(in.x, y, in.y);
 	}
+
+	public static int count1Bits(int i) {
+		int ret = 0;
+		for (int j = 0; j < 32; j++) {
+			ret += (i>>>j)&1;
+		}
+		return ret;
+	}
 }

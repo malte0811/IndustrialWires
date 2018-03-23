@@ -38,14 +38,26 @@ import static malte0811.industrialWires.util.ConversionUtil.joulesPerIf;
 import static malte0811.industrialWires.util.NBTKeys.*;
 
 public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric {
-	private final static double MAX_BUFFER = 10e3;//200kW
 	private double bufferToMB;
 	private boolean isACInMBBuffer;
 	private double bufferToWorld;
 	private boolean isACInWBuffer;
+
 	@Override
 	public Waveform getProduced(MechEnergy state) {
-		return bufferToMB>0?(isACInMBBuffer? AC_ASYNC: DC): NONE;
+		if (bufferToMB > 0) {
+			if (isACInMBBuffer)
+				if (has4Phases()) {
+					return AC_4PHASE_ASYNC;
+				} else {
+					return AC_ASYNC;
+				}
+			else {
+				return DC;
+			}
+		} else {
+			return NONE;
+		}
 	}
 
 	@Override
@@ -60,7 +72,10 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 
 	@Override
 	public double requestEEnergy(Waveform waveform, MechEnergy energy) {
-		return MAX_BUFFER-bufferToWorld;
+		if (waveform.isSinglePhase()) {
+			return getMaxBuffer()-bufferToWorld;
+		}
+		return 0;
 	}
 
 	@Override
@@ -104,7 +119,7 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 	}
 
 	@Override
-	public double getSpeedFor15RS() {
+	public double getMaxSpeed() {
 		return Double.MAX_VALUE;//TODO
 	}
 
@@ -158,7 +173,7 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 		@Override
 		public int receiveEnergy(int maxReceive, boolean simulate) {
 			double joules = joulesPerIf()*maxReceive;
-			double insert = Math.min(joules, MAX_BUFFER-bufferToMB);
+			double insert = Math.min(joules, getMaxBuffer()-bufferToMB);
 			if (!simulate) {
 				if (!isACInMBBuffer) {
 					bufferToMB = 0;
@@ -189,7 +204,7 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 
 		@Override
 		public int getMaxEnergyStored() {
-			return (int) Math.round(MAX_BUFFER*2* ifPerJoule());
+			return (int) Math.round(getMaxBuffer()*2* ifPerJoule());
 		}
 
 		@Override
@@ -218,5 +233,13 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 		if (pos.equals(BlockPos.ORIGIN)&&side==EnumFacing.UP&&cap== CapabilityEnergy.ENERGY)
 			return CapabilityEnergy.ENERGY.cast(energy);
 		return super.getCapability(cap, side, pos);
+	}
+
+	protected double getMaxBuffer() {
+		return 10e3;//200kW
+	}
+
+	protected boolean has4Phases() {
+		return false;
 	}
 }

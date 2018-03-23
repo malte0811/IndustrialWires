@@ -59,7 +59,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 
 import static blusunrize.immersiveengineering.common.IEContent.blockMetalDecoration0;
-import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.LIGHT_ENGINEERING;
+import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.HEAVY_ENGINEERING;
 import static malte0811.industrialWires.converter.EUCapability.ENERGY_IC2;
 import static malte0811.industrialWires.converter.IMBPartElectric.Waveform.*;
 import static malte0811.industrialWires.util.MiscUtils.getOffset;
@@ -134,7 +134,7 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 		}
 		Set<MechMBPart> failed = new HashSet<>();
 		for (MechMBPart part:mechanical) {
-			if (energyState.getSpeed()>part.getSpeedFor15RS()) {
+			if (energyState.getSpeed()>part.getMaxSpeed()) {
 				failed.add(part);
 			}
 		}
@@ -156,7 +156,7 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 					availableWf[i - section[0]] = NONE;
 					continue;
 				}
-				if (localWf == AC_ASYNC && Math.abs(energyState.getSpeed() - ASYNC_SPEED) <= SYNC_TOLERANCE * ASYNC_SPEED) {
+				if (localWf == AC_ASYNC && Math.abs(energyState.getSpeed() - EXTERNAL_SPEED) <= SYNC_TOLERANCE * EXTERNAL_SPEED) {
 					localWf = AC_SYNC;
 				}
 				double availableLocal = electricalComp.getAvailableEEnergy();
@@ -169,8 +169,10 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 			if (hasEnergy) {
 				double[][] requested = new double[VALUES.length][sectionLength];
 				for (int i = 0; i < requested.length; i++) {
-					for (int j = 0; j < sectionLength; j++) {
-						requested[i][j] = ((IMBPartElectric) mechanical[j + section[0]]).requestEEnergy(VALUES[i], energyState);
+					if (VALUES[i].isEnergyWaveform()) {
+						for (int j = 0; j < sectionLength; j++) {
+							requested[i][j] = ((IMBPartElectric) mechanical[j + section[0]]).requestEEnergy(VALUES[i], energyState);
+						}
 					}
 				}
 				Waveform maxWf = NONE;
@@ -182,7 +184,9 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 						maxWf = VALUES[i];
 					}
 				}
-				transferElectric(section, available, availableWf, maxWf, requested[maxWf.ordinal()], false);
+				if (maxWf!=NONE) {
+					transferElectric(section, available, availableWf, maxWf, requested[maxWf.ordinal()], false);
+				}
 			}
 		}
 
@@ -386,7 +390,7 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 				}
 				Set<MechMBPart> failed = new HashSet<>();
 				for (MechMBPart part : master.mechanical) {
-					if (master.energyState.getSpeed() > (part == broken ? MIN_BREAK_BROKEN : MIN_BREAK) * part.getSpeedFor15RS()) {
+					if (master.energyState.getSpeed() > (part == broken ? MIN_BREAK_BROKEN : MIN_BREAK) * part.getMaxSpeed()) {
 						failed.add(part);
 					}
 				}
@@ -399,9 +403,9 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 		if (!world.isRemote&&formed) {
 			formed = false;
 			world.setBlockState(pos,
-					blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, LIGHT_ENGINEERING));
+					blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, HEAVY_ENGINEERING));
 			world.setBlockState(pos.down(),
-					blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, LIGHT_ENGINEERING));
+					blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, HEAVY_ENGINEERING));
 			for (MechMBPart mech:mechanical) {
 				mech.disassemble(failed.contains(mech), energyState);
 				short pattern = mech.getFormPattern();
@@ -417,9 +421,9 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 			BlockPos otherEnd = offset(pos, facing.getOpposite(), mirrored, 0,
 					offsets[offsets.length-1]+mechanical[mechanical.length-1].getLength(), 0);
 			world.setBlockState(otherEnd,
-					blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, LIGHT_ENGINEERING));
+					blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, HEAVY_ENGINEERING));
 			world.setBlockState(otherEnd.down(),
-					blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, LIGHT_ENGINEERING));
+					blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, HEAVY_ENGINEERING));
 		}
 	}
 
