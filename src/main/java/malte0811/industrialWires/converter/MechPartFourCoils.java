@@ -87,4 +87,9 @@ public class MechPartFourCoils extends MechPartSingleCoil {
 	public ResourceLocation getRotatingBaseModel() {
 		return new ResourceLocation(IndustrialWires.MODID, "block/mech_mb/four_coil.obj");
 	}
+
+	@Override
+	public double getMaxSpeed() {
+		return 500;
+	}
 }

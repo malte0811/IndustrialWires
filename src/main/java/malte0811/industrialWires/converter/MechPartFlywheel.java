@@ -38,9 +38,6 @@ import net.minecraftforge.oredict.OreDictionary;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static blusunrize.immersiveengineering.common.IEContent.blockMetalDecoration0;
-import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.LIGHT_ENGINEERING;
-
 public class MechPartFlywheel extends MechMBPart {
 	private static final double RADIUS = 1.25;
 	private static final double THICKNESS = 1;
@@ -127,8 +124,7 @@ public class MechPartFlywheel extends MechMBPart {
 
 	@Override
 	public void disassemble(boolean failed, MechEnergy energy) {
-		world.setBlockState(BlockPos.ORIGIN,
-				blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, LIGHT_ENGINEERING));
+		setDefaultShaft(BlockPos.ORIGIN);
 		IBlockState state = Blocks.AIR.getDefaultState();
 		if (!failed) {
 			for (ItemStack block: OreDictionary.getOres("block"+material.oreName())) {
@@ -153,7 +149,7 @@ public class MechPartFlywheel extends MechMBPart {
 				mat.rotate(Math.PI/4, 0, 0, 1);
 				Vec3d pos = mat.apply(baseVec);
 				EntityBrokenPart e = new EntityBrokenPart(world.getWorld(), material.blockTexture);
-				e.setPosition(pos.x, pos.y, .5);
+				e.setPosition(pos.x, pos.y, -.5);
 				double speed = (energy.getSpeed()/ getMaxSpeed())/1.5;
 				e.motionX = pos.y*speed;
 				e.motionY = -pos.x*speed;

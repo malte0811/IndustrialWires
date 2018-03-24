@@ -15,49 +15,43 @@
 
 package malte0811.industrialWires.converter;
 
+import com.google.common.collect.ImmutableSet;
+import malte0811.industrialWires.IWConfig;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
 import malte0811.industrialWires.util.ConversionUtil;
 import malte0811.industrialWires.util.LocalSidedWorld;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.Set;
 
 import static blusunrize.immersiveengineering.common.IEContent.blockMetalDecoration0;
 import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.GENERATOR;
-import static malte0811.industrialWires.converter.IMBPartElectric.Waveform.*;
+import static malte0811.industrialWires.converter.Waveform.Phases.get;
 import static malte0811.industrialWires.util.ConversionUtil.ifPerJoule;
 import static malte0811.industrialWires.util.ConversionUtil.joulesPerIf;
 import static malte0811.industrialWires.util.NBTKeys.*;
+import static net.minecraft.util.EnumFacing.UP;
+import static net.minecraft.util.math.BlockPos.ORIGIN;
 
 public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric {
 	private double bufferToMB;
-	private boolean isACInMBBuffer;
+	private Waveform wfToMB = Waveform.forParameters(Waveform.Type.NONE, get(has4Phases()), Waveform.Speed.EXTERNAL);
 	private double bufferToWorld;
-	private boolean isACInWBuffer;
+	private Waveform wfToWorld = Waveform.forParameters(Waveform.Type.NONE, get(has4Phases()), Waveform.Speed.ROTATION);
 
 	@Override
 	public Waveform getProduced(MechEnergy state) {
-		if (bufferToMB > 0) {
-			if (isACInMBBuffer)
-				if (has4Phases()) {
-					return AC_4PHASE_ASYNC;
-				} else {
-					return AC_ASYNC;
-				}
-			else {
-				return DC;
-			}
-		} else {
-			return NONE;
-		}
+		return wfToMB;
 	}
 
 	@Override
@@ -72,7 +66,7 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 
 	@Override
 	public double requestEEnergy(Waveform waveform, MechEnergy energy) {
-		if (waveform.isSinglePhase()) {
+		if (waveform.isSinglePhase()^has4Phases()) {
 			return getMaxBuffer()-bufferToWorld;
 		}
 		return 0;
@@ -80,13 +74,11 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 
 	@Override
 	public void insertEEnergy(double given, Waveform waveform, MechEnergy energy) {
-		if (bufferToWorld > 0 && (isACInWBuffer ^ waveform.isAC())) {
+		if (bufferToWorld > 0 && (wfToWorld.isAC() ^ waveform.isAC())) {
 			bufferToWorld = 0;
 		}
-		if (waveform.isAC() || waveform.isAC()) {
-			bufferToWorld += given;
-			isACInWBuffer = waveform.isAC();
-		}
+		bufferToWorld += given;
+		wfToWorld = waveform;
 	}
 
 	@Override
@@ -99,44 +91,37 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 
 	@Override
 	public void insertMEnergy(double added) {
-		int available = (int) (ConversionUtil.ifPerJoule()*bufferToWorld);
-		if (available>0&&isACInWBuffer) {//The IC2 net will deal with DC by itself
-			BlockPos up = BlockPos.ORIGIN.up();
-			TileEntity te = world.getTileEntity(up);
-			if (te != null && te.hasCapability(CapabilityEnergy.ENERGY, EnumFacing.DOWN)) {
-				IEnergyStorage energy = te.getCapability(CapabilityEnergy.ENERGY, EnumFacing.DOWN);
-				if (energy != null && energy.canReceive()) {
-					int received = energy.receiveEnergy(available, false);
-					bufferToWorld -= ConversionUtil.joulesPerIf() * received;
-				}
-			}
+		int available = (int) (Math.min(ConversionUtil.ifPerJoule() * bufferToWorld,
+				getMaxBuffer()/getEnergyConnections().size()));
+		if (available > 0 && wfToWorld.isAC()) {//The IC2 net will deal with DC by itself
+			bufferToWorld -= outputFE(world, available);
 		}
 	}
 
 	@Override
 	public double getInertia() {
-		return 50;//Random value. Does this work reasonably well?
+		return 50;
 	}
 
 	@Override
 	public double getMaxSpeed() {
-		return Double.MAX_VALUE;//TODO
+		return IWConfig.MechConversion.allowMBFE()?200:-1;
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound out) {
 		out.setDouble(BUFFER_IN, bufferToMB);
-		out.setBoolean(BUFFER_IN+AC, isACInMBBuffer);
+		out.setInteger(BUFFER_IN+AC, wfToMB.getIndex());
 		out.setDouble(BUFFER_OUT, bufferToWorld);
-		out.setBoolean(BUFFER_OUT+AC, isACInWBuffer);
+		out.setInteger(BUFFER_OUT+AC, wfToWorld.getIndex());
 	}
 
 	@Override
 	public void readFromNBT(NBTTagCompound in) {
 		bufferToMB = in.getDouble(BUFFER_IN);
-		isACInMBBuffer = in.getBoolean(BUFFER_IN+AC);
+		wfToMB = Waveform.VALUES[in.getInteger(BUFFER_IN+AC)];
 		bufferToWorld = in.getDouble(BUFFER_OUT);
-		isACInWBuffer = in.getBoolean(BUFFER_OUT+AC);
+		wfToWorld = Waveform.VALUES[in.getInteger(BUFFER_OUT+AC)];
 	}
 
 	@Override
@@ -147,7 +132,10 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 
 	@Override
 	public boolean canForm(LocalSidedWorld w) {
-		IBlockState state = w.getBlockState(BlockPos.ORIGIN);
+		if (!IWConfig.MechConversion.allowMBFE()) {
+			return false;
+		}
+		IBlockState state = w.getBlockState(ORIGIN);
 		return state.getBlock()== blockMetalDecoration0 &&
 				state.getValue(blockMetalDecoration0.property)== GENERATOR;
 	}
@@ -159,7 +147,7 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 
 	@Override
 	public void disassemble(boolean failed, MechEnergy energy) {
-		world.setBlockState(BlockPos.ORIGIN,
+		world.setBlockState(ORIGIN,
 				blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, GENERATOR));
 	}
 
@@ -168,16 +156,22 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 		return MechanicalMBBlockType.SHAFT_1_PHASE;
 	}
 
+	private static final ImmutableSet<Pair<BlockPos, EnumFacing>> outputs = ImmutableSet.of(
+			new ImmutablePair<>(ORIGIN, UP)
+	);
+	public Set<Pair<BlockPos, EnumFacing>> getEnergyConnections() {
+		return outputs;
+	}
 
 	private IEnergyStorage energy = new IEnergyStorage() {
 		@Override
 		public int receiveEnergy(int maxReceive, boolean simulate) {
 			double joules = joulesPerIf()*maxReceive;
-			double insert = Math.min(joules, getMaxBuffer()-bufferToMB);
+			double insert = Math.min(Math.min(joules, getMaxBuffer()-bufferToMB), getMaxBuffer()/getEnergyConnections().size());
 			if (!simulate) {
-				if (!isACInMBBuffer) {
+				if (!wfToMB.isAC()) {
 					bufferToMB = 0;
-					isACInMBBuffer = true;
+					wfToMB = Waveform.forParameters(Waveform.Type.AC, get(has4Phases()), Waveform.Speed.EXTERNAL);
 				}
 				bufferToMB += insert;
 			}
@@ -186,9 +180,9 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 
 		@Override
 		public int extractEnergy(int maxExtract, boolean simulate) {
-			if (isACInWBuffer) {
+			if (wfToWorld.isAC()) {
 				double joules = joulesPerIf() * maxExtract;
-				double extract = Math.min(joules, bufferToWorld);
+				double extract = Math.min(Math.min(joules, bufferToWorld), getMaxBuffer()/getEnergyConnections().size());
 				if (!simulate)
 					bufferToWorld -= extract;
 				return (int) Math.floor(extract * ifPerJoule());
@@ -219,8 +213,8 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 	};
 
 	@Override
-	public <T> boolean hasCapability(Capability<T> cap, EnumFacing side, Vec3i pos) {
-		if (pos.equals(BlockPos.ORIGIN)&&side==EnumFacing.UP) {
+	public <T> boolean hasCapability(Capability<T> cap, EnumFacing side, BlockPos pos) {
+		if (getEnergyConnections().contains(new ImmutablePair<>(pos, side))) {
 			if (cap==CapabilityEnergy.ENERGY)
 				return true;
 			//TODO return true for internal IC2 cap that doesn't exist yet
@@ -229,8 +223,8 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 	}
 
 	@Override
-	public <T> T getCapability(Capability<T> cap, EnumFacing side, Vec3i pos) {
-		if (pos.equals(BlockPos.ORIGIN)&&side==EnumFacing.UP&&cap== CapabilityEnergy.ENERGY)
+	public <T> T getCapability(Capability<T> cap, EnumFacing side, BlockPos pos) {
+		if (getEnergyConnections().contains(new ImmutablePair<>(pos, side))&&cap== CapabilityEnergy.ENERGY)
 			return CapabilityEnergy.ENERGY.cast(energy);
 		return super.getCapability(cap, side, pos);
 	}

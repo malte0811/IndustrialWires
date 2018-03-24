@@ -15,11 +15,20 @@
 
 package malte0811.industrialWires.converter;
 
+import com.google.common.collect.ImmutableSet;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
 import malte0811.industrialWires.util.LocalSidedWorld;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.Set;
+
+import static net.minecraft.util.EnumFacing.EAST;
+import static net.minecraft.util.EnumFacing.WEST;
 
 public class MechPartFourElectrodes extends MechPartTwoElectrodes {
 	@Override
@@ -51,6 +60,17 @@ public class MechPartFourElectrodes extends MechPartTwoElectrodes {
 				setLightEngineering(new BlockPos(2*i-1, j-1, 0));
 			}
 		}
+	}
+
+	private static final Set<Pair<BlockPos, EnumFacing>> outputs = ImmutableSet.of(
+			new ImmutablePair<>(new BlockPos(1, 0, 0), EAST),
+			new ImmutablePair<>(new BlockPos(1, -1, 0), EAST),
+			new ImmutablePair<>(new BlockPos(-1, 0, 0), WEST),
+			new ImmutablePair<>(new BlockPos(-1, -1, 0), WEST)
+	);
+	@Override
+	public Set<Pair<BlockPos, EnumFacing>> getEnergyConnections() {
+		return outputs;
 	}
 
 	@Override

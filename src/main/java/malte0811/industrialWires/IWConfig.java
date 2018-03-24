@@ -62,6 +62,17 @@ public class IWConfig {
 		@Comment({"The conversion factor between Joules (the SI unit) and RF. Used for the Marx generator and the rotary converters"})
 		//Default value assumes the IE diesel generator is 200kW
 		public static double joulesPerRF = 200e3/(20*IEConfig.Machines.dieselGen_output);
+		@Comment({"What energy types can be used with the mechanical multiblock. 0: None (Probably useless),",
+				"1: EU (Currently useless), 2: FE, 3:EU and FE (allows conversion, default)"})
+		public static int multiblockEnergyType = 3;
+
+		public static boolean allowMBFE() {
+			return (multiblockEnergyType&2)!=0;
+		}
+
+		public static boolean allowMBEU() {
+			return (multiblockEnergyType&1)!=0;
+		}
 	}
 
 	public static HVStuff hv;

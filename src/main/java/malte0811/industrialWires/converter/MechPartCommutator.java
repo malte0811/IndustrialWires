@@ -15,6 +15,8 @@
 
 package malte0811.industrialWires.converter;
 
+import com.google.common.collect.ImmutableSet;
+import malte0811.industrialWires.IWConfig;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
 import malte0811.industrialWires.converter.EUCapability.IC2EnergyHandler;
@@ -25,18 +27,29 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.IEnergyStorage;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.Set;
+
+import static malte0811.industrialWires.converter.EUCapability.ENERGY_IC2;
+import static malte0811.industrialWires.converter.Waveform.Phases.get;
+import static malte0811.industrialWires.converter.Waveform.Speed.EXTERNAL;
+import static malte0811.industrialWires.converter.Waveform.Speed.ROTATION;
+import static malte0811.industrialWires.converter.Waveform.Type.DC;
+import static malte0811.industrialWires.converter.Waveform.Type.NONE;
 import static malte0811.industrialWires.util.NBTKeys.*;
+import static net.minecraft.util.EnumFacing.UP;
+import static net.minecraft.util.math.BlockPos.ORIGIN;
 import static net.minecraftforge.energy.CapabilityEnergy.ENERGY;
 
 public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 	private double bufferToMB;
-	private Waveform wfToMB = Waveform.NONE;
+	private Waveform wfToMB = Waveform.forParameters(NONE, get(has4Phases()), ROTATION);
 	private double bufferToWorld;
-	private Waveform wfToWorld = Waveform.NONE;
+	private Waveform wfToWorld = Waveform.forParameters(NONE, get(has4Phases()), ROTATION);
 	@Override
 	public Waveform getProduced(MechEnergy state) {
 		return wfToMB.getCommutated(state.getSpeed(), has4Phases());
@@ -65,26 +78,32 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 	}
 
 	@Override
-	public void insertEEnergy(double given, Waveform waveform, MechEnergy energy) {
-		waveform = waveform.getCommutated(energy.getSpeed(), has4Phases());
+	public void insertEEnergy(double given, Waveform waveform, MechEnergy mechEnergy) {
+		waveform = waveform.getCommutated(mechEnergy.getSpeed(), has4Phases());
 		if (waveform!=wfToWorld) {
 			wfToWorld = waveform;
 			bufferToWorld = 0;
 		}
 		bufferToWorld += given;
+		int available = (int) (Math.min(ConversionUtil.ifPerJoule() * bufferToWorld,
+				getMaxBuffer()/getEnergyConnections().size()));
+		if (available > 0 && wfToWorld.isAC()) {//The IC2 net will deal with DC by itself
+			bufferToWorld -= outputFE(world, available);
+		}
 	}
+
 
 	private final IC2EnergyHandler capIc2 = new IC2EnergyHandler() {
 		{
 			tier = 3;//TODO does this mean everything blows up?
 		}
 		@Override
-		public boolean acceptsEnergyFrom(EnumFacing side) {
+		public boolean acceptsEnergyFrom(EnumFacing side, BlockPos offset) {
 			return side==EnumFacing.UP&&bufferToMB<getMaxBuffer();
 		}
 
 		@Override
-		public boolean emitsEnergyTo(EnumFacing side) {
+		public boolean emitsEnergyTo(EnumFacing side, BlockPos offset) {
 			return side==EnumFacing.UP&&bufferToWorld>0;
 		}
 
@@ -98,7 +117,7 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 			input = Math.min(input, getMaxBuffer()-buffer);
 			buffer += input;
 			bufferToMB = buffer;
-			wfToMB = Waveform.AC_ASYNC;
+			wfToMB = Waveform.forParameters(DC, get(has4Phases()), EXTERNAL);
 			return amount-ConversionUtil.euPerJoule()*input;
 		}
 
@@ -128,7 +147,7 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 			buffer += input;
 			if (!simulate) {
 				bufferToMB = buffer;
-				wfToMB = Waveform.AC_ASYNC;
+				wfToMB = Waveform.forParameters(Waveform.Type.AC, get(has4Phases()), EXTERNAL);
 			}
 			return (int) (ConversionUtil.ifPerJoule()*input);
 		}
@@ -170,23 +189,28 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 	};
 
 	@Override
-	public <T> T getCapability(Capability<T> cap, EnumFacing side, Vec3i pos) {
-		if (cap==EUCapability.ENERGY_IC2) {
-			return EUCapability.ENERGY_IC2.cast(capIc2);
-		}
-		if (side==EnumFacing.UP&&cap== ENERGY) {
-			return ENERGY.cast(capForge);
+	public <T> T getCapability(Capability<T> cap, EnumFacing side, BlockPos pos) {
+		IndustrialWires.logger.info("{}, {}", pos, side);
+		if (getEnergyConnections().contains(new ImmutablePair<>(pos, side))) {
+			if (cap == ENERGY_IC2) {
+				return ENERGY_IC2.cast(capIc2);
+			}
+			if (cap == ENERGY) {
+				return ENERGY.cast(capForge);
+			}
 		}
 		return super.getCapability(cap, side, pos);
 	}
 
 	@Override
-	public <T> boolean hasCapability(Capability<T> cap, EnumFacing side, Vec3i pos) {
-		if (cap==EUCapability.ENERGY_IC2) {
-			return true;
-		}
-		if (side==EnumFacing.UP&&cap== ENERGY) {
-			return true;
+	public <T> boolean hasCapability(Capability<T> cap, EnumFacing side, BlockPos pos) {
+		if (getEnergyConnections().contains(new ImmutablePair<>(pos, side))) {
+			if (cap == ENERGY_IC2) {
+				return true;
+			}
+			if (cap == ENERGY) {
+				return true;
+			}
 		}
 		return super.hasCapability(cap, side, pos);
 	}
@@ -209,15 +233,15 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 
 	@Override
 	public double getMaxSpeed() {
-		return Double.MAX_VALUE;
+		return IWConfig.MechConversion.allowMBEU()?100:-1;
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound out) {
 		out.setDouble(BUFFER_IN, bufferToMB);
 		out.setDouble(BUFFER_OUT, bufferToWorld);
-		out.setInteger(BUFFER_IN+WAVEFORM, wfToMB.ordinal());
-		out.setInteger(BUFFER_OUT+WAVEFORM, wfToWorld.ordinal());
+		out.setInteger(BUFFER_IN+WAVEFORM, wfToMB.getIndex());
+		out.setInteger(BUFFER_OUT+WAVEFORM, wfToWorld.getIndex());//TODO better way of doing this that doesn't break when I change anything
 	}
 
 	@Override
@@ -237,6 +261,9 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 			new ResourceLocation("ic2", "kinetic_generator");
 	@Override
 	public boolean canForm(LocalSidedWorld w) {
+		if (!IWConfig.MechConversion.allowMBEU()) {
+			return false;
+		}
 		//Center is an IC2 kinetic generator
 		TileEntity te = w.getTileEntity(BlockPos.ORIGIN);
 		if (te!=null) {
@@ -275,4 +302,12 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 	protected boolean has4Phases() {
 		return false;
 	}
+
+	private static final ImmutableSet<Pair<BlockPos, EnumFacing>> outputs = ImmutableSet.of(
+			new ImmutablePair<>(ORIGIN, UP)
+	);
+	public Set<Pair<BlockPos, EnumFacing>> getEnergyConnections() {
+		return outputs;
+	}
+
 }

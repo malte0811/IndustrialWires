@@ -15,7 +15,17 @@
 
 package malte0811.industrialWires.converter;
 
-import javax.annotation.Nullable;
+import com.google.common.collect.ImmutableSet;
+import malte0811.industrialWires.util.ConversionUtil;
+import malte0811.industrialWires.util.LocalSidedWorld;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.energy.IEnergyStorage;
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.Set;
 
 public interface IMBPartElectric {
 	/**
@@ -30,80 +40,24 @@ public interface IMBPartElectric {
 	double requestEEnergy(Waveform waveform, MechEnergy energy);
 	void insertEEnergy(double given, Waveform waveform, MechEnergy energy);
 
-	enum Waveform {
-		NONE(null, 0, true),
-		//Sync/async refers to multiblock rotation speed, not to line frequency
-		AC_SYNC(true, 4, true),
-		AC_ASYNC(true, 5, 4, true),
-		AC_4PHASE_SYNC(true, 4, false),
-		AC_4PHASE_ASYNC(true, 4, false),
-		DC(false, 1, true) {
-			@Override
-			public Waveform getCommutated(double speed, boolean fourPhase) {
-				if (!fourPhase) {
-					return super.getCommutated(speed, false);
-				} else {
-					if (isSyncSpeed(speed)) {
-						return AC_4PHASE_ASYNC;
-					} else {
-						return AC_4PHASE_SYNC;
-					}
+	default Set<Pair<BlockPos, EnumFacing>> getEnergyConnections() {
+		return ImmutableSet.of();
+	}
+	default double outputFE(LocalSidedWorld world, int available) {
+		double extracted = 0;
+		for (Pair<BlockPos, EnumFacing> output : getEnergyConnections()) {
+			BlockPos outTE = output.getLeft().offset(output.getRight());
+			TileEntity te = world.getTileEntity(outTE);
+			EnumFacing sideReal = world.transformedToReal(output.getRight()).getOpposite();
+			if (te != null && te.hasCapability(CapabilityEnergy.ENERGY, sideReal)) {
+				IEnergyStorage energy = te.getCapability(CapabilityEnergy.ENERGY, sideReal);
+				if (energy != null && energy.canReceive()) {
+					int received = energy.receiveEnergy(available, false);
+					available -= received;
+					extracted += ConversionUtil.joulesPerIf() * received;
 				}
 			}
-		},
-		MESS(null, 5, true);
-
-		public static final double EXTERNAL_SPEED = 20;
-		public static final double SYNC_TOLERANCE = .1;
-		public static final double MIN_COMM_SPEED = 4;
-		public static final Waveform[] VALUES = values();
-		public static boolean isSyncSpeed(double speed) {
-			return Math.abs(speed- EXTERNAL_SPEED)<SYNC_TOLERANCE* EXTERNAL_SPEED;
 		}
-
-		@Nullable
-		private Boolean isAC;
-		boolean single;
-		private int dualId, syncDualId;
-		public Waveform dual, syncDual;
-		Waveform(@Nullable Boolean ac, int dualId, boolean singlePhase) {
-			this(ac, dualId, dualId, singlePhase);
-		}
-		Waveform(@Nullable Boolean ac, int dualId, int syncDual, boolean singlePhase) {
-			isAC = ac;
-			this.dualId = dualId;
-			syncDualId = syncDual;
-			single = singlePhase;
-		}
-
-		public static void init() {
-			for (Waveform f:VALUES) {
-				f.dual = VALUES[f.dualId];
-				f.syncDual = VALUES[f.syncDualId];
-			}
-		}
-
-		public Waveform getCommutated(double speed, boolean fourPhase) {
-			if (isSyncSpeed(speed)) {
-				return syncDual;
-			}
-			return speed<MIN_COMM_SPEED?this:dual;
-		}
-
-		public boolean isAC() {
-			return isAC==Boolean.TRUE;
-		}
-
-		public boolean isDC() {
-			return isAC==Boolean.FALSE;
-		}
-
-		public boolean isEnergyWaveform() {
-			return isAC!=null;
-		}
-
-		public boolean isSinglePhase() {
-			return single;
-		}
+		return extracted;
 	}
 }

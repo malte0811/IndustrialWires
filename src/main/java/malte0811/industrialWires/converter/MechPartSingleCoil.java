@@ -26,6 +26,7 @@ import net.minecraft.util.math.BlockPos;
 
 import static blusunrize.immersiveengineering.common.IEContent.blockMetalDecoration0;
 import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.COIL_LV;
+import static malte0811.industrialWires.converter.Waveform.Phases.get;
 import static malte0811.industrialWires.util.NBTKeys.BUFFER_IN;
 import static malte0811.industrialWires.util.NBTKeys.BUFFER_OUT;
 
@@ -35,7 +36,7 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 
 	@Override
 	public Waveform getProduced(MechEnergy state) {
-		return Waveform.AC_SYNC;
+		return Waveform.forParameters(Waveform.Type.AC, get(has4Phases()), Waveform.Speed.ROTATION);
 	}
 
 	@Override
@@ -88,7 +89,7 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 
 	@Override
 	public double getMaxSpeed() {
-		return Double.MAX_VALUE;//TODO I'm fine with shafts having infinite max speed. Not coils though.
+		return 200;
 	}
 
 	@Override

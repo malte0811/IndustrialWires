@@ -32,7 +32,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -80,11 +79,11 @@ public abstract class MechMBPart {
 			for (int j = 0; j < 2; j++) {
 				IBlockState state = w.getBlockState(new BlockPos(2*i-1, j-1, 0));
 				if (!isLightEngineering(state)) {
-					return true;
+					return false;
 				}
 			}
 		}
-		return false;
+		return true;
 	}
 
 	public abstract short getFormPattern();
@@ -96,11 +95,11 @@ public abstract class MechMBPart {
 
 	public abstract MechanicalMBBlockType getType();
 
-	public <T> boolean hasCapability(Capability<T> cap, EnumFacing side, Vec3i pos) {
+	public <T> boolean hasCapability(Capability<T> cap, EnumFacing side, BlockPos pos) {
 		return false;
 	}
 
-	public <T> T getCapability(Capability<T> cap, EnumFacing side, Vec3i pos) {
+	public <T> T getCapability(Capability<T> cap, EnumFacing side, BlockPos pos) {
 		return null;
 	}
 
@@ -110,8 +109,6 @@ public abstract class MechMBPart {
 			(c)->-MiscUtils.count1Bits(c.getFormPattern())
 	);
 	public static void preInit() {
-		IMBPartElectric.Waveform.init();
-
 		REGISTRY.put("flywheel", MechPartFlywheel.class);
 		REGISTRY.put("singleCoil", MechPartSingleCoil.class);
 		REGISTRY.put("twoElectrodes", MechPartTwoElectrodes.class);

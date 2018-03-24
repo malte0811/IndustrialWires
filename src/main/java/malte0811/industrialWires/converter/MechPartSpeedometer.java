@@ -42,7 +42,7 @@ import static net.minecraft.util.EnumFacing.AxisDirection.POSITIVE;
 import static net.minecraft.util.math.BlockPos.ORIGIN;
 
 public class MechPartSpeedometer extends MechMBPart implements IPlayerInteraction, IRedstoneOutput {
-	private double speedFor15RS = 2 * IMBPartElectric.Waveform.EXTERNAL_SPEED;
+	private double speedFor15RS = 2 * Waveform.EXTERNAL_SPEED;
 	private int currentOutputLin = -1;
 	private int currentOutputLog = -1;
 	private double logFactor = 15 / Math.log(speedFor15RS + 1);

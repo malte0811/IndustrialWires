@@ -94,6 +94,7 @@ public class MultiblockConverter implements MultiblockHandler.IMultiblock {
 				instances.sort(MechMBPart.SORT_BY_COUNT);
 				int lastCount = 0;
 				for (MechMBPart part:instances) {
+					IndustrialWires.logger.info(w.getRealPos(BlockPos.ORIGIN)+", "+part);
 					int newCount = MiscUtils.count1Bits(part.getFormPattern());
 					if (newCount==1&&lastCount>1&&checkEnd(w, mutPos)) {
 						foundAll = true;
