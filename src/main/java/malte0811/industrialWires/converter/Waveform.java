@@ -21,8 +21,6 @@ import static malte0811.industrialWires.converter.Waveform.Speed.ROTATION;
 import static malte0811.industrialWires.converter.Waveform.Type.*;
 
 public class Waveform {
-
-
 	public static final double EXTERNAL_SPEED = 20;
 	public static final double SYNC_TOLERANCE = .1;
 	public static final double MIN_COMM_SPEED = 4;
@@ -130,5 +128,24 @@ public class Waveform {
 		ROTATION,
 		EXTERNAL;
 		public static final Speed[] VALUES = values();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		Waveform waveform = (Waveform) o;
+
+		if (type != waveform.type) return false;
+		if (phases != waveform.phases) return false;
+		return type != AC || speed == waveform.speed;
+	}
+
+	@Override
+	public int hashCode() {
+		int result = type.hashCode();
+		result = 31 * result + phases.hashCode();
+		return result;
 	}
 }

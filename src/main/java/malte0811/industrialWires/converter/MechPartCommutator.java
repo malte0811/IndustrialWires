@@ -67,12 +67,8 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 
 	@Override
 	public double requestEEnergy(Waveform waveform, MechEnergy energy) {
-		if (!has4Phases()^waveform.isSinglePhase()) {
-			if (waveform == wfToWorld.getCommutated(energy.getSpeed(), has4Phases())) {
-				return getMaxBuffer() - bufferToWorld;
-			} else {
-				return getMaxBuffer();
-			}
+		if (!has4Phases()==waveform.isSinglePhase()) {
+			return getMaxBuffer() - bufferToWorld;
 		}
 		return 0;
 	}
@@ -80,31 +76,19 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 	@Override
 	public void insertEEnergy(double given, Waveform waveform, MechEnergy mechEnergy) {
 		waveform = waveform.getCommutated(mechEnergy.getSpeed(), has4Phases());
-		if (waveform!=wfToWorld) {
-			wfToWorld = waveform;
-			bufferToWorld = 0;
-		}
+		wfToWorld = waveform;
 		bufferToWorld += given;
 		int available = (int) (Math.min(ConversionUtil.ifPerJoule() * bufferToWorld,
 				getMaxBuffer()/getEnergyConnections().size()));
 		if (available > 0 && wfToWorld.isAC()) {//The IC2 net will deal with DC by itself
 			bufferToWorld -= outputFE(world, available);
-		}
+		}//TODO move to mech!
 	}
 
 
 	private final IC2EnergyHandler capIc2 = new IC2EnergyHandler() {
 		{
 			tier = 3;//TODO does this mean everything blows up?
-		}
-		@Override
-		public boolean acceptsEnergyFrom(EnumFacing side, BlockPos offset) {
-			return side==EnumFacing.UP&&bufferToMB<getMaxBuffer();
-		}
-
-		@Override
-		public boolean emitsEnergyTo(EnumFacing side, BlockPos offset) {
-			return side==EnumFacing.UP&&bufferToWorld>0;
 		}
 
 		@Override
@@ -124,7 +108,8 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 		@Override
 		public double getOfferedEnergy() {
 			if (wfToWorld.isDC()) {
-				return ConversionUtil.euPerJoule()*bufferToWorld;
+				return Math.min(ConversionUtil.euPerJoule()*bufferToWorld,
+						ConversionUtil.euPerJoule()*getMaxBuffer()/getEnergyConnections().size()*2);
 			}
 			return 0;
 		}
@@ -190,7 +175,6 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 
 	@Override
 	public <T> T getCapability(Capability<T> cap, EnumFacing side, BlockPos pos) {
-		IndustrialWires.logger.info("{}, {}", pos, side);
 		if (getEnergyConnections().contains(new ImmutablePair<>(pos, side))) {
 			if (cap == ENERGY_IC2) {
 				return ENERGY_IC2.cast(capIc2);
@@ -304,7 +288,7 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 	}
 
 	private static final ImmutableSet<Pair<BlockPos, EnumFacing>> outputs = ImmutableSet.of(
-			new ImmutablePair<>(ORIGIN, UP)
+			new ImmutablePair<>(ORIGIN, UP), new ImmutablePair<>(ORIGIN, null)
 	);
 	public Set<Pair<BlockPos, EnumFacing>> getEnergyConnections() {
 		return outputs;

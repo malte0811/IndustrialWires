@@ -17,7 +17,6 @@ package malte0811.industrialWires.converter;
 
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.CapabilityManager;
@@ -52,11 +51,6 @@ public class EUCapability {
 			return tier;
 		}
 
-		public abstract boolean acceptsEnergyFrom(EnumFacing side, BlockPos offset);
-
-		public abstract boolean emitsEnergyTo(EnumFacing side, BlockPos offset);
-
-
 		public abstract double injectEnergy(EnumFacing enumFacing, double v, double v1);
 
 		public abstract double getOfferedEnergy();
@@ -65,16 +59,6 @@ public class EUCapability {
 	}
 
 	public static class IC2EnergyHandlerDummy extends IC2EnergyHandler {
-
-		@Override
-		public boolean acceptsEnergyFrom(EnumFacing side, BlockPos offset) {
-			return false;
-		}
-
-		@Override
-		public boolean emitsEnergyTo(EnumFacing side, BlockPos offset) {
-			return false;
-		}
 
 		@Override
 		public double injectEnergy(EnumFacing enumFacing, double v, double v1) {

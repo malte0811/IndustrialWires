@@ -16,6 +16,7 @@
 package malte0811.industrialWires.converter;
 
 import com.google.common.collect.ImmutableSet;
+import malte0811.industrialWires.IWConfig;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
 import malte0811.industrialWires.util.LocalSidedWorld;
@@ -81,5 +82,10 @@ public class MechPartFourElectrodes extends MechPartTwoElectrodes {
 	@Override
 	public ResourceLocation getRotatingBaseModel() {
 		return new ResourceLocation(IndustrialWires.MODID, "block/mech_mb/shaft4.obj");
+	}
+
+	@Override
+	public double getMaxSpeed() {
+		return IWConfig.MechConversion.allowMBFE()?600:-1;
 	}
 }

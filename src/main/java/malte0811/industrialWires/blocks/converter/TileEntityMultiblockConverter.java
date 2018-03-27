@@ -147,8 +147,8 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 			Set<Waveform> availableWaveforms = new HashSet<>();
 			for (int i = section[0]; i < section[1]; i++) {
 				IMBPartElectric electricalComp = ((IMBPartElectric) mechanical[i]);
-				Waveform localWf = electricalComp.getProduced(energyState);
-				availableWf[i - section[0]] = localWf.getForSpeed(energyState.getSpeed());
+				Waveform localWf = electricalComp.getProduced(energyState).getForSpeed(energyState.getSpeed());
+				availableWf[i - section[0]] = localWf;
 				if (!localWf.isEnergyWaveform()) {
 					continue;
 				}
@@ -180,6 +180,19 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 						maxId = i;
 					}
 				}
+				if (maxId<0) {
+					double[] availablePerWf = new double[availableWaveforms.size()];
+					for (int i = 0;i<availableWf.length;i++) {
+						if (availableWf[i].isEnergyWaveform()) {
+							availablePerWf[availableWfList.indexOf(availableWf[i])] += available[i];
+						}
+					}
+					for (int i = 0;i<availablePerWf.length;i++) {
+						if (availablePerWf[i]>0&&(maxId<0||availablePerWf[maxId]<availablePerWf[i])) {
+							maxId = i;
+						}
+					}
+				}
 				if (maxId>=0) {
 					transferElectric(section, available, availableWf, availableWfList.get(maxId), requested[maxId], false);
 				}
@@ -201,7 +214,7 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 									boolean simulate) {
 		double totalAvailable = 0;
 		for (int i = 0; i < available.length; i++) {
-			if (availableWf[i]==waveform) {
+			if (availableWf[i].equals(waveform)) {
 				totalAvailable += available[i];
 			} else {
 				available[i] = 0;
@@ -233,6 +246,8 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 				}
 				totalAvailable -= ins;
 				transferred += ins;
+			} else if (!simulate) {
+				((IMBPartElectric)mechanical[i]).insertEEnergy(0, waveform, energyState);//Notify of possible waveform changes
 			}
 		}
 		return transferred;
@@ -440,8 +455,8 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 		}
 		MechMBPart part = master.mechanical[id];
 		BlockPos offsetPart = new BlockPos(offsetDirectional.getX(), offsetDirectional.getY(), offsetDirectional.getZ()-master.offsets[id]);
-		EUCapability.IC2EnergyHandler cap =  part.getCapability(ENERGY_IC2, part.world.realToTransformed(facing), offsetPart);
-		return cap!=null&&cap.emitsEnergyTo(side, offsetPart);
+		EUCapability.IC2EnergyHandler cap =  part.getCapability(ENERGY_IC2, part.world.realToTransformed(side), offsetPart);
+		return cap!=null;
 	}
 
 	@Override
@@ -474,8 +489,8 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 		}
 		MechMBPart part = master.mechanical[id];
 		BlockPos offsetPart = new BlockPos(offsetDirectional.getX(), offsetDirectional.getY(), offsetDirectional.getZ()-master.offsets[id]);
-		EUCapability.IC2EnergyHandler cap =  part.getCapability(ENERGY_IC2, part.world.realToTransformed(facing), offsetPart);
-		return cap!=null&&cap.acceptsEnergyFrom(side, offsetPart);
+		EUCapability.IC2EnergyHandler cap =  part.getCapability(ENERGY_IC2, part.world.realToTransformed(side), offsetPart);
+		return cap!=null;
 	}
 
 	@Override

@@ -74,9 +74,6 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 
 	@Override
 	public void insertEEnergy(double given, Waveform waveform, MechEnergy energy) {
-		if (bufferToWorld > 0 && (wfToWorld.isAC() ^ waveform.isAC())) {
-			bufferToWorld = 0;
-		}
 		bufferToWorld += given;
 		wfToWorld = waveform;
 	}
@@ -167,7 +164,8 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 		@Override
 		public int receiveEnergy(int maxReceive, boolean simulate) {
 			double joules = joulesPerIf()*maxReceive;
-			double insert = Math.min(Math.min(joules, getMaxBuffer()-bufferToMB), getMaxBuffer()/getEnergyConnections().size());
+			double insert = Math.min(Math.min(joules, getMaxBuffer()-bufferToMB),
+					getMaxBuffer()/getEnergyConnections().size());
 			if (!simulate) {
 				if (!wfToMB.isAC()) {
 					bufferToMB = 0;

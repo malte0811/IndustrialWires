@@ -32,14 +32,22 @@ public final class MechEnergy {
 	}
 
 	public void addEnergy(double energy) {
+		if (energy<=0) {
+			return;
+		}
 		double targetEnergy = getEnergy()+energy;
 		speed = Math.sqrt(2*targetEnergy/weight);
+		//IndustrialWires.logger.info("Added {}", energy);
 	}
 
 	public void extractEnergy(double energy) {
+		if (energy<=0) {
+			return;
+		}
 		double oldEnergy = getEnergy();
 		energy = Math.min(energy, oldEnergy);
 		speed = Math.sqrt(2*(oldEnergy-energy)/weight);
+		//IndustrialWires.logger.info("Extracted {}", energy);
 	}
 
 	public void decaySpeed(double decay) {

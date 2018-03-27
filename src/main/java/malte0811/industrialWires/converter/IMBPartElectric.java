@@ -46,6 +46,8 @@ public interface IMBPartElectric {
 	default double outputFE(LocalSidedWorld world, int available) {
 		double extracted = 0;
 		for (Pair<BlockPos, EnumFacing> output : getEnergyConnections()) {
+			if (output.getRight()==null)
+				continue;
 			BlockPos outTE = output.getLeft().offset(output.getRight());
 			TileEntity te = world.getTileEntity(outTE);
 			EnumFacing sideReal = world.transformedToReal(output.getRight()).getOpposite();

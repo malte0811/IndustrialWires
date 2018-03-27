@@ -79,10 +79,10 @@ public class MechPartCommutator4Phase extends MechPartCommutator {
 	}
 
 	private static final Set<Pair<BlockPos, EnumFacing>> outputs = ImmutableSet.of(
-			new ImmutablePair<>(new BlockPos(1, 0, 0), EAST),
-			new ImmutablePair<>(new BlockPos(1, -1, 0), EAST),
-			new ImmutablePair<>(new BlockPos(-1, 0, 0), WEST),
-			new ImmutablePair<>(new BlockPos(-1, -1, 0), WEST)
+			new ImmutablePair<>(new BlockPos(1, 0, 0), EAST), new ImmutablePair<>(new BlockPos(1, 0, 0), null),
+			new ImmutablePair<>(new BlockPos(1, -1, 0), EAST), new ImmutablePair<>(new BlockPos(1, -1, 0), null),
+			new ImmutablePair<>(new BlockPos(-1, 0, 0), WEST), new ImmutablePair<>(new BlockPos(-1, 0, 0), null),
+			new ImmutablePair<>(new BlockPos(-1, -1, 0), WEST), new ImmutablePair<>(new BlockPos(-1, -1, 0), null)
 	);
 	@Override
 	public Set<Pair<BlockPos, EnumFacing>> getEnergyConnections() {

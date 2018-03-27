@@ -35,7 +35,7 @@
         "model": "industrialwires:mech_mb/mag_ring.obj"
       },
       "shaft_commutator_4": {
-        "model": "industrialwires:mech_mb/four_electrodes.obj"
+        "model": "industrialwires:mech_mb/commutator4.obj"
       },
       "shaft_4_phase": {
         "model": "industrialwires:mech_mb/four_electrodes.obj"

@@ -99,7 +99,8 @@ public class LocalSidedWorld {
 		if (f==null||f.getAxis()== EnumFacing.Axis.Y) {
 			return f;
 		}
-		return EnumFacing.getHorizontal(f.getHorizontalIndex()-facing.getHorizontalIndex()+2);
+		//+6 because getHorizontal uses abs(input%3). No idea why.
+		return EnumFacing.getHorizontal(f.getHorizontalIndex()-facing.getHorizontalIndex()+6);
 	}
 
 	public EnumFacing transformedToReal(@Nullable EnumFacing f) {
