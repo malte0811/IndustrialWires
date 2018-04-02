@@ -109,7 +109,7 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 		public double getOfferedEnergy() {
 			if (wfToWorld.isDC()) {
 				return Math.min(ConversionUtil.euPerJoule()*bufferToWorld,
-						ConversionUtil.euPerJoule()*getMaxBuffer()/getEnergyConnections().size()*2);
+						ConversionUtil.euPerJoule()*getMaxBuffer())/getEnergyConnections().size()*2;
 			}
 			return 0;
 		}

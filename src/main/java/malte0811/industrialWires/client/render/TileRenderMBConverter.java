@@ -76,7 +76,6 @@ public class TileRenderMBConverter extends TileEntitySpecialRenderer<TileEntityM
 				TES_WITH_MODELS.add(te);
 			}
 			GlStateManager.enableBlend();
-			//GlStateManager.disableCull();
 			GlStateManager.blendFunc(770, 771);
 			RenderHelper.disableStandardItemLighting();
 			Minecraft.getMinecraft().renderEngine.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
@@ -89,7 +88,6 @@ public class TileRenderMBConverter extends TileEntitySpecialRenderer<TileEntityM
 			Tessellator tes = Tessellator.getInstance();
 			BufferBuilder bb = tes.getBuffer();
 			bb.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-			//TODO fix that and probably remove the AT entry
 			ClientUtils.renderModelTESRFast(te.rotatingModel, bb, te.getWorld(), te.getPos());
 			tes.draw();
 			GlStateManager.popMatrix();

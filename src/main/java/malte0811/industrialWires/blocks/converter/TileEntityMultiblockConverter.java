@@ -210,47 +210,34 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 		}
 	}
 
-	private double transferElectric(int[] section, double[] available, Waveform[] availableWf, Waveform waveform, double[] requested,
-									boolean simulate) {
+	//return value is maximized to choose the waveform to use
+	private double transferElectric(int[] section, double[] available, Waveform[] availableWf, Waveform waveform,
+									double[] requested, boolean simulate) {
 		double totalAvailable = 0;
+		double totalRequested = 0;
 		for (int i = 0; i < available.length; i++) {
 			if (availableWf[i].equals(waveform)) {
 				totalAvailable += available[i];
 			} else {
 				available[i] = 0;
 			}
+			totalRequested += requested[i];
 		}
-		if (totalAvailable==0) {
-			return 0;
-		}
-		double transferred = 0;
+		double extractFactor = Math.min(1, totalRequested / totalAvailable);
+		double insertFactor = Math.min(1, totalAvailable / totalRequested);
+		double totalTransf = 0;
 		for (int i = section[0]; i < section[1]; i++) {
 			int i0 = i - section[0];
-			if (requested[i0] > 0 && totalAvailable != available[i0]) {
-				double otherAvailable = totalAvailable - available[i0];
-				double ins = Math.min(requested[i0], otherAvailable);
-				double extractFactor = ins / otherAvailable;
-				if (!simulate) {
-					IMBPartElectric electricalComp = ((IMBPartElectric) mechanical[i]);
-					electricalComp.insertEEnergy(ins, waveform, energyState);
-				}
-				for (int j = section[0]; j < section[1]; j++) {
-					if (i != j && availableWf[j-section[0]] == waveform) {
-						double extractRaw = extractFactor * available[j - section[0]];
-						available[j - section[0]] -= extractRaw;
-						if (!simulate) {
-							IMBPartElectric compJ = (IMBPartElectric) mechanical[j];
-							compJ.extractEEnergy(extractRaw);
-						}
-					}
-				}
-				totalAvailable -= ins;
-				transferred += ins;
-			} else if (!simulate) {
-				((IMBPartElectric)mechanical[i]).insertEEnergy(0, waveform, energyState);//Notify of possible waveform changes
+			double ins = requested[i0] * insertFactor;
+			double extr = available[i0] * extractFactor;
+			if (!simulate) {
+				IMBPartElectric electric = (IMBPartElectric) mechanical[i];
+				electric.insertEEnergy(ins, waveform, energyState);
+				electric.extractEEnergy(extr);
 			}
+			totalTransf += Math.abs(ins-extr);
 		}
-		return transferred;
+		return totalTransf;
 	}
 
 	@Override
