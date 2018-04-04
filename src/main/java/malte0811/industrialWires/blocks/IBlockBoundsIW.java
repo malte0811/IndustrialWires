@@ -15,8 +15,27 @@
 
 package malte0811.industrialWires.blocks;
 
+import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
+import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
+import malte0811.industrialWires.util.MiscUtils;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 
 public interface IBlockBoundsIW {
 	AxisAlignedBB getBoundingBox();
+
+	interface IBlockBoundsDirectional extends IBlockBoundsIW, IEBlockInterfaces.IDirectionalTile {
+
+		@Override
+		default AxisAlignedBB getBoundingBox() {
+			EnumFacing dir = getFacing();
+			Matrix4 mat = new Matrix4();
+			mat.translate(.5, 0, .5);
+			mat.rotate((-dir.getHorizontalAngle()+180)*Math.PI/180, 0, 1, 0);
+			mat.translate(-.5, 0, -.5);
+			return MiscUtils.apply(mat, getBoundingBoxNoRot());
+		}
+
+		AxisAlignedBB getBoundingBoxNoRot();
+	}
 }

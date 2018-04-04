@@ -92,4 +92,5 @@ public class MechPartFourCoils extends MechPartSingleCoil {
 	public double getMaxSpeed() {
 		return 500;
 	}
+
 }

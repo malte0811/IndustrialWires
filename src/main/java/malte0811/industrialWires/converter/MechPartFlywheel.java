@@ -21,6 +21,7 @@ import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
 import malte0811.industrialWires.entities.EntityBrokenPart;
 import malte0811.industrialWires.util.LocalSidedWorld;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -31,8 +32,11 @@ import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.oredict.OreDictionary;
 
 import java.util.List;
@@ -81,6 +85,7 @@ public class MechPartFlywheel extends MechMBPart {
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public List<BakedQuad> getRotatingQuads() {
 		List<BakedQuad> orig = super.getRotatingQuads();
 		TextureAtlasSprite newTex = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(material.blockTexture.toString());
@@ -168,5 +173,18 @@ public class MechPartFlywheel extends MechMBPart {
 	@Override
 	public MechanicalMBBlockType getType() {
 		return MechanicalMBBlockType.FLYWHEEL;
+	}
+
+	@Override
+	public AxisAlignedBB getBoundingBox(BlockPos offsetPart) {
+		if (BlockPos.ORIGIN.equals(offsetPart)) {
+			return Block.FULL_BLOCK_AABB;
+		}
+		final double small = .375;
+		double xMin = offsetPart.getX()<=0?0:small;
+		double xMax = offsetPart.getX()>=0?1:1-small;
+		double yMin = offsetPart.getY()>=0?0:small;
+		double yMax = offsetPart.getY()<=0?1:1-small;
+		return new AxisAlignedBB(xMin, yMin, .0625, xMax, yMax, .9375);
 	}
 }

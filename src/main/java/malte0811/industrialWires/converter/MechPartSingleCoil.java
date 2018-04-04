@@ -19,9 +19,11 @@ import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecor
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
 import malte0811.industrialWires.util.LocalSidedWorld;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 
 import static blusunrize.immersiveengineering.common.IEContent.blockMetalDecoration0;
@@ -178,5 +180,14 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 	
 	protected boolean has4Phases() {
 		return false;
+	}
+
+	@Override
+	public AxisAlignedBB getBoundingBox(BlockPos offsetPart) {
+		if (BlockPos.ORIGIN.equals(offsetPart)) {
+			return Block.FULL_BLOCK_AABB;
+		} else {
+			return new AxisAlignedBB(0, 0, .0625, 1, 1, .9375);
+		}
 	}
 }

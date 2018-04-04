@@ -15,14 +15,24 @@
 
 package malte0811.industrialWires.client;
 
+import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
+import malte0811.industrialWires.client.panelmodel.SmartLightingQuadIW;
+import malte0811.industrialWires.controlpanel.PanelUtils;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.client.model.obj.OBJModel;
+import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import org.lwjgl.util.vector.Vector3f;
 
 import java.util.List;
 
+@SideOnly(Side.CLIENT)
 public class ClientUtilsIW {
 	/**
 	 * Base on {@link blusunrize.immersiveengineering.client.ClientUtils#renderModelTESRFast(List, BufferBuilder, World, BlockPos)}
@@ -49,5 +59,26 @@ public class ClientUtilsIW {
 			}
 
 		}
+	}
+
+	@SideOnly(Side.CLIENT)
+	public static BakedQuad bakeQuad(RawQuad raw, Matrix4 transform, Matrix4 transfNormal) {
+		VertexFormat format = DefaultVertexFormats.ITEM;
+		UnpackedBakedQuad.Builder builder = new UnpackedBakedQuad.Builder(format);
+		builder.setQuadOrientation(raw.facing);
+		builder.setTexture(raw.tex);
+		Vector3f[] vertices = raw.vertices;
+		float[][] uvs = raw.uvs;
+		Vector3f normal = transfNormal.apply(raw.normal);
+		OBJModel.Normal faceNormal = new OBJModel.Normal(normal.x, normal.y, normal.z);
+		for (int i = 0; i < 4; i++) {
+			PanelUtils.putVertexData(format, builder, transform.apply(vertices[i]), faceNormal, uvs[i][0], uvs[i][1], raw.tex,
+					raw.colorA);
+		}
+		BakedQuad ret = builder.build();
+		if (raw.light>0) {
+			ret = new SmartLightingQuadIW(ret, raw.light);
+		}
+		return ret;
 	}
 }

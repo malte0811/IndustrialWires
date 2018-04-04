@@ -18,12 +18,10 @@ package malte0811.industrialWires.blocks.hv;
 import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDirectionalTile;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IPlayerInteraction;
-import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import malte0811.industrialWires.IndustrialWires;
-import malte0811.industrialWires.blocks.IBlockBoundsIW;
+import malte0811.industrialWires.blocks.IBlockBoundsIW.IBlockBoundsDirectional;
 import malte0811.industrialWires.blocks.TileEntityIWBase;
 import malte0811.industrialWires.hv.IMarxTarget;
-import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -36,7 +34,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import javax.annotation.Nonnull;
 
 public class TileEntityDischargeMeter extends TileEntityIWBase implements IPlayerInteraction, IMarxTarget,
-		IBlockBoundsIW, IDirectionalTile {
+		IBlockBoundsDirectional, IDirectionalTile {
 	private static final String HAS_WIRE = "hasWire";
 	private static final String FACING = "facing";
 	private static final String LAST_DISCHARGE = "last";
@@ -93,15 +91,15 @@ public class TileEntityDischargeMeter extends TileEntityIWBase implements IPlaye
 
 	AxisAlignedBB aabb = null;
 	@Override
+	public AxisAlignedBB getBoundingBoxNoRot() {
+		return new AxisAlignedBB(1F/16, 0, 5F/16,
+					10F/16, (hasWire?15F:14F)/16, 11F/16);
+	}
+
+	@Override
 	public AxisAlignedBB getBoundingBox() {
-		//if (aabb==null)
-		{
-			Matrix4 mat = new Matrix4();
-			mat.translate(.5, 0, .5);
-			mat.rotate((-facing.getHorizontalAngle()+180)*Math.PI/180, 0, 1, 0);
-			mat.translate(-.5, 0, -.5);
-			aabb = MiscUtils.apply(mat, new AxisAlignedBB(1F/16, 0, 5F/16,
-					10F/16, (hasWire?15F:14F)/16, 11F/16));
+		if (aabb==null) {
+			aabb = IBlockBoundsDirectional.super.getBoundingBox();
 		}
 		return aabb;
 	}

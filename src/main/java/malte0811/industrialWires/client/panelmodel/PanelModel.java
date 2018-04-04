@@ -33,6 +33,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraftforge.common.property.IExtendedBlockState;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.util.vector.Vector3f;
 
 import javax.annotation.Nonnull;
@@ -42,6 +44,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+@SideOnly(Side.CLIENT)
 public class PanelModel implements IBakedModel {
 	public final static Cache<PanelRenderProperties, AssembledBakedModel> modelCache = CacheBuilder.newBuilder()
 			.maximumSize(100)

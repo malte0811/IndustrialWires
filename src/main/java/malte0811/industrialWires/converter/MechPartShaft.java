@@ -20,6 +20,7 @@ import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
 import malte0811.industrialWires.util.LocalSidedWorld;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 
 import static malte0811.industrialWires.blocks.converter.MechanicalMBBlockType.SHAFT_BASIC;
@@ -75,5 +76,10 @@ public class MechPartShaft extends MechMBPart {
 	@Override
 	public MechanicalMBBlockType getType() {
 		return SHAFT_BASIC;
+	}
+
+	@Override
+	public AxisAlignedBB getBoundingBox(BlockPos offsetPart) {
+		return new AxisAlignedBB(.375, .375, 0, .625, .625, 1);
 	}
 }

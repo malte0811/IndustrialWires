@@ -31,6 +31,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fml.relauncher.Side;
@@ -105,6 +106,8 @@ public abstract class MechMBPart {
 
 	public static final BiMap<String, Class<? extends MechMBPart>> REGISTRY = HashBiMap.create();
 
+	public static final String SHAFT_KEY = "shaft";
+
 	public static final Comparator<MechMBPart> SORT_BY_COUNT = Comparator.comparingInt(
 			(c)->-MiscUtils.count1Bits(c.getFormPattern())
 	);
@@ -113,7 +116,7 @@ public abstract class MechMBPart {
 		REGISTRY.put("singleCoil", MechPartSingleCoil.class);
 		REGISTRY.put("twoElectrodes", MechPartTwoElectrodes.class);
 		REGISTRY.put("commutator", MechPartCommutator.class);
-		REGISTRY.put("shaft", MechPartShaft.class);
+		REGISTRY.put(SHAFT_KEY, MechPartShaft.class);
 		REGISTRY.put("speedometer", MechPartSpeedometer.class);
 		REGISTRY.put("commFour", MechPartCommutator4Phase.class);
 		REGISTRY.put("fourCoils", MechPartFourCoils.class);
@@ -205,4 +208,6 @@ public abstract class MechMBPart {
 	public int getLength() {
 		return 1;
 	}
+
+	public abstract AxisAlignedBB getBoundingBox(BlockPos offsetPart);
 }

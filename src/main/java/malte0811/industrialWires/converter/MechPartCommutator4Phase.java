@@ -20,8 +20,10 @@ import malte0811.industrialWires.IWConfig;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
 import malte0811.industrialWires.util.LocalSidedWorld;
+import net.minecraft.block.Block;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -89,4 +91,16 @@ public class MechPartCommutator4Phase extends MechPartCommutator {
 		return outputs;
 	}
 
+	@Override
+	public AxisAlignedBB getBoundingBox(BlockPos offsetPart) {
+		if (BlockPos.ORIGIN.equals(offsetPart)) {
+			return super.getBoundingBox(offsetPart);
+		}
+		if (offsetPart.getY()==0) {
+			return Block.FULL_BLOCK_AABB;
+		}
+		double xMin = offsetPart.getX()<=0?.5:0;
+		double xMax = offsetPart.getX()>=0?.5:1;
+		return new AxisAlignedBB(xMin, 0, 0, xMax, 1, 1);
+	}
 }

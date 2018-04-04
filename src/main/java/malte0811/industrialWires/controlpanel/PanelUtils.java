@@ -20,14 +20,13 @@ import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.controlpanel.BlockPanel;
 import malte0811.industrialWires.blocks.controlpanel.BlockTypes_Panel;
+import malte0811.industrialWires.client.ClientUtilsIW;
 import malte0811.industrialWires.client.RawQuad;
-import malte0811.industrialWires.client.panelmodel.SmartLightingQuadIW;
 import malte0811.industrialWires.controlpanel.PropertyComponents.PanelRenderProperties;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.EnumDyeColor;
@@ -83,7 +82,7 @@ public final class PanelUtils {
 			Matrix4 m4Here = m4.copy().translate(pc.getX(), PanelComponent.Y_DELTA, pc.getY());
 			List<RawQuad> compQuads = pc.getQuads();
 			for (RawQuad bq : compQuads) {
-				ret.add(bakeQuad(bq, m4Here, m4RotOnly));
+				ret.add(ClientUtilsIW.bakeQuad(bq, m4Here, m4RotOnly));
 			}
 		}
 		Matrix4 baseTrans = components.getPanelBaseTransform();
@@ -140,30 +139,9 @@ public final class PanelUtils {
 				new Vector3f(xMax, height1, zMax), new Vector3f(xMin, height1, zMax),
 				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, new float[]{0, 0, vMax1, uMaxX}, -1));
 		for (RawQuad bq : rawOut) {
-			ret.add(bakeQuad(bq, baseTrans, baseNorm));
+			ret.add(ClientUtilsIW.bakeQuad(bq, baseTrans, baseNorm));
 		}
 
-		return ret;
-	}
-
-	@SideOnly(Side.CLIENT)
-	public static BakedQuad bakeQuad(RawQuad raw, Matrix4 transform, Matrix4 transfNormal) {
-		VertexFormat format = DefaultVertexFormats.ITEM;
-		UnpackedBakedQuad.Builder builder = new UnpackedBakedQuad.Builder(format);
-		builder.setQuadOrientation(raw.facing);
-		builder.setTexture(raw.tex);
-		Vector3f[] vertices = raw.vertices;
-		float[][] uvs = raw.uvs;
-		Vector3f normal = transfNormal.apply(raw.normal);
-		OBJModel.Normal faceNormal = new OBJModel.Normal(normal.x, normal.y, normal.z);
-		for (int i = 0; i < 4; i++) {
-			putVertexData(format, builder, transform.apply(vertices[i]), faceNormal, uvs[i][0], uvs[i][1], raw.tex,
-					raw.colorA);
-		}
-		BakedQuad ret = builder.build();
-		if (raw.light>0) {
-			ret = new SmartLightingQuadIW(ret, raw.light);
-		}
 		return ret;
 	}
 
@@ -272,6 +250,7 @@ public final class PanelUtils {
 		}
 	}
 
+	@SideOnly(Side.CLIENT)
 	public static void addInfo(ItemStack stack, List<String> list, NBTTagCompound data) {
 		switch (stack.getMetadata()) {
 			case 0: //button
@@ -322,6 +301,7 @@ public final class PanelUtils {
 		}
 	}
 
+	@SideOnly(Side.CLIENT)
 	public static void addCommonInfo(NBTTagCompound data, List<String> list, boolean color, boolean rs) {
 		if (color && data.hasKey(COLOR)) {
 			String hexCol = String.format("%6s", Integer.toHexString(data.getInteger(COLOR) & 0xffffff)).replace(' ', '0');

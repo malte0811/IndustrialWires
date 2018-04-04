@@ -15,8 +15,12 @@
 
 package malte0811.industrialWires.client.render;
 
+import blusunrize.immersiveengineering.api.IEApi;
 import blusunrize.immersiveengineering.client.ClientUtils;
+import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import malte0811.industrialWires.blocks.converter.TileEntityMultiblockConverter;
+import malte0811.industrialWires.client.ClientUtilsIW;
+import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.converter.MechMBPart;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -33,47 +37,25 @@ import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.IResourceManagerReloadListener;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.vector.Vector3f;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 
 import static malte0811.industrialWires.blocks.converter.TileEntityMultiblockConverter.TICK_ANGLE_PER_SPEED;
+import static malte0811.industrialWires.converter.MechMBPart.SHAFT_KEY;
 
 public class TileRenderMBConverter extends TileEntitySpecialRenderer<TileEntityMultiblockConverter> implements IResourceManagerReloadListener {
 	public static final Map<ResourceLocation, IBakedModel> BASE_MODELS = new HashMap<>();
 	public static final Set<TileEntityMultiblockConverter> TES_WITH_MODELS = Collections.newSetFromMap(new WeakHashMap<>());
+	static {
+		IEApi.renderCacheClearers.add(TileRenderMBConverter::clearCache);
+	}
 	@Override
 	public void render(TileEntityMultiblockConverter te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
-		if (te.mechanical!=null) {
-			if (te.rotatingModel == null)
-			{
-				te.rotatingModel = new ArrayList<>();
-				int offset = 0;
-				for (MechMBPart part : te.mechanical) {
-					List<BakedQuad> quadsForPart = part.getRotatingQuads();
-					if (offset != 0) {
-						for (BakedQuad b : quadsForPart) {
-							int[] data = Arrays.copyOf(b.getVertexData(), b.getVertexData().length);
-							int pos = 0;
-							for (VertexFormatElement ele : b.getFormat().getElements()) {
-								if (ele.getUsage() == VertexFormatElement.EnumUsage.POSITION) {
-									for (int i = 0;i<4;i++) {
-										data[i*b.getFormat().getIntegerSize()+pos + 2] = Float.floatToRawIntBits(
-												Float.intBitsToFloat(data[i*b.getFormat().getIntegerSize()+pos + 2]) + offset);
-									}
-									break;
-								}
-								pos += ele.getSize()/4;
-							}
-							BakedQuad translated = new BakedQuad(data, b.getTintIndex(), b.getFace(),
-									b.getSprite(), b.shouldApplyDiffuseLighting(), b.getFormat());
-							te.rotatingModel.add(translated);
-						}
-					} else {
-						te.rotatingModel.addAll(quadsForPart);
-					}
-					offset += part.getLength();
-				}
-				TES_WITH_MODELS.add(te);
+		if (te.mechanical != null) {
+			if (te.rotatingModel == null) {
+				generateModel(te);
 			}
 			GlStateManager.enableBlend();
 			GlStateManager.blendFunc(770, 771);
@@ -81,10 +63,10 @@ public class TileRenderMBConverter extends TileEntitySpecialRenderer<TileEntityM
 			Minecraft.getMinecraft().renderEngine.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(.5F + x, .5F + y, .5F + z);
-			GlStateManager.rotate(180-te.facing.getHorizontalAngle(), 0, 1, 0);
+			GlStateManager.rotate(180 - te.facing.getHorizontalAngle(), 0, 1, 0);
 			GlStateManager.rotate((float) (te.angle + te.energyState.getSpeed() * TICK_ANGLE_PER_SPEED * partialTicks),
 					0, 0, 1);
-			GlStateManager.translate(-.5, -.5, .5);
+			GlStateManager.translate(-.5, -.5, -.5);
 			Tessellator tes = Tessellator.getInstance();
 			BufferBuilder bb = tes.getBuffer();
 			bb.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
@@ -96,9 +78,77 @@ public class TileRenderMBConverter extends TileEntitySpecialRenderer<TileEntityM
 	}
 
 	@Override
-	public void onResourceManagerReload(IResourceManager resourceManager) {
-		for (TileEntityMultiblockConverter te:TES_WITH_MODELS)
+	public void onResourceManagerReload(@Nonnull IResourceManager resourceManager) {
+		clearCache();
+	}
+
+	private static void clearCache() {
+		for (TileEntityMultiblockConverter te : TES_WITH_MODELS)
 			te.rotatingModel = null;
 		TES_WITH_MODELS.clear();
+	}
+
+	private void generateModel(TileEntityMultiblockConverter te) {
+		te.rotatingModel = new ArrayList<>();
+		int offset = 1;
+		for (MechMBPart part : te.mechanical) {
+			addQuadsForPart(part, offset, te.rotatingModel);
+			offset += part.getLength();
+		}
+		//Add shaft model in the end blocks
+		//TODO handle ends not being in the same indices for all quads
+		List<BakedQuad> shaftQuads = MechMBPart.INSTANCES.get(SHAFT_KEY).getRotatingQuads();
+		Vector3f tmp = new Vector3f();
+		Matrix4 id = new Matrix4();
+		Matrix4 translate = new Matrix4();
+		translate.translate(0, 0, offset);
+		for (BakedQuad q : shaftQuads) {
+			RawQuad raw = RawQuad.unbake(q);
+			Vector3f.add(raw.vertices[0], raw.vertices[1], tmp);
+			tmp.scale(.5F);
+			Vector3f middle0 = new Vector3f(tmp);
+			Vector3f.add(raw.vertices[2], raw.vertices[3], tmp);
+			tmp.scale(.5F);
+			Vector3f middle1 = new Vector3f(tmp);
+			RawQuad start = new RawQuad(raw.vertices[0], middle0, middle1, raw.vertices[3],
+					raw.facing, raw.tex, raw.colorA, raw.normal, new float[][]{
+					raw.uvs[0], {raw.uvs[1][0], .5F}, {raw.uvs[2][0], .5F}, raw.uvs[3]
+			}, -1);
+			te.rotatingModel.add(ClientUtilsIW.bakeQuad(start, id, id));
+			RawQuad end = new RawQuad(middle0, raw.vertices[1], raw.vertices[2], middle1,
+					raw.facing, raw.tex, raw.colorA, raw.normal, new float[][]{
+					{raw.uvs[0][0], .5F}, raw.uvs[1], raw.uvs[2], {raw.uvs[3][0], .5F}
+			}, -1);
+			te.rotatingModel.add(ClientUtilsIW.bakeQuad(end, translate, id));
+		}
+		TES_WITH_MODELS.add(te);
+	}
+
+	private void addQuadsForPart(MechMBPart part, int offset, List<BakedQuad> out) {
+		List<BakedQuad> quadsForPart = part.getRotatingQuads();
+		if (offset != 0) {
+			for (BakedQuad b : quadsForPart) {
+				out.add(translateQuadZ(b, offset));
+			}
+		} else {
+			out.addAll(quadsForPart);
+		}
+	}
+
+	private BakedQuad translateQuadZ(BakedQuad b, float offset) {
+		int[] data = Arrays.copyOf(b.getVertexData(), b.getVertexData().length);
+		int pos = 0;
+		for (VertexFormatElement ele : b.getFormat().getElements()) {
+			if (ele.getUsage() == VertexFormatElement.EnumUsage.POSITION) {
+				for (int i = 0; i < 4; i++) {
+					data[i * b.getFormat().getIntegerSize() + pos + 2] = Float.floatToRawIntBits(
+							Float.intBitsToFloat(data[i * b.getFormat().getIntegerSize() + pos + 2]) + offset);
+				}
+				break;
+			}
+			pos += ele.getSize() / 4;
+		}
+		return new BakedQuad(data, b.getTintIndex(), b.getFace(),
+				b.getSprite(), b.shouldApplyDiffuseLighting(), b.getFormat());
 	}
 }

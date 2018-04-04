@@ -25,6 +25,7 @@ import ic2.api.energy.tile.IEnergyEmitter;
 import ic2.api.energy.tile.IEnergySink;
 import ic2.api.energy.tile.IEnergySource;
 import malte0811.industrialWires.IndustrialWires;
+import malte0811.industrialWires.blocks.IBlockBoundsIW.IBlockBoundsDirectional;
 import malte0811.industrialWires.blocks.ISyncReceiver;
 import malte0811.industrialWires.blocks.TileEntityIWMultiblock;
 import malte0811.industrialWires.converter.*;
@@ -59,15 +60,14 @@ import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_Met
 import static malte0811.industrialWires.converter.EUCapability.ENERGY_IC2;
 import static malte0811.industrialWires.util.MiscUtils.getOffset;
 import static malte0811.industrialWires.util.MiscUtils.offset;
-import static malte0811.industrialWires.util.NBTKeys.PARTS;
-import static malte0811.industrialWires.util.NBTKeys.SPEED;
+import static malte0811.industrialWires.util.NBTKeys.*;
 
 @net.minecraftforge.fml.common.Optional.InterfaceList({
 		@net.minecraftforge.fml.common.Optional.Interface(iface = "ic2.api.energy.tile.IEnergySource", modid = "ic2"),
 		@Optional.Interface(iface = "ic2.api.energy.tile.IEnergySink", modid = "ic2")
 })
 public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implements ITickable, ISyncReceiver,
-		IEnergySource, IEnergySink, IPlayerInteraction, IRedstoneOutput {
+		IEnergySource, IEnergySink, IPlayerInteraction, IRedstoneOutput, IBlockBoundsDirectional {
 	private static final double DECAY_BASE = Math.exp(Math.log(.8)/(2*60*60*20));
 	public static final double TICK_ANGLE_PER_SPEED = 180/20/Math.PI;
 	private static final double SYNC_THRESHOLD = .95;
@@ -84,6 +84,8 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 	public List<BakedQuad> rotatingModel;
 	private boolean shouldInitWorld;
 	private boolean firstTick = true;
+	// To allow changing the MB structure later on without resulting in dupes/conversion
+	private int structureVersion = 0;
 
 	@Override
 	public void update() {
@@ -251,6 +253,7 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 			out.setTag(PARTS, mechParts);
 			out.setDouble(SPEED, energyState.getSpeed());
 		}
+		out.setInteger(STRUCTURE_VERSION, structureVersion);
     }
 
     @Override
@@ -270,7 +273,9 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 				shouldInitWorld = true;
 			}
 		}
+		structureVersion = in.getInteger(STRUCTURE_VERSION);
 		rBB = null;
+		aabb = null;
 	}
 
 	public void setMechanical(MechMBPart[] mech, double speed) {
@@ -555,5 +560,32 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 					part.world.realToTransformed(side));
 		}
 		return false;
+	}
+
+	@Override
+	public AxisAlignedBB getBoundingBoxNoRot() {
+		Vec3i offset = getOffsetDir();
+		TileEntityMultiblockConverter master = masterOr(this, this);
+		int comp = getPart(offset.getZ(), master);
+		if (comp<0) {
+			if (offset.getZ()==0) {
+				return new AxisAlignedBB(0, 0, .25, 1, 1, 1+offset.getY()*.25);
+			} else {
+				return new AxisAlignedBB(0, 0, -offset.getY()*.25, 1, 1, .75);
+			}
+		}
+		MechMBPart part = master.mechanical[comp];
+		BlockPos offsetPart = new BlockPos(offset.getX(), offset.getY(), offset.getZ()-master.offsets[comp]);
+		return part.getBoundingBox(offsetPart);
+	}
+
+	private AxisAlignedBB aabb = null;
+	@Override
+	public AxisAlignedBB getBoundingBox() {
+		if (aabb==null)
+		{
+			aabb = IBlockBoundsDirectional.super.getBoundingBox();
+		}
+		return aabb;
 	}
 }

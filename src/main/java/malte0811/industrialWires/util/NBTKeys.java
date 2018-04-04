@@ -24,6 +24,7 @@ public final class NBTKeys {
 	public static final String TYPE = "type";
 	public static final String BUFFER_IN = "inBuffer";
 	public static final String BUFFER_OUT = "outBuffer";
+	public static final String STRUCTURE_VERSION = "structureVersion";
 
 	//Control panels
 	public static final String HEIGHT = "height";

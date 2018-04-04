@@ -16,8 +16,13 @@
 package malte0811.industrialWires.client;
 
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.vertex.VertexFormat;
+import net.minecraft.client.renderer.vertex.VertexFormatElement;
 import net.minecraft.util.EnumFacing;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.util.vector.Vector3f;
 
 import javax.annotation.Nullable;
@@ -26,6 +31,7 @@ import java.util.Arrays;
 import static org.lwjgl.util.vector.Vector3f.cross;
 import static org.lwjgl.util.vector.Vector3f.sub;
 
+@SideOnly(Side.CLIENT)
 public class RawQuad {
 	public final Vector3f[] vertices = new Vector3f[4];
 	public final EnumFacing facing;
@@ -73,6 +79,52 @@ public class RawQuad {
 		}
 		this.uvs = uvs;
 		this.light = light;
+	}
+
+	public static RawQuad unbake(BakedQuad q) {
+		Vector3f[] vertices = new Vector3f[4];
+		float[] color = new float[4];
+		Vector3f normal = new Vector3f();
+		float[][] uvs = new float[4][2];
+		TextureAtlasSprite sprite = q.getSprite();
+		VertexFormat format = q.getFormat();
+		int pos = 0;
+		for (int v = 0; v < 4; v++) {
+			for (int e = 0; e < format.getElementCount(); e++) {
+				switch (format.getElement(e).getUsage()) {
+					case POSITION:
+						int x = q.getVertexData()[pos];
+						int y = q.getVertexData()[pos + 1];
+						int z = q.getVertexData()[pos + 2];
+						vertices[v] = new Vector3f(Float.intBitsToFloat(x),
+								Float.intBitsToFloat(y),
+								Float.intBitsToFloat(z));
+						break;
+					case COLOR:
+						for (int i = 0; i < 4; i++) {
+							color[i] = Float.intBitsToFloat(q.getVertexData()[pos + i]);
+						}
+						break;
+					case UV:
+						if (format.getElement(e).getType() == VertexFormatElement.EnumType.FLOAT) {
+							uvs[v][0] = sprite.getUnInterpolatedU(Float.intBitsToFloat(q.getVertexData()[pos]));
+							uvs[v][1] = sprite.getUnInterpolatedV(Float.intBitsToFloat(q.getVertexData()[pos + 1]));
+						}
+						break;
+					case NORMAL:
+						x = q.getVertexData()[pos];
+						y = q.getVertexData()[pos + 1];
+						z = q.getVertexData()[pos + 2];
+						normal.set(Float.intBitsToFloat(x),
+								Float.intBitsToFloat(y),
+								Float.intBitsToFloat(z));
+						break;
+				}
+				pos += format.getElement(e).getSize() / 4;
+			}
+		}
+		return new RawQuad(vertices[0], vertices[1], vertices[2], vertices[3],
+				q.getFace(), sprite, color, normal, uvs, -1);
 	}
 
 	public RawQuad apply(Matrix4 mat) {

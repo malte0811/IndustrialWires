@@ -26,6 +26,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.IEnergyStorage;
@@ -294,4 +295,8 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 		return outputs;
 	}
 
+	@Override
+	public AxisAlignedBB getBoundingBox(BlockPos offsetPart) {
+		return new AxisAlignedBB(0, .375-1/32D, 0, 1, 1, 1);
+	}
 }

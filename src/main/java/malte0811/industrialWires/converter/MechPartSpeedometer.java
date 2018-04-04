@@ -30,6 +30,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 
 import javax.annotation.Nonnull;
@@ -172,5 +174,10 @@ public class MechPartSpeedometer extends MechMBPart implements IPlayerInteractio
 	@Override
 	public boolean canConnectRedstone(@Nonnull IBlockState state, @Nonnull EnumFacing side) {
 		return side.getAxis() == X;
+	}
+
+	@Override
+	public AxisAlignedBB getBoundingBox(BlockPos offsetPart) {
+		return new AxisAlignedBB(0, .1875, 0, 1, .8125, 1);
 	}
 }

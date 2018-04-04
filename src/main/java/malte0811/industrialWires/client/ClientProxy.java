@@ -72,12 +72,15 @@ import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.WeakHashMap;
 
+@SideOnly(Side.CLIENT)
 public class ClientProxy extends CommonProxy {
 	@Override
 	public void preInit() {
