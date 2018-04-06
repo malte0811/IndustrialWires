@@ -117,7 +117,14 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 
 	@Override
 	public TileEntity createTileEntity(@Nonnull World world, @Nonnull IBlockState state) {
-		switch (state.getValue(TYPE)) {
+		TileEntityIC2ConnectorTin base = getBaseTE(state.getValue(TYPE));
+		if (base!=null) {
+			base.facing = state.getValue(IEProperties.FACING_ALL);
+		}
+		return base;
+	}
+	private TileEntityIC2ConnectorTin getBaseTE(BlockTypes_IC2_Connector type) {
+		switch (type) {
 		case TIN_CONN:
 			return new TileEntityIC2ConnectorTin(false);
 		case TIN_RELAY:

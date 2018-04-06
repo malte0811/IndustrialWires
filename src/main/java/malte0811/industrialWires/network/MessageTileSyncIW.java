@@ -18,6 +18,7 @@ package malte0811.industrialWires.network;
 import io.netty.buffer.ByteBuf;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.ISyncReceiver;
+import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -57,13 +58,15 @@ public class MessageTileSyncIW implements IMessage {
 	public static class HandlerClient implements IMessageHandler<MessageTileSyncIW, IMessage> {
 		@Override
 		public IMessage onMessage(MessageTileSyncIW message, MessageContext ctx) {
-			World world = IndustrialWires.proxy.getClientWorld();
-			if (world != null) {
-				TileEntity tile = world.getTileEntity(message.pos);
-				if (tile instanceof ISyncReceiver) {
-					((ISyncReceiver) tile).onSync(message.nbt);
+			Minecraft.getMinecraft().addScheduledTask(()-> {
+				World world = IndustrialWires.proxy.getClientWorld();
+				if (world != null) {
+					TileEntity tile = world.getTileEntity(message.pos);
+					if (tile instanceof ISyncReceiver) {
+						((ISyncReceiver) tile).onSync(message.nbt);
+					}
 				}
-			}
+			});
 			return null;
 		}
 	}
