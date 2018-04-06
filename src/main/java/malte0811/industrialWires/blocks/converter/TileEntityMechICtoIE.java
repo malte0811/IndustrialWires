@@ -29,8 +29,8 @@ import net.minecraft.util.math.BlockPos;
 
 import javax.annotation.Nonnull;
 
-import static malte0811.industrialWires.util.NBTKeys.BUFFER_TAG;
-import static malte0811.industrialWires.util.NBTKeys.DIR_TAG;
+import static malte0811.industrialWires.util.NBTKeys.BUFFER;
+import static malte0811.industrialWires.util.NBTKeys.DIRECTION;
 
 public class TileEntityMechICtoIE extends TileEntityIWBase implements IDirectionalTile, ITickable {
 	EnumFacing dir = EnumFacing.DOWN;
@@ -68,14 +68,14 @@ public class TileEntityMechICtoIE extends TileEntityIWBase implements IDirection
 
 	@Override
 	public void writeNBT(NBTTagCompound out, boolean updatePacket) {
-		out.setByte(DIR_TAG, (byte) dir.getIndex());
-		out.setInteger(BUFFER_TAG, kinBuffer);
+		out.setByte(DIRECTION, (byte) dir.getIndex());
+		out.setInteger(BUFFER, kinBuffer);
 	}
 
 	@Override
 	public void readNBT(NBTTagCompound in, boolean updatePacket) {
-		dir = EnumFacing.VALUES[in.getByte(DIR_TAG)];
-		kinBuffer = in.getInteger(BUFFER_TAG);
+		dir = EnumFacing.VALUES[in.getByte(DIRECTION)];
+		kinBuffer = in.getInteger(BUFFER);
 		to = null;
 		from = null;
 	}

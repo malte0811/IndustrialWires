@@ -253,7 +253,7 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 			out.setTag(PARTS, mechParts);
 			out.setDouble(SPEED, energyState.getSpeed());
 		}
-		out.setInteger(STRUCTURE_VERSION, structureVersion);
+		out.setInteger(VERSION, structureVersion);
     }
 
     @Override
@@ -273,7 +273,7 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 				shouldInitWorld = true;
 			}
 		}
-		structureVersion = in.getInteger(STRUCTURE_VERSION);
+		structureVersion = in.getInteger(VERSION);
 		rBB = null;
 		aabb = null;
 	}

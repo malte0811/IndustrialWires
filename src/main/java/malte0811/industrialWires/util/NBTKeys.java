@@ -18,13 +18,13 @@ package malte0811.industrialWires.util;
 public final class NBTKeys {
 
 	//General
-	public static final String ENERGY_TAG = "energy";
-	public static final String BUFFER_TAG = "buffer";
-	public static final String DIR_TAG = "dir";
+	public static final String ENERGY = "energy";
+	public static final String BUFFER = "buffer";
+	public static final String DIRECTION = "dir";
 	public static final String TYPE = "type";
 	public static final String BUFFER_IN = "inBuffer";
 	public static final String BUFFER_OUT = "outBuffer";
-	public static final String STRUCTURE_VERSION = "structureVersion";
+	public static final String VERSION = "version";
 
 	//Control panels
 	public static final String HEIGHT = "height";

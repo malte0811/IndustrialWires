@@ -16,7 +16,10 @@
 package malte0811.industrialWires.blocks;
 
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public interface ISyncReceiver {
+	@SideOnly(Side.CLIENT)
 	void onSync(NBTTagCompound nbt);
 }

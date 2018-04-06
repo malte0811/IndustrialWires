@@ -26,8 +26,8 @@ import net.minecraft.util.EnumFacing;
 
 import javax.annotation.Nonnull;
 
-import static malte0811.industrialWires.util.NBTKeys.BUFFER_TAG;
-import static malte0811.industrialWires.util.NBTKeys.DIR_TAG;
+import static malte0811.industrialWires.util.NBTKeys.BUFFER;
+import static malte0811.industrialWires.util.NBTKeys.DIRECTION;
 
 public class TileEntityMechIEtoIC extends TileEntityIWBase implements IDirectionalTile, IRotationAcceptor, IKineticSource {
 	EnumFacing dir = EnumFacing.DOWN;
@@ -37,14 +37,14 @@ public class TileEntityMechIEtoIC extends TileEntityIWBase implements IDirection
 
 	@Override
 	public void writeNBT(NBTTagCompound out, boolean updatePacket) {
-		out.setByte(DIR_TAG, (byte) dir.getIndex());
-		out.setDouble(BUFFER_TAG, rotBuffer);
+		out.setByte(DIRECTION, (byte) dir.getIndex());
+		out.setDouble(BUFFER, rotBuffer);
 	}
 
 	@Override
 	public void readNBT(NBTTagCompound in, boolean updatePacket) {
-		dir = EnumFacing.VALUES[in.getByte(DIR_TAG)];
-		rotBuffer = in.getDouble(BUFFER_TAG);
+		dir = EnumFacing.VALUES[in.getByte(DIRECTION)];
+		rotBuffer = in.getDouble(BUFFER);
 	}
 
 	// Directional

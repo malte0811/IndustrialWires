@@ -73,19 +73,19 @@ public class TileEntityIEMotor extends TileEntityIWBase implements ITickable, IF
 
 	@Override
 	public void readNBT(NBTTagCompound in, boolean updatePacket) {
-		dir = EnumFacing.VALUES[in.getByte(DIR_TAG)];
-		energy.readFromNBT(in.getCompoundTag(ENERGY_TAG));
+		dir = EnumFacing.VALUES[in.getByte(DIRECTION)];
+		energy.readFromNBT(in.getCompoundTag(ENERGY));
 		receiver = null;
-		rotBuffer = in.getDouble(BUFFER_TAG);
+		rotBuffer = in.getDouble(BUFFER);
 	}
 
 	@Override
 	public void writeNBT(NBTTagCompound out, boolean updatePacket) {
-		out.setByte(DIR_TAG, (byte) dir.getIndex());
+		out.setByte(DIRECTION, (byte) dir.getIndex());
 		NBTTagCompound nbt = new NBTTagCompound();
 		energy.writeToNBT(nbt);
-		out.setTag(ENERGY_TAG, nbt);
-		out.setDouble(BUFFER_TAG, rotBuffer);
+		out.setTag(ENERGY, nbt);
+		out.setDouble(BUFFER, rotBuffer);
 	}
 
 	// Flux energy

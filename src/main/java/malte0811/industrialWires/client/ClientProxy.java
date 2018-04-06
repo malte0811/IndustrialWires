@@ -205,7 +205,7 @@ public class ClientProxy extends CommonProxy {
 			return ~0;
 		}, IndustrialWires.panelComponent);
 
-		Config.manual_doubleA.put("iwJacobsUsage", IWConfig.HVStuff.jacobsUsageEU);
+		Config.manual_doubleA.put("iwJacobsUsage", IWConfig.HVStuff.jacobsUsageWatt);
 		Config.manual_int.put("iwKeysOnRing", IWConfig.maxKeysOnRing);
 		m.addEntry("industrialwires.jacobs", IndustrialWires.MODID,
 				new ManualPages.CraftingMulti(m, "industrialwires.jacobs0", new ItemStack(IndustrialWires.jacobsLadder, 1, 0), new ItemStack(IndustrialWires.jacobsLadder, 1, 1), new ItemStack(IndustrialWires.jacobsLadder, 1, 2)),

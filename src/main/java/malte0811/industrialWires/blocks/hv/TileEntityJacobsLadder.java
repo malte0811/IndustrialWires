@@ -33,7 +33,8 @@ import malte0811.industrialWires.blocks.IHasDummyBlocksIW;
 import malte0811.industrialWires.blocks.ISyncReceiver;
 import malte0811.industrialWires.network.MessageTileSyncIW;
 import malte0811.industrialWires.util.Beziers;
-import malte0811.industrialWires.util.DualEnergyStorage;
+import malte0811.industrialWires.util.ConversionUtil;
+import malte0811.industrialWires.util.JouleEnergyStorage;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -55,7 +56,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -73,7 +73,7 @@ import static malte0811.industrialWires.util.MiscUtils.interpolate;
 public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickable, IHasDummyBlocksIW, ISyncReceiver,
 		IEnergySink, IBlockBoundsIW, IDirectionalTile, IColoredLight, IEBlockInterfaces.IPlayerInteraction {
 	public EnumFacing facing = EnumFacing.NORTH;
-	private DualEnergyStorage energy;
+	private JouleEnergyStorage energy;
 	public LadderSize size;
 
 	public Vec3d[] controls;
@@ -85,7 +85,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 	private int dummy = 0;
 	public int timeTillActive = -1;
 	private double tStep = 0;
-	private double consumtionEU;
+	private double consumtionJoule;
 	private boolean addedToIC2Net = false;
 	private int soundPhase;
 	private Vec3d soundPos;
@@ -106,8 +106,9 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 		controlControls = new Vec3d[size.arcPoints - 2][size.movementPoints];
 		controlMovement = new Vec3d[size.arcPoints];
 		int sizeId = size.ordinal();
-		consumtionEU = IWConfig.HVStuff.jacobsUsageEU[sizeId];
-		energy = new DualEnergyStorage(20 * consumtionEU, 2 * consumtionEU);
+		consumtionJoule = IWConfig.HVStuff.jacobsUsageWatt[sizeId];
+		energy = new JouleEnergyStorage(20 * consumtionJoule,
+				40 * consumtionJoule);
 	}
 
 	@Override
@@ -120,7 +121,8 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 			if (hasIC2&&!addedToIC2Net) {
 				addToIC2Net();
 			}
-			if ((controlControls[0][0] == null || timeTillActive == -1 || t >= 1) && energy.getEnergyStoredEU() >= 2 * consumtionEU) {
+			if ((controlControls[0][0] == null || timeTillActive == -1 || t >= 1)
+					&& energy.getEnergyStoredJ() >= 2 * consumtionJoule) {
 				for (int j = 0; j < size.movementPoints; j++) {
 					double y = j * (size.height + size.extraHeight) / (double) (size.movementPoints - 1) + size.innerPointOffset;
 					double width = widthFromHeight(y);
@@ -137,9 +139,9 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 				tStep = 1D / (int) (.875 * size.tickToTop + world.rand.nextInt(size.tickToTop / 4));
 				IndustrialWires.packetHandler.sendToAll(new MessageTileSyncIW(this, writeArcStarter()));
 			} else if (timeTillActive == 0 && t < 1) {
-				double extracted = energy.extractEU(consumtionEU, false);
-				if (extracted >= consumtionEU) {
-					energy.extractEU(consumtionEU, true);
+				double extracted = energy.extract(consumtionJoule, 1, true);
+				if (extracted >= consumtionJoule) {
+					energy.extract(consumtionJoule, 1, false);
 				} else {
 					timeTillActive = -1 - size.delay;
 					NBTTagCompound nbt = new NBTTagCompound();
@@ -248,6 +250,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 		return nbt;
 	}
 
+	@SideOnly(Side.CLIENT)
 	private void readArcStarter(NBTTagCompound nbt) {
 		controlControls = read2DVecArray(nbt.getTagList("ctrlCtrl", 9));
 		tStep = nbt.getDouble("tStep");
@@ -320,6 +323,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void onSync(NBTTagCompound nbt) {
 		if (nbt.hasKey("salt")) {
 			salt = nbt.getDouble("salt");
@@ -419,7 +423,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 	@Override
 	@Optional.Method(modid = "ic2")
 	public double getDemandedEnergy() {
-		return energy.getEURequested();
+		return energy.getRequested(ConversionUtil.euPerJoule());
 	}
 
 	@Override
@@ -431,7 +435,7 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 	@Override
 	@Optional.Method(modid = "ic2")
 	public double injectEnergy(EnumFacing dir, double amount, double voltage) {
-		return amount - energy.insertEU(amount, true);
+		return amount - energy.insert(amount, ConversionUtil.joulesPerEu(), true);
 	}
 
 	@Override
@@ -445,13 +449,12 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 		return !isDummy() && from == facing && capability == CapabilityEnergy.ENERGY;
 	}
 
-	private EnergyCap energyCap = new EnergyCap();
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing) {
 		if (hasCapability(capability, facing)) {
 			if (capability == CapabilityEnergy.ENERGY) {
-				return CapabilityEnergy.ENERGY.cast(energyCap);
+				return CapabilityEnergy.ENERGY.cast(energy);
 			}
 		}
 		return null;
@@ -644,39 +647,6 @@ public class TileEntityJacobsLadder extends TileEntityIEBase implements ITickabl
 		@Override
 		public String getName() {
 			return name().toLowerCase();
-		}
-	}
-
-	public class EnergyCap implements IEnergyStorage {
-
-		@Override
-		public int receiveEnergy(int maxReceive, boolean simulate) {
-			return (int) energy.insertIF(maxReceive, !simulate);
-		}
-
-		@Override
-		public int extractEnergy(int maxExtract, boolean simulate) {
-			return 0;
-		}
-
-		@Override
-		public int getEnergyStored() {
-			return (int) energy.getEnergyStoredIF();
-		}
-
-		@Override
-		public int getMaxEnergyStored() {
-			return (int) energy.getMaxStoredIF();
-		}
-
-		@Override
-		public boolean canExtract() {
-			return false;
-		}
-
-		@Override
-		public boolean canReceive() {
-			return true;
 		}
 	}
 }

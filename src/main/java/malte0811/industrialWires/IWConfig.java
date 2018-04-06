@@ -79,7 +79,7 @@ public class IWConfig {
 
 	public static class HVStuff {
 		@Comment({"The amount of EU a Jacobs Ladder uses per tick, sorted by size of the ladder"})
-		public static double[] jacobsUsageEU = {20, 50, 100};
+		public static double[] jacobsUsageWatt = {40, 300, 2000};
 		@Comment({"The damage dealt by a small Jacobs Ladder. Normal Ladders deal twice this damage, huge ones 3 times as much"})
 		public static float jacobsBaseDmg = 5;
 		@Comment({"The effect of standing somewhat close to a Marx generator discharge.",

@@ -38,7 +38,8 @@ import malte0811.industrialWires.blocks.TileEntityIWMultiblock;
 import malte0811.industrialWires.hv.IMarxTarget;
 import malte0811.industrialWires.hv.MarxOreHandler;
 import malte0811.industrialWires.network.MessageTileSyncIW;
-import malte0811.industrialWires.util.DualEnergyStorage;
+import malte0811.industrialWires.util.ConversionUtil;
+import malte0811.industrialWires.util.JouleEnergyStorage;
 import malte0811.industrialWires.util.MiscUtils;
 import malte0811.industrialWires.wires.IC2Wiretype;
 import net.minecraft.block.Block;
@@ -103,8 +104,8 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	private int stageCount = 0;
 	public FiringState state = FiringState.CHARGING;
 	public Discharge dischargeData;
-	// Voltage=100*storedEU
-	private DualEnergyStorage storage = new DualEnergyStorage(50_000, 32_000);
+	// Voltage=10*storedJ
+	private JouleEnergyStorage storage = new JouleEnergyStorage(5_000, 3_200);
 	private boolean hasConnection;
 	private double[] capVoltages;
 	private int voltageControl = 0;
@@ -126,7 +127,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		out.setInteger(TYPE, type.ordinal());
 		out.setInteger(STAGES, stageCount);
 		out.setBoolean(HAS_CONN, hasConnection);
-		storage.writeToNbt(out, ENERGY_TAG);
+		storage.writeToNbt(out, ENERGY);
 		NBTTagList voltages = new NBTTagList();
 		if (capVoltages != null) {
 			for (int i = 0; i < stageCount; i++) {
@@ -147,7 +148,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		for (int i = 0;i<stageCount;i++) {
 			capVoltages[i] = voltages.getDoubleAt(i);
 		}
-		storage.readFromNBT(in.getCompoundTag(ENERGY_TAG));
+		storage.readFromNBT(in.getCompoundTag(ENERGY));
 		hasConnection = in.getBoolean(HAS_CONN);
 		collisionAabb = null;
 		renderAabb = null;
@@ -223,7 +224,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 			}
 			//charge bottom cap from storage
 			double setVoltage = MAX_VOLTAGE * voltageControl / 255F;
-			double u0 = Math.min(setVoltage, 100 * storage.getEnergyStoredEU());
+			double u0 = Math.min(setVoltage, 10 * storage.getEnergyStoredJ());
 			if (u0 < 0) {
 				u0 = 0;
 			}
@@ -232,8 +233,8 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 			}
 			double tmp = u0 - (u0 - oldBottomVoltage) * timeFactorBottom;
 			double energyUsed = .5 * (tmp * tmp - oldBottomVoltage * oldBottomVoltage) * CAPACITANCE;
-			if (energyUsed > 0 && storage.extractEU(energyUsed, false) == energyUsed) {// energyUsed can be negative when discharging the caps
-				storage.extractEU(energyUsed, true);
+			if (energyUsed > 0 && storage.extract(energyUsed, 1, true) == energyUsed) {// energyUsed can be negative when discharging the caps
+				storage.extract(energyUsed, 1, false);
 				capVoltages[0] = tmp;
 			} else if (energyUsed <= 0) {
 				capVoltages[0] = tmp;
@@ -248,7 +249,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 				state = FiringState.NEXT_TICK;
 			}
 		}
-		leftover = storage.getMaxInputIF();
+		leftover = storage.getMaxInPerTick();
 	}
 
 	private void fire() {
@@ -523,7 +524,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	public int outputEnergy(int amount, boolean simulate, int energyType) {
 		TileEntityMarx master = master(this);
 		if (master!=null && amount>0) {
-			double ret = master.storage.insertIF(amount, master.leftover, !simulate);
+			double ret = master.storage.insert(amount, ConversionUtil.joulesPerIf(), simulate, master.leftover);
 			master.leftover -= ret;
 			return (int) ret;
 		} else {
@@ -535,7 +536,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	public double insertEnergy(double eu, boolean simulate) {
 		TileEntityMarx master = master(this);
 		if (master!=null) {
-			double ret = master.storage.insertEU(eu, master.leftover, !simulate);
+			double ret = master.storage.insert(eu, ConversionUtil.joulesPerEu(), simulate, master.leftover);
 			master.leftover -= ret;
 			return eu-ret;
 		} else {

@@ -253,9 +253,7 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 		TileEntity te = w.getTileEntity(BlockPos.ORIGIN);
 		if (te!=null) {
 			ResourceLocation loc = TileEntity.getKey(te.getClass());
-			if (loc!=null&&loc.equals(KINETIC_GEN_KEY)) {
-				return true;
-			}
+			return loc != null && loc.equals(KINETIC_GEN_KEY);
 		}
 		return false;
 	}
@@ -267,7 +265,7 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 
 	@Override
 	public void disassemble(boolean failed, MechEnergy energy) {
-		if (IndustrialWires.ic2TeBlock!=null) {
+		if (!failed&&IndustrialWires.ic2TeBlock!=null) {
 			NBTTagCompound dummyNbt = new NBTTagCompound();
 			dummyNbt.setString("id", KINETIC_GEN_KEY.toString());
 			world.setBlockState(BlockPos.ORIGIN, IndustrialWires.ic2TeBlock.getDefaultState());
