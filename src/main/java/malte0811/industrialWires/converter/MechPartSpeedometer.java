@@ -15,8 +15,10 @@
 
 package malte0811.industrialWires.converter;
 
+import blusunrize.immersiveengineering.common.IEContent;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IPlayerInteraction;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IRedstoneOutput;
+import blusunrize.immersiveengineering.common.items.ItemIETool;
 import blusunrize.immersiveengineering.common.util.ChatUtils;
 import blusunrize.immersiveengineering.common.util.Utils;
 import malte0811.industrialWires.IndustrialWires;
@@ -33,8 +35,11 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.text.DecimalFormat;
 
 import static blusunrize.immersiveengineering.common.IEContent.blockMetalDecoration0;
 import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.RS_ENGINEERING;
@@ -48,6 +53,7 @@ public class MechPartSpeedometer extends MechMBPart implements IPlayerInteractio
 	private int currentOutputLin = -1;
 	private int currentOutputLog = -1;
 	private double logFactor = 15 / Math.log(speedFor15RS + 1);
+	@Nullable
 	private MechEnergy energy = null;
 
 	@Override
@@ -137,9 +143,14 @@ public class MechPartSpeedometer extends MechMBPart implements IPlayerInteractio
 		return SPEEDOMETER;
 	}
 
+	private static ItemStack voltMeter = ItemStack.EMPTY;
+	private static DecimalFormat format = new DecimalFormat("###.000");
 	@Override
 	public boolean interact(@Nonnull EnumFacing side, @Nonnull EntityPlayer player, @Nonnull EnumHand hand,
 							@Nonnull ItemStack heldItem, float hitX, float hitY, float hitZ) {
+		if (voltMeter.isEmpty()) {
+			voltMeter = new ItemStack(IEContent.itemTool, 1, ItemIETool.VOLTMETER_META);
+		}
 		if (Utils.isHammer(heldItem)) {
 			if (!world.isRemote) {
 				if (player.isSneaking()) {
@@ -154,6 +165,12 @@ public class MechPartSpeedometer extends MechMBPart implements IPlayerInteractio
 								speedFor15RS));
 				update(true);
 			}
+			return true;
+		} else if (OreDictionary.itemMatches(heldItem, voltMeter, false)) {
+			double speed = energy!=null?energy.getSpeed():0;
+			ChatUtils.sendServerNoSpamMessages(player,
+					new TextComponentTranslation(IndustrialWires.MODID + ".chat.currSpeed",
+							format.format(speed), format.format(speed*60D/(2*Math.PI))));
 			return true;
 		}
 		return false;
