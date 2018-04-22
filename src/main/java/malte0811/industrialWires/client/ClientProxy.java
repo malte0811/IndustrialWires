@@ -31,7 +31,7 @@ import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.controlpanel.BlockTypes_Panel;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanelCreator;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityRSPanelConn;
-import malte0811.industrialWires.blocks.converter.TileEntityMultiblockConverter;
+import malte0811.industrialWires.blocks.converter.TileEntityMechMB;
 import malte0811.industrialWires.blocks.hv.TileEntityJacobsLadder;
 import malte0811.industrialWires.blocks.hv.TileEntityMarx;
 import malte0811.industrialWires.client.gui.GuiPanelComponent;
@@ -42,6 +42,7 @@ import malte0811.industrialWires.client.manual.TextSplitter;
 import malte0811.industrialWires.client.panelmodel.PanelModelLoader;
 import malte0811.industrialWires.client.render.*;
 import malte0811.industrialWires.controlpanel.PanelComponent;
+import malte0811.industrialWires.converter.MechEnergy;
 import malte0811.industrialWires.crafting.IC2TRHelper;
 import malte0811.industrialWires.entities.EntityBrokenPart;
 import malte0811.industrialWires.hv.MarxOreHandler;
@@ -53,6 +54,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.MovingSound;
 import net.minecraft.client.audio.PositionedSoundRecord;
+import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.resources.IReloadableResourceManager;
@@ -65,6 +67,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.client.ClientCommandHandler;
@@ -75,10 +78,7 @@ import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.WeakHashMap;
+import java.util.*;
 
 @SideOnly(Side.CLIENT)
 public class ClientProxy extends CommonProxy {
@@ -128,7 +128,7 @@ public class ClientProxy extends CommonProxy {
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityJacobsLadder.class, new TileRenderJacobsLadder());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMarx.class, new TileRenderMarx());
 		TileRenderMBConverter tesr = new TileRenderMBConverter();
-		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMultiblockConverter.class, tesr);
+		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMechMB.class, tesr);
 		((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(tesr);
 		RenderingRegistry.registerEntityRenderingHandler(EntityBrokenPart.class, EntityRenderBrokenPart::new);
 
@@ -326,19 +326,19 @@ public class ClientProxy extends CommonProxy {
 		return Minecraft.getMinecraft().world;
 	}
 
-	private WeakHashMap<BlockPos, ISound> playingSounds = new WeakHashMap<>();
+	private Map<BlockPos, List<ISound>> playingSounds = new HashMap<>();
 	private static ResourceLocation jacobsStart = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_start");//~470 ms ~=9 ticks
 	private static ResourceLocation jacobsMiddle = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_middle");
 	private static ResourceLocation jacobsEnd = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_end");//~210 ms ~= 4 ticks
 	private static ResourceLocation marxBang = new ResourceLocation(IndustrialWires.MODID, "marx_bang");
 	private static ResourceLocation marxPop = new ResourceLocation(IndustrialWires.MODID, "marx_pop");
+	private static ResourceLocation mmbBang = new ResourceLocation(IndustrialWires.MODID, "mech_mb_breaking");
+	private static ResourceLocation turnFast = new ResourceLocation(IndustrialWires.MODID, "mech_mb_fast");
+	private static ResourceLocation turnSlow = new ResourceLocation(IndustrialWires.MODID, "mech_mb_slow");
 
 	@Override
 	public void playJacobsLadderSound(TileEntityJacobsLadder te, int phase, Vec3d soundPos) {
-		if (playingSounds.containsKey(te.getPos())) {
-			Minecraft.getMinecraft().getSoundHandler().stopSound(playingSounds.get(te.getPos()));
-			playingSounds.remove(te.getPos());
-		}
+		stopAllSounds(te.getPos());
 		ResourceLocation event;
 		switch (phase) {
 		case 0:
@@ -355,7 +355,37 @@ public class ClientProxy extends CommonProxy {
 		}
 		PositionedSoundRecord sound = new PositionedSoundRecord(event, SoundCategory.BLOCKS, te.size.soundVolume, 1, false, 0, ISound.AttenuationType.LINEAR, (float) soundPos.x, (float) soundPos.y, (float) soundPos.z);
 		ClientUtils.mc().getSoundHandler().playSound(sound);
-		playingSounds.put(te.getPos(), sound);
+		addSound(te.getPos(), sound);
+	}
+
+	@Override
+	public void playMechMBBang(TileEntityMechMB te, float volume) {
+		PositionedSoundRecord sound = new PositionedSoundRecord(mmbBang, SoundCategory.BLOCKS, volume, 1,
+				false, 0, ISound.AttenuationType.LINEAR, te.getPos().getX(), te.getPos().getY(),
+				te.getPos().getZ());
+		ClientUtils.mc().getSoundHandler().playSound(sound);
+		//This won't be added to the list since it's short and will play while the TE is being destroyed
+	}
+
+	@Override
+	public void playMechMBTurning(TileEntityMechMB te, MechEnergy energy) {
+		stopAllSounds(te.getPos());
+		float lambda = MathHelper.clamp((float) energy.getSpeed()/20-.5F, 0, 1);
+		float totalVolume = (float) (energy.weight/50e3*Math.sqrt(energy.getSpeed()));
+		if (lambda>0) {
+			PositionedSoundRecord sound = new PositionedSoundRecord(turnFast, SoundCategory.BLOCKS, lambda*totalVolume, 1,
+					false, 0, ISound.AttenuationType.LINEAR, te.getPos().getX(), te.getPos().getY(),
+					te.getPos().getZ());
+			ClientUtils.mc().getSoundHandler().playSound(sound);
+			addSound(te.getPos(), sound);
+		}
+		if (lambda<1) {
+			PositionedSoundRecord sound = new PositionedSoundRecord(turnSlow, SoundCategory.BLOCKS, (1-lambda)*totalVolume, 1,
+					false, 0, ISound.AttenuationType.LINEAR, te.getPos().getX(), te.getPos().getY(),
+					te.getPos().getZ());
+			ClientUtils.mc().getSoundHandler().playSound(sound);
+			addSound(te.getPos(), sound);
+		}
 	}
 
 	@Override
@@ -365,9 +395,32 @@ public class ClientProxy extends CommonProxy {
 			energy = -energy;
 			soundLoc = marxPop;
 		}
-		PositionedSoundRecord sound = new PositionedSoundRecord(soundLoc, SoundCategory.BLOCKS, 5*energy, 1, false, 0, ISound.AttenuationType.LINEAR, (float) pos.x, (float) pos.y, (float) pos.z);
+		PositionedSoundRecord sound = new PositionedSoundRecord(soundLoc, SoundCategory.BLOCKS, 5*energy, 1,
+				false, 0, ISound.AttenuationType.LINEAR, (float) pos.x, (float) pos.y, (float) pos.z);
 		ClientUtils.mc().getSoundHandler().playSound(sound);
-		playingSounds.put(te.getPos(), sound);
+		addSound(te.getPos(), sound);
+	}
+
+	private void addSound(BlockPos pos, ISound sound) {
+		List<ISound> allForPos = playingSounds.get(pos);
+		if (allForPos==null) {
+			allForPos = new ArrayList<>();
+		}
+		allForPos.add(sound);
+		if (allForPos.size()==1) {
+			playingSounds.put(pos, allForPos);
+		}
+	}
+
+	@Override
+	public void stopAllSounds(BlockPos pos) {
+		if (playingSounds.containsKey(pos)) {
+			SoundHandler manager = Minecraft.getMinecraft().getSoundHandler();
+			for (ISound sound:playingSounds.get(pos)) {
+				manager.stopSound(sound);
+			}
+			playingSounds.remove(pos);
+		}
 	}
 
 	@Override

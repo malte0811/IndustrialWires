@@ -165,7 +165,7 @@ public class IndustrialWires {
 				GameRegistry.registerTileEntity(TileEntityMechIEtoIC.class, MODID + ":mechIeToIc");
 			}
 		}
-		GameRegistry.registerTileEntity(TileEntityMultiblockConverter.class, MODID + ":mechMB");
+		GameRegistry.registerTileEntity(TileEntityMechMB.class, MODID + ":mechMB");
 		GameRegistry.registerTileEntity(TileEntityJacobsLadder.class, MODID + ":jacobsLadder");
 		GameRegistry.registerTileEntity(TileEntityMarx.class, MODID + ":marx_generator");
 		GameRegistry.registerTileEntity(TileEntityPanel.class, MODID + ":control_panel");

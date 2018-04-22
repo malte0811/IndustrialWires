@@ -18,7 +18,7 @@ package malte0811.industrialWires.client.render;
 import blusunrize.immersiveengineering.api.IEApi;
 import blusunrize.immersiveengineering.client.ClientUtils;
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
-import malte0811.industrialWires.blocks.converter.TileEntityMultiblockConverter;
+import malte0811.industrialWires.blocks.converter.TileEntityMechMB;
 import malte0811.industrialWires.client.ClientUtilsIW;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.converter.MechMBPart;
@@ -42,17 +42,17 @@ import org.lwjgl.util.vector.Vector3f;
 import javax.annotation.Nonnull;
 import java.util.*;
 
-import static malte0811.industrialWires.blocks.converter.TileEntityMultiblockConverter.TICK_ANGLE_PER_SPEED;
+import static malte0811.industrialWires.blocks.converter.TileEntityMechMB.TICK_ANGLE_PER_SPEED;
 import static malte0811.industrialWires.converter.MechMBPart.SHAFT_KEY;
 
-public class TileRenderMBConverter extends TileEntitySpecialRenderer<TileEntityMultiblockConverter> implements IResourceManagerReloadListener {
+public class TileRenderMBConverter extends TileEntitySpecialRenderer<TileEntityMechMB> implements IResourceManagerReloadListener {
 	public static final Map<ResourceLocation, IBakedModel> BASE_MODELS = new HashMap<>();
-	public static final Set<TileEntityMultiblockConverter> TES_WITH_MODELS = Collections.newSetFromMap(new WeakHashMap<>());
+	public static final Set<TileEntityMechMB> TES_WITH_MODELS = Collections.newSetFromMap(new WeakHashMap<>());
 	static {
 		IEApi.renderCacheClearers.add(TileRenderMBConverter::clearCache);
 	}
 	@Override
-	public void render(TileEntityMultiblockConverter te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
+	public void render(TileEntityMechMB te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
 		if (te.mechanical != null) {
 			if (te.rotatingModel == null) {
 				generateModel(te);
@@ -83,12 +83,12 @@ public class TileRenderMBConverter extends TileEntitySpecialRenderer<TileEntityM
 	}
 
 	private static void clearCache() {
-		for (TileEntityMultiblockConverter te : TES_WITH_MODELS)
+		for (TileEntityMechMB te : TES_WITH_MODELS)
 			te.rotatingModel = null;
 		TES_WITH_MODELS.clear();
 	}
 
-	private void generateModel(TileEntityMultiblockConverter te) {
+	private void generateModel(TileEntityMechMB te) {
 		te.rotatingModel = new ArrayList<>();
 		int offset = 1;
 		for (MechMBPart part : te.mechanical) {

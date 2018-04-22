@@ -66,11 +66,12 @@ import static malte0811.industrialWires.util.NBTKeys.*;
 		@net.minecraftforge.fml.common.Optional.Interface(iface = "ic2.api.energy.tile.IEnergySource", modid = "ic2"),
 		@Optional.Interface(iface = "ic2.api.energy.tile.IEnergySink", modid = "ic2")
 })
-public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implements ITickable, ISyncReceiver,
+public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickable, ISyncReceiver,
 		IEnergySource, IEnergySink, IPlayerInteraction, IRedstoneOutput, IBlockBoundsDirectional {
-	private static final double DECAY_BASE = Math.exp(Math.log(.8)/(2*60*60*20));
-	public static final double TICK_ANGLE_PER_SPEED = 180/20/Math.PI;
+	private static final double DECAY_BASE = Math.exp(Math.log(.8) / (2 * 60 * 60 * 20));
+	public static final double TICK_ANGLE_PER_SPEED = 180 / 20 / Math.PI;
 	private static final double SYNC_THRESHOLD = .95;
+	private static final int TURN_SOUND_LENGTH = 7;
 	public MechMBPart[] mechanical = null;
 	private int[] offsets = null;
 
@@ -86,22 +87,26 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 	private boolean firstTick = true;
 	// To allow changing the MB structure later on without resulting in dupes/conversion
 	private int structureVersion = 0;
+	private int soundTimingOffset = 0;
 
 	@Override
 	public void update() {
 		ApiUtils.checkForNeedlessTicking(this);
 		if (firstTick) {
 			//TODO make safe for when IC2 isn't installed
-			if (!world.isRemote&& IndustrialWires.hasIC2) {
+			if (!world.isRemote && IndustrialWires.hasIC2) {
 				MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
 			}
 			firstTick = false;
 		}
-		if (world.isRemote&&mechanical!=null) {
-			angle += energyState.getSpeed()*TICK_ANGLE_PER_SPEED;
+		if (world.isRemote && mechanical != null) {
+			angle += energyState.getSpeed() * TICK_ANGLE_PER_SPEED;
 			angle %= 360;
+			if (energyState.getSpeed()>1 && soundTimingOffset==world.getTotalWorldTime()%TURN_SOUND_LENGTH) {
+				IndustrialWires.proxy.playMechMBTurning(this, energyState);
+			}
 		}
-		if (world.isRemote||isLogicDummy()||mechanical==null) {
+		if (world.isRemote || isLogicDummy() || mechanical == null) {
 			return;
 		}
 		if (shouldInitWorld) {
@@ -113,25 +118,25 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 			}
 		}
 		// Mechanical
-		for (MechMBPart part:mechanical) {
+		for (MechMBPart part : mechanical) {
 			part.createMEnergy(energyState);
 		}
 		double requestSum = 0;
 		IdentityHashMap<MechMBPart, Double> individualRequests = new IdentityHashMap<>();
-		for (MechMBPart part:mechanical) {
+		for (MechMBPart part : mechanical) {
 			double eForPart = part.requestMEnergy(energyState);
 			requestSum += eForPart;
 			individualRequests.put(part, eForPart);
 		}
-		double availableEnergy = energyState.getEnergy()/5;//prevent energy transmission without movement
-		double factor = Math.min(availableEnergy/requestSum, 1);
+		double availableEnergy = energyState.getEnergy() / 5;//prevent energy transmission without movement
+		double factor = Math.min(availableEnergy / requestSum, 1);
 		energyState.extractEnergy(Math.min(requestSum, availableEnergy));
-		for (MechMBPart part:mechanical) {
-			part.insertMEnergy(factor*individualRequests.get(part));
+		for (MechMBPart part : mechanical) {
+			part.insertMEnergy(factor * individualRequests.get(part));
 		}
 		Set<MechMBPart> failed = new HashSet<>();
-		for (MechMBPart part:mechanical) {
-			if (energyState.getSpeed()>part.getMaxSpeed()) {
+		for (MechMBPart part : mechanical) {
+			if (energyState.getSpeed() > part.getMaxSpeed()) {
 				failed.add(part);
 			}
 		}
@@ -141,7 +146,7 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 		}
 
 		//Electrical
-		for (int[] section:electricalStartEnd) {
+		for (int[] section : electricalStartEnd) {
 			final int sectionLength = section[1] - section[0];
 			double[] available = new double[sectionLength];
 			Waveform[] availableWf = new Waveform[sectionLength];
@@ -157,7 +162,7 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 				double availableLocal = electricalComp.getAvailableEEnergy();
 				available[i - section[0]] = availableLocal;
 				availableWaveforms.add(localWf);
-				if (availableLocal>0) {
+				if (availableLocal > 0) {
 					hasEnergy = true;
 				}
 			}
@@ -182,20 +187,20 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 						maxId = i;
 					}
 				}
-				if (maxId<0) {
+				if (maxId < 0) {
 					double[] availablePerWf = new double[availableWaveforms.size()];
-					for (int i = 0;i<availableWf.length;i++) {
+					for (int i = 0; i < availableWf.length; i++) {
 						if (availableWf[i].isEnergyWaveform()) {
 							availablePerWf[availableWfList.indexOf(availableWf[i])] += available[i];
 						}
 					}
-					for (int i = 0;i<availablePerWf.length;i++) {
-						if (availablePerWf[i]>0&&(maxId<0||availablePerWf[maxId]<availablePerWf[i])) {
+					for (int i = 0; i < availablePerWf.length; i++) {
+						if (availablePerWf[i] > 0 && (maxId < 0 || availablePerWf[maxId] < availablePerWf[i])) {
 							maxId = i;
 						}
 					}
 				}
-				if (maxId>=0) {
+				if (maxId >= 0) {
 					transferElectric(section, available, availableWf, availableWfList.get(maxId), requested[maxId], false);
 				}
 			}
@@ -204,7 +209,7 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 		//General
 		energyState.decaySpeed(decay);
 		markDirty();
-		if (lastSyncedSpeed<energyState.getSpeed()*SYNC_THRESHOLD||lastSyncedSpeed>energyState.getSpeed()/SYNC_THRESHOLD) {
+		if (lastSyncedSpeed < energyState.getSpeed() * SYNC_THRESHOLD || lastSyncedSpeed > energyState.getSpeed() / SYNC_THRESHOLD) {
 			NBTTagCompound nbt = new NBTTagCompound();
 			nbt.setDouble(SPEED, energyState.getSpeed());
 			IndustrialWires.packetHandler.sendToDimension(new MessageTileSyncIW(this, nbt), world.provider.getDimension());
@@ -237,29 +242,29 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 				electric.insertEEnergy(ins, waveform, energyState);
 				electric.extractEEnergy(extr);
 			}
-			totalTransf += Math.abs(ins-extr);
+			totalTransf += Math.abs(ins - extr);
 		}
 		return totalTransf;
 	}
 
 	@Override
-    public void writeNBT(NBTTagCompound out, boolean updatePacket) {
-        super.writeNBT(out, updatePacket);
-		if (mechanical!=null) {
+	public void writeNBT(NBTTagCompound out, boolean updatePacket) {
+		super.writeNBT(out, updatePacket);
+		if (mechanical != null) {
 			NBTTagList mechParts = new NBTTagList();
-			for (MechMBPart part:mechanical) {
+			for (MechMBPart part : mechanical) {
 				mechParts.appendTag(MechMBPart.toNBT(part));
 			}
 			out.setTag(PARTS, mechParts);
 			out.setDouble(SPEED, energyState.getSpeed());
 		}
 		out.setInteger(VERSION, structureVersion);
-    }
+	}
 
-    @Override
-    public void readNBT(NBTTagCompound in, boolean updatePacket) {
-        super.readNBT(in, updatePacket);
-        if (in.hasKey(PARTS, Constants.NBT.TAG_LIST)) {
+	@Override
+	public void readNBT(NBTTagCompound in, boolean updatePacket) {
+		super.readNBT(in, updatePacket);
+		if (in.hasKey(PARTS, Constants.NBT.TAG_LIST)) {
 			NBTTagList mechParts = in.getTagList(PARTS, Constants.NBT.TAG_COMPOUND);
 			MechMBPart[] mech = new MechMBPart[mechParts.tagCount()];
 			int offset = 1;
@@ -269,7 +274,7 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 				offset += mech[i].getLength();
 			}
 			setMechanical(mech, in.getDouble(SPEED));
-			if (world==null) {
+			if (world == null) {
 				shouldInitWorld = true;
 			}
 		}
@@ -289,14 +294,14 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 			offsets[i] = offset;
 			weight += mechanical[i].getInertia();
 			offset += mechanical[i].getLength();
-			if (lastEStart<0&&mechanical[i] instanceof IMBPartElectric) {
+			if (lastEStart < 0 && mechanical[i] instanceof IMBPartElectric) {
 				lastEStart = i;
-			} else if (lastEStart>=0&&!(mechanical[i] instanceof IMBPartElectric)) {
+			} else if (lastEStart >= 0 && !(mechanical[i] instanceof IMBPartElectric)) {
 				electrical.add(new int[]{lastEStart, i});
 				lastEStart = -1;
 			}
 		}
-		if (lastEStart>=0) {
+		if (lastEStart >= 0) {
 			electrical.add(new int[]{lastEStart, mechanical.length});
 		}
 		electricalStartEnd = electrical.toArray(new int[electrical.size()][]);
@@ -304,13 +309,13 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 		energyState = new MechEnergy(weight, speed);
 	}
 
-	private int getPart(int offset, TileEntityMultiblockConverter master) {
-		if (offset==0) {
+	private int getPart(int offset, TileEntityMechMB master) {
+		if (offset == 0) {
 			return -1;
 		}
 		int pos = 1;
 		MechMBPart[] mechMaster = master.mechanical;
-		if (mechMaster!=null) {
+		if (mechMaster != null) {
 			for (int i = 0, mechanical1Length = mechMaster.length; i < mechanical1Length; i++) {
 				MechMBPart part = mechMaster[i];
 				if (pos >= offset) {
@@ -322,27 +327,29 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 		return -1;
 	}
 
-    @Nonnull
-    @Override
-    protected BlockPos getOrigin() {
-        return pos;//Irrelevant, since this uses a custome disassembly method
-    }
+	@Nonnull
+	@Override
+	protected BlockPos getOrigin() {
+		return pos;//Irrelevant, since this uses a custom disassembly method
+	}
 
-    @Override
-    public IBlockState getOriginalBlock() {
-        return Blocks.AIR.getDefaultState();//Mostly irrelevant, since this uses a custom disassembly method
-    }
+	@Override
+	public IBlockState getOriginalBlock() {
+		return Blocks.AIR.getDefaultState();// TODO implement for pick block
+	}
 
 	@Override
 	public void onSync(NBTTagCompound nbt) {
 		energyState.setSpeed(nbt.getDouble(SPEED));
+		soundTimingOffset = (int) (world.getTotalWorldTime()%TURN_SOUND_LENGTH);
 	}
 
 	private AxisAlignedBB rBB;
+
 	@Nonnull
 	@Override
 	public AxisAlignedBB getRenderBoundingBox() {
-		if (rBB==null) {
+		if (rBB == null) {
 			if (isLogicDummy()) {
 				rBB = new AxisAlignedBB(pos, pos);
 			} else {
@@ -356,13 +363,13 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 	@Override
 	public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing) {
 		Vec3i offsetDirectional = getOffsetDir();
-		TileEntityMultiblockConverter master = masterOr(this, this);
+		TileEntityMechMB master = masterOr(this, this);
 		int id = getPart(offsetDirectional.getZ(), master);
-		if (id<0) {
+		if (id < 0) {
 			return false;
 		}
 		MechMBPart part = master.mechanical[id];
-		BlockPos offsetPart = new BlockPos(offsetDirectional.getX(), offsetDirectional.getY(), offsetDirectional.getZ()-master.offsets[id]);
+		BlockPos offsetPart = new BlockPos(offsetDirectional.getX(), offsetDirectional.getY(), offsetDirectional.getZ() - master.offsets[id]);
 		return part.hasCapability(capability, part.world.realToTransformed(facing), offsetPart);
 	}
 
@@ -370,13 +377,13 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 	@Override
 	public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing) {
 		Vec3i offsetDirectional = getOffsetDir();
-		TileEntityMultiblockConverter master = masterOr(this, this);
+		TileEntityMechMB master = masterOr(this, this);
 		int id = getPart(offsetDirectional.getZ(), master);
-		if (id<0) {
+		if (id < 0) {
 			return null;
 		}
 		MechMBPart part = master.mechanical[id];
-		BlockPos offsetPart = new BlockPos(offsetDirectional.getX(), offsetDirectional.getY(), offsetDirectional.getZ()-master.offsets[id]);
+		BlockPos offsetPart = new BlockPos(offsetDirectional.getX(), offsetDirectional.getY(), offsetDirectional.getZ() - master.offsets[id]);
 		return part.getCapability(capability, part.world.realToTransformed(facing), offsetPart);
 	}
 
@@ -385,7 +392,7 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 		final double MIN_BREAK = .1;
 		final double MIN_BREAK_BROKEN = .5;
 		if (formed) {
-			TileEntityMultiblockConverter master = master(this);
+			TileEntityMechMB master = master(this);
 			if (master != null) {
 				int partId = master.getPart(offset.getX(), master);
 				MechMBPart broken = null;
@@ -404,26 +411,28 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 	}
 
 	private void disassemble(Set<MechMBPart> failed) {
-		if (!world.isRemote&&formed) {
+		if (world.isRemote)
+			IndustrialWires.proxy.playMechMBBang(this, failed.size()*2);//TODO this doesn't run client-side
+		if (!world.isRemote && formed) {
 			formed = false;
 			world.setBlockState(pos,
 					blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, HEAVY_ENGINEERING));
 			world.setBlockState(pos.down(),
 					blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, HEAVY_ENGINEERING));
-			for (MechMBPart mech:mechanical) {
+			for (MechMBPart mech : mechanical) {
 				mech.disassemble(failed.contains(mech), energyState);
 				short pattern = mech.getFormPattern();
-				for (int i = 0;i<9;i++) {
-					if (((pattern>>i)&1)!=0) {
-						BlockPos pos = new BlockPos(i%3-1, i/3-1, 0);
-						if (mech.world.getBlockState(pos).getBlock()==IndustrialWires.mechanicalMB) {
+				for (int i = 0; i < 9; i++) {
+					if (((pattern >> i) & 1) != 0) {
+						BlockPos pos = new BlockPos(i % 3 - 1, i / 3 - 1, 0);
+						if (mech.world.getBlockState(pos).getBlock() == IndustrialWires.mechanicalMB) {
 							mech.world.setBlockState(pos, Blocks.AIR.getDefaultState());
 						}
 					}
 				}
 			}
 			BlockPos otherEnd = offset(pos, facing.getOpposite(), mirrored, 0,
-					offsets[offsets.length-1]+mechanical[mechanical.length-1].getLength(), 0);
+					offsets[offsets.length - 1] + mechanical[mechanical.length - 1].getLength(), 0);
 			world.setBlockState(otherEnd,
 					blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, HEAVY_ENGINEERING));
 			world.setBlockState(otherEnd.down(),
@@ -432,69 +441,69 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 	}
 
 	private EUCapability.IC2EnergyHandler getIC2Cap() {
-		return ENERGY_IC2!=null?getCapability(ENERGY_IC2, null):null;
+		return ENERGY_IC2 != null ? getCapability(ENERGY_IC2, null) : null;
 	}
 
 	@Override
 	public boolean emitsEnergyTo(IEnergyAcceptor output, EnumFacing side) {
-		if (ENERGY_IC2==null)
+		if (ENERGY_IC2 == null)
 			return false;
 		Vec3i offsetDirectional = getOffsetDir();
-		TileEntityMultiblockConverter master = masterOr(this, this);
+		TileEntityMechMB master = masterOr(this, this);
 		int id = getPart(offsetDirectional.getZ(), master);
-		if (id<0) {
+		if (id < 0) {
 			return false;
 		}
 		MechMBPart part = master.mechanical[id];
-		BlockPos offsetPart = new BlockPos(offsetDirectional.getX(), offsetDirectional.getY(), offsetDirectional.getZ()-master.offsets[id]);
-		EUCapability.IC2EnergyHandler cap =  part.getCapability(ENERGY_IC2, part.world.realToTransformed(side), offsetPart);
-		return cap!=null;
+		BlockPos offsetPart = new BlockPos(offsetDirectional.getX(), offsetDirectional.getY(), offsetDirectional.getZ() - master.offsets[id]);
+		EUCapability.IC2EnergyHandler cap = part.getCapability(ENERGY_IC2, part.world.realToTransformed(side), offsetPart);
+		return cap != null;
 	}
 
 	@Override
 	public double getDemandedEnergy() {
 		EUCapability.IC2EnergyHandler cap = getIC2Cap();
-		return cap!=null?cap.getDemandedEnergy():0;
+		return cap != null ? cap.getDemandedEnergy() : 0;
 	}
 
 	@Override
 	public int getSinkTier() {
 		EUCapability.IC2EnergyHandler cap = getIC2Cap();
-		return cap!=null?cap.getEnergyTier():0;
+		return cap != null ? cap.getEnergyTier() : 0;
 	}
 
 	@Override
 	public double injectEnergy(EnumFacing enumFacing, double amount, double voltage) {
 		EUCapability.IC2EnergyHandler cap = getIC2Cap();
-		return cap!=null?cap.injectEnergy(enumFacing, amount, voltage):0;
+		return cap != null ? cap.injectEnergy(enumFacing, amount, voltage) : 0;
 	}
 
 	@Override
 	public boolean acceptsEnergyFrom(IEnergyEmitter input, EnumFacing side) {
-		if (ENERGY_IC2==null)
+		if (ENERGY_IC2 == null)
 			return false;
 		Vec3i offsetDirectional = getOffsetDir();
-		TileEntityMultiblockConverter master = masterOr(this, this);
+		TileEntityMechMB master = masterOr(this, this);
 		int id = getPart(offsetDirectional.getZ(), master);
-		if (id<0) {
+		if (id < 0) {
 			return false;
 		}
 		MechMBPart part = master.mechanical[id];
-		BlockPos offsetPart = new BlockPos(offsetDirectional.getX(), offsetDirectional.getY(), offsetDirectional.getZ()-master.offsets[id]);
-		EUCapability.IC2EnergyHandler cap =  part.getCapability(ENERGY_IC2, part.world.realToTransformed(side), offsetPart);
-		return cap!=null;
+		BlockPos offsetPart = new BlockPos(offsetDirectional.getX(), offsetDirectional.getY(), offsetDirectional.getZ() - master.offsets[id]);
+		EUCapability.IC2EnergyHandler cap = part.getCapability(ENERGY_IC2, part.world.realToTransformed(side), offsetPart);
+		return cap != null;
 	}
 
 	@Override
 	public double getOfferedEnergy() {
 		EUCapability.IC2EnergyHandler cap = getIC2Cap();
-		return cap!=null?cap.getOfferedEnergy():0;
+		return cap != null ? cap.getOfferedEnergy() : 0;
 	}
 
 	@Override
 	public void drawEnergy(double amount) {
 		EUCapability.IC2EnergyHandler cap = getIC2Cap();
-		if (cap!=null) {
+		if (cap != null) {
 			cap.drawEnergy(amount);
 		}
 	}
@@ -502,7 +511,7 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 	@Override
 	public int getSourceTier() {
 		EUCapability.IC2EnergyHandler cap = getIC2Cap();
-		return cap!=null?cap.getEnergyTier():0;
+		return cap != null ? cap.getEnergyTier() : 0;
 	}
 
 
@@ -525,10 +534,10 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 	@Override
 	public boolean interact(@Nonnull EnumFacing side, @Nonnull EntityPlayer player, @Nonnull EnumHand hand,
 							@Nonnull ItemStack heldItem, float hitX, float hitY, float hitZ) {
-		TileEntityMultiblockConverter master = masterOr(this, this);
+		TileEntityMechMB master = masterOr(this, this);
 		int id = getPart(getOffsetDir().getZ(), master);
-		if (id>=0&&master.mechanical[id] instanceof IPlayerInteraction) {
-			return ((IPlayerInteraction)master.mechanical[id]).interact(side, player, hand, heldItem, hitX, hitY, hitZ);
+		if (id >= 0 && master.mechanical[id] instanceof IPlayerInteraction) {
+			return ((IPlayerInteraction) master.mechanical[id]).interact(side, player, hand, heldItem, hitX, hitY, hitZ);
 		}
 		return false;
 	}
@@ -540,11 +549,11 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 
 	@Override
 	public int getStrongRSOutput(@Nonnull IBlockState state, @Nonnull EnumFacing side) {
-		TileEntityMultiblockConverter master = masterOr(this, this);
+		TileEntityMechMB master = masterOr(this, this);
 		int id = getPart(getOffsetDir().getZ(), master);
-		if (id>=0&&master.mechanical[id] instanceof IRedstoneOutput) {
+		if (id >= 0 && master.mechanical[id] instanceof IRedstoneOutput) {
 			MechMBPart part = master.mechanical[id];
-			return ((IRedstoneOutput)part).getStrongRSOutput(state,
+			return ((IRedstoneOutput) part).getStrongRSOutput(state,
 					part.world.realToTransformed(side));
 		}
 		return 0;
@@ -552,11 +561,11 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 
 	@Override
 	public boolean canConnectRedstone(@Nonnull IBlockState state, @Nonnull EnumFacing side) {
-		TileEntityMultiblockConverter master = masterOr(this, this);
+		TileEntityMechMB master = masterOr(this, this);
 		int id = getPart(getOffsetDir().getZ(), master);
-		if (id>=0&&master.mechanical[id] instanceof IRedstoneOutput) {
+		if (id >= 0 && master.mechanical[id] instanceof IRedstoneOutput) {
 			MechMBPart part = master.mechanical[id];
-			return ((IRedstoneOutput)part).canConnectRedstone(state,
+			return ((IRedstoneOutput) part).canConnectRedstone(state,
 					part.world.realToTransformed(side));
 		}
 		return false;
@@ -565,25 +574,25 @@ public class TileEntityMultiblockConverter extends TileEntityIWMultiblock implem
 	@Override
 	public AxisAlignedBB getBoundingBoxNoRot() {
 		Vec3i offset = getOffsetDir();
-		TileEntityMultiblockConverter master = masterOr(this, this);
+		TileEntityMechMB master = masterOr(this, this);
 		int comp = getPart(offset.getZ(), master);
-		if (comp<0) {
-			if (offset.getZ()==0) {
-				return new AxisAlignedBB(0, 0, .25, 1, 1, 1+offset.getY()*.25);
+		if (comp < 0) {
+			if (offset.getZ() == 0) {
+				return new AxisAlignedBB(0, 0, .25, 1, 1, 1 + offset.getY() * .25);
 			} else {
-				return new AxisAlignedBB(0, 0, -offset.getY()*.25, 1, 1, .75);
+				return new AxisAlignedBB(0, 0, -offset.getY() * .25, 1, 1, .75);
 			}
 		}
 		MechMBPart part = master.mechanical[comp];
-		BlockPos offsetPart = new BlockPos(offset.getX(), offset.getY(), offset.getZ()-master.offsets[comp]);
+		BlockPos offsetPart = new BlockPos(offset.getX(), offset.getY(), offset.getZ() - master.offsets[comp]);
 		return part.getBoundingBox(offsetPart);
 	}
 
 	private AxisAlignedBB aabb = null;
+
 	@Override
 	public AxisAlignedBB getBoundingBox() {
-		if (aabb==null)
-		{
+		if (aabb == null) {
 			aabb = IBlockBoundsDirectional.super.getBoundingBox();
 		}
 		return aabb;

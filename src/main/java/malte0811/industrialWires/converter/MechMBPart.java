@@ -21,7 +21,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
-import malte0811.industrialWires.blocks.converter.TileEntityMultiblockConverter;
+import malte0811.industrialWires.blocks.converter.TileEntityMechMB;
 import malte0811.industrialWires.client.render.TileRenderMBConverter;
 import malte0811.industrialWires.util.LocalSidedWorld;
 import malte0811.industrialWires.util.MiscUtils;
@@ -184,7 +184,7 @@ public abstract class MechMBPart {
 	}
 
 
-	public void form(LocalSidedWorld w, Consumer<TileEntityMultiblockConverter> initializer) {
+	public void form(LocalSidedWorld w, Consumer<TileEntityMechMB> initializer) {
 		world = w;
 		BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain();
 		short pattern = getFormPattern();
@@ -195,8 +195,8 @@ public abstract class MechMBPart {
 					pos.setPos(x, y, 0);
 					w.setBlockState(pos, IndustrialWires.mechanicalMB.getStateFromMeta((i==4?getType():NO_MODEL).ordinal()));
 					TileEntity te = w.getTileEntity(pos);
-					if (te instanceof TileEntityMultiblockConverter) {
-						initializer.accept((TileEntityMultiblockConverter) te);
+					if (te instanceof TileEntityMechMB) {
+						initializer.accept((TileEntityMechMB) te);
 					}
 				}
 				i++;

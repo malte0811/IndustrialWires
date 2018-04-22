@@ -40,5 +40,41 @@
     "sounds": [
       "industrialwires:marx_pop"
     ]
+  },
+  "mech_mb_breaking": {
+    "category": "block",
+    "subtitle": "industrialwires.subtitle.mech_mb_breaking",
+    "sounds": [
+      "industrialwires:mech_mb/breaking"
+    ]
+  },
+  "mech_mb_slow": {
+    "category": "block",
+    "subtitle": "industrialwires.subtitle.mech_mb_turning",
+    "sounds": [
+      "industrialwires:mech_mb/turn_slow_000",
+      "industrialwires:mech_mb/turn_slow_001",
+      "industrialwires:mech_mb/turn_slow_002",
+      "industrialwires:mech_mb/turn_slow_003",
+      "industrialwires:mech_mb/turn_slow_004",
+      "industrialwires:mech_mb/turn_slow_005",
+      "industrialwires:mech_mb/turn_slow_006",
+      "industrialwires:mech_mb/turn_slow_007",
+      "industrialwires:mech_mb/turn_slow_008"
+    ]
+  },
+  "mech_mb_fast": {
+    "category": "block",
+    "subtitle": "industrialwires.subtitle.mech_mb_turning",
+    "sounds": [
+      "industrialwires:mech_mb/turn_fast_000",
+      "industrialwires:mech_mb/turn_fast_001",
+      "industrialwires:mech_mb/turn_fast_002",
+      "industrialwires:mech_mb/turn_fast_003",
+      "industrialwires:mech_mb/turn_fast_004",
+      "industrialwires:mech_mb/turn_fast_005",
+      "industrialwires:mech_mb/turn_fast_006",
+      "industrialwires:mech_mb/turn_fast_007"
+    ]
   }
 }

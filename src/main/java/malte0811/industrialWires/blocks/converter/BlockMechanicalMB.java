@@ -51,7 +51,7 @@ public class BlockMechanicalMB extends BlockIWMultiblock implements IMetaEnum {
 	@Nullable
 	@Override
 	public TileEntity createTileEntity(@Nonnull World world, @Nonnull IBlockState state) {
-		return new TileEntityMultiblockConverter();
+		return new TileEntityMechMB();
 	}
 
 	@Override

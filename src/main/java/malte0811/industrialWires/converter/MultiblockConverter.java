@@ -19,7 +19,7 @@ import blusunrize.immersiveengineering.api.MultiblockHandler;
 import blusunrize.immersiveengineering.api.crafting.IngredientStack;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
-import malte0811.industrialWires.blocks.converter.TileEntityMultiblockConverter;
+import malte0811.industrialWires.blocks.converter.TileEntityMechMB;
 import malte0811.industrialWires.util.LocalSidedWorld;
 import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.block.state.IBlockState;
@@ -59,18 +59,18 @@ public class MultiblockConverter implements MultiblockHandler.IMultiblock {
 	}
 
 	private void formEnd(LocalSidedWorld w, BlockPos.PooledMutableBlockPos p, MechanicalMBBlockType type,
-			BiConsumer<TileEntityMultiblockConverter, Boolean> init) {
+			BiConsumer<TileEntityMechMB, Boolean> init) {
 		p.setPos(0, 0, 0);
 		w.setBlockState(p, IndustrialWires.mechanicalMB.getStateFromMeta(type.ordinal()));
 		TileEntity te = w.getTileEntity(p);
-		if (te instanceof TileEntityMultiblockConverter) {
-			init.accept((TileEntityMultiblockConverter) te, true);
+		if (te instanceof TileEntityMechMB) {
+			init.accept((TileEntityMechMB) te, true);
 		}
 		p.setPos(0, -1, 0);
 		w.setBlockState(p, IndustrialWires.mechanicalMB.getStateFromMeta(NO_MODEL.ordinal()));
 		te = w.getTileEntity(p);
-		if (te instanceof TileEntityMultiblockConverter) {
-			init.accept((TileEntityMultiblockConverter) te, false);
+		if (te instanceof TileEntityMechMB) {
+			init.accept((TileEntityMechMB) te, false);
 		}
 	}
 
@@ -129,7 +129,7 @@ public class MultiblockConverter implements MultiblockHandler.IMultiblock {
 				te.formed = true;
 			});
 			lastLength = 1;
-			Consumer<TileEntityMultiblockConverter> init = (te) -> {
+			Consumer<TileEntityMechMB> init = (te) -> {
 				te.offset = te.getPos().subtract(pos);
 				te.facing = side;
 				te.formed = true;

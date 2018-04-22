@@ -16,12 +16,14 @@ package malte0811.industrialWires;
 
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanelCreator;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityRSPanelConn;
+import malte0811.industrialWires.blocks.converter.TileEntityMechMB;
 import malte0811.industrialWires.blocks.hv.TileEntityJacobsLadder;
 import malte0811.industrialWires.blocks.hv.TileEntityMarx;
 import malte0811.industrialWires.containers.ContainerPanelComponent;
 import malte0811.industrialWires.containers.ContainerPanelCreator;
 import malte0811.industrialWires.containers.ContainerRSPanelConn;
 import malte0811.industrialWires.containers.ContainerRenameKey;
+import malte0811.industrialWires.converter.MechEnergy;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
@@ -32,7 +34,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.IGuiHandler;
 
-public class CommonProxy implements IGuiHandler {
+public abstract class CommonProxy implements IGuiHandler {
 	public void preInit() {
 	}
 
@@ -78,4 +80,9 @@ public class CommonProxy implements IGuiHandler {
 	}
 
 	public void playMarxBang(TileEntityMarx tileEntityMarx, Vec3d vec3d, float energy) {}
+
+	public void playMechMBBang(TileEntityMechMB te, float volume) {}
+
+	public void playMechMBTurning(TileEntityMechMB te, MechEnergy energy) {}
+	public void stopAllSounds(BlockPos pos) {}
 }
