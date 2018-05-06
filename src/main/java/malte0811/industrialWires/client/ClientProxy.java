@@ -24,6 +24,7 @@ import blusunrize.lib.manual.ManualInstance;
 import blusunrize.lib.manual.ManualPages;
 import blusunrize.lib.manual.ManualPages.PositionedItemStack;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import malte0811.industrialWires.CommonProxy;
 import malte0811.industrialWires.IWConfig;
 import malte0811.industrialWires.IWPotions;
@@ -338,7 +339,7 @@ public class ClientProxy extends CommonProxy {
 
 	@Override
 	public void playJacobsLadderSound(TileEntityJacobsLadder te, int phase, Vec3d soundPos) {
-		stopAllSounds(te.getPos());
+		stopAllSoundsExcept(te.getPos(), ImmutableSet.of());
 		ResourceLocation event;
 		switch (phase) {
 		case 0:
@@ -353,7 +354,8 @@ public class ClientProxy extends CommonProxy {
 		default:
 			return;
 		}
-		PositionedSoundRecord sound = new PositionedSoundRecord(event, SoundCategory.BLOCKS, te.size.soundVolume, 1, false, 0, ISound.AttenuationType.LINEAR, (float) soundPos.x, (float) soundPos.y, (float) soundPos.z);
+		PositionedSoundRecord sound = new PositionedSoundRecord(event, SoundCategory.BLOCKS, te.size.soundVolume, 1,
+				false, 0, ISound.AttenuationType.LINEAR, (float) soundPos.x, (float) soundPos.y, (float) soundPos.z);
 		ClientUtils.mc().getSoundHandler().playSound(sound);
 		addSound(te.getPos(), sound);
 	}
@@ -368,24 +370,33 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@Override
-	public void playMechMBTurning(TileEntityMechMB te, MechEnergy energy) {
-		stopAllSounds(te.getPos());
-		float lambda = MathHelper.clamp((float) energy.getSpeed()/20-.5F, 0, 1);
-		float totalVolume = (float) (energy.weight/50e3*Math.sqrt(energy.getSpeed()));
-		if (lambda>0) {
-			PositionedSoundRecord sound = new PositionedSoundRecord(turnFast, SoundCategory.BLOCKS, lambda*totalVolume, 1,
-					false, 0, ISound.AttenuationType.LINEAR, te.getPos().getX(), te.getPos().getY(),
-					te.getPos().getZ());
-			ClientUtils.mc().getSoundHandler().playSound(sound);
-			addSound(te.getPos(), sound);
+	public void updateMechMBTurningSound(TileEntityMechMB te, MechEnergy energy) {
+		final double MIN_SPEED = 5;
+		Set<ISound> added = new HashSet<>();
+		if (energy.getSpeed() > MIN_SPEED) {
+			boolean adjusting = energy.isAdjusting();
+			double speedToUse = energy.getSpeed()-MIN_SPEED;//Volume should be zero by the time the sound stops
+			float lambda = MathHelper.clamp((float) speedToUse / 20 - .5F, 0, 1);
+			float totalVolume = (float) (energy.weight / 50e3 * Math.sqrt(speedToUse));
+			float pitch = (float) Math.min(Math.sqrt(speedToUse), 3);
+			if (lambda > 0) {
+				PositionedSoundRecord sound = new PositionedSoundRecord(turnFast, SoundCategory.BLOCKS, lambda * totalVolume, pitch,
+						!adjusting, 0, ISound.AttenuationType.LINEAR, te.getPos().getX(), te.getPos().getY(),
+						te.getPos().getZ());
+				ClientUtils.mc().getSoundHandler().playSound(sound);
+				addSound(te.getPos(), sound);
+				added.add(sound);
+			}
+			if (lambda < 1) {
+				PositionedSoundRecord sound = new PositionedSoundRecord(turnSlow, SoundCategory.BLOCKS, (1 - lambda) * totalVolume, pitch,
+						!adjusting, 0, ISound.AttenuationType.LINEAR, te.getPos().getX(), te.getPos().getY(),
+						te.getPos().getZ());
+				ClientUtils.mc().getSoundHandler().playSound(sound);
+				addSound(te.getPos(), sound);
+				added.add(sound);
+			}
 		}
-		if (lambda<1) {
-			PositionedSoundRecord sound = new PositionedSoundRecord(turnSlow, SoundCategory.BLOCKS, (1-lambda)*totalVolume, 1,
-					false, 0, ISound.AttenuationType.LINEAR, te.getPos().getX(), te.getPos().getY(),
-					te.getPos().getZ());
-			ClientUtils.mc().getSoundHandler().playSound(sound);
-			addSound(te.getPos(), sound);
-		}
+		stopAllSoundsExcept(te.getPos(), added);
 	}
 
 	@Override
@@ -413,13 +424,21 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@Override
-	public void stopAllSounds(BlockPos pos) {
+	public void stopAllSoundsExcept(BlockPos pos, Set<ISound> excluded) {
 		if (playingSounds.containsKey(pos)) {
 			SoundHandler manager = Minecraft.getMinecraft().getSoundHandler();
-			for (ISound sound:playingSounds.get(pos)) {
-				manager.stopSound(sound);
+			List<ISound> sounds = playingSounds.get(pos);
+			List<ISound> toRemove = new ArrayList<>(sounds.size()-excluded.size());
+			for (ISound sound:sounds) {
+				if (!excluded.contains(sound)) {
+					manager.stopSound(sound);
+					toRemove.add(sound);
+				}
 			}
-			playingSounds.remove(pos);
+			sounds.removeAll(toRemove);
+			if (sounds.isEmpty()) {
+				playingSounds.remove(pos);
+			}
 		}
 	}
 

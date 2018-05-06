@@ -87,11 +87,20 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 	private boolean firstTick = true;
 	// To allow changing the MB structure later on without resulting in dupes/conversion
 	private int structureVersion = 0;
-	private int soundTimingOffset = 0;
 
 	@Override
 	public void update() {
 		ApiUtils.checkForNeedlessTicking(this);
+		if (isLogicDummy() || mechanical == null) {
+			return;
+		}
+		if (world.isRemote) {
+			angle += energyState.getSpeed() * TICK_ANGLE_PER_SPEED;
+			angle %= 360;
+			if (energyState.clientUpdate()||firstTick) {
+				IndustrialWires.proxy.updateMechMBTurningSound(this, energyState);
+			}
+		}
 		if (firstTick) {
 			//TODO make safe for when IC2 isn't installed
 			if (!world.isRemote && IndustrialWires.hasIC2) {
@@ -99,14 +108,7 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 			}
 			firstTick = false;
 		}
-		if (world.isRemote && mechanical != null) {
-			angle += energyState.getSpeed() * TICK_ANGLE_PER_SPEED;
-			angle %= 360;
-			if (energyState.getSpeed()>1 && soundTimingOffset==world.getTotalWorldTime()%TURN_SOUND_LENGTH) {
-				IndustrialWires.proxy.playMechMBTurning(this, energyState);
-			}
-		}
-		if (world.isRemote || isLogicDummy() || mechanical == null) {
+		if (world.isRemote) {
 			return;
 		}
 		if (shouldInitWorld) {
@@ -340,8 +342,7 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 
 	@Override
 	public void onSync(NBTTagCompound nbt) {
-		energyState.setSpeed(nbt.getDouble(SPEED));
-		soundTimingOffset = (int) (world.getTotalWorldTime()%TURN_SOUND_LENGTH);
+		energyState.setTargetSpeed(nbt.getDouble(SPEED));
 	}
 
 	private AxisAlignedBB rBB;

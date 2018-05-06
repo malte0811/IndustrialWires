@@ -16,15 +16,21 @@
 package malte0811.industrialWires.converter;
 
 
+import malte0811.industrialWires.IndustrialWires;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
 public final class MechEnergy {
 	private double speed = 0;
 	public final double weight;
+
 	public MechEnergy(double weight, double speed) {
 		this.weight = weight;
 		this.speed = speed;
 	}
+
 	public double getEnergy() {
-		return .5*weight*speed*speed;
+		return .5 * weight * speed * speed;
 	}
 
 	public double getSpeed() {
@@ -32,32 +38,58 @@ public final class MechEnergy {
 	}
 
 	public void addEnergy(double energy) {
-		if (energy<=0) {
+		if (energy <= 0) {
 			return;
 		}
-		double targetEnergy = getEnergy()+energy;
-		speed = Math.sqrt(2*targetEnergy/weight);
-		//IndustrialWires.logger.info("Added {}", energy);
+		double targetEnergy = getEnergy() + energy;
+		speed = Math.sqrt(2 * targetEnergy / weight);
 	}
 
 	public void extractEnergy(double energy) {
-		if (energy<=0) {
+		if (energy <= 0) {
 			return;
 		}
 		double oldEnergy = getEnergy();
 		energy = Math.min(energy, oldEnergy);
-		speed = Math.sqrt(2*(oldEnergy-energy)/weight);
-		//IndustrialWires.logger.info("Extracted {}", energy);
+		speed = Math.sqrt(2 * (oldEnergy - energy) / weight);
 	}
 
 	public void decaySpeed(double decay) {
 		speed *= decay;
-		if (speed<.1)
+		if (speed < .1)
 			speed = 0;
 	}
 
+	private static final int TICKS_FOR_ADJUSTMENT = 30;
+	private double targetSpeed;
+	private double oldSpeed = -1;
+	private int ticksTillReached;
+
 	//ONLY USE FOR SYNCING
-	public void setSpeed(double speed) {
-		this.speed = speed;
+	@SideOnly(Side.CLIENT)
+	public void setTargetSpeed(double speed) {
+		targetSpeed = speed;
+		oldSpeed = getSpeed();
+		IndustrialWires.logger.info(targetSpeed+" from "+oldSpeed);
+		ticksTillReached = TICKS_FOR_ADJUSTMENT;
+	}
+
+	@SideOnly(Side.CLIENT)
+	public boolean clientUpdate() {
+		if (ticksTillReached >= 0) {
+			speed = ((TICKS_FOR_ADJUSTMENT - ticksTillReached) * targetSpeed +
+					ticksTillReached * oldSpeed) / TICKS_FOR_ADJUSTMENT;
+			ticksTillReached--;
+			return true;
+		} else {
+			oldSpeed = -1;
+			return false;
+		}
+	}
+
+	@SideOnly(Side.CLIENT)
+	public boolean isAdjusting()
+	{
+		return ticksTillReached>=0;
 	}
 }

@@ -14,6 +14,7 @@
  */
 package malte0811.industrialWires.blocks;
 
+import com.google.common.collect.ImmutableSet;
 import malte0811.industrialWires.IndustrialWires;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
@@ -67,13 +68,13 @@ public abstract class TileEntityIWBase extends TileEntity {
 	@Override
 	public void invalidate() {
 		super.invalidate();
-		IndustrialWires.proxy.stopAllSounds(pos);
+		IndustrialWires.proxy.stopAllSoundsExcept(pos, ImmutableSet.of());
 	}
 
 	@Override
 	public void onChunkUnload() {
 		super.onChunkUnload();
-		IndustrialWires.proxy.stopAllSounds(pos);
+		IndustrialWires.proxy.stopAllSoundsExcept(pos, ImmutableSet.of());
 	}
 
 	public abstract void writeNBT(NBTTagCompound out, boolean updatePacket);
