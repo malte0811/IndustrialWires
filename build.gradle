@@ -30,7 +30,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 minecraft {
-    version = "14.23.1.2555"
+    version = "14.23.3.2655"
     runDir = "run"
 
     replace '${version}', project.version
@@ -70,11 +70,11 @@ repositories {
 }
 
 dependencies {
-    deobfCompile 'net.industrial-craft:industrialcraft-2:2.8.+'
+    compileOnly 'net.industrial-craft:industrialcraft-2:2.8.+'
     deobfCompile "blusunrize:ImmersiveEngineering:0.12-+:deobf"
     compileOnly "TechReborn:TechReborn-1.12:2.6.+:dev"
     compileOnly "RebornCore:RebornCore-1.12:3.2.+:dev"
-    deobfCompile 'com.elytradev:mirage:2.0.1-SNAPSHOT'
+    compileOnly 'com.elytradev:mirage:2.0.1-SNAPSHOT'
     compileOnly "mezz.jei:jei_1.12:4.+"
     compileOnly "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.+"
 }

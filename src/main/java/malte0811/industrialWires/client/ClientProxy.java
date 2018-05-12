@@ -269,7 +269,7 @@ public class ClientProxy extends CommonProxy {
 		m.entryRenderPost();
 		m.fontRenderer.setUnicodeFlag(uni);
 		List<ManualPages> marxEntry = splitter.toManualEntry();
-		m.addEntry("industrialwires.marx", IndustrialWires.MODID, marxEntry.toArray(new ManualPages[marxEntry.size()]));
+		m.addEntry("industrialwires.marx", IndustrialWires.MODID, marxEntry.toArray(new ManualPages[0]));
 		ClientCommandHandler.instance.registerCommand(new CommandIWClient());
 	}
 
@@ -333,7 +333,6 @@ public class ClientProxy extends CommonProxy {
 	private static ResourceLocation jacobsEnd = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_end");//~210 ms ~= 4 ticks
 	private static ResourceLocation marxBang = new ResourceLocation(IndustrialWires.MODID, "marx_bang");
 	private static ResourceLocation marxPop = new ResourceLocation(IndustrialWires.MODID, "marx_pop");
-	private static ResourceLocation mmbBang = new ResourceLocation(IndustrialWires.MODID, "mech_mb_breaking");
 	private static ResourceLocation turnFast = new ResourceLocation(IndustrialWires.MODID, "mech_mb_fast");
 	private static ResourceLocation turnSlow = new ResourceLocation(IndustrialWires.MODID, "mech_mb_slow");
 
@@ -361,15 +360,6 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@Override
-	public void playMechMBBang(TileEntityMechMB te, float volume) {
-		PositionedSoundRecord sound = new PositionedSoundRecord(mmbBang, SoundCategory.BLOCKS, volume, 1,
-				false, 0, ISound.AttenuationType.LINEAR, te.getPos().getX(), te.getPos().getY(),
-				te.getPos().getZ());
-		ClientUtils.mc().getSoundHandler().playSound(sound);
-		//This won't be added to the list since it's short and will play while the TE is being destroyed
-	}
-
-	@Override
 	public void updateMechMBTurningSound(TileEntityMechMB te, MechEnergy energy) {
 		final double MIN_SPEED = 5;
 		Set<ISound> added = new HashSet<>();
@@ -377,7 +367,8 @@ public class ClientProxy extends CommonProxy {
 			boolean adjusting = energy.isAdjusting();
 			double speedToUse = energy.getSpeed()-MIN_SPEED;//Volume should be zero by the time the sound stops
 			float lambda = MathHelper.clamp((float) speedToUse / 20 - .5F, 0, 1);
-			float totalVolume = (float) (energy.weight / 50e3 * Math.sqrt(speedToUse));
+			float totalVolume = (float) (energy.weight / 20e3 * Math.sqrt(speedToUse));
+			totalVolume = Math.min(totalVolume, 2);
 			float pitch = (float) Math.min(Math.sqrt(speedToUse), 3);
 			if (lambda > 0) {
 				PositionedSoundRecord sound = new PositionedSoundRecord(turnFast, SoundCategory.BLOCKS, lambda * totalVolume, pitch,

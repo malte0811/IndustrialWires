@@ -84,8 +84,7 @@ public abstract class CommonProxy implements IGuiHandler {
 
 	public void playMarxBang(TileEntityMarx tileEntityMarx, Vec3d vec3d, float energy) {}
 
-	public void playMechMBBang(TileEntityMechMB te, float volume) {}
-
 	public void updateMechMBTurningSound(TileEntityMechMB te, MechEnergy energy) {}
+
 	public void stopAllSoundsExcept(BlockPos pos, Set<ISound> excluded) {}
 }

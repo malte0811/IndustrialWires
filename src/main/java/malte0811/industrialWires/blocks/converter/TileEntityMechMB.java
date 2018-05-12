@@ -38,9 +38,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.ITickable;
+import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
@@ -411,9 +409,8 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 		}
 	}
 
+	private static ResourceLocation mmbBang = new ResourceLocation(IndustrialWires.MODID, "mech_mb_breaking");
 	private void disassemble(Set<MechMBPart> failed) {
-		if (world.isRemote)
-			IndustrialWires.proxy.playMechMBBang(this, failed.size()*2);//TODO this doesn't run client-side
 		if (!world.isRemote && formed) {
 			formed = false;
 			world.setBlockState(pos,
@@ -430,6 +427,9 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 							mech.world.setBlockState(pos, Blocks.AIR.getDefaultState());
 						}
 					}
+				}
+				if (failed.contains(mech)) {
+					world.playSound(null, mech.world.getOrigin(), new SoundEvent(mmbBang), SoundCategory.BLOCKS, 1, 1);
 				}
 			}
 			BlockPos otherEnd = offset(pos, facing.getOpposite(), mirrored, 0,

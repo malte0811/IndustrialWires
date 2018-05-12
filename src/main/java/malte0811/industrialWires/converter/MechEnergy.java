@@ -16,7 +16,6 @@
 package malte0811.industrialWires.converter;
 
 
-import malte0811.industrialWires.IndustrialWires;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -70,7 +69,6 @@ public final class MechEnergy {
 	public void setTargetSpeed(double speed) {
 		targetSpeed = speed;
 		oldSpeed = getSpeed();
-		IndustrialWires.logger.info(targetSpeed+" from "+oldSpeed);
 		ticksTillReached = TICKS_FOR_ADJUSTMENT;
 	}
 

@@ -68,13 +68,17 @@ public abstract class TileEntityIWBase extends TileEntity {
 	@Override
 	public void invalidate() {
 		super.invalidate();
-		IndustrialWires.proxy.stopAllSoundsExcept(pos, ImmutableSet.of());
+		if (world.isRemote) {
+			IndustrialWires.proxy.stopAllSoundsExcept(pos, ImmutableSet.of());
+		}
 	}
 
 	@Override
 	public void onChunkUnload() {
 		super.onChunkUnload();
-		IndustrialWires.proxy.stopAllSoundsExcept(pos, ImmutableSet.of());
+		if (world.isRemote) {
+			IndustrialWires.proxy.stopAllSoundsExcept(pos, ImmutableSet.of());
+		}
 	}
 
 	public abstract void writeNBT(NBTTagCompound out, boolean updatePacket);

@@ -175,7 +175,7 @@ public class IndustrialWires {
 		GameRegistry.registerTileEntity(TileEntityComponentPanel.class, MODID + ":single_component_panel");
 		GameRegistry.registerTileEntity(TileEntityDischargeMeter.class, MODID + ":discharge_meter");
 		EntityRegistry.registerModEntity(new ResourceLocation(MODID, "broken_part"), EntityBrokenPart.class,
-				"broken_part", 0, this, 64, 1, true);
+				"broken_part", 0, this, 64, 5, true);
 
 		proxy.preInit();
 		Compat.preInit();

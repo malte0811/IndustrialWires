@@ -17,12 +17,15 @@ package malte0811.industrialWires.converter;
 
 import blusunrize.immersiveengineering.common.IEContent;
 import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0;
+import blusunrize.immersiveengineering.common.util.Utils;
+import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
 import malte0811.industrialWires.blocks.converter.TileEntityMechMB;
 import malte0811.industrialWires.client.render.TileRenderMBConverter;
+import malte0811.industrialWires.entities.EntityBrokenPart;
 import malte0811.industrialWires.util.LocalSidedWorld;
 import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.block.state.IBlockState;
@@ -33,6 +36,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -203,6 +207,24 @@ public abstract class MechMBPart {
 			}
 		}
 		pos.release();
+	}
+
+	protected void spawnBrokenParts(int count, MechEnergy energy, ResourceLocation texture) {
+		Matrix4 mat = new Matrix4();
+		mat.rotate(Utils.RAND.nextDouble(), 0, 0, 1);
+		Vec3d baseVec = new Vec3d(0, 1.5, 0);
+		for (int i = 0;i<count;i++) {
+			mat.rotate(2*Math.PI / count, 0, 0, 1);
+			Vec3d pos = mat.apply(baseVec);
+			EntityBrokenPart e = new EntityBrokenPart(world.getWorld(), texture);
+			e.setPosition(pos.x, pos.y, -.5);
+			double speed = (energy.getSpeed() / getMaxSpeed()) / 1.5;
+			e.motionX = pos.y * speed;
+			e.motionY = -pos.x * speed;
+			e.motionZ = (Utils.RAND.nextDouble() - .5) * speed / 10;
+			world.spawnEntity(e);
+			e.breakBlocks(speed * speed * 1.5 * 1.5);
+		}
 	}
 
 	public int getLength() {

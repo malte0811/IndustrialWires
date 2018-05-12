@@ -16,10 +16,8 @@
 package malte0811.industrialWires.entities;
 
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
-import net.minecraft.entity.projectile.EntityArrow;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
@@ -27,9 +25,9 @@ import net.minecraft.network.datasync.DataSerializer;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.*;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
@@ -39,7 +37,7 @@ import java.util.List;
 
 import static malte0811.industrialWires.util.NBTKeys.TEXTURE;
 
-public class EntityBrokenPart extends EntityArrow {
+public class EntityBrokenPart extends /*EntityArrow*/ Entity {
 	public static final DataSerializer<ResourceLocation> RES_LOC_SERIALIZER = new DataSerializer<ResourceLocation>() {
 		@Override
 		public void write(@Nonnull PacketBuffer buf, @Nonnull ResourceLocation value) {
@@ -67,20 +65,24 @@ public class EntityBrokenPart extends EntityArrow {
 		}
 	};
 	private static DataParameter<ResourceLocation> MARKER_TEXTURE;
+
 	static {
 		DataSerializers.registerSerializer(RES_LOC_SERIALIZER);
 		MARKER_TEXTURE = EntityDataManager.createKey(EntityBrokenPart.class, RES_LOC_SERIALIZER);
 	}
 
 	private static final double HARDNESS_MAX = 15;
-	private static final double DESPAWN_DELAY = 400;
+	private static final double DESPAWN_DELAY_GROUND = 400;
+	private static final double DESPAWN_DELAY_AIR = 60*20;
 
-	public ResourceLocation texture = new ResourceLocation("blocks/stone");
+	private static final ResourceLocation DEFAULT_TEXTURE = new ResourceLocation("blocks/stone");
+	public ResourceLocation texture = DEFAULT_TEXTURE;
 	private int timeUnmoved = 0;
 
 	public EntityBrokenPart(World worldIn) {
 		super(worldIn);
 		setSize(.5F, .5F);
+		preventEntitySpawning = true;
 	}
 
 	public EntityBrokenPart(World worldIn, ResourceLocation texture) {
@@ -89,46 +91,109 @@ public class EntityBrokenPart extends EntityArrow {
 	}
 
 	@Override
-	public void onUpdate() {
-		if (firstUpdate &&!world.isRemote && texture != null) {
+	public void onEntityUpdate() {
+		if (firstUpdate && !world.isRemote && texture != null) {
 			dataManager.set(MARKER_TEXTURE, texture);
 		}
-		onEntityUpdate();
-
-
-		//movement logic, modified to simulate higher speed than MC is happy about
-		{
-			this.motionY -= 0.02;
-			this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
-			this.motionX *= 0.98;
-			this.motionY *= 0.98;
-			this.motionZ *= 0.98;
-
-			if (this.onGround) {
-				this.motionX *= .7;
-				this.motionZ *= .7;
-				this.motionY *= -0.5D;
-			}
-		}
-		if (world.isRemote) {
+		super.onEntityUpdate();
+		if (world.isRemote && DEFAULT_TEXTURE.equals(texture)) {
 			texture = dataManager.get(MARKER_TEXTURE);
-			return;
 		}
+	}
 
-		double speedSq = motionX * motionX + motionY * motionY + motionZ * motionZ;
-		breakBlocks(speedSq);
-		if (speedSq>.25) {
-			List<EntityLivingBase> entities = world.getEntitiesWithinAABB(EntityLivingBase.class, getEntityBoundingBox());
-			for (EntityLivingBase e:entities) {
-				e.attackEntityFrom(DamageSource.FALLING_BLOCK, 7);
+	//Taken from EntityIEProjectile and modified afterwards
+	private int ticksOnGround;
+	private int ticksInAir;
+	@Override
+	public void onUpdate() {
+		this.onEntityUpdate();
+
+		if (this.onGround) {
+			++this.ticksOnGround;
+			if (this.ticksOnGround >= DESPAWN_DELAY_GROUND) {
+				this.setDead();
 			}
-		}
-		if (speedSq<1e-3) {
-			timeUnmoved++;
-			if (timeUnmoved>DESPAWN_DELAY) {
-				setDead();
+		} else {
+			++this.ticksInAir;
+
+			if (ticksInAir >= DESPAWN_DELAY_AIR) {
+				this.setDead();
+				return;
 			}
+
+			Vec3d currentPos = new Vec3d(this.posX, this.posY, this.posZ);
+			Vec3d nextPos = new Vec3d(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+			RayTraceResult mop = this.world.rayTraceBlocks(currentPos, nextPos, false, true, false);
+
+			currentPos = new Vec3d(this.posX, this.posY, this.posZ);
+
+			if (mop != null)
+				nextPos = new Vec3d(mop.hitVec.x, mop.hitVec.y, mop.hitVec.z);
+			else
+				nextPos = new Vec3d(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+
+			if (mop == null || mop.entityHit == null) {
+				Entity entity = null;
+				List<Entity> list = this.world.getEntitiesInAABBexcluding(this, this.getEntityBoundingBox().expand(this.motionX, this.motionY, this.motionZ).grow(1), Entity::canBeCollidedWith);
+				double d0 = 0.0D;
+				for (Entity e : list) {
+					if (e.canBeCollidedWith()) {
+						float f = 0.3F;
+						AxisAlignedBB axisalignedbb = e.getEntityBoundingBox().grow((double) f, (double) f, (double) f);
+						RayTraceResult movingobjectposition1 = axisalignedbb.calculateIntercept(currentPos, nextPos);
+
+						if (movingobjectposition1 != null) {
+							double d1 = currentPos.distanceTo(movingobjectposition1.hitVec);
+							if (d1 < d0 || d0 == 0.0D) {
+								entity = e;
+								d0 = d1;
+							}
+						}
+					}
+				}
+				if (entity != null)
+					mop = new RayTraceResult(entity);
+			}
+
+			if (mop != null) {
+				if (mop.entityHit != null) {
+					this.attackEntity(mop.entityHit);
+				}
+			}
+
+			float motion = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+			this.rotationYaw = (float) (Math.atan2(this.motionX, this.motionZ) * 180.0D / Math.PI);
+
+			this.rotationPitch = (float) (Math.atan2(this.motionY, (double) motion) * 180.0D / Math.PI);
+			while (this.rotationPitch - this.prevRotationPitch < -180.0F) {
+				this.prevRotationPitch -= 360.0F;
+			}
+			while (this.rotationPitch - this.prevRotationPitch >= 180.0F)
+				this.prevRotationPitch += 360.0F;
+			while (this.rotationYaw - this.prevRotationYaw < -180.0F)
+				this.prevRotationYaw -= 360.0F;
+			while (this.rotationYaw - this.prevRotationYaw >= 180.0F)
+				this.prevRotationYaw += 360.0F;
+			this.rotationPitch = this.prevRotationPitch + (this.rotationPitch - this.prevRotationPitch) * 0.2F;
+			this.rotationYaw = this.prevRotationYaw + (this.rotationYaw - this.prevRotationYaw) * 0.2F;
 		}
+		float movementDecay = onGround?.5F:.99F;
+
+		if (this.isInWater()) {
+			for (int j = 0; j < 4; ++j) {
+				float f3 = 0.25F;
+				this.world.spawnParticle(EnumParticleTypes.WATER_BUBBLE, this.posX - this.motionX * (double) f3,
+						this.posY - this.motionY * (double) f3, this.posZ - this.motionZ * (double) f3, this.motionX, this.motionY, this.motionZ);
+			}
+			movementDecay *= 0.8F;
+		}
+		this.motionX *= movementDecay;
+		this.motionY *= movementDecay;
+		this.motionZ *= movementDecay;
+		this.motionY -= .05;
+		breakBlocks(getSpeedSq());
+		this.doBlockCollisions();
+		move(MoverType.SELF, motionX, motionY, motionZ);
 	}
 
 	public void breakBlocks(double speedSq) {
@@ -151,17 +216,13 @@ public class EntityBrokenPart extends EntityArrow {
 							if (speed < 0) {
 								speed = Math.sqrt(speedSq);
 							}
-							if (hardness>0&&hardness < HARDNESS_MAX*speed) {
+							if (hardness > 0 && hardness < HARDNESS_MAX * speed) {
 								world.setBlockToAir(iter);
-								double factor = (HARDNESS_MAX*speed - hardness) / (HARDNESS_MAX*speed);
+								double factor = (HARDNESS_MAX * speed - hardness) / (HARDNESS_MAX * speed);
 								motionX *= factor;
 								motionY *= factor;
 								motionZ *= factor;
 								speed *= factor;
-							} else {
-								motionX = 0;
-								motionY = 0;
-								motionZ = 0;
 							}
 						}
 					}
@@ -176,7 +237,7 @@ public class EntityBrokenPart extends EntityArrow {
 
 	@Override
 	protected void entityInit() {
-		dataManager.register(MARKER_TEXTURE, new ResourceLocation("blocks/stone"));
+		dataManager.register(MARKER_TEXTURE, DEFAULT_TEXTURE);
 	}
 
 	@Override
@@ -196,9 +257,21 @@ public class EntityBrokenPart extends EntityArrow {
 		return getEntityBoundingBox();
 	}
 
-	@Nonnull
+	private void attackEntity(Entity e) {
+		e.attackEntityFrom(DamageSource.FALLING_BLOCK, 20*getSpeedSq());
+	}
+
+	private float getSpeedSq() {
+		return (float) (motionX*motionX+motionY*motionY+motionZ*motionZ);
+	}
+
 	@Override
-	protected ItemStack getArrowStack() {
-		return ItemStack.EMPTY;
+	public boolean canBeCollidedWith() {
+		return true;
+	}
+
+	@Override
+	public boolean canBePushed() {
+		return false;
 	}
 }

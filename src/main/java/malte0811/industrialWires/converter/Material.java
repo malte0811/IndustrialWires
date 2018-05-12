@@ -24,7 +24,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.oredict.OreDictionary;
 
 public enum Material {
-	//TODO max speed
 	COPPER(8.96, 220, "blocks/storage_copper"),
 	ALUMINUM(2.7, 45, "blocks/storage_aluminum"),
 	LEAD(11.34, 12, "blocks/storage_lead"),
@@ -33,7 +32,8 @@ public enum Material {
 	GOLD(19.3, 100, new ResourceLocation("minecraft", "blocks/gold_block")),
 	URANIUM(19.1, 400, "blocks/storage_uranium_side"),// This is a bit silly. But why not.
 	CONSTANTAN(8.885, 600, "blocks/storage_constantan"),
-	ELECTRUM((SILVER.density + GOLD.density) / 2, (SILVER.tensileStrength + GOLD.tensileStrength) / 2, "blocks/storage_electrum"),//Tensile strength is a guess ((GOLD+SILVER)/2), if anyone has better data I'll put it in
+	//Tensile strength is a guess ((GOLD+SILVER)/2), if anyone has better data I'll put it in
+	ELECTRUM((SILVER.density + GOLD.density) / 2, (SILVER.tensileStrength + GOLD.tensileStrength) / 2, "blocks/storage_electrum"),
 	STEEL(7.874, 1250, "blocks/storage_steel"),
 	IRON(7.874, 350, new ResourceLocation("minecraft", "blocks/iron_block")),
 	DIAMOND(3.5, 2800, new ResourceLocation("minecraft", "blocks/diamond_block"));

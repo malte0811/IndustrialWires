@@ -15,6 +15,7 @@
 
 package malte0811.industrialWires.converter;
 
+import blusunrize.immersiveengineering.ImmersiveEngineering;
 import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
@@ -91,7 +92,7 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 
 	@Override
 	public double getMaxSpeed() {
-		return 200;
+		return 100;
 	}
 
 	@Override
@@ -154,6 +155,8 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 		return 0b111_111_111;
 	}
 
+	private static final ResourceLocation COIL_TEXTURE = new ResourceLocation(ImmersiveEngineering.MODID,
+			"blocks/metal_decoration0_coil_lv_side");
 	@Override
 	public void disassemble(boolean failed, MechEnergy energy) {
 		setDefaultShaft(BlockPos.ORIGIN);
@@ -161,6 +164,9 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 			for (int i = -1;i<=1;i+=2) {
 				setCoil(BlockPos.ORIGIN.up(i));
 			}
+		} else {
+			int count = has4Phases()?8:2;
+			spawnBrokenParts(count, energy, COIL_TEXTURE);
 		}
 		for (int i = -1; i <= 1; i+=2) {
 			for (int y = -1; y <= 1; y++) {

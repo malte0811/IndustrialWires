@@ -15,7 +15,6 @@
 
 package malte0811.industrialWires.util;
 
-import malte0811.industrialWires.IndustrialWires;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
@@ -61,7 +60,6 @@ public class LocalSidedWorld {
 
 	public void spawnEntity(Entity e) {
 		Vec3d pos = getRealPos(e.getPositionVector());
-		IndustrialWires.logger.info("Spawning at {} (relative), {} (absolute)", e.getPositionVector(), pos);
 		e.setPosition(pos.x, pos.y, pos.z);
 		Vec3d motion = getRealDirection(new Vec3d(e.motionX, e.motionY, e.motionZ));
 		e.motionX = motion.x;

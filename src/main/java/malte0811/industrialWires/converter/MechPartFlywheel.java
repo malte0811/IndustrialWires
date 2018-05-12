@@ -15,11 +15,8 @@
 
 package malte0811.industrialWires.converter;
 
-import blusunrize.immersiveengineering.common.util.Utils;
-import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
-import malte0811.industrialWires.entities.EntityBrokenPart;
 import malte0811.industrialWires.util.LocalSidedWorld;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -34,7 +31,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.oredict.OreDictionary;
@@ -147,21 +143,7 @@ public class MechPartFlywheel extends MechMBPart {
 			}
 		}
 		if (failed) {
-			Matrix4 mat = new Matrix4();
-			mat.rotate(Utils.RAND.nextDouble(), 0, 0, 1);
-			Vec3d baseVec = new Vec3d(0, 1.5, 0);
-			for (int i = 0;i<8;i++) {
-				mat.rotate(Math.PI/4, 0, 0, 1);
-				Vec3d pos = mat.apply(baseVec);
-				EntityBrokenPart e = new EntityBrokenPart(world.getWorld(), material.blockTexture);
-				e.setPosition(pos.x, pos.y, -.5);
-				double speed = (energy.getSpeed()/ getMaxSpeed())/1.5;
-				e.motionX = pos.y*speed;
-				e.motionY = -pos.x*speed;
-				e.motionZ = (Utils.RAND.nextDouble()-.5)*speed/10;
-				world.spawnEntity(e);
-				e.breakBlocks(speed*speed*1.5*1.5);
-			}
+			spawnBrokenParts(8, energy, material.blockTexture);
 		}
 	}
 
