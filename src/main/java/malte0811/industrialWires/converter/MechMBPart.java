@@ -24,7 +24,7 @@ import com.google.common.collect.HashBiMap;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
 import malte0811.industrialWires.blocks.converter.TileEntityMechMB;
-import malte0811.industrialWires.client.render.TileRenderMBConverter;
+import malte0811.industrialWires.client.render.TileRenderMechMB;
 import malte0811.industrialWires.entities.EntityBrokenPart;
 import malte0811.industrialWires.util.LocalSidedWorld;
 import malte0811.industrialWires.util.MiscUtils;
@@ -70,7 +70,7 @@ public abstract class MechMBPart {
 
 	@SideOnly(Side.CLIENT)
 	public List<BakedQuad> getRotatingQuads() {
-		return TileRenderMBConverter.BASE_MODELS.get(getRotatingBaseModel())
+		return TileRenderMechMB.BASE_MODELS.get(getRotatingBaseModel())
 				.getQuads(null, null, 123);
 
 	}

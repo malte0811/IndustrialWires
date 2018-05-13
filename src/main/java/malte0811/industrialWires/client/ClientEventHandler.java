@@ -66,7 +66,7 @@ import javax.annotation.Nonnull;
 import java.util.Locale;
 import java.util.Map;
 
-import static malte0811.industrialWires.client.render.TileRenderMBConverter.BASE_MODELS;
+import static malte0811.industrialWires.client.render.TileRenderMechMB.BASE_MODELS;
 
 @Mod.EventBusSubscriber(modid = IndustrialWires.MODID, value = Side.CLIENT)
 public class ClientEventHandler {

@@ -28,7 +28,7 @@ package malte0811.industrialWires;
  import malte0811.industrialWires.controlpanel.PanelUtils;
  import malte0811.industrialWires.converter.EUCapability;
  import malte0811.industrialWires.converter.MechMBPart;
- import malte0811.industrialWires.converter.MultiblockConverter;
+ import malte0811.industrialWires.converter.MultiblockMechMB;
  import malte0811.industrialWires.crafting.Recipes;
  import malte0811.industrialWires.entities.EntityBrokenPart;
  import malte0811.industrialWires.hv.MarxOreHandler;
@@ -221,8 +221,8 @@ public class IndustrialWires {
 	public void init(FMLInitializationEvent e) {
 		MultiblockMarx.INSTANCE = new MultiblockMarx();
 		MultiblockHandler.registerMultiblock(MultiblockMarx.INSTANCE);
-		MultiblockConverter.INSTANCE = new MultiblockConverter();
-		MultiblockHandler.registerMultiblock(MultiblockConverter.INSTANCE);
+		MultiblockMechMB.INSTANCE = new MultiblockMechMB();
+		MultiblockHandler.registerMultiblock(MultiblockMechMB.INSTANCE);
 
 		packetHandler.registerMessage(MessageTileSyncIW.HandlerClient.class, MessageTileSyncIW.class, 0, Side.CLIENT);
 		packetHandler.registerMessage(MessagePanelInteract.HandlerServer.class, MessagePanelInteract.class, 1, Side.SERVER);

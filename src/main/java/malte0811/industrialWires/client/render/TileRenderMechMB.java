@@ -45,11 +45,11 @@ import java.util.*;
 import static malte0811.industrialWires.blocks.converter.TileEntityMechMB.TICK_ANGLE_PER_SPEED;
 import static malte0811.industrialWires.converter.MechMBPart.SHAFT_KEY;
 
-public class TileRenderMBConverter extends TileEntitySpecialRenderer<TileEntityMechMB> implements IResourceManagerReloadListener {
+public class TileRenderMechMB extends TileEntitySpecialRenderer<TileEntityMechMB> implements IResourceManagerReloadListener {
 	public static final Map<ResourceLocation, IBakedModel> BASE_MODELS = new HashMap<>();
-	public static final Set<TileEntityMechMB> TES_WITH_MODELS = Collections.newSetFromMap(new WeakHashMap<>());
+	private static final Set<TileEntityMechMB> TES_WITH_MODELS = Collections.newSetFromMap(new WeakHashMap<>());
 	static {
-		IEApi.renderCacheClearers.add(TileRenderMBConverter::clearCache);
+		IEApi.renderCacheClearers.add(TileRenderMechMB::clearCache);
 	}
 	@Override
 	public void render(TileEntityMechMB te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
@@ -96,7 +96,6 @@ public class TileRenderMBConverter extends TileEntitySpecialRenderer<TileEntityM
 			offset += part.getLength();
 		}
 		//Add shaft model in the end blocks
-		//TODO handle ends not being in the same indices for all quads
 		List<BakedQuad> shaftQuads = MechMBPart.INSTANCES.get(SHAFT_KEY).getRotatingQuads();
 		Vector3f tmp = new Vector3f();
 		Matrix4 id = new Matrix4();
@@ -106,18 +105,18 @@ public class TileRenderMBConverter extends TileEntitySpecialRenderer<TileEntityM
 			RawQuad raw = RawQuad.unbake(q);
 			Vector3f.add(raw.vertices[0], raw.vertices[1], tmp);
 			tmp.scale(.5F);
-			Vector3f middle0 = new Vector3f(tmp);
+			Vector3f middle01 = new Vector3f(tmp);
 			Vector3f.add(raw.vertices[2], raw.vertices[3], tmp);
 			tmp.scale(.5F);
-			Vector3f middle1 = new Vector3f(tmp);
-			RawQuad start = new RawQuad(raw.vertices[0], middle0, middle1, raw.vertices[3],
+			Vector3f middle23 = new Vector3f(tmp);
+			RawQuad start = new RawQuad(raw.vertices[0], middle01, middle23, raw.vertices[3],
 					raw.facing, raw.tex, raw.colorA, raw.normal, new float[][]{
-					raw.uvs[0], {raw.uvs[1][0], .5F}, {raw.uvs[2][0], .5F}, raw.uvs[3]
+					raw.uvs[0], {raw.uvs[1][0], 8}, {raw.uvs[2][0], 8}, raw.uvs[3]
 			}, -1);
 			te.rotatingModel.add(ClientUtilsIW.bakeQuad(start, id, id));
-			RawQuad end = new RawQuad(middle0, raw.vertices[1], raw.vertices[2], middle1,
+			RawQuad end = new RawQuad(middle01, raw.vertices[1], raw.vertices[2], middle23,
 					raw.facing, raw.tex, raw.colorA, raw.normal, new float[][]{
-					{raw.uvs[0][0], .5F}, raw.uvs[1], raw.uvs[2], {raw.uvs[3][0], .5F}
+					{raw.uvs[0][0], 8}, raw.uvs[1], raw.uvs[2], {raw.uvs[3][0], 8}
 			}, -1);
 			te.rotatingModel.add(ClientUtilsIW.bakeQuad(end, translate, id));
 		}

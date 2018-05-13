@@ -197,6 +197,8 @@ public class EntityBrokenPart extends /*EntityArrow*/ Entity {
 	}
 
 	public void breakBlocks(double speedSq) {
+		if (world.isRemote)
+			return;
 		AxisAlignedBB axisalignedbb = this.getEntityBoundingBox();
 		axisalignedbb = axisalignedbb.grow(motionX, motionY, motionZ);
 		BlockPos.PooledMutableBlockPos min = BlockPos.PooledMutableBlockPos.retain(axisalignedbb.minX - .1,

@@ -128,7 +128,7 @@ public class ClientProxy extends CommonProxy {
 		ModelLoaderRegistry.registerLoader(new PanelModelLoader());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityJacobsLadder.class, new TileRenderJacobsLadder());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMarx.class, new TileRenderMarx());
-		TileRenderMBConverter tesr = new TileRenderMBConverter();
+		TileRenderMechMB tesr = new TileRenderMechMB();
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMechMB.class, tesr);
 		((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(tesr);
 		RenderingRegistry.registerEntityRenderingHandler(EntityBrokenPart.class, EntityRenderBrokenPart::new);

@@ -37,11 +37,11 @@ import java.util.function.Consumer;
 
 import static malte0811.industrialWires.blocks.converter.MechanicalMBBlockType.*;
 
-public class MultiblockConverter implements MultiblockHandler.IMultiblock {
-	public static MultiblockConverter INSTANCE;
+public class MultiblockMechMB implements MultiblockHandler.IMultiblock {
+	public static MultiblockMechMB INSTANCE;
 	@Override
 	public String getUniqueName() {
-		return "iw:converter";
+		return IndustrialWires.MODID+":mech_mb";
 	}
 
 	@Override
@@ -120,7 +120,7 @@ public class MultiblockConverter implements MultiblockHandler.IMultiblock {
 			formEnd(w, mutPos, END, (te, master) -> {
 				if (master) {
 					te.offset = BlockPos.ORIGIN;
-					te.setMechanical(parts.toArray(new MechMBPart[parts.size()]), 0);
+					te.setMechanical(parts.toArray(new MechMBPart[0]), 0);
 					te.energyState = new MechEnergy(finalWeight, 0);
 				} else {
 					te.offset = new BlockPos(0, -1, 0);

@@ -18,6 +18,7 @@ package malte0811.industrialWires.blocks.converter;
 import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IPlayerInteraction;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IRedstoneOutput;
+import blusunrize.immersiveengineering.common.util.Utils;
 import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergyAcceptor;
@@ -38,6 +39,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -69,7 +71,6 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 	private static final double DECAY_BASE = Math.exp(Math.log(.8) / (2 * 60 * 60 * 20));
 	public static final double TICK_ANGLE_PER_SPEED = 180 / 20 / Math.PI;
 	private static final double SYNC_THRESHOLD = .95;
-	private static final int TURN_SOUND_LENGTH = 7;
 	public MechMBPart[] mechanical = null;
 	private int[] offsets = null;
 
@@ -97,6 +98,11 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 			angle %= 360;
 			if (energyState.clientUpdate()||firstTick) {
 				IndustrialWires.proxy.updateMechMBTurningSound(this, energyState);
+				int otherEndOffset = offsets[offsets.length-1]+mechanical[mechanical.length-1].getLength();
+				TileEntity otherEnd = Utils.getExistingTileEntity(world, pos.offset(facing, -otherEndOffset));
+				if (otherEnd instanceof TileEntityMechMB) {
+					IndustrialWires.proxy.updateMechMBTurningSound((TileEntityMechMB) otherEnd, energyState);
+				}
 			}
 		}
 		if (firstTick) {
@@ -181,7 +187,8 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 				double maxTransferred = 0;
 				for (int i = 0; i < requested.length; i++) {
 					Waveform wf = availableWfList.get(i);
-					double transferred = transferElectric(section, Arrays.copyOf(available, sectionLength), availableWf, wf, requested[i], true);
+					double transferred = transferElectric(section, Arrays.copyOf(available, sectionLength), availableWf, wf,
+							Arrays.copyOf(requested[i], sectionLength), true);
 					if (transferred > maxTransferred) {
 						maxTransferred = transferred;
 						maxId = i;
@@ -224,6 +231,11 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 		double totalRequested = 0;
 		for (int i = 0; i < available.length; i++) {
 			if (availableWf[i].equals(waveform)) {
+				if (available[i]>requested[i]) {
+					requested[i] = 0;
+				} else {
+					available[i] = 0;
+				}
 				totalAvailable += available[i];
 			} else {
 				available[i] = 0;
@@ -576,6 +588,8 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 	public AxisAlignedBB getBoundingBoxNoRot() {
 		Vec3i offset = getOffsetDir();
 		TileEntityMechMB master = masterOr(this, this);
+		if (master==this&&!offset.equals(Vec3i.NULL_VECTOR))
+			return new AxisAlignedBB(0, 0, 0, 0, 0, 0);
 		int comp = getPart(offset.getZ(), master);
 		if (comp < 0) {
 			if (offset.getZ() == 0) {
@@ -589,11 +603,12 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 		return part.getBoundingBox(offsetPart);
 	}
 
-	private AxisAlignedBB aabb = null;
+	public AxisAlignedBB aabb = null;
 
 	@Override
 	public AxisAlignedBB getBoundingBox() {
-		if (aabb == null) {
+		if (aabb == null || aabb.minX==aabb.maxX)
+		{
 			aabb = IBlockBoundsDirectional.super.getBoundingBox();
 		}
 		return aabb;

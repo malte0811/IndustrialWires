@@ -55,14 +55,14 @@ public final class MechEnergy {
 
 	public void decaySpeed(double decay) {
 		speed *= decay;
-		if (speed < .1)
+		if (speed < .01)
 			speed = 0;
 	}
 
 	private static final int TICKS_FOR_ADJUSTMENT = 30;
 	private double targetSpeed;
 	private double oldSpeed = -1;
-	private int ticksTillReached;
+	private int ticksTillReached = -1;
 
 	//ONLY USE FOR SYNCING
 	@SideOnly(Side.CLIENT)
