@@ -18,9 +18,8 @@ package malte0811.industrialWires.blocks.converter;
 import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IPlayerInteraction;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IRedstoneOutput;
+import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0;
 import blusunrize.immersiveengineering.common.util.Utils;
-import ic2.api.energy.event.EnergyTileLoadEvent;
-import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergyAcceptor;
 import ic2.api.energy.tile.IEnergyEmitter;
 import ic2.api.energy.tile.IEnergySink;
@@ -29,9 +28,11 @@ import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.IBlockBoundsIW.IBlockBoundsDirectional;
 import malte0811.industrialWires.blocks.ISyncReceiver;
 import malte0811.industrialWires.blocks.TileEntityIWMultiblock;
+import malte0811.industrialWires.compat.Compat;
 import malte0811.industrialWires.converter.*;
 import malte0811.industrialWires.network.MessageTileSyncIW;
 import malte0811.industrialWires.util.LocalSidedWorld;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.entity.player.EntityPlayer;
@@ -44,7 +45,6 @@ import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.Optional;
@@ -106,10 +106,7 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 			}
 		}
 		if (firstTick) {
-			//TODO make safe for when IC2 isn't installed
-			if (!world.isRemote && IndustrialWires.hasIC2) {
-				MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
-			}
+			Compat.loadIC2Tile.accept(this);
 			firstTick = false;
 		}
 		if (world.isRemote) {
@@ -347,7 +344,21 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 
 	@Override
 	public IBlockState getOriginalBlock() {
-		return Blocks.AIR.getDefaultState();// TODO implement for pick block
+		return Blocks.AIR.getDefaultState();//Irrelevant, the method below is used for pick block
+	}
+
+	@Override
+	public ItemStack getOriginalItem() {
+		Vec3i offsetDirectional = getOffsetDir();
+		TileEntityMechMB master = masterOr(this, this);
+		int id = getPart(offsetDirectional.getZ(), master);
+		if (id < 0) {
+			return new ItemStack(blockMetalDecoration0, 1,
+					BlockTypes_MetalDecoration0.HEAVY_ENGINEERING.ordinal());
+		}
+		MechMBPart part = master.mechanical[id];
+		BlockPos offsetPart = new BlockPos(offsetDirectional.getX(), offsetDirectional.getY(), offsetDirectional.getZ() - master.offsets[id]);
+		return part.getOriginalItem(offsetPart);
 	}
 
 	@Override
@@ -417,6 +428,17 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 					}
 				}
 				master.disassemble(failed);
+				try {
+					IBlockState state = world.getBlockState(pos);
+					NonNullList<ItemStack> drops = NonNullList.create();
+					state.getBlock().getDrops(drops, world, pos, state, 0);
+					world.setBlockToAir(pos);
+					for (ItemStack s:drops) {
+						Block.spawnAsEntity(world, pos, s);
+					}
+				} catch (Exception x) {
+					x.printStackTrace();
+				}
 			}
 		}
 	}
@@ -430,18 +452,22 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 			world.setBlockState(pos.down(),
 					blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, HEAVY_ENGINEERING));
 			for (MechMBPart mech : mechanical) {
-				mech.disassemble(failed.contains(mech), energyState);
-				short pattern = mech.getFormPattern();
-				for (int i = 0; i < 9; i++) {
-					if (((pattern >> i) & 1) != 0) {
-						BlockPos pos = new BlockPos(i % 3 - 1, i / 3 - 1, 0);
-						if (mech.world.getBlockState(pos).getBlock() == IndustrialWires.mechanicalMB) {
-							mech.world.setBlockState(pos, Blocks.AIR.getDefaultState());
-						}
-					}
-				}
 				if (failed.contains(mech)) {
 					world.playSound(null, mech.world.getOrigin(), new SoundEvent(mmbBang), SoundCategory.BLOCKS, 1, 1);
+					mech.breakOnFailure(energyState);
+				} else {
+					mech.disassemble();
+				}
+				for (int l = 0;l<mech.getLength();l++) {
+					short pattern = mech.getFormPattern(l);
+					for (int i = 0; i < 9; i++) {
+						if (((pattern >> i) & 1) != 0) {
+							BlockPos pos = new BlockPos(i % 3 - 1, i / 3 - 1, -l);
+							if (mech.world.getBlockState(pos).getBlock() == IndustrialWires.mechanicalMB) {
+								mech.world.setBlockState(pos, Blocks.AIR.getDefaultState());
+							}
+						}
+					}
 				}
 			}
 			BlockPos otherEnd = offset(pos, facing.getOpposite(), mirrored, 0,
@@ -531,7 +557,7 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 	@Override
 	public void invalidate() {
 		if (!world.isRemote && !firstTick)
-			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
+			Compat.unloadIC2Tile.accept(this);
 		firstTick = true;
 		super.invalidate();
 	}
@@ -540,7 +566,7 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 	public void onChunkUnload() {
 		super.onChunkUnload();
 		if (!world.isRemote && !firstTick)
-			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
+			Compat.unloadIC2Tile.accept(this);
 		firstTick = true;
 	}
 

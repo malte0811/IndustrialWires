@@ -21,6 +21,7 @@ import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
 import malte0811.industrialWires.util.LocalSidedWorld;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -34,6 +35,14 @@ import static net.minecraft.util.EnumFacing.EAST;
 import static net.minecraft.util.EnumFacing.WEST;
 
 public class MechPartCommutator4Phase extends MechPartCommutator {
+	{
+		IBlockState lightEng = getLightEngineering();
+		for (int i = 0; i < 2; i++) {
+			for (int j = 0; j < 2; j++) {
+				original.put(new BlockPos(2*i-1, j-1, 0), lightEng);
+			}
+		}
+	}
 	@Override
 	protected double getMaxBuffer() {
 		return 8*super.getMaxBuffer();
@@ -51,18 +60,8 @@ public class MechPartCommutator4Phase extends MechPartCommutator {
 	}
 
 	@Override
-	public short getFormPattern() {
+	public short getFormPattern(int offset) {
 		return 0b000_111_101;
-	}
-
-	@Override
-	public void disassemble(boolean failed, MechEnergy energy) {
-		super.disassemble(failed, energy);
-		for (int i = 0; i < 2; i++) {
-			for (int j = 0; j < 2; j++) {
-				setLightEngineering(new BlockPos(2*i-1, j-1, 0));
-			}
-		}
 	}
 
 	@Override

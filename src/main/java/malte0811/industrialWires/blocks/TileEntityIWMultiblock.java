@@ -49,6 +49,10 @@ public abstract class TileEntityIWMultiblock extends TileEntityIWBase implements
 	@Nonnull
 	protected abstract BlockPos getOrigin();
 	public abstract IBlockState getOriginalBlock();
+	public ItemStack getOriginalItem() {
+		IBlockState state = getOriginalBlock();
+		return new ItemStack(state.getBlock(), 1, state.getBlock().getMetaFromState(state));
+	}
 	public BiConsumer<World, BlockPos> getOriginalBlockPlacer() {
 		return (w, p)->w.setBlockState(p, getOriginalBlock());
 	}
@@ -93,7 +97,7 @@ public abstract class TileEntityIWMultiblock extends TileEntityIWBase implements
 								if (!pos.equals(this.pos)) {
 									part.getOriginalBlockPlacer().accept(world, pos);
 								} else if (part.getOriginalBlock()!=null) {
-									ItemStack drop = MiscUtils.getItemStack(part.getOriginalBlock(), world, pos);
+									ItemStack drop = getOriginalItem();
 									world.spawnEntity(new EntityItem(world, pos.getX()+.5,pos.getY()+.5,pos.getZ()+.5, drop));
 								}
 							}

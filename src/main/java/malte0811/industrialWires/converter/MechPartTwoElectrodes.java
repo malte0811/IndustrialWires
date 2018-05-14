@@ -50,6 +50,11 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 	private double bufferToWorld;
 	private Waveform wfToWorld = Waveform.forParameters(Waveform.Type.NONE, get(has4Phases()), Waveform.Speed.ROTATION);
 
+	{
+		original.put(ORIGIN, blockMetalDecoration0.getDefaultState().withProperty(
+				blockMetalDecoration0.property, GENERATOR));
+	}
+
 	@Override
 	public Waveform getProduced(MechEnergy state) {
 		return wfToMB;
@@ -139,14 +144,13 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 	}
 
 	@Override
-	public short getFormPattern() {
+	public short getFormPattern(int offset) {
 		return 0b000_010_000;
 	}
 
 	@Override
-	public void disassemble(boolean failed, MechEnergy energy) {
-		world.setBlockState(ORIGIN,
-				blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, GENERATOR));
+	public void breakOnFailure(MechEnergy energy) {
+		//NOP
 	}
 
 	@Override

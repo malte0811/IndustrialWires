@@ -30,6 +30,8 @@ import malte0811.industrialWires.util.LocalSidedWorld;
 import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -56,6 +58,7 @@ import static malte0811.industrialWires.util.NBTKeys.TYPE;
 public abstract class MechMBPart {
 	public static final Map<String, MechMBPart> INSTANCES = new HashMap<>();
 	public LocalSidedWorld world;
+	protected Map<BlockPos, IBlockState> original = new HashMap<>();
 
 	// These 3 are called once per tick in bulk in this order
 	public abstract void createMEnergy(MechEnergy e);
@@ -91,12 +94,18 @@ public abstract class MechMBPart {
 		return true;
 	}
 
-	public abstract short getFormPattern();
+	public abstract short getFormPattern(int offset);
 
-	/**
-	 * @param failed whether the MB is being disassembled because this part failed
-	 */
-	public abstract void disassemble(boolean failed, MechEnergy energy);
+	public abstract void breakOnFailure(MechEnergy energy);
+
+	public ItemStack getOriginalItem(BlockPos pos) {
+		IBlockState state = getOriginalBlock(pos);
+		return new ItemStack(state.getBlock(), 1, state.getBlock().getMetaFromState(state));
+	}
+
+	public IBlockState getOriginalBlock(BlockPos pos) {
+		return original.getOrDefault(pos, Blocks.AIR.getDefaultState());
+	}
 
 	public abstract MechanicalMBBlockType getType();
 
@@ -112,9 +121,19 @@ public abstract class MechMBPart {
 
 	public static final String SHAFT_KEY = "shaft";
 
-	public static final Comparator<MechMBPart> SORT_BY_COUNT = Comparator.comparingInt(
-			(c)->-MiscUtils.count1Bits(c.getFormPattern())
-	);
+	public static final Comparator<MechMBPart> SORT_BY_COUNT = (a, b)-> {
+		if (a.getLength()!=b.getLength()) {
+			return Integer.compare(a.getLength(), b.getLength());
+		}
+		for (int i = 0;i<a.getLength();i++) {
+			int aBits = MiscUtils.count1Bits(a.getFormPattern(i));
+			int bBits = MiscUtils.count1Bits(b.getFormPattern(i));
+			if (aBits!=bBits) {
+				return Integer.compare(aBits, bBits);
+			}
+		}
+		return 0;
+	};
 	public static void preInit() {
 		REGISTRY.put("flywheel", MechPartFlywheel.class);
 		REGISTRY.put("singleCoil", MechPartSingleCoil.class);
@@ -177,33 +196,48 @@ public abstract class MechMBPart {
 				state.getValue(IEContent.blockMetalDecoration0.property)==BlockTypes_MetalDecoration0.LIGHT_ENGINEERING;
 	}
 
-	public void setDefaultShaft(BlockPos pos) {
-		world.setBlockState(pos, blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property,
-				HEAVY_ENGINEERING));
+	public IBlockState getDefaultShaft() {
+		return blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property,
+				HEAVY_ENGINEERING);
 	}
 
-	public void setLightEngineering(BlockPos pos) {
-		world.setBlockState(pos, blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property,
-				LIGHT_ENGINEERING));
+	public IBlockState getLightEngineering() {
+		return blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property,
+				LIGHT_ENGINEERING);
 	}
 
 
 	public void form(LocalSidedWorld w, Consumer<TileEntityMechMB> initializer) {
 		world = w;
 		BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain();
-		short pattern = getFormPattern();
-		int i = 0;
-		for (int y = -1; y <= 1; y++) {
-			for (int x = -1; x <= 1; x++) {
-				if ((pattern & (1 << i)) != 0) {
-					pos.setPos(x, y, 0);
-					w.setBlockState(pos, IndustrialWires.mechanicalMB.getStateFromMeta((i==4?getType():NO_MODEL).ordinal()));
-					TileEntity te = w.getTileEntity(pos);
-					if (te instanceof TileEntityMechMB) {
-						initializer.accept((TileEntityMechMB) te);
+		for (int z = 0;z<getLength();z++) {
+			short pattern = getFormPattern(z);
+			int i = 0;
+			for (int y = -1; y <= 1; y++) {
+				for (int x = -1; x <= 1; x++) {
+					if ((pattern & (1 << i)) != 0) {
+						pos.setPos(x, y, -z);
+						w.setBlockState(pos, IndustrialWires.mechanicalMB.getStateFromMeta((i == 4 ? getType() : NO_MODEL).ordinal()));
+						TileEntity te = w.getTileEntity(pos);
+						if (te instanceof TileEntityMechMB) {
+							initializer.accept((TileEntityMechMB) te);
+						}
 					}
+					i++;
 				}
-				i++;
+			}
+		}
+		pos.release();
+	}
+
+	public void disassemble() {
+		BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain();
+		for (int z = 0;z<getLength();z++) {
+			for (int x = -1; x <= 1; x++) {
+				for (int y = -1; y <= 1; y++) {
+					pos.setPos(x, y, -z);
+					world.setBlockState(pos, getOriginalBlock(pos));
+				}
 			}
 		}
 		pos.release();

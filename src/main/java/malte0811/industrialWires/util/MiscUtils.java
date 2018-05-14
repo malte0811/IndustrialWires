@@ -19,14 +19,12 @@ import blusunrize.immersiveengineering.ImmersiveEngineering;
 import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.api.energy.wires.IImmersiveConnectable;
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler;
-import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
 import blusunrize.immersiveengineering.common.util.Utils;
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import com.google.common.collect.ImmutableSet;
 import malte0811.industrialWires.IndustrialWires;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
@@ -140,14 +138,6 @@ public final class MiscUtils {
 		min = mat.apply(min);
 		max = mat.apply(max);
 		return new AxisAlignedBB(min.x, min.y, min.z, max.x, max.y, max.z);
-	}
-
-	public static ItemStack getItemStack(IBlockState origState, World w, BlockPos pos) {
-		if (origState.getBlock() instanceof IEBlockInterfaces.IIEMetaBlock) {
-			int meta = origState.getBlock().getMetaFromState(origState);
-			return new ItemStack(origState.getBlock(), 1, meta);
-		}
-		return origState.getBlock().getPickBlock(origState, null, w, pos, null);
 	}
 
 	public static float[] interpolate(double a, float[] cA, double b, float[] cB) {

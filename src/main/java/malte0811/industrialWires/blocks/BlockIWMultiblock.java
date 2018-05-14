@@ -15,7 +15,6 @@
 
 package malte0811.industrialWires.blocks;
 
-import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -72,7 +71,7 @@ public abstract class BlockIWMultiblock extends BlockIWBase {
 	public ItemStack getPickBlock(@Nonnull IBlockState state, RayTraceResult target, @Nonnull World world, @Nonnull BlockPos pos, EntityPlayer player) {
 		TileEntity te = world.getTileEntity(pos);
 		if (te instanceof TileEntityIWMultiblock) {
-			return MiscUtils.getItemStack(((TileEntityIWMultiblock) te).getOriginalBlock(), world, pos);
+			return ((TileEntityIWMultiblock) te).getOriginalItem();
 		}
 		return ItemStack.EMPTY;
 	}

@@ -26,6 +26,9 @@ import net.minecraft.util.math.BlockPos;
 import static malte0811.industrialWires.blocks.converter.MechanicalMBBlockType.SHAFT_BASIC;
 
 public class MechPartShaft extends MechMBPart {
+	{
+		original.put(BlockPos.ORIGIN, getDefaultShaft());
+	}
 	@Override
 	public void createMEnergy(MechEnergy e) {}
 
@@ -64,13 +67,13 @@ public class MechPartShaft extends MechMBPart {
 	}
 
 	@Override
-	public short getFormPattern() {
+	public short getFormPattern(int offset) {
 		return 0b000_010_000;
 	}
 
 	@Override
-	public void disassemble(boolean failed, MechEnergy energy) {
-		setDefaultShaft(BlockPos.ORIGIN);
+	public void breakOnFailure(MechEnergy energy) {
+		disassemble();
 	}
 
 	@Override

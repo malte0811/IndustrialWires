@@ -32,8 +32,20 @@ import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_Met
 import static malte0811.industrialWires.converter.Waveform.Phases.get;
 import static malte0811.industrialWires.util.NBTKeys.BUFFER_IN;
 import static malte0811.industrialWires.util.NBTKeys.BUFFER_OUT;
+import static net.minecraft.util.math.BlockPos.ORIGIN;
 
 public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
+	{
+		IBlockState lightEng = getLightEngineering();
+		IBlockState coil = getCoil();
+		for (int y = -1;y<=1;y++) {
+			original.put(new BlockPos(-1, y, 0), lightEng);
+			original.put(new BlockPos(0, y, 0), coil);
+			original.put(new BlockPos(1, y, 0), lightEng);
+		}
+		original.put(ORIGIN, getDefaultShaft());
+	}
+
 	private double bufferToMech;
 	private double bufferToE;
 
@@ -117,8 +129,8 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 				state.getValue(blockMetalDecoration0.property) == BlockTypes_MetalDecoration0.COIL_LV;
 	}
 
-	protected void setCoil(BlockPos p) {
-		world.setBlockState(p, blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, COIL_LV));
+	protected IBlockState getCoil() {
+		return blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, COIL_LV);
 	}
 
 	@Override
@@ -151,28 +163,21 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 	}
 
 	@Override
-	public short getFormPattern() {
+	public short getFormPattern(int offset) {
 		return 0b111_111_111;
 	}
 
-	private static final ResourceLocation COIL_TEXTURE = new ResourceLocation(ImmersiveEngineering.MODID,
+	protected static final ResourceLocation COIL_TEXTURE = new ResourceLocation(ImmersiveEngineering.MODID,
 			"blocks/metal_decoration0_coil_lv_side");
 	@Override
-	public void disassemble(boolean failed, MechEnergy energy) {
-		setDefaultShaft(BlockPos.ORIGIN);
-		if (!failed) {
-			for (int i = -1;i<=1;i+=2) {
-				setCoil(BlockPos.ORIGIN.up(i));
-			}
-		} else {
-			int count = has4Phases()?8:2;
-			spawnBrokenParts(count, energy, COIL_TEXTURE);
-		}
+	public void breakOnFailure(MechEnergy energy) {
+		world.setBlockState(ORIGIN, getDefaultShaft());
 		for (int i = -1; i <= 1; i+=2) {
 			for (int y = -1; y <= 1; y++) {
-				setLightEngineering(new BlockPos(i, y, 0));
+				world.setBlockState(new BlockPos(i, y, 0), getLightEngineering());
 			}
 		}
+		spawnBrokenParts(8, energy, COIL_TEXTURE);
 	}
 
 	@Override

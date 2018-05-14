@@ -27,6 +27,7 @@ import malte0811.industrialWires.util.LocalSidedWorld;
 import malte0811.industrialWires.util.NBTKeys;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -53,6 +54,10 @@ public class MechPartSpeedometer extends MechMBPart implements IPlayerInteractio
 	private int currentOutputLin = -1;
 	private int currentOutputLog = -1;
 	private double logFactor = 15 / Math.log(speedFor15RS + 1);
+	{
+		original.put(ORIGIN, blockMetalDecoration0
+				.getStateFromMeta(RS_ENGINEERING.getMeta()));
+	}
 	@Nullable
 	private MechEnergy energy = null;
 
@@ -128,14 +133,13 @@ public class MechPartSpeedometer extends MechMBPart implements IPlayerInteractio
 	}
 
 	@Override
-	public short getFormPattern() {
+	public short getFormPattern(int offset) {
 		return 0b000_010_000;
 	}
 
 	@Override
-	public void disassemble(boolean failed, MechEnergy energy) {
-		world.setBlockState(ORIGIN, blockMetalDecoration0
-				.getStateFromMeta(RS_ENGINEERING.getMeta()));
+	public void breakOnFailure(MechEnergy energy) {
+		world.setBlockState(ORIGIN, Blocks.AIR.getDefaultState());
 	}
 
 	@Override

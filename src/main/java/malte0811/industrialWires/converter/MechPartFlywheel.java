@@ -38,6 +38,8 @@ import net.minecraftforge.oredict.OreDictionary;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static net.minecraft.util.math.BlockPos.ORIGIN;
+
 public class MechPartFlywheel extends MechMBPart {
 	private static final double RADIUS = 1.25;
 	private static final double THICKNESS = 1;
@@ -124,17 +126,23 @@ public class MechPartFlywheel extends MechMBPart {
 	}
 
 	@Override
-	public void disassemble(boolean failed, MechEnergy energy) {
-		setDefaultShaft(BlockPos.ORIGIN);
-		IBlockState state = Blocks.AIR.getDefaultState();
-		if (!failed) {
-			for (ItemStack block: OreDictionary.getOres("block"+material.oreName())) {
-				if (block.getItem() instanceof ItemBlock) {
-					ItemBlock ib = (ItemBlock) block.getItem();
-					state = ib.getBlock().getStateFromMeta(block.getMetadata());
-				}
+	public IBlockState getOriginalBlock(BlockPos pos) {
+		if (pos.equals(ORIGIN)) {
+			return getDefaultShaft();
+		}
+		for (ItemStack block: OreDictionary.getOres("block"+material.oreName())) {
+			if (block.getItem() instanceof ItemBlock) {
+				ItemBlock ib = (ItemBlock) block.getItem();
+				return ib.getBlock().getStateFromMeta(block.getMetadata());
 			}
 		}
+		return Blocks.AIR.getDefaultState();
+	}
+
+	@Override
+	public void breakOnFailure(MechEnergy energy) {
+		world.setBlockState(ORIGIN, getDefaultShaft());
+		IBlockState state = Blocks.AIR.getDefaultState();
 		for (int x = -1; x <= 1; x++) {
 			for (int y = -1; y <= 1; y++) {
 				if (x != 0 || y != 0) {
@@ -142,13 +150,11 @@ public class MechPartFlywheel extends MechMBPart {
 				}
 			}
 		}
-		if (failed) {
-			spawnBrokenParts(8, energy, material.blockTexture);
-		}
+		spawnBrokenParts(8, energy, material.blockTexture);
 	}
 
 	@Override
-	public short getFormPattern() {
+	public short getFormPattern(int offset) {
 		return 0b111_111_111;
 	}
 
@@ -159,7 +165,7 @@ public class MechPartFlywheel extends MechMBPart {
 
 	@Override
 	public AxisAlignedBB getBoundingBox(BlockPos offsetPart) {
-		if (BlockPos.ORIGIN.equals(offsetPart)) {
+		if (ORIGIN.equals(offsetPart)) {
 			return Block.FULL_BLOCK_AABB;
 		}
 		final double small = .375;

@@ -76,7 +76,7 @@ dependencies {
     compileOnly "RebornCore:RebornCore-1.12:3.2.+:dev"
     compileOnly 'com.elytradev:mirage:2.0.1-SNAPSHOT'
     compileOnly "mezz.jei:jei_1.12:4.+"
-    compileOnly "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.+"
+    compileOnly "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.8.460"
 }
 
 jar {

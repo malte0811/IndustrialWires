@@ -18,10 +18,18 @@ package malte0811.industrialWires.converter;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
 import malte0811.industrialWires.util.LocalSidedWorld;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 
+import static net.minecraft.util.math.BlockPos.ORIGIN;
+
 public class MechPartFourCoils extends MechPartSingleCoil {
+	{
+		IBlockState coil = getCoil();
+		original.put(new BlockPos(-1, 0, 0), coil);
+		original.put(new BlockPos(1, 0, 0), coil);
+	}
 	@Override
 	protected double getMaxBuffer() {
 		return 8*super.getMaxBuffer();
@@ -59,23 +67,20 @@ public class MechPartFourCoils extends MechPartSingleCoil {
 	}
 
 	@Override
-	public short getFormPattern() {
+	public short getFormPattern(int offset) {
 		return 0b111_111_111;
 	}
 
 	@Override
-	public void disassemble(boolean failed, MechEnergy energy) {
-		BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain(0, 0, 0);
-		setDefaultShaft(pos);
+	public void breakOnFailure(MechEnergy energy) {
+		world.setBlockState(ORIGIN, getDefaultShaft());
 		for (int i = 0; i < 2; i++) {
 			for (int j = 0; j < 2; j++) {
-				pos.setPos(2 * i - 1, 2 * j - 1, 0);
-				setLightEngineering(pos);
-				pos.setPos((j == 0) ? 2 * i - 1 : 0, (j != 0) ? 2 * i - 1 : 0, 0);
-				setCoil(pos);
+				BlockPos pos = new BlockPos(2 * i - 1, 2 * j - 1, 0);
+				world.setBlockState(pos, getLightEngineering());
 			}
 		}
-		pos.release();
+		spawnBrokenParts(8, energy, COIL_TEXTURE);
 	}
 
 	@Override

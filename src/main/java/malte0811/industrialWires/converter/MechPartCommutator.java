@@ -22,6 +22,7 @@ import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
 import malte0811.industrialWires.converter.EUCapability.IC2EnergyHandler;
 import malte0811.industrialWires.util.ConversionUtil;
 import malte0811.industrialWires.util.LocalSidedWorld;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -47,6 +48,7 @@ import static net.minecraft.util.math.BlockPos.ORIGIN;
 import static net.minecraftforge.energy.CapabilityEnergy.ENERGY;
 
 public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
+	public static ItemStack originalStack = ItemStack.EMPTY;
 	private double bufferToMB;
 	private Waveform wfToMB = Waveform.forParameters(NONE, get(has4Phases()), ROTATION);
 	private double bufferToWorld;
@@ -259,13 +261,24 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 	}
 
 	@Override
-	public short getFormPattern() {
+	public short getFormPattern(int offset) {
 		return 0b000_010_000;
 	}
 
 	@Override
-	public void disassemble(boolean failed, MechEnergy energy) {
-		if (!failed&&IndustrialWires.ic2TeBlock!=null) {
+	public void breakOnFailure(MechEnergy energy) {
+		//NOP
+	}
+
+	@Override
+	public ItemStack getOriginalItem(BlockPos pos) {
+		return pos.equals(ORIGIN)?originalStack:super.getOriginalItem(pos);
+	}
+
+	@Override
+	public void disassemble() {
+		super.disassemble();
+		if (IndustrialWires.ic2TeBlock!=null) {
 			NBTTagCompound dummyNbt = new NBTTagCompound();
 			dummyNbt.setString("id", KINETIC_GEN_KEY.toString());
 			world.setBlockState(BlockPos.ORIGIN, IndustrialWires.ic2TeBlock.getDefaultState());
