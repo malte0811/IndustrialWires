@@ -81,11 +81,6 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 		waveform = waveform.getCommutated(mechEnergy.getSpeed(), has4Phases());
 		wfToWorld = waveform;
 		bufferToWorld += given;
-		int available = (int) (Math.min(ConversionUtil.ifPerJoule() * bufferToWorld,
-				getMaxBuffer()/getEnergyConnections().size()));
-		if (available > 0 && wfToWorld.isAC()) {//The IC2 net will deal with DC by itself
-			bufferToWorld -= outputFE(world, available);
-		}//TODO move to mech!
 	}
 
 
@@ -211,7 +206,12 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 	}
 
 	@Override
-	public void insertMEnergy(double added) {}
+	public void insertMEnergy(double added) {int available = (int) (Math.min(ConversionUtil.ifPerJoule() * bufferToWorld,
+			getMaxBuffer()/getEnergyConnections().size()));
+		if (available > 0 && wfToWorld.isAC()) {//The IC2 net will deal with DC by itself
+			bufferToWorld -= outputFE(world, available);
+		}
+	}
 
 	@Override
 	public double getInertia() {
@@ -227,16 +227,16 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 	public void writeToNBT(NBTTagCompound out) {
 		out.setDouble(BUFFER_IN, bufferToMB);
 		out.setDouble(BUFFER_OUT, bufferToWorld);
-		out.setInteger(BUFFER_IN+WAVEFORM, wfToMB.getIndex());
-		out.setInteger(BUFFER_OUT+WAVEFORM, wfToWorld.getIndex());//TODO better way of doing this that doesn't break when I change anything
+		out.setString(BUFFER_IN+WAVEFORM, wfToMB.serializeToString());
+		out.setString(BUFFER_OUT+WAVEFORM, wfToWorld.serializeToString());
 	}
 
 	@Override
 	public void readFromNBT(NBTTagCompound in) {
 		bufferToMB = in.getDouble(BUFFER_IN);
 		bufferToWorld = in.getDouble(BUFFER_OUT);
-		wfToMB = Waveform.VALUES[in.getInteger(BUFFER_IN+WAVEFORM)];
-		wfToWorld = Waveform.VALUES[in.getInteger(BUFFER_OUT+WAVEFORM)];
+		wfToMB = Waveform.fromString(in.getString(BUFFER_IN+WAVEFORM));
+		wfToWorld = Waveform.fromString(in.getString(BUFFER_OUT+WAVEFORM));
 	}
 
 	@Override

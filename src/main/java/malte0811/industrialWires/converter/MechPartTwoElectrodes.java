@@ -37,7 +37,10 @@ import java.util.Set;
 
 import static blusunrize.immersiveengineering.common.IEContent.blockMetalDecoration0;
 import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.GENERATOR;
+import static malte0811.industrialWires.converter.EUCapability.ENERGY_IC2;
 import static malte0811.industrialWires.converter.Waveform.Phases.get;
+import static malte0811.industrialWires.converter.Waveform.Speed.EXTERNAL;
+import static malte0811.industrialWires.converter.Waveform.Type.DC;
 import static malte0811.industrialWires.util.ConversionUtil.ifPerJoule;
 import static malte0811.industrialWires.util.ConversionUtil.joulesPerIf;
 import static malte0811.industrialWires.util.NBTKeys.*;
@@ -114,17 +117,17 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 	@Override
 	public void writeToNBT(NBTTagCompound out) {
 		out.setDouble(BUFFER_IN, bufferToMB);
-		out.setInteger(BUFFER_IN+AC, wfToMB.getIndex());
+		out.setString(BUFFER_IN+AC, wfToMB.serializeToString());
 		out.setDouble(BUFFER_OUT, bufferToWorld);
-		out.setInteger(BUFFER_OUT+AC, wfToWorld.getIndex());
+		out.setString(BUFFER_OUT+AC, wfToWorld.serializeToString());
 	}
 
 	@Override
 	public void readFromNBT(NBTTagCompound in) {
 		bufferToMB = in.getDouble(BUFFER_IN);
-		wfToMB = Waveform.VALUES[in.getInteger(BUFFER_IN+AC)];
+		wfToMB = Waveform.fromString(in.getString(BUFFER_IN+AC));
 		bufferToWorld = in.getDouble(BUFFER_OUT);
-		wfToWorld = Waveform.VALUES[in.getInteger(BUFFER_OUT+AC)];
+		wfToWorld = Waveform.fromString(in.getString(BUFFER_OUT+AC));
 	}
 
 	@Override
@@ -220,15 +223,20 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 		if (getEnergyConnections().contains(new ImmutablePair<>(pos, side))) {
 			if (cap==CapabilityEnergy.ENERGY)
 				return true;
-			//TODO return true for internal IC2 cap that doesn't exist yet
+			if (cap==ENERGY_IC2)
+				return true;
 		}
 		return super.hasCapability(cap, side, pos);
 	}
 
 	@Override
 	public <T> T getCapability(Capability<T> cap, EnumFacing side, BlockPos pos) {
-		if (getEnergyConnections().contains(new ImmutablePair<>(pos, side))&&cap== CapabilityEnergy.ENERGY)
-			return CapabilityEnergy.ENERGY.cast(energy);
+		if (getEnergyConnections().contains(new ImmutablePair<>(pos, side))) {
+			if (cap == CapabilityEnergy.ENERGY)
+				return CapabilityEnergy.ENERGY.cast(energy);
+			if (cap==ENERGY_IC2)
+				return ENERGY_IC2.cast(capIc2);
+		}
 		return super.getCapability(cap, side, pos);
 	}
 
@@ -244,4 +252,38 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 	public AxisAlignedBB getBoundingBox(BlockPos offsetPart) {
 		return new AxisAlignedBB(0, .375, 0, 1, 1, 1);
 	}
+
+	private final EUCapability.IC2EnergyHandler capIc2 = new EUCapability.IC2EnergyHandler() {
+		{
+			tier = 3;//TODO does this mean everything blows up?
+		}
+
+		@Override
+		public double injectEnergy(EnumFacing side, double amount, double voltage) {
+			double buffer = bufferToMB;
+			double input = amount * ConversionUtil.joulesPerEu();
+			if (!wfToMB.isDC()) {
+				buffer = 0;
+			}
+			input = Math.min(input, getMaxBuffer()-buffer);
+			buffer += input;
+			bufferToMB = buffer;
+			wfToMB = Waveform.forParameters(DC, get(has4Phases()), EXTERNAL);
+			return amount-ConversionUtil.euPerJoule()*input;
+		}
+
+		@Override
+		public double getOfferedEnergy() {
+			if (wfToWorld.isDC()) {
+				return Math.min(ConversionUtil.euPerJoule()*bufferToWorld,
+						ConversionUtil.euPerJoule()*getMaxBuffer())/getEnergyConnections().size()*2;
+			}
+			return 0;
+		}
+
+		@Override
+		public void drawEnergy(double amount) {
+			bufferToWorld -= ConversionUtil.joulesPerEu()*amount;
+		}
+	};
 }

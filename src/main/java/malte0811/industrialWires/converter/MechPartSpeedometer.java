@@ -101,7 +101,7 @@ public class MechPartSpeedometer extends MechMBPart implements IPlayerInteractio
 
 	@Override
 	public double getInertia() {
-		return 60;//TODO
+		return 60;
 	}
 
 	@Override

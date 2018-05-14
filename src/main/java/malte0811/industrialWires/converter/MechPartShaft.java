@@ -42,7 +42,7 @@ public class MechPartShaft extends MechMBPart {
 
 	@Override
 	public double getInertia() {
-		return 5;//TODO
+		return 5;
 	}
 
 	@Override

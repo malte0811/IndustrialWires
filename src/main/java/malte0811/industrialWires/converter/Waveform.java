@@ -102,8 +102,20 @@ public class Waveform {
 		return this;
 	}
 
-	public int getIndex() {
-		return getIndex(type, phases, speed);
+	public String serializeToString() {
+		return type+":"+phases+":"+speed;
+	}
+
+	public static Waveform fromString(String in) {
+		String[] elements = in.split(":");
+		try {
+			Type t = Type.valueOf(elements[0]);
+			Phases p = Phases.valueOf(elements[1]);
+			Speed s = Speed.valueOf(elements[1]);
+			return forParameters(t, p, s);
+		} catch (Exception x) {
+			return forParameters(NONE, SINGLE, ROTATION);
+		}
 	}
 
 	public enum Type {

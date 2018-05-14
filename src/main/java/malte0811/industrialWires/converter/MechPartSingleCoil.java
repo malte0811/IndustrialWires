@@ -75,7 +75,7 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 	@Override
 	public void insertEEnergy(double given, Waveform waveform, MechEnergy energy) {
 		if (waveform.isDC()) {
-			bufferToMech = 0;//TODO something more spectacular
+			bufferToMech = 0;
 		} else {
 			bufferToMech += given;
 		}

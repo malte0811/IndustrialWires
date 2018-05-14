@@ -33,7 +33,6 @@ public class IC2ItemFactory implements IIngredientFactory {
 		String variant = json.get("variant").getAsString();
 		return IC2TRHelper.getStack(name, variant);
 	}
-	//TODO NBT sensitivity?
 	private class MyNBTIngredient extends IngredientNBT {
 
 		public MyNBTIngredient(ItemStack stack) {

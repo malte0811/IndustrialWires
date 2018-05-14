@@ -28,11 +28,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.Set;
 
 public interface IMBPartElectric {
-	/**
-	 * If a section has more than one waveform (!=NONE) the generators are shorted (or worse), so it will:
-	 * 1. Heat up the sources, possibly destroying them (TODO do I want to do that?)
-	 * 2. Consume a lot of mechanical energy
-	 */
 	Waveform getProduced(MechEnergy state);
 	// All four in Joules
 	double getAvailableEEnergy();
