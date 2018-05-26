@@ -52,28 +52,32 @@
     "category": "block",
     "subtitle": "industrialwires.subtitle.mech_mb_turning",
     "sounds": [
-      "industrialwires:mech_mb/turn_slow_000",
-      "industrialwires:mech_mb/turn_slow_001",
-      "industrialwires:mech_mb/turn_slow_002",
-      "industrialwires:mech_mb/turn_slow_003",
-      "industrialwires:mech_mb/turn_slow_004",
-      "industrialwires:mech_mb/turn_slow_005",
-      "industrialwires:mech_mb/turn_slow_006",
-      "industrialwires:mech_mb/turn_slow_007",
-      "industrialwires:mech_mb/turn_slow_008"
+      "industrialwires:mech_mb/slow00",
+      "industrialwires:mech_mb/slow01",
+      "industrialwires:mech_mb/slow02",
+      "industrialwires:mech_mb/slow03",
+      "industrialwires:mech_mb/slow04",
+      "industrialwires:mech_mb/slow05",
+      "industrialwires:mech_mb/slow06",
+      "industrialwires:mech_mb/slow07",
+      "industrialwires:mech_mb/slow08",
+      "industrialwires:mech_mb/slow09"
     ]
   },
   "mech_mb_fast": {
     "category": "block",
     "subtitle": "industrialwires.subtitle.mech_mb_turning",
     "sounds": [
-      "industrialwires:mech_mb/turn_fast_000",
-      "industrialwires:mech_mb/turn_fast_001",
-      "industrialwires:mech_mb/turn_fast_002",
-      "industrialwires:mech_mb/turn_fast_003",
-      "industrialwires:mech_mb/turn_fast_004",
-      "industrialwires:mech_mb/turn_fast_005",
-      "industrialwires:mech_mb/turn_fast_006"
+      "industrialwires:mech_mb/fast00",
+      "industrialwires:mech_mb/fast01",
+      "industrialwires:mech_mb/fast02",
+      "industrialwires:mech_mb/fast03",
+      "industrialwires:mech_mb/fast04",
+      "industrialwires:mech_mb/fast05",
+      "industrialwires:mech_mb/fast06",
+      "industrialwires:mech_mb/fast07",
+      "industrialwires:mech_mb/fast08",
+      "industrialwires:mech_mb/fast09"
     ]
   }
 }

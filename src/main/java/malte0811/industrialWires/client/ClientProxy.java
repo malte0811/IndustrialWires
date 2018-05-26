@@ -366,9 +366,9 @@ public class ClientProxy extends CommonProxy {
 		if (energy.getSpeed() > MIN_SPEED) {
 			boolean adjusting = energy.isAdjusting();
 			double speedToUse = energy.getSpeed()-MIN_SPEED;//Volume should be zero by the time the sound stops
-			float lambda = MathHelper.clamp((float) speedToUse / 20 - .5F, 0, 1);
-			float totalVolume = (float) (energy.weight / 20e3 * Math.sqrt(speedToUse));
-			totalVolume = Math.min(totalVolume, 2);
+			float lambda = MathHelper.clamp((float) speedToUse / 50 - .5F, 0, 1);
+			float totalVolume = (float) (energy.weight / 20e3 * Math.tanh(speedToUse/30));
+			totalVolume = Math.min(totalVolume, 1.5F);
 			float pitch = (float) Math.min(Math.sqrt(speedToUse), 3);
 			if (lambda > 0) {
 				PositionedSoundRecord sound = new PositionedSoundRecord(turnFast, SoundCategory.BLOCKS, lambda * totalVolume, pitch,

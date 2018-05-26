@@ -228,11 +228,6 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 		double totalRequested = 0;
 		for (int i = 0; i < available.length; i++) {
 			if (availableWf[i].equals(waveform)) {
-				if (available[i]>requested[i]) {
-					requested[i] = 0;
-				} else {
-					available[i] = 0;
-				}
 				totalAvailable += available[i];
 			} else {
 				available[i] = 0;

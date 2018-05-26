@@ -59,7 +59,8 @@ public class LocalSidedWorld {
 	}
 
 	public void spawnEntity(Entity e) {
-		Vec3d pos = getRealPos(e.getPositionVector());
+		Vec3d posTransf = e.getPositionVector();
+		Vec3d pos = getRealPos(posTransf);
 		e.setPosition(pos.x, pos.y, pos.z);
 		Vec3d motion = getRealDirection(new Vec3d(e.motionX, e.motionY, e.motionZ));
 		e.motionX = motion.x;
@@ -86,7 +87,8 @@ public class LocalSidedWorld {
 	}
 
 	public Vec3d getRealPos(Vec3d relative) {
-		return MiscUtils.offset(new Vec3d(origin), facing, mirror, relative);
+		return MiscUtils.offset(new Vec3d(origin.getX()+.5, origin.getY()+.5, origin.getZ()+.5), facing, mirror,
+				relative.addVector(.5, .5, .5));
 	}
 
 	public Vec3d getRealDirection(Vec3d dir) {

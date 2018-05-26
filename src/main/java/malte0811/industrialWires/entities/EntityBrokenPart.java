@@ -134,7 +134,8 @@ public class EntityBrokenPart extends /*EntityArrow*/ Entity {
 
 			if (mop == null || mop.entityHit == null) {
 				Entity entity = null;
-				List<Entity> list = this.world.getEntitiesInAABBexcluding(this, this.getEntityBoundingBox().expand(this.motionX, this.motionY, this.motionZ).grow(1), Entity::canBeCollidedWith);
+				List<Entity> list = this.world.getEntitiesInAABBexcluding(this,
+						this.getEntityBoundingBox().expand(this.motionX, this.motionY, this.motionZ).grow(1), e -> true);
 				double d0 = 0.0D;
 				for (Entity e : list) {
 					if (e.canBeCollidedWith()) {
