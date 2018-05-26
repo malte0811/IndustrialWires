@@ -103,6 +103,7 @@
     "inventory,type=top": {
       "model":"industrialwires:block/panel_creator.obj"//Doesn't matter, this will be overridden in code
     },
+    "inventory,type=single_comp": [{}],
     "inventory,type=unfinished": {
       "model": "industrialwires:block/panel_creator.obj"
       //Doesn't matter, this will be overridden in code

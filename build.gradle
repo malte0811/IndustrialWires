@@ -82,7 +82,7 @@ dependencies {
 jar {
 	from 'LICENSE'
     manifest {
-        
+        attributes 'Maven-Artifact': group+':'+archivesBaseName+':'+version
     }
 }
 

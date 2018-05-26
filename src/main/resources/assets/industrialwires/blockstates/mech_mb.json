@@ -11,6 +11,18 @@
     "model": "builtin/generated"
   },
   "variants": {
+    "inventory,type=no_model": [{}],
+    "inventory,type=end": [{}],
+    "inventory,type=other_end": [{}],
+    "inventory,type=flywheel": [{}],
+    "inventory,type=coil_1_phase": [{}],
+    "inventory,type=shaft_commutator": [{}],
+    "inventory,type=shaft_1_phase": [{}],
+    "inventory,type=coil_4_phase": [{}],
+    "inventory,type=shaft_commutator_4": [{}],
+    "inventory,type=shaft_4_phase": [{}],
+    "inventory,type=speedometer": [{}],
+    "inventory,type=shaft_basic": [{}],
     "type": {
       "no_model": {
       },
