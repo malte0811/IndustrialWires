@@ -16,6 +16,7 @@
 package malte0811.industrialWires.converter;
 
 
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -85,9 +86,32 @@ public final class MechEnergy {
 		}
 	}
 
-	@SideOnly(Side.CLIENT)
-	public boolean isAdjusting()
-	{
-		return ticksTillReached>=0;
+	//Sound helper methods
+
+	public float getVolumeSlow() {
+		return (1-getSoundLambda())*getTotalVolume();
+	}
+
+	public float getVolumeFast() {
+		return getSoundLambda()*getTotalVolume();
+	}
+
+	public float getPitch() {
+		return (float) Math.min(.3*Math.sqrt(getSpeedForSound()), 2);
+	}
+
+	private float getTotalVolume() {
+		float ret = (float) (weight / 20e3 * Math.tanh(getSpeedForSound()/30));
+		ret = Math.min(ret, 1.5F);
+		return ret;
+	}
+
+	private float getSoundLambda() {
+		return (float) MathHelper.clamp(getSpeedForSound() / 20 - .5F, 0, 1);
+	}
+
+	private double getSpeedForSound() {
+		final double MIN_SPEED = 5;
+		return getSpeed()-MIN_SPEED;//Volume should be zero by the time the sound stops
 	}
 }

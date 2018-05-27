@@ -23,6 +23,7 @@ import blusunrize.immersiveengineering.common.util.Utils;
 import blusunrize.lib.manual.ManualInstance;
 import blusunrize.lib.manual.ManualPages;
 import blusunrize.lib.manual.ManualPages.PositionedItemStack;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import malte0811.industrialWires.CommonProxy;
@@ -68,7 +69,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.client.ClientCommandHandler;
@@ -361,33 +361,37 @@ public class ClientProxy extends CommonProxy {
 
 	@Override
 	public void updateMechMBTurningSound(TileEntityMechMB te, MechEnergy energy) {
-		final double MIN_SPEED = 5;
-		Set<ISound> added = new HashSet<>();
-		if (energy.getSpeed() > MIN_SPEED) {
-			boolean adjusting = energy.isAdjusting();
-			double speedToUse = energy.getSpeed()-MIN_SPEED;//Volume should be zero by the time the sound stops
-			float lambda = MathHelper.clamp((float) speedToUse / 50 - .5F, 0, 1);
-			float totalVolume = (float) (energy.weight / 20e3 * Math.tanh(speedToUse/30));
-			totalVolume = Math.min(totalVolume, 1.5F);
-			float pitch = (float) Math.min(Math.sqrt(speedToUse), 3);
-			if (lambda > 0) {
-				PositionedSoundRecord sound = new PositionedSoundRecord(turnFast, SoundCategory.BLOCKS, lambda * totalVolume, pitch,
-						!adjusting, 0, ISound.AttenuationType.LINEAR, te.getPos().getX(), te.getPos().getY(),
-						te.getPos().getZ());
-				ClientUtils.mc().getSoundHandler().playSound(sound);
-				addSound(te.getPos(), sound);
-				added.add(sound);
+		SoundHandler sndHandler = ClientUtils.mc().getSoundHandler();
+		List<ISound> soundsAtPos;
+		if (playingSounds.containsKey(te.getPos())) {
+			soundsAtPos = playingSounds.get(te.getPos());
+			soundsAtPos.removeIf(s -> !sndHandler.isSoundPlaying(s));
+			if (soundsAtPos.isEmpty()) {
+				playingSounds.remove(te.getPos());
 			}
-			if (lambda < 1) {
-				PositionedSoundRecord sound = new PositionedSoundRecord(turnSlow, SoundCategory.BLOCKS, (1 - lambda) * totalVolume, pitch,
-						!adjusting, 0, ISound.AttenuationType.LINEAR, te.getPos().getX(), te.getPos().getY(),
-						te.getPos().getZ());
-				ClientUtils.mc().getSoundHandler().playSound(sound);
-				addSound(te.getPos(), sound);
-				added.add(sound);
+		} else {
+			soundsAtPos = ImmutableList.of();
+		}
+		boolean hasSlow = false, hasFast = false;
+		for (ISound s:soundsAtPos) {
+			if (s.getSoundLocation().equals(turnFast)) {
+				hasFast = true;
+			} else if (s.getSoundLocation().equals(turnSlow)) {
+				hasSlow = true;
 			}
 		}
-		stopAllSoundsExcept(te.getPos(), added);
+		if (!hasSlow && energy.getVolumeSlow() > 0) {
+			ISound snd = new IWTickableSound(turnSlow, SoundCategory.BLOCKS, energy::getVolumeSlow, energy::getPitch,
+					te.getPos().getX(), te.getPos().getY(), te.getPos().getZ());
+			sndHandler.playSound(snd);
+			addSound(te.getPos(), snd);
+		}
+		if (!hasFast && energy.getVolumeFast() > 0) {
+			ISound snd = new IWTickableSound(turnFast, SoundCategory.BLOCKS, energy::getVolumeFast, energy::getPitch,
+					te.getPos().getX(), te.getPos().getY(), te.getPos().getZ());
+			sndHandler.playSound(snd);
+			addSound(te.getPos(), snd);
+		}
 	}
 
 	@Override
