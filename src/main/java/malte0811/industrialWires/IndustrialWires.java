@@ -41,6 +41,7 @@ package malte0811.industrialWires;
  import malte0811.industrialWires.network.MessagePanelInteract;
  import malte0811.industrialWires.network.MessageTileSyncIW;
  import malte0811.industrialWires.util.CommandIW;
+ import malte0811.industrialWires.util.MultiblockTemplateManual;
  import net.minecraft.block.Block;
  import net.minecraft.creativetab.CreativeTabs;
  import net.minecraft.item.Item;
@@ -68,6 +69,7 @@ package malte0811.industrialWires;
  import java.util.List;
 
  import static malte0811.industrialWires.blocks.wire.BlockTypes_IC2_Connector.*;
+ import static malte0811.industrialWires.converter.MechMBPart.EXAMPLE_MECHMB_LOC;
  import static malte0811.industrialWires.wires.IC2Wiretype.*;
 
 @Mod(modid = IndustrialWires.MODID, version = IndustrialWires.VERSION, dependencies = "required-after:immersiveengineering@[0.12-77,);after:ic2",
@@ -223,6 +225,7 @@ public class IndustrialWires {
 		MultiblockHandler.registerMultiblock(MultiblockMarx.INSTANCE);
 		MultiblockMechMB.INSTANCE = new MultiblockMechMB();
 		MultiblockHandler.registerMultiblock(MultiblockMechMB.INSTANCE);
+		MultiblockHandler.registerMultiblock(new MultiblockTemplateManual(EXAMPLE_MECHMB_LOC));
 
 		packetHandler.registerMessage(MessageTileSyncIW.HandlerClient.class, MessageTileSyncIW.class, 0, Side.CLIENT);
 		packetHandler.registerMessage(MessagePanelInteract.HandlerServer.class, MessagePanelInteract.class, 1, Side.SERVER);

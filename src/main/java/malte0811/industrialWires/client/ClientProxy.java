@@ -20,6 +20,7 @@ import blusunrize.immersiveengineering.api.energy.wires.WireApi;
 import blusunrize.immersiveengineering.client.ClientUtils;
 import blusunrize.immersiveengineering.common.Config;
 import blusunrize.immersiveengineering.common.util.Utils;
+import blusunrize.lib.manual.IManualPage;
 import blusunrize.lib.manual.ManualInstance;
 import blusunrize.lib.manual.ManualPages;
 import blusunrize.lib.manual.ManualPages.PositionedItemStack;
@@ -45,6 +46,7 @@ import malte0811.industrialWires.client.panelmodel.PanelModelLoader;
 import malte0811.industrialWires.client.render.*;
 import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.converter.MechEnergy;
+import malte0811.industrialWires.converter.MechMBPart;
 import malte0811.industrialWires.crafting.IC2TRHelper;
 import malte0811.industrialWires.entities.EntityBrokenPart;
 import malte0811.industrialWires.hv.MarxOreHandler;
@@ -52,6 +54,7 @@ import malte0811.industrialWires.hv.MultiblockMarx;
 import malte0811.industrialWires.items.ItemIC2Coil;
 import malte0811.industrialWires.items.ItemPanelComponent;
 import malte0811.industrialWires.util.CommandIWClient;
+import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.MovingSound;
@@ -86,6 +89,7 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public void preInit() {
 		super.preInit();
+
 		if (IndustrialWires.hasIC2) {
 			WireApi.registerConnectorForRender("ic2_conn_tin", new ResourceLocation("immersiveengineering:block/connector/connector_lv.obj"),
 					ImmutableMap.of("#immersiveengineering:blocks/connector_connector_lv",
@@ -260,16 +264,29 @@ public class ClientProxy extends CommonProxy {
 		boolean uni = m.fontRenderer.getUnicodeFlag();
 		m.fontRenderer.setUnicodeFlag(true);
 		m.entryRenderPre();
-		TextSplitter splitter = new TextSplitter(m.fontRenderer::getStringWidth, 16, 120,
-				(s) -> new ManualPages.Text(m, s));
+		TextSplitter splitter = new TextSplitter(m);
 		splitter.addSpecialPage(0, 0, 6,
 				(s) -> new ManualPageMultiblock(m, s,
 						MultiblockMarx.INSTANCE));
 		splitter.split(text);
 		m.entryRenderPost();
 		m.fontRenderer.setUnicodeFlag(uni);
-		List<ManualPages> marxEntry = splitter.toManualEntry();
-		m.addEntry("industrialwires.marx", IndustrialWires.MODID, marxEntry.toArray(new ManualPages[0]));
+		List<IManualPage> marxEntry = splitter.toManualEntry();
+		m.addEntry("industrialwires.marx", IndustrialWires.MODID, marxEntry.toArray(new IManualPage[0]));
+
+		text = I18n.format("ie.manual.entry.industrialwires.mech_mb");
+		splitter = new TextSplitter(m);
+		splitter.addSpecialPage(0, 0, 8, (s)->new ManualPageMultiblock(m, s,
+				MiscUtils.getMBFromName(MechMBPart.EXAMPLE_MECHMB_LOC.toString())));
+		uni = m.fontRenderer.getUnicodeFlag();
+		m.fontRenderer.setUnicodeFlag(true);
+		m.entryRenderPre();
+		splitter.split(text);
+		m.entryRenderPost();
+		m.fontRenderer.setUnicodeFlag(uni);
+		List<IManualPage> mechMBEntry = splitter.toManualEntry();
+		m.addEntry("industrialwires.mech_mb", IndustrialWires.MODID, mechMBEntry.toArray(new IManualPage[0]));
+
 		ClientCommandHandler.instance.registerCommand(new CommandIWClient());
 	}
 

@@ -17,18 +17,21 @@ package malte0811.industrialWires.util;
 
 import blusunrize.immersiveengineering.ImmersiveEngineering;
 import blusunrize.immersiveengineering.api.ApiUtils;
+import blusunrize.immersiveengineering.api.MultiblockHandler;
 import blusunrize.immersiveengineering.api.energy.wires.IImmersiveConnectable;
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler;
 import blusunrize.immersiveengineering.common.util.Utils;
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import com.google.common.collect.ImmutableSet;
 import malte0811.industrialWires.IndustrialWires;
+import malte0811.industrialWires.hv.MultiblockMarx;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Rotation;
 import net.minecraft.util.math.*;
 import net.minecraft.world.World;
 import net.minecraftforge.common.property.IExtendedBlockState;
@@ -263,5 +266,64 @@ public final class MiscUtils {
 			ret += (i>>>j)&1;
 		}
 		return ret;
+	}
+
+
+	public static EnumFacing applyRotationToFacing(Rotation rot, EnumFacing facing)
+	{
+		switch(rot)
+		{
+			case CLOCKWISE_90:
+				facing = facing.rotateY();
+				break;
+			case CLOCKWISE_180:
+				facing = facing.getOpposite();
+				break;
+			case COUNTERCLOCKWISE_90:
+				facing = facing.rotateYCCW();
+				break;
+		}
+		return facing;
+	}
+
+	public static Rotation getRotationBetweenFacings(EnumFacing orig, EnumFacing to)
+	{
+		if (to==orig)
+			return Rotation.NONE;
+		if (orig.getAxis()==EnumFacing.Axis.Y||to.getAxis()==EnumFacing.Axis.Y)
+			return null;
+		orig = orig.rotateY();
+		if (orig==to)
+			return Rotation.CLOCKWISE_90;
+		orig = orig.rotateY();
+		if (orig==to)
+			return Rotation.CLOCKWISE_180;
+		orig = orig.rotateY();
+		if (orig==to)
+			return Rotation.COUNTERCLOCKWISE_90;
+		return null;//This shouldn't ever happen
+	}
+
+	public static String toSnakeCase(String in) {
+		StringBuilder ret = new StringBuilder(in.length());
+		ret.append(in.charAt(0));
+		for (int i = 1;i<in.length();i++) {
+			char here = in.charAt(i);
+			if (Character.isUpperCase(here)) {
+				ret.append('_').append(Character.toLowerCase(here));
+			} else {
+				ret.append(here);
+			}
+		}
+		return ret.toString();
+	}
+
+	public static MultiblockHandler.IMultiblock getMBFromName(String s) {
+		for (MultiblockHandler.IMultiblock mb:MultiblockHandler.getMultiblocks()) {
+			if (mb.getUniqueName().equals(s)) {
+				return mb;
+			}
+		}
+		return MultiblockMarx.INSTANCE;
 	}
 }

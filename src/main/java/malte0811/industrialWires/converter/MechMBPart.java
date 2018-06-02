@@ -15,6 +15,7 @@
 
 package malte0811.industrialWires.converter;
 
+import blusunrize.immersiveengineering.api.MultiblockHandler;
 import blusunrize.immersiveengineering.common.IEContent;
 import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0;
 import blusunrize.immersiveengineering.common.util.Utils;
@@ -28,6 +29,7 @@ import malte0811.industrialWires.client.render.TileRenderMechMB;
 import malte0811.industrialWires.entities.EntityBrokenPart;
 import malte0811.industrialWires.util.LocalSidedWorld;
 import malte0811.industrialWires.util.MiscUtils;
+import malte0811.industrialWires.util.MultiblockTemplateManual;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.init.Blocks;
@@ -52,6 +54,7 @@ import java.util.function.Consumer;
 import static blusunrize.immersiveengineering.common.IEContent.blockMetalDecoration0;
 import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.HEAVY_ENGINEERING;
 import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.LIGHT_ENGINEERING;
+import static malte0811.industrialWires.IndustrialWires.MODID;
 import static malte0811.industrialWires.blocks.converter.MechanicalMBBlockType.NO_MODEL;
 import static malte0811.industrialWires.util.NBTKeys.TYPE;
 
@@ -120,6 +123,7 @@ public abstract class MechMBPart {
 	public static final BiMap<String, Class<? extends MechMBPart>> REGISTRY = HashBiMap.create();
 
 	public static final String SHAFT_KEY = "shaft";
+	public static final ResourceLocation EXAMPLE_MECHMB_LOC = new ResourceLocation(MODID, "example_mech_mb");
 
 	public static final Comparator<MechMBPart> SORT_BY_COUNT = (a, b)-> {
 		if (a.getLength()!=b.getLength()) {
@@ -147,7 +151,21 @@ public abstract class MechMBPart {
 
 		for (String key : REGISTRY.keySet()) {
 			cacheNewInstance(key);
+			MultiblockHandler.registerMultiblock(
+					new MultiblockTemplateManual(getSchematicLocationForPart(key)));
 		}
+	}
+
+	public static ResourceLocation getSchematicLocationForPart(Class<? extends MechMBPart> cl) {
+		String name = REGISTRY.inverse().get(cl);
+		return getSchematicLocationForPart(name);
+	}
+
+	public static ResourceLocation getSchematicLocationForPart(String name) {
+		if (name==null)
+			return null;
+		name = MiscUtils.toSnakeCase(name);
+		return new ResourceLocation(MODID, name);
 	}
 
 	public static void cacheNewInstance(String key) {

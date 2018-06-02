@@ -15,7 +15,13 @@
 
 package malte0811.industrialWires.client.manual;
 
+import blusunrize.lib.manual.IManualPage;
+import blusunrize.lib.manual.ManualInstance;
 import blusunrize.lib.manual.ManualPages;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,93 +32,125 @@ import java.util.stream.Collectors;
 
 public class TextSplitter {
 	private final Function<String, Integer> width;
+	private final TIntObjectMap<Map<Integer, Page>> specialByAnchor = new TIntObjectHashMap<>();
+	private final TIntObjectMap<Page> specialByPage = new TIntObjectHashMap<>();
+	private final List<List<String>> entry = new ArrayList<>();
+	private final Function<String, String> tokenTransform;
 	private final int lineWidth;
-	private Map<Integer, Map<Integer, Page>> linesOnSpecialPages = new HashMap<>();
-	private Map<Integer, Page> pageToSpecial = new HashMap<>();
-	private List<List<String>> entry = new ArrayList<>();
-	private Page defPage;
-	public TextSplitter(Function<String, Integer> w, int lP, int lW, Function<String, ManualPages> defaultPage) {
+	private final int linesPerPage;
+	private TIntIntMap pageByAnchor = new TIntIntHashMap();
+	private final Function<String, IManualPage> defaultPage;
+
+	public TextSplitter(Function<String, Integer> w, int lineWidthPixel, int linesPerPage,
+						Function<String, IManualPage> defPage, Function<String, String> tokenTransform) {
 		width = w;
-		lineWidth = lW;
-		defPage = new Page(lP, defaultPage);
+		this.lineWidth = lineWidthPixel;
+		this.linesPerPage = linesPerPage;
+		this.tokenTransform = tokenTransform;
+		this.defaultPage = defPage;
 	}
 
-	public void clearSpecial() {
-		linesOnSpecialPages.clear();
+	public TextSplitter(ManualInstance m) {
+		this(m.fontRenderer::getStringWidth, 120, 16, s-> new ManualPages.Text(m, s), (s) -> s);
 	}
 
-	public void addSpecialPage(int ref, int offset, int linesOnPage, Function<String, ManualPages> factory) {
-		if (offset<0||(ref!=-1&&ref<0)) {
+	public TextSplitter(ManualInstance m, Function<String, String> tokenTransform) {
+		this(m.fontRenderer::getStringWidth, 120, 16,s-> new ManualPages.Text(m, s), tokenTransform);
+	}
+
+	public void clearSpecialByPage() {
+		specialByPage.clear();
+	}
+
+	public void clearSpecialByAnchor() {
+		specialByAnchor.clear();
+	}
+
+	public void addSpecialPage(int ref, int offset, int lines, Function<String, IManualPage> factory) {
+		if (offset < 0 || (ref != -1 && ref < 0)) {
 			throw new IllegalArgumentException();
 		}
-		if (!linesOnSpecialPages.containsKey(ref)) {
-			linesOnSpecialPages.put(ref, new HashMap<>());
+		if (!specialByAnchor.containsKey(ref)) {
+			specialByAnchor.put(ref, new HashMap<>());
 		}
-		linesOnSpecialPages.get(ref).put(offset, new Page(linesOnPage, factory));
+		specialByAnchor.get(ref).put(offset, new Page(lines, factory));
 	}
 
 	// I added labels to all break statements to make it more readable
 	@SuppressWarnings({"UnnecessaryLabelOnBreakStatement", "UnusedLabel"})
 	public void split(String in) {
+		clearSpecialByPage();
+		entry.clear();
 		String[] wordsAndSpaces = splitWhitespace(in);
 		int pos = 0;
 		List<String> overflow = new ArrayList<>();
-		updateSpecials(-1, 0);
-		entry:while (pos<wordsAndSpaces.length) {
-			List<String> page = new ArrayList<>();
-			page.addAll(overflow);
+		updateSpecials(-1, 0, 0);
+		entry:
+		while (pos < wordsAndSpaces.length) {
+			List<String> page = new ArrayList<>(overflow);
 			overflow.clear();
-			page:while (page.size()<getLinesOnPage(entry.size())&&pos<wordsAndSpaces.length) {
+			page:
+			while (page.size() < getLinesOnPage(entry.size()) && pos < wordsAndSpaces.length) {
 				String line = "";
 				int currWidth = 0;
-				line:while (pos<wordsAndSpaces.length&&currWidth<lineWidth) {
-					String text = wordsAndSpaces[pos];
-					if (pos<wordsAndSpaces.length) {
-						int textWidth = getWidth(text);
-						if (currWidth + textWidth < lineWidth||line.length()==0) {
-							pos++;
-							if (text.equals("<np>")) {
-								page.add(line);
-								break page;
-							} else if (text.equals("<br>")) {
-								break line;
-							} else if (text.startsWith("<&")&&text.endsWith(">")) {
-								int id = Integer.parseInt(text.substring(2, text.length()-1));
-								int pageForId = entry.size();
-								Map<Integer, Page> specialForId = linesOnSpecialPages.get(id);
-								if (specialForId!=null&&specialForId.containsKey(0)) {
-									if (page.size()>getLinesOnPage(pageForId)) {
-										pageForId++;
-									}
-								}
-								updateSpecials(id, pageForId);
-							} else if (!Character.isWhitespace(text.charAt(0))||line.length()!=0) {//Don't add whitespace at the start of a line
-								line += text;
-								currWidth += textWidth;
-							}
-						} else {
+				line:
+				while (pos < wordsAndSpaces.length && currWidth < lineWidth) {
+					String token = tokenTransform.apply(wordsAndSpaces[pos]);
+					int textWidth = getWidth(token);
+					if (currWidth + textWidth < lineWidth || line.length() == 0) {
+						pos++;
+						if (token.equals("<np>")) {
+							page.add(line);
+							break page;
+						} else if (token.equals("<br>")) {
 							break line;
+						} else if (token.startsWith("<&") && token.endsWith(">")) {
+							int id = Integer.parseInt(token.substring(2, token.length() - 1));
+							int pageForId = entry.size();
+							Map<Integer, Page> specialForId = specialByAnchor.get(id);
+							if (specialForId != null && specialForId.containsKey(0)) {
+								if (page.size() > getLinesOnPage(pageForId)) {
+									pageForId++;
+								}
+							}
+							//New page if there is already a special element on this page
+							if (updateSpecials(id, pageForId, page.size())) {
+								page.add(line);
+								pos--;
+								break page;
+							}
+						} else if (!Character.isWhitespace(token.charAt(0)) || line.length() != 0) {//Don't add whitespace at the start of a line
+							line += token;
+							currWidth += textWidth;
 						}
+					} else {
+						break line;
 					}
 				}
-				page.add(line);
+				line = line.trim();
+				if (!line.isEmpty())
+					page.add(line);
 			}
 			if (!page.stream().allMatch(String::isEmpty)) {
 				int linesMax = getLinesOnPage(entry.size());
-				if (page.size()>linesMax) {
+				if (page.size() > linesMax) {
 					overflow.addAll(page.subList(linesMax, page.size()));
-					page = page.subList(0, linesMax-1);
+					page = page.subList(0, linesMax);
 				}
 				entry.add(page);
 			}
 		}
 	}
 
-	public List<ManualPages> toManualEntry() {
-		List<ManualPages> ret = new ArrayList<>(entry.size());
+	public List<IManualPage> toManualEntry() {
+		List<IManualPage> ret = new ArrayList<>(entry.size());
 		for (int i = 0; i < entry.size(); i++) {
 			String s = entry.get(i).stream().collect(Collectors.joining("\n"));
-			ret.add(pageToSpecial.getOrDefault(i, defPage).factory.apply(s));
+			if (specialByPage.containsKey(i)) {
+				ret.add(specialByPage.get(i).factory.apply(s));
+			} else {
+				ret.add(defaultPage.apply(s));
+			}
 		}
 		return ret;
 	}
@@ -132,79 +170,81 @@ public class TextSplitter {
 	}
 
 	private int getLinesOnPage(int id) {
-		if (pageToSpecial.containsKey(id)) {
-			return pageToSpecial.get(id).lines;
+		if (specialByPage.containsKey(id)) {
+			return specialByPage.get(id).lines;
 		}
-		return defPage.lines;
+		return linesPerPage;
 	}
 
-	private void updateSpecials(int ref, int page) {
-		if (linesOnSpecialPages.containsKey(ref)) {
-			for (Map.Entry<Integer, Page> entry :linesOnSpecialPages.get(ref).entrySet()) {
-				int specialPage = page+entry.getKey();
-				if (pageToSpecial.containsKey(specialPage)) {
-					throw new IllegalStateException("Page "+specialPage+" was registered already");
+	private boolean updateSpecials(int ref, int page, int currLine) {
+		if (specialByAnchor.containsKey(ref)) {
+			TIntObjectMap<Page> specialByPageTmp = new TIntObjectHashMap<>();
+			for (Map.Entry<Integer, Page> entry : specialByAnchor.get(ref).entrySet()) {
+				int specialPage = page + entry.getKey();
+				if (specialByPage.containsKey(specialPage)) {
+					return true;
 				}
-				pageToSpecial.put(specialPage, entry.getValue());
+				if (entry.getKey()==0&&entry.getValue().lines<=currLine) {
+					return true;
+				}
+				specialByPageTmp.put(specialPage, entry.getValue());
 			}
-		} else if (ref!=-1) {//Default reference for page 0
-			System.out.println("WARNING: Reference "+ref+" was found, but no special pages were registered for it");
+			specialByPage.putAll(specialByPageTmp);
+		} else if (ref != -1) {//Default reference for page 0
+			System.out.println("WARNING: Reference " + ref + " was found, but no special pages were registered for it");
 		}
+		pageByAnchor.put(ref, page);
+		return false;
 	}
 
 	private String[] splitWhitespace(String in) {
 		List<String> parts = new ArrayList<>();
-		for (int i = 0;i<in.length();) {
+		for (int i = 0; i < in.length(); ) {
 			StringBuilder here = new StringBuilder();
 			char first = in.charAt(i);
 			here.append(first);
 			i++;
-			for (;i<in.length();) {
+			for (; i < in.length(); ) {
 				char hereC = in.charAt(i);
 				byte action = shouldSplit(first, hereC);
-				if ((action&1)!=0) {
+				if ((action & 1) != 0) {
 					here.append(in.charAt(i));
 					i++;
 				}
-				if ((action&2)!=0||(action&1)==0) {
+				if ((action & 2) != 0 || (action & 1) == 0) {
 					break;
 				}
 			}
 			parts.add(here.toString());
 		}
-		return parts.toArray(new String[parts.size()]);
+		return parts.toArray(new String[0]);
 	}
 
 	/**
-	 * @return
-	 * &1: add
+	 * @return &1: add
 	 * &2: end here
 	 */
 	private byte shouldSplit(char start, char here) {
 		byte ret = 0b01;
-		if (Character.isWhitespace(start)^Character.isWhitespace(here)) {
+		if (Character.isWhitespace(start) ^ Character.isWhitespace(here)) {
 			ret = 0b10;
 		}
-		if (here=='<') {
+		if (here == '<') {
 			ret = 0b10;
 		}
-		if (start=='<') {
+		if (start == '<') {
 			ret = 0b01;
-			if (here=='>') {
+			if (here == '>') {
 				ret |= 0b10;
 			}
 		}
 		return ret;
 	}
 
-	public List<List<String>> getEntry() {
-		return entry;
-	}
-
 	private class Page {
 		final int lines;
-		final Function<String, ManualPages> factory;
-		public Page(int l, Function<String, ManualPages> f) {
+		final Function<String, IManualPage> factory;
+		public Page(int l, Function<String, IManualPage> f) {
 			factory = f;
 			lines = l;
 		}

@@ -68,7 +68,7 @@ import static malte0811.industrialWires.util.NBTKeys.*;
 })
 public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickable, ISyncReceiver,
 		IEnergySource, IEnergySink, IPlayerInteraction, IRedstoneOutput, IBlockBoundsDirectional {
-	private static final double DECAY_BASE = Math.exp(Math.log(.8) / (2 * 60 * 60 * 20));
+	private static final double DECAY_BASE = Math.exp(Math.log(.95) / (60 * 60 * 20));
 	public static final double TICK_ANGLE_PER_SPEED = 180 / 20 / Math.PI;
 	private static final double SYNC_THRESHOLD = .95;
 	public MechMBPart[] mechanical = null;
