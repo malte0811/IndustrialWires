@@ -92,11 +92,18 @@ public class MechPartSpeedometer extends MechMBPart implements IPlayerInteractio
 	}
 
 	private int roundHysteresis(int old, double newExact) {
-		if (old<newExact) {
-			return (int) Math.floor(newExact);
-		} else {
-			return (int) Math.ceil(newExact);
+		double mod = newExact%1;
+		final double THRESHOLD = .1;
+		int floor = (int) Math.floor(newExact);
+		if (floor == old) {
+			return old;
 		}
+		if (old<newExact && mod>THRESHOLD) {
+			return floor;
+		} else if (old>newExact && mod<1-THRESHOLD) {
+			return floor;
+		}
+		return old;
 	}
 
 	@Override

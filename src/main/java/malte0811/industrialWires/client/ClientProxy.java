@@ -45,8 +45,7 @@ import malte0811.industrialWires.client.manual.TextSplitter;
 import malte0811.industrialWires.client.panelmodel.PanelModelLoader;
 import malte0811.industrialWires.client.render.*;
 import malte0811.industrialWires.controlpanel.PanelComponent;
-import malte0811.industrialWires.converter.MechEnergy;
-import malte0811.industrialWires.converter.MechMBPart;
+import malte0811.industrialWires.converter.*;
 import malte0811.industrialWires.crafting.IC2TRHelper;
 import malte0811.industrialWires.entities.EntityBrokenPart;
 import malte0811.industrialWires.hv.MarxOreHandler;
@@ -54,6 +53,7 @@ import malte0811.industrialWires.hv.MultiblockMarx;
 import malte0811.industrialWires.items.ItemIC2Coil;
 import malte0811.industrialWires.items.ItemPanelComponent;
 import malte0811.industrialWires.util.CommandIWClient;
+import malte0811.industrialWires.util.ConversionUtil;
 import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
@@ -211,6 +211,7 @@ public class ClientProxy extends CommonProxy {
 		}, IndustrialWires.panelComponent);
 
 		Config.manual_doubleA.put("iwJacobsUsage", IWConfig.HVStuff.jacobsUsageWatt);
+		Config.manual_double.put("iwFluxPerJoule", ConversionUtil.ifPerJoule());
 		Config.manual_int.put("iwKeysOnRing", IWConfig.maxKeysOnRing);
 		m.addEntry("industrialwires.jacobs", IndustrialWires.MODID,
 				new ManualPages.CraftingMulti(m, "industrialwires.jacobs0", new ItemStack(IndustrialWires.jacobsLadder, 1, 0), new ItemStack(IndustrialWires.jacobsLadder, 1, 1), new ItemStack(IndustrialWires.jacobsLadder, 1, 2)),
@@ -276,7 +277,7 @@ public class ClientProxy extends CommonProxy {
 
 		text = I18n.format("ie.manual.entry.industrialwires.mech_mb");
 		splitter = new TextSplitter(m);
-		splitter.addSpecialPage(0, 0, 8, (s)->new ManualPageMultiblock(m, s,
+		splitter.addSpecialPage(0, 0, 8, (s) -> new ManualPageMultiblock(m, s,
 				MiscUtils.getMBFromName(MechMBPart.EXAMPLE_MECHMB_LOC.toString())));
 		uni = m.fontRenderer.getUnicodeFlag();
 		m.fontRenderer.setUnicodeFlag(true);
@@ -286,6 +287,36 @@ public class ClientProxy extends CommonProxy {
 		m.fontRenderer.setUnicodeFlag(uni);
 		List<IManualPage> mechMBEntry = splitter.toManualEntry();
 		m.addEntry("industrialwires.mech_mb", IndustrialWires.MODID, mechMBEntry.toArray(new IManualPage[0]));
+
+		String[][] flywheelTable;
+		{
+			List<String[]> flywheelTableList = new ArrayList<>(1+Material.values().length);
+			flywheelTableList.add(new String[]{"industrialwires.desc.material", "industrialwires.desc.inertia", "industrialwires.desc.max_speed"});
+			for (Material mat:Material.values()) {
+				MechPartFlywheel f = new MechPartFlywheel(mat);
+				flywheelTableList.add(new String[]{mat.oreName(), Utils.formatDouble(f.getInertia(), "0.#"),
+						Utils.formatDouble(f.getMaxSpeed(), "0.#")});
+			}
+			flywheelTable = flywheelTableList.toArray(new String[0][]);
+		}
+
+		List<IManualPage> partsEntry = new ArrayList<>(ImmutableList.of(
+				new ManualPages.Text(m, "industrialwires.mech_mb_parts.shaft"),
+				new ManualPageMultiblock(m, "industrialwires.mech_mb_parts.flywheel",
+						MechMBPart.getManualMBForPart(MechPartFlywheel.class)),
+				new ManualPages.Table(m, "", flywheelTable, true),
+				new ManualPageMultiblock(m, "industrialwires.mech_mb_parts.coils0",
+						MechMBPart.getManualMBForPart(MechPartSingleCoil.class)),
+				new ManualPages.Text(m, "industrialwires.mech_mb_parts.coils1"),
+				new ManualPageMultiblock(m, "industrialwires.mech_mb_parts.electrodes",
+						MechMBPart.getManualMBForPart(MechPartFourElectrodes.class)),
+				new ManualPages.Text(m, "industrialwires.mech_mb_parts.speedometer0"),
+				new ManualPages.Text(m, "industrialwires.mech_mb_parts.speedometer1")));
+		if (IWConfig.MechConversion.allowMBEU()) {
+			partsEntry.add(new ManualPageMultiblock(m, "industrialwires.mech_mb_parts.commutator",
+					MechMBPart.getManualMBForPart(MechPartCommutator4Phase.class)));
+		}
+		m.addEntry("industrialwires.mech_mb_parts", IndustrialWires.MODID, partsEntry.toArray(new IManualPage[0]));
 
 		ClientCommandHandler.instance.registerCommand(new CommandIWClient());
 	}

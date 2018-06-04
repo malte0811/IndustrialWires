@@ -168,6 +168,10 @@ public abstract class MechMBPart {
 		return new ResourceLocation(MODID, name);
 	}
 
+	public static MultiblockHandler.IMultiblock getManualMBForPart(Class<? extends MechMBPart> cl) {
+		return MiscUtils.getMBFromName(getSchematicLocationForPart(cl).toString());
+	}
+
 	public static void cacheNewInstance(String key) {
 		try {
 			MechMBPart instance = REGISTRY.get(key).newInstance();

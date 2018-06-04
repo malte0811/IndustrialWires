@@ -24,20 +24,27 @@ import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergyTile;
 import ic2.api.item.IBoxable;
 import ic2.api.item.IC2Items;
+import ic2.core.block.TileEntityBlock;
 import malte0811.industrialWires.converter.MechPartCommutator;
 import malte0811.industrialWires.hv.MarxOreHandler;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.world.gen.structure.template.Template;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Loader;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 public class Compat {
+	public static BiFunction<ItemStack, Template.BlockInfo, ItemStack> stackFromInfo = (s, i)->s;
 	static Consumer<MarxOreHandler.OreInfo> addMarx = (o) -> {
 	};
 	static Consumer<MarxOreHandler.OreInfo> removeMarx = (o) -> {
@@ -55,7 +62,7 @@ public class Compat {
 	static {
 		try {
 			preInit = CompatModule.class.getMethod("preInit");
-			CompatModule.class.getMethod("init");
+			init = CompatModule.class.getMethod("init");
 		} catch (NoSuchMethodException e) {
 			e.printStackTrace();
 		}
@@ -93,14 +100,14 @@ public class Compat {
 		}
 	}
 
-	private static class CompatCT extends CompatModule {
+	public static class CompatCT extends CompatModule {
 		@Override
 		public void preInit() {
 			CraftTweakerAPI.registerClass(CTMarxGenerator.class);
 		}
 	}
 
-	private static class CompatIC2 extends CompatModule {
+	public static class CompatIC2 extends CompatModule {
 		public void init() {
 			Item tinnedFood = IC2Items.getItem("filled_tin_can").getItem();
 			ItemStack emptyMug = IC2Items.getItem("mug", "empty");
@@ -115,8 +122,37 @@ public class Compat {
 				return a instanceof IBoxable && ((IBoxable) a).canBeStoredInToolbox(s);
 			});
 			MechPartCommutator.originalStack = IC2Items.getItem("te", "kinetic_generator");
-			loadIC2Tile = (te) -> MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent((IEnergyTile) te));
-			unloadIC2Tile = (te) -> MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent((IEnergyTile) te));
+			loadIC2Tile = (te) -> {
+				if (!te.getWorld().isRemote) {
+					MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent((IEnergyTile) te));
+				}
+			};
+			unloadIC2Tile = (te) ->{
+				if (!te.getWorld().isRemote) {
+					MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent((IEnergyTile) te));
+				}
+			};
+			try {
+				Class<?> teb = Class.forName("ic2.core.block.TileEntityBlock");
+				Method getPickBlock = teb.getDeclaredMethod("getPickBlock", EntityPlayer.class, RayTraceResult.class);
+				getPickBlock.setAccessible(true);
+				final ResourceLocation IC2_TE = new ResourceLocation("ic2", "te");
+				stackFromInfo = (stack, info) -> {
+					try {
+						if (info.tileentityData != null && IC2_TE.equals(info.blockState.getBlock().getRegistryName())) {
+							TileEntity te = TileEntity.create(null, info.tileentityData);
+							if (te instanceof TileEntityBlock)
+								stack = (ItemStack) getPickBlock.invoke(te, null, null);
+						}
+					} catch (NullPointerException | IllegalAccessException | InvocationTargetException x) {
+						x.printStackTrace();
+					}
+					return stack;
+				};
+			} catch (Exception x) {
+				x.printStackTrace();
+			}
+
 		}
 	}
 }

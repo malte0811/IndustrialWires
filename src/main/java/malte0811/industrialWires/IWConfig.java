@@ -71,7 +71,7 @@ public class IWConfig {
 		}
 
 		public static boolean allowMBEU() {
-			return (multiblockEnergyType&1)!=0;
+			return (multiblockEnergyType&1)!=0 && IndustrialWires.hasIC2;
 		}
 	}
 

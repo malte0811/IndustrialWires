@@ -45,6 +45,11 @@ public class MechPartFlywheel extends MechMBPart {
 	private static final double THICKNESS = 1;
 	private static final double VOLUME = Math.PI*RADIUS*RADIUS*THICKNESS;
 	private Material material;
+	public MechPartFlywheel() {}
+
+	public MechPartFlywheel(Material m) {
+		material = m;
+	}
 	//A flywheel simply adds mass (lots of mass!), it doesn't actively change speeds/energy
 	@Override
 	public void createMEnergy(MechEnergy e) {}
