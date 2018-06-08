@@ -21,7 +21,6 @@ import malte0811.industrialWires.compat.Compat;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
@@ -65,7 +64,7 @@ public class MultiblockTemplateManual implements MultiblockHandler.IMultiblock {
 			for (int x = 0; x < size.getX(); x++) {
 				for (int y = 0; y < size.getY(); y++) {
 					for (int z = 0; z < size.getZ(); z++) {
-						fakeStructure[y][x][z] = new ItemStack(Items.COMMAND_BLOCK_MINECART);
+						fakeStructure[y][x][z] = ItemStack.EMPTY;
 					}
 				}
 			}
@@ -76,7 +75,8 @@ public class MultiblockTemplateManual implements MultiblockHandler.IMultiblock {
 				ItemStack here = Compat.stackFromInfo.apply(new ItemStack(info.blockState.getBlock(), 1,
 						info.blockState.getBlock().getMetaFromState(info.blockState)), info);
 				if (!here.isEmpty()) {
-					realStructure.put(fakeStructure[info.pos.getY()][info.pos.getX()][info.pos.getZ()],
+					fakeStructure[info.pos.getY()][info.pos.getX()][info.pos.getZ()] = here;
+					realStructure.put(here,
 							info.blockState);
 					Optional<ItemStack> match = matsSet.stream().filter(s -> ItemStack.areItemsEqual(here, s)).findAny();
 					if (match.isPresent()) {
@@ -87,15 +87,6 @@ public class MultiblockTemplateManual implements MultiblockHandler.IMultiblock {
 				}
 			}
 			mats = matsSet.stream().map(IngredientStack::new).toArray(IngredientStack[]::new);
-			for (int x = 0; x < size.getX(); x++) {
-				for (int y = 0; y < size.getY(); y++) {
-					for (int z = 0; z < size.getZ(); z++) {
-						if (!realStructure.containsKey(fakeStructure[y][x][z])) {
-							fakeStructure[y][x][z] = ItemStack.EMPTY;
-						}
-					}
-				}
-			}
 		}
 	}
 
