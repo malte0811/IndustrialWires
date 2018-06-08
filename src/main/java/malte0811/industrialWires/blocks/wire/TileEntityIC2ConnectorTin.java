@@ -66,6 +66,7 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	//IC2 net to IE net buffer
 	double inBuffer = 0;
 	double maxToNet = 0;
+	private double inputInTick = 0;
 	//IE net to IC2 net buffer
 	double outBuffer = 0;
 	double maxToMachine = 0;
@@ -87,6 +88,14 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 			ImmersiveNetHandler.INSTANCE.onTEValidated(this);
 			first = false;
 		}
+		if (inBuffer < maxToNet) {
+			maxToNet = inBuffer;
+		}
+		if (inputInTick>maxToNet) {
+			maxToNet = inputInTick;
+		}
+		inputInTick = 0;
+
 		if (!world.isRemote) {
 			if (inBuffer > EPS) {
 				transferPower();
@@ -106,10 +115,11 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 			if (c.isEnergyOutput) {
 				IImmersiveConnectable iic = ApiUtils.toIIC(c.end, world);
 				if (iic instanceof IIC2Connector) {
-					double tmp = outputMax - ((IIC2Connector) iic).insertEnergy(outputMax, true);
-					if (tmp > EPS) {
-						maxOutputs.put(c, new ImmutablePair<>((IIC2Connector) iic, tmp));
-						sum += tmp;
+					double extract =
+							outputMax - ((IIC2Connector) iic).insertEnergy(outputMax, true);
+					if (extract > EPS) {
+						maxOutputs.put(c, new ImmutablePair<>((IIC2Connector) iic, extract));
+						sum += extract;
 					}
 				}
 			}
@@ -121,12 +131,14 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 				AbstractConnection c = entry.getKey();
 				double out = outputMax * p.getRight() / sum;
 				double loss = getAverageLossRate(c);
-				out -= loss;
+				out = Math.min(out, inBuffer-loss);
+				if (out<=0)
+					continue;
 				double inserted = out - p.getLeft().insertEnergy(out, false);
-				inBuffer -= inserted;
+				double energyAtConn = inserted + loss;
+				inBuffer -= energyAtConn;
 				float intermediaryLoss = 0;
 				HashSet<IImmersiveConnectable> passedConnectors = new HashSet<>();
-				double energyAtConn = inserted + loss;
 				for (Connection sub : c.subConnections) {
 					int transferredPerCon = transferedPerConn.getOrDefault(sub, 0);
 					energyAtConn -= sub.cableType.getLossRatio() * sub.length;
@@ -315,13 +327,8 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	}
 
 	private void addToIn(double amount) {
-		if (inBuffer < maxToNet) {
-			maxToNet = inBuffer;
-		}
 		inBuffer += amount;
-		if (amount > maxToNet) {
-			maxToNet = amount;
-		}
+		inputInTick += amount;
 		notifyAvailableEnergy(amount);
 	}
 

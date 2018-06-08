@@ -23,6 +23,7 @@ import malte0811.industrialWires.blocks.converter.TileEntityMechMB;
 import malte0811.industrialWires.util.LocalSidedWorld;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -148,14 +149,16 @@ public class MultiblockMechMB implements MultiblockHandler.IMultiblock {
 		}
 	}
 
+	ItemStack[][][] fakeStructure = {{{new ItemStack(Blocks.COMMAND_BLOCK)}}};
+	IngredientStack[] fakeMats = {new IngredientStack(fakeStructure[0][0][0])};
 	@Override
 	public ItemStack[][][] getStructureManual() {
-		return new ItemStack[0][][];
+		return fakeStructure;
 	}
 
 	@Override
 	public IngredientStack[] getTotalMaterials() {
-		return new IngredientStack[0];
+		return fakeMats;
 	}
 
 	@Override
