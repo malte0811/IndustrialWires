@@ -24,7 +24,6 @@ import malte0811.industrialWires.containers.ContainerPanelCreator;
 import malte0811.industrialWires.containers.ContainerRSPanelConn;
 import malte0811.industrialWires.containers.ContainerRenameKey;
 import malte0811.industrialWires.converter.MechEnergy;
-import net.minecraft.client.audio.ISound;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
@@ -37,7 +36,7 @@ import net.minecraftforge.fml.common.network.IGuiHandler;
 
 import java.util.Set;
 
-public abstract class CommonProxy implements IGuiHandler {
+public class CommonProxy implements IGuiHandler {
 	public void preInit() {
 	}
 
@@ -86,5 +85,5 @@ public abstract class CommonProxy implements IGuiHandler {
 
 	public void updateMechMBTurningSound(TileEntityMechMB te, MechEnergy energy) {}
 
-	public void stopAllSoundsExcept(BlockPos pos, Set<ISound> excluded) {}
+	public void stopAllSoundsExcept(BlockPos pos, Set<?> excluded) {}
 }

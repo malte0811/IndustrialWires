@@ -47,7 +47,10 @@ package malte0811.industrialWires;
  import net.minecraft.item.Item;
  import net.minecraft.item.ItemStack;
  import net.minecraft.item.crafting.IRecipe;
+ import net.minecraft.network.datasync.DataSerializers;
+ import net.minecraft.network.datasync.EntityDataManager;
  import net.minecraft.util.ResourceLocation;
+ import net.minecraft.util.SoundEvent;
  import net.minecraftforge.event.RegistryEvent;
  import net.minecraftforge.fml.common.Loader;
  import net.minecraftforge.fml.common.Mod;
@@ -63,6 +66,7 @@ package malte0811.industrialWires;
  import net.minecraftforge.fml.common.registry.EntityRegistry;
  import net.minecraftforge.fml.common.registry.GameRegistry;
  import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.registries.IForgeRegistry;
  import org.apache.logging.log4j.Logger;
 
  import java.util.ArrayList;
@@ -70,6 +74,8 @@ package malte0811.industrialWires;
 
  import static malte0811.industrialWires.blocks.wire.BlockTypes_IC2_Connector.*;
  import static malte0811.industrialWires.converter.MechMBPart.EXAMPLE_MECHMB_LOC;
+ import static malte0811.industrialWires.entities.EntityBrokenPart.MARKER_TEXTURE;
+ import static malte0811.industrialWires.entities.EntityBrokenPart.RES_LOC_SERIALIZER;
  import static malte0811.industrialWires.wires.IC2Wiretype.*;
 
 @Mod(modid = IndustrialWires.MODID, version = IndustrialWires.VERSION, dependencies = "required-after:immersiveengineering@[0.12-77,);after:ic2",
@@ -79,6 +85,14 @@ public class IndustrialWires {
 	public static final String MODID = "industrialwires";
 	public static final String VERSION = "${version}";
 	public static final String MODNAME = "Industrial Wires";
+	public static final ResourceLocation TINNITUS_LOC = new ResourceLocation(IndustrialWires.MODID, "tinnitus");
+	public static final ResourceLocation LADDER_START = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_start");//~470 ms ~=9 ticks
+	public static final ResourceLocation LADDER_MIDDLE = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_middle");
+	public static final ResourceLocation LADDER_END = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_end");//~210 ms ~= 4 ticks
+	public static final ResourceLocation MARX_BANG = new ResourceLocation(IndustrialWires.MODID, "marx_bang");
+	public static final ResourceLocation MARX_POP = new ResourceLocation(IndustrialWires.MODID, "marx_pop");
+	public static final ResourceLocation TURN_FAST = new ResourceLocation(IndustrialWires.MODID, "mech_mb_fast");
+	public static final ResourceLocation TURN_SLOW = new ResourceLocation(IndustrialWires.MODID, "mech_mb_slow");
 
 	public static final List<BlockIWBase> blocks = new ArrayList<>();
 	public static final List<Item> items = new ArrayList<>();
@@ -176,6 +190,9 @@ public class IndustrialWires {
 		GameRegistry.registerTileEntity(TileEntityUnfinishedPanel.class, MODID + ":unfinished_panel");
 		GameRegistry.registerTileEntity(TileEntityComponentPanel.class, MODID + ":single_component_panel");
 		GameRegistry.registerTileEntity(TileEntityDischargeMeter.class, MODID + ":discharge_meter");
+
+		DataSerializers.registerSerializer(RES_LOC_SERIALIZER);
+		MARKER_TEXTURE = EntityDataManager.createKey(EntityBrokenPart.class, RES_LOC_SERIALIZER);
 		EntityRegistry.registerModEntity(new ResourceLocation(MODID, "broken_part"), EntityBrokenPart.class,
 				"broken_part", 0, this, 64, 5, true);
 
@@ -212,6 +229,22 @@ public class IndustrialWires {
 		}
 		event.getRegistry().register(new ItemPanelComponent());
 		event.getRegistry().register(new ItemKey());
+	}
+
+	@SubscribeEvent
+	public static void registerSounds(RegistryEvent.Register<SoundEvent> event) {
+		registerSound(event.getRegistry(), TINNITUS_LOC);
+		registerSound(event.getRegistry(), LADDER_START);
+		registerSound(event.getRegistry(), LADDER_MIDDLE);
+		registerSound(event.getRegistry(), LADDER_END);
+		registerSound(event.getRegistry(), MARX_BANG);
+		registerSound(event.getRegistry(), MARX_POP);
+		registerSound(event.getRegistry(), TURN_FAST);
+		registerSound(event.getRegistry(), TURN_SLOW);
+	}
+
+	private static void registerSound(IForgeRegistry<SoundEvent> reg, ResourceLocation loc) {
+		reg.register(new SoundEvent(loc).setRegistryName(loc));
 	}
 
 	@SubscribeEvent

@@ -22,8 +22,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializer;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
@@ -37,7 +35,7 @@ import java.util.List;
 
 import static malte0811.industrialWires.util.NBTKeys.TEXTURE;
 
-public class EntityBrokenPart extends /*EntityArrow*/ Entity {
+public class EntityBrokenPart extends Entity {
 	public static final DataSerializer<ResourceLocation> RES_LOC_SERIALIZER = new DataSerializer<ResourceLocation>() {
 		@Override
 		public void write(@Nonnull PacketBuffer buf, @Nonnull ResourceLocation value) {
@@ -64,12 +62,8 @@ public class EntityBrokenPart extends /*EntityArrow*/ Entity {
 			return new ResourceLocation(value.getResourceDomain(), value.getResourcePath());
 		}
 	};
-	private static DataParameter<ResourceLocation> MARKER_TEXTURE;
+	public static DataParameter<ResourceLocation> MARKER_TEXTURE;
 
-	static {
-		DataSerializers.registerSerializer(RES_LOC_SERIALIZER);
-		MARKER_TEXTURE = EntityDataManager.createKey(EntityBrokenPart.class, RES_LOC_SERIALIZER);
-	}
 
 	private static final double HARDNESS_MAX = 15;
 	private static final double DESPAWN_DELAY_GROUND = 400;

@@ -84,6 +84,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.*;
 
+import static malte0811.industrialWires.IndustrialWires.*;
+
 @SideOnly(Side.CLIENT)
 public class ClientProxy extends CommonProxy {
 	@Override
@@ -381,14 +383,6 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	private Map<BlockPos, List<ISound>> playingSounds = new HashMap<>();
-	private static final ResourceLocation TINNITUS_LOC = new ResourceLocation(IndustrialWires.MODID, "tinnitus");
-	private static final ResourceLocation LADDER_START = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_start");//~470 ms ~=9 ticks
-	private static final ResourceLocation LADDER_MIDDLE = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_middle");
-	private static final ResourceLocation LADDER_END = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_end");//~210 ms ~= 4 ticks
-	private static final ResourceLocation MARX_BANG = new ResourceLocation(IndustrialWires.MODID, "marx_bang");
-	private static final ResourceLocation MARX_POP = new ResourceLocation(IndustrialWires.MODID, "marx_pop");
-	private static final ResourceLocation TURN_FAST = new ResourceLocation(IndustrialWires.MODID, "mech_mb_fast");
-	private static final ResourceLocation TURN_SLOW = new ResourceLocation(IndustrialWires.MODID, "mech_mb_slow");
 
 	@Override
 	public void playJacobsLadderSound(TileEntityJacobsLadder te, int phase, Vec3d soundPos) {
@@ -473,7 +467,7 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@Override
-	public void stopAllSoundsExcept(BlockPos pos, Set<ISound> excluded) {
+	public void stopAllSoundsExcept(BlockPos pos, Set<?> excluded) {
 		if (playingSounds.containsKey(pos)) {
 			SoundHandler manager = Minecraft.getMinecraft().getSoundHandler();
 			List<ISound> sounds = playingSounds.get(pos);
