@@ -15,8 +15,15 @@
 
 package malte0811.industrialWires.client;
 
+import blusunrize.immersiveengineering.api.Lib;
+import blusunrize.immersiveengineering.common.IEContent;
+import blusunrize.immersiveengineering.common.items.ItemEarmuffs;
+import blusunrize.immersiveengineering.common.util.ItemNBTHelper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ITickableSound;
 import net.minecraft.client.audio.PositionedSound;
+import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 
@@ -49,9 +56,28 @@ public class IWTickableSound extends PositionedSound implements ITickableSound {
 		//NOP
 	}
 
+	//This can be static as it's the same for all sounds
+	private static float mod = 1;
+	private static long lastCheck = Long.MIN_VALUE;
+	private static final int UPDATE_FREQU = 5;
 	@Override
 	public float getVolume() {
-		return getVolume.get();
+		Minecraft mc = Minecraft.getMinecraft();
+		long time = mc.world.getTotalWorldTime();
+		// Earmuffs don't work well for long sounds
+		// so I adjust the volume manually and blacklist the sounds from the "normal" muffling
+		if (time>lastCheck+UPDATE_FREQU) {
+			mod = 1;
+			lastCheck = time;
+			ItemStack earmuffs = mc.player.getItemStackFromSlot(EntityEquipmentSlot.HEAD);
+			if (ItemNBTHelper.hasKey(earmuffs, Lib.NBT_Earmuffs))
+				earmuffs = ItemNBTHelper.getItemStack(earmuffs, Lib.NBT_Earmuffs);
+			if (!earmuffs.isEmpty() && IEContent.itemEarmuffs.equals(earmuffs.getItem()) &&
+					!ItemNBTHelper.getBoolean(earmuffs, "IE:Earmuffs:Cat_" + category.getName())) {
+				mod = ItemEarmuffs.getVolumeMod(earmuffs);
+			}
+		}
+		return mod*getVolume.get();
 	}
 
 	@Override

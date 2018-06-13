@@ -195,10 +195,7 @@ public class ClientProxy extends CommonProxy {
 				);
 			}
 		}
-		int oldLength = Config.IEConfig.Tools.earDefenders_SoundBlacklist.length;
-		Config.IEConfig.Tools.earDefenders_SoundBlacklist =
-				Arrays.copyOf(Config.IEConfig.Tools.earDefenders_SoundBlacklist, oldLength + 1);
-		Config.IEConfig.Tools.earDefenders_SoundBlacklist[oldLength] = TINNITUS_LOC.toString();
+		addUnblockableSounds(TINNITUS_LOC, TURN_FAST, TURN_SLOW);
 
 		ClientUtils.mc().getItemColors().registerItemColorHandler((stack, pass) -> {
 			if (pass == 1) {
@@ -321,8 +318,16 @@ public class ClientProxy extends CommonProxy {
 		ClientCommandHandler.instance.registerCommand(new CommandIWClient());
 	}
 
-	private static final ResourceLocation TINNITUS_LOC = new ResourceLocation(IndustrialWires.MODID, "tinnitus");
 	private static ISound playingTinnitus = null;
+
+	private void addUnblockableSounds(ResourceLocation... sounds) {
+		int oldLength = Config.IEConfig.Tools.earDefenders_SoundBlacklist.length;
+		Config.IEConfig.Tools.earDefenders_SoundBlacklist =
+				Arrays.copyOf(Config.IEConfig.Tools.earDefenders_SoundBlacklist, oldLength + sounds.length);
+		for (int i = 0;i<sounds.length;i++) {
+			Config.IEConfig.Tools.earDefenders_SoundBlacklist[oldLength+i] = sounds[i].toString();
+		}
+	}
 	@Override
 	public void startTinnitus() {
 		final Minecraft mc = Minecraft.getMinecraft();
@@ -376,13 +381,14 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	private Map<BlockPos, List<ISound>> playingSounds = new HashMap<>();
-	private static ResourceLocation jacobsStart = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_start");//~470 ms ~=9 ticks
-	private static ResourceLocation jacobsMiddle = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_middle");
-	private static ResourceLocation jacobsEnd = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_end");//~210 ms ~= 4 ticks
-	private static ResourceLocation marxBang = new ResourceLocation(IndustrialWires.MODID, "marx_bang");
-	private static ResourceLocation marxPop = new ResourceLocation(IndustrialWires.MODID, "marx_pop");
-	private static ResourceLocation turnFast = new ResourceLocation(IndustrialWires.MODID, "mech_mb_fast");
-	private static ResourceLocation turnSlow = new ResourceLocation(IndustrialWires.MODID, "mech_mb_slow");
+	private static final ResourceLocation TINNITUS_LOC = new ResourceLocation(IndustrialWires.MODID, "tinnitus");
+	private static final ResourceLocation LADDER_START = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_start");//~470 ms ~=9 ticks
+	private static final ResourceLocation LADDER_MIDDLE = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_middle");
+	private static final ResourceLocation LADDER_END = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_end");//~210 ms ~= 4 ticks
+	private static final ResourceLocation MARX_BANG = new ResourceLocation(IndustrialWires.MODID, "marx_bang");
+	private static final ResourceLocation MARX_POP = new ResourceLocation(IndustrialWires.MODID, "marx_pop");
+	private static final ResourceLocation TURN_FAST = new ResourceLocation(IndustrialWires.MODID, "mech_mb_fast");
+	private static final ResourceLocation TURN_SLOW = new ResourceLocation(IndustrialWires.MODID, "mech_mb_slow");
 
 	@Override
 	public void playJacobsLadderSound(TileEntityJacobsLadder te, int phase, Vec3d soundPos) {
@@ -390,13 +396,13 @@ public class ClientProxy extends CommonProxy {
 		ResourceLocation event;
 		switch (phase) {
 		case 0:
-			event = jacobsStart;
+			event = LADDER_START;
 			break;
 		case 1:
-			event = jacobsMiddle;
+			event = LADDER_MIDDLE;
 			break;
 		case 2:
-			event = jacobsEnd;
+			event = LADDER_END;
 			break;
 		default:
 			return;
@@ -422,20 +428,20 @@ public class ClientProxy extends CommonProxy {
 		}
 		boolean hasSlow = false, hasFast = false;
 		for (ISound s:soundsAtPos) {
-			if (s.getSoundLocation().equals(turnFast)) {
+			if (s.getSoundLocation().equals(TURN_FAST)) {
 				hasFast = true;
-			} else if (s.getSoundLocation().equals(turnSlow)) {
+			} else if (s.getSoundLocation().equals(TURN_SLOW)) {
 				hasSlow = true;
 			}
 		}
 		if (!hasSlow && energy.getVolumeSlow() > 0) {
-			ISound snd = new IWTickableSound(turnSlow, SoundCategory.BLOCKS, energy::getVolumeSlow, energy::getPitch,
+			ISound snd = new IWTickableSound(TURN_SLOW, SoundCategory.BLOCKS, energy::getVolumeSlow, energy::getPitch,
 					te.getPos().getX(), te.getPos().getY(), te.getPos().getZ());
 			sndHandler.playSound(snd);
 			addSound(te.getPos(), snd);
 		}
 		if (!hasFast && energy.getVolumeFast() > 0) {
-			ISound snd = new IWTickableSound(turnFast, SoundCategory.BLOCKS, energy::getVolumeFast, energy::getPitch,
+			ISound snd = new IWTickableSound(TURN_FAST, SoundCategory.BLOCKS, energy::getVolumeFast, energy::getPitch,
 					te.getPos().getX(), te.getPos().getY(), te.getPos().getZ());
 			sndHandler.playSound(snd);
 			addSound(te.getPos(), snd);
@@ -444,10 +450,10 @@ public class ClientProxy extends CommonProxy {
 
 	@Override
 	public void playMarxBang(TileEntityMarx te, Vec3d pos, float energy) {
-		ResourceLocation soundLoc = marxBang;
+		ResourceLocation soundLoc = MARX_BANG;
 		if (energy<0) {
 			energy = -energy;
-			soundLoc = marxPop;
+			soundLoc = MARX_POP;
 		}
 		PositionedSoundRecord sound = new PositionedSoundRecord(soundLoc, SoundCategory.BLOCKS, 5*energy, 1,
 				false, 0, ISound.AttenuationType.LINEAR, (float) pos.x, (float) pos.y, (float) pos.z);
