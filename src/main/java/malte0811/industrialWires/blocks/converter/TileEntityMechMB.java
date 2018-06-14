@@ -90,6 +90,10 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 	@Override
 	public void update() {
 		ApiUtils.checkForNeedlessTicking(this);
+		if (firstTick) {
+			Compat.loadIC2Tile.accept(this);
+			firstTick = false;
+		}
 		if (isLogicDummy() || mechanical == null) {
 			return;
 		}
@@ -104,10 +108,6 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 					IndustrialWires.proxy.updateMechMBTurningSound((TileEntityMechMB) otherEnd, energyState);
 				}
 			}
-		}
-		if (firstTick) {
-			Compat.loadIC2Tile.accept(this);
-			firstTick = false;
 		}
 		if (world.isRemote) {
 			return;
