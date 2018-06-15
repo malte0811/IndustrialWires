@@ -207,6 +207,8 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 		final double insert = Math.min(maxStored - bufferToMachine, eu);
 		if (!simulate) {
 			bufferToMachine += insert;
+		} else {
+			//Yes, this is weird. But it works, otherwise the system can get stuck at a lower output rate with a full buffer
 			ieInputInTick += insert;
 		}
 		return eu - insert;

@@ -222,7 +222,7 @@ public abstract class MechPartEnergyIO extends MechMBPart implements IMBPartElec
 		public double getOfferedEnergy() {
 			if (wfToWorld.isDC() && getLastIOState().canSwitchToOutput()) {
 				return Math.min(ConversionUtil.euPerJoule()*bufferToWorld,
-						ConversionUtil.euPerJoule()*getMaxBuffer()/getEnergyConnections().size()*2);
+						ConversionUtil.euPerJoule()*getMaxBuffer())/getEnergyConnections().size()*2;
 			}
 			return 0;
 		}
@@ -231,7 +231,7 @@ public abstract class MechPartEnergyIO extends MechMBPart implements IMBPartElec
 		public double getDemandedEnergy() {
 			if (getLastIOState().canSwitchToInput()) {
 				return Math.min(ConversionUtil.euPerJoule()*(getMaxBuffer()-bufferToMB),
-						ConversionUtil.euPerJoule()*getMaxBuffer()/getEnergyConnections().size()*2);
+						ConversionUtil.euPerJoule()*getMaxBuffer())/getEnergyConnections().size()*2;
 			}
 			return 0;
 		}

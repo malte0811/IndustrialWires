@@ -178,10 +178,12 @@ public class MechPartSpeedometer extends MechMBPart implements IPlayerInteractio
 			}
 			return true;
 		} else if (OreDictionary.itemMatches(heldItem, voltMeter, false)) {
-			double speed = energy!=null?energy.getSpeed():0;
-			ChatUtils.sendServerNoSpamMessages(player,
-					new TextComponentTranslation(IndustrialWires.MODID + ".chat.currSpeed",
-							format.format(speed), format.format(speed*60D/(2*Math.PI))));
+			if (!world.isRemote) {
+				double speed = energy != null ? energy.getSpeed() : 0;
+				ChatUtils.sendServerNoSpamMessages(player,
+						new TextComponentTranslation(IndustrialWires.MODID + ".chat.currSpeed",
+								format.format(speed), format.format(speed * 60D / (2 * Math.PI))));
+			}
 			return true;
 		}
 		return false;
