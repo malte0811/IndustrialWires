@@ -37,6 +37,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.Set;
 
 import static malte0811.industrialWires.converter.EUCapability.ENERGY_IC2;
+import static malte0811.industrialWires.converter.IMBPartElectric.IOState.*;
 import static malte0811.industrialWires.converter.Waveform.Phases.get;
 import static malte0811.industrialWires.converter.Waveform.Speed.EXTERNAL;
 import static malte0811.industrialWires.converter.Waveform.Speed.ROTATION;
@@ -53,6 +54,9 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 	private Waveform wfToMB = Waveform.forParameters(NONE, get(has4Phases()), ROTATION);
 	private double bufferToWorld;
 	private Waveform wfToWorld = Waveform.forParameters(NONE, get(has4Phases()), ROTATION);
+	private IOState lastIOState = NO_TRANSFER;
+	private long lastStateChange = Long.MIN_VALUE;
+
 	@Override
 	public Waveform getProduced(MechEnergy state) {
 		return wfToMB.getCommutated(state.getSpeed(), has4Phases());
@@ -83,6 +87,17 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 		bufferToWorld += given;
 	}
 
+	@Override
+	public void setLastIOState(IOState state) {
+		lastIOState = state;
+		lastStateChange = world.getWorld().getTotalWorldTime();
+	}
+
+	@Override
+	public IOState getLastIOState() {
+		return lastIOState;
+	}
+
 
 	private final IC2EnergyHandler capIc2 = new IC2EnergyHandler() {
 		{
@@ -100,14 +115,24 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 			buffer += input;
 			bufferToMB = buffer;
 			wfToMB = Waveform.forParameters(DC, get(has4Phases()), EXTERNAL);
+			setLastIOState(INPUT);
 			return amount-ConversionUtil.euPerJoule()*input;
 		}
 
 		@Override
 		public double getOfferedEnergy() {
-			if (wfToWorld.isDC()) {
+			if (wfToWorld.isDC() && getLastIOState().canSwitchToOutput()) {
 				return Math.min(ConversionUtil.euPerJoule()*bufferToWorld,
-						ConversionUtil.euPerJoule()*getMaxBuffer())/getEnergyConnections().size()*2;
+						ConversionUtil.euPerJoule()*getMaxBuffer()/getEnergyConnections().size()*2);
+			}
+			return 0;
+		}
+
+		@Override
+		public double getDemandedEnergy() {
+			if (getLastIOState().canSwitchToInput()) {
+				return Math.min(ConversionUtil.euPerJoule()*(getMaxBuffer()-bufferToMB),
+						ConversionUtil.euPerJoule()*getMaxBuffer()/getEnergyConnections().size()*2);
 			}
 			return 0;
 		}
@@ -115,12 +140,16 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 		@Override
 		public void drawEnergy(double amount) {
 			bufferToWorld -= ConversionUtil.joulesPerEu()*amount;
+			setLastIOState(OUTPUT);
 		}
 	};
 
 	private IEnergyStorage capForge = new IEnergyStorage() {
 		@Override
 		public int receiveEnergy(int maxReceive, boolean simulate) {
+			if (!getLastIOState().canSwitchToInput()) {
+				return 0;
+			}
 			double buffer = bufferToMB;
 			double input = maxReceive* ConversionUtil.joulesPerIf();
 			if (!wfToMB.isAC()) {
@@ -131,21 +160,27 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 			if (!simulate) {
 				bufferToMB = buffer;
 				wfToMB = Waveform.forParameters(Waveform.Type.AC, get(has4Phases()), EXTERNAL);
+				if (input>0) {
+					setLastIOState(INPUT);
+				}
 			}
 			return (int) (ConversionUtil.ifPerJoule()*input);
 		}
 
 		@Override
 		public int extractEnergy(int maxExtract, boolean simulate) {
-			if (!wfToWorld.isAC()) {
+			if (!wfToWorld.isAC() || !getLastIOState().canSwitchToOutput()) {
 				return 0;
 			}
 			double buffer = bufferToWorld;
 			double output = maxExtract* ConversionUtil.joulesPerIf();
-			output = Math.min(output, getMaxBuffer()-buffer);
-			buffer += output;
+			output = Math.min(output, buffer);
+			buffer -= output;
 			if (!simulate) {
 				bufferToWorld = buffer;
+				if (output>0) {
+					setLastIOState(OUTPUT);
+				}
 			}
 			return (int) (ConversionUtil.ifPerJoule()*output);
 		}
@@ -206,7 +241,11 @@ public class MechPartCommutator extends MechMBPart implements IMBPartElectric {
 	}
 
 	@Override
-	public void insertMEnergy(double added) {int available = (int) (Math.min(ConversionUtil.ifPerJoule() * bufferToWorld,
+	public void insertMEnergy(double added) {
+		if (world.getWorld().getTotalWorldTime()>lastStateChange+1) {
+			setLastIOState(NO_TRANSFER);
+		}
+		int available = (int) (Math.min(ConversionUtil.ifPerJoule() * bufferToWorld,
 			getMaxBuffer()/getEnergyConnections().size()));
 		if (available > 0 && wfToWorld.isAC()) {//The IC2 net will deal with DC by itself
 			bufferToWorld -= outputFE(world, available);

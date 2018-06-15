@@ -38,6 +38,7 @@ import java.util.Set;
 import static blusunrize.immersiveengineering.common.IEContent.blockMetalDecoration0;
 import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.GENERATOR;
 import static malte0811.industrialWires.converter.EUCapability.ENERGY_IC2;
+import static malte0811.industrialWires.converter.IMBPartElectric.IOState.*;
 import static malte0811.industrialWires.converter.Waveform.Phases.get;
 import static malte0811.industrialWires.converter.Waveform.Speed.EXTERNAL;
 import static malte0811.industrialWires.converter.Waveform.Type.DC;
@@ -52,6 +53,8 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 	private Waveform wfToMB = Waveform.forParameters(Waveform.Type.NONE, get(has4Phases()), Waveform.Speed.EXTERNAL);
 	private double bufferToWorld;
 	private Waveform wfToWorld = Waveform.forParameters(Waveform.Type.NONE, get(has4Phases()), Waveform.Speed.ROTATION);
+	private IOState lastIO = NO_TRANSFER;
+	private long lastStateChange = Long.MIN_VALUE;
 
 	{
 		original.put(ORIGIN, blockMetalDecoration0.getDefaultState().withProperty(
@@ -88,6 +91,17 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 	}
 
 	@Override
+	public void setLastIOState(IOState state) {
+		lastIO = state;
+		lastStateChange = world.getWorld().getTotalWorldTime();
+	}
+
+	@Override
+	public IOState getLastIOState() {
+		return lastIO;
+	}
+
+	@Override
 	public void createMEnergy(MechEnergy e) {}
 
 	@Override
@@ -97,6 +111,9 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 
 	@Override
 	public void insertMEnergy(double added) {
+		if (world.getWorld().getTotalWorldTime()>lastStateChange+1) {
+			setLastIOState(NO_TRANSFER);
+		}
 		int available = (int) (Math.min(ConversionUtil.ifPerJoule() * bufferToWorld,
 				getMaxBuffer()/getEnergyConnections().size()));
 		if (available > 0 && wfToWorld.isAC()) {//The IC2 net will deal with DC by itself
@@ -171,6 +188,9 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 	private IEnergyStorage energy = new IEnergyStorage() {
 		@Override
 		public int receiveEnergy(int maxReceive, boolean simulate) {
+			if (!getLastIOState().canSwitchToInput()) {
+				return 0;
+			}
 			double joules = joulesPerIf()*maxReceive;
 			double insert = Math.min(Math.min(joules, getMaxBuffer()-bufferToMB),
 					getMaxBuffer()/getEnergyConnections().size());
@@ -179,6 +199,9 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 					bufferToMB = 0;
 					wfToMB = Waveform.forParameters(Waveform.Type.AC, get(has4Phases()), Waveform.Speed.EXTERNAL);
 				}
+				if (insert>0) {
+					setLastIOState(INPUT);
+				}
 				bufferToMB += insert;
 			}
 			return (int) Math.ceil(insert* ifPerJoule());
@@ -186,11 +209,18 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 
 		@Override
 		public int extractEnergy(int maxExtract, boolean simulate) {
+			if (!getLastIOState().canSwitchToOutput()) {
+				return 0;
+			}
 			if (wfToWorld.isAC()) {
 				double joules = joulesPerIf() * maxExtract;
 				double extract = Math.min(Math.min(joules, bufferToWorld), getMaxBuffer()/getEnergyConnections().size());
-				if (!simulate)
+				if (!simulate) {
 					bufferToWorld -= extract;
+					if (extract>0) {
+						setLastIOState(OUTPUT);
+					}
+				}
 				return (int) Math.floor(extract * ifPerJoule());
 			} else {
 				return 0;
@@ -269,12 +299,13 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 			buffer += input;
 			bufferToMB = buffer;
 			wfToMB = Waveform.forParameters(DC, get(has4Phases()), EXTERNAL);
+			setLastIOState(INPUT);
 			return amount-ConversionUtil.euPerJoule()*input;
 		}
 
 		@Override
 		public double getOfferedEnergy() {
-			if (wfToWorld.isDC()) {
+			if (wfToWorld.isDC() && getLastIOState().canSwitchToOutput()) {
 				return Math.min(ConversionUtil.euPerJoule()*bufferToWorld,
 						ConversionUtil.euPerJoule()*getMaxBuffer())/getEnergyConnections().size()*2;
 			}
@@ -282,8 +313,18 @@ public class MechPartTwoElectrodes extends MechMBPart implements IMBPartElectric
 		}
 
 		@Override
+		public double getDemandedEnergy() {
+			if (getLastIOState().canSwitchToInput()) {
+				return Math.min(ConversionUtil.euPerJoule()*(getMaxBuffer()-bufferToMB),
+						ConversionUtil.euPerJoule()*getMaxBuffer()/getEnergyConnections().size()*2);
+			}
+			return 0;
+		}
+
+		@Override
 		public void drawEnergy(double amount) {
 			bufferToWorld -= ConversionUtil.joulesPerEu()*amount;
+			setLastIOState(OUTPUT);
 		}
 	};
 }

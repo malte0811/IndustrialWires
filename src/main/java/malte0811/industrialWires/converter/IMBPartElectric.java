@@ -34,11 +34,15 @@ public interface IMBPartElectric {
 	void extractEEnergy(double energy);
 	double requestEEnergy(Waveform waveform, MechEnergy energy);
 	void insertEEnergy(double given, Waveform waveform, MechEnergy energy);
+	void setLastIOState(IOState state);
+	IOState getLastIOState();
 
 	default Set<Pair<BlockPos, EnumFacing>> getEnergyConnections() {
 		return ImmutableSet.of();
 	}
 	default double outputFE(LocalSidedWorld world, int available) {
+		if (!getLastIOState().canSwitchToOutput())
+			return 0;
 		double extracted = 0;
 		for (Pair<BlockPos, EnumFacing> output : getEnergyConnections()) {
 			if (output.getRight()==null)
@@ -55,6 +59,23 @@ public interface IMBPartElectric {
 				}
 			}
 		}
+		if (extracted>0) {
+			setLastIOState(IOState.OUTPUT);
+		}
 		return extracted;
+	}
+
+	enum IOState {
+		NO_TRANSFER,
+		OUTPUT,
+		INPUT;
+
+		boolean canSwitchToOutput() {
+			return NO_TRANSFER ==this||OUTPUT==this;
+		}
+
+		boolean canSwitchToInput() {
+			return NO_TRANSFER ==this||INPUT==this;
+		}
 	}
 }

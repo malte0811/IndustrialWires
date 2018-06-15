@@ -395,6 +395,7 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 	public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing) {
 		Vec3i offsetDirectional = getOffsetDir();
 		TileEntityMechMB master = masterOr(this, this);
+
 		int id = getPart(offsetDirectional.getZ(), master);
 		if (id < 0) {
 			return null;

@@ -81,6 +81,17 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 		}
 	}
 
+	//TODO clean this up once I know whether it works
+	@Override
+	public void setLastIOState(IOState state) {
+
+	}
+
+	@Override
+	public IOState getLastIOState() {
+		return IOState.NO_TRANSFER;
+	}
+
 	@Override
 	public void createMEnergy(MechEnergy e) {
 		e.addEnergy(bufferToMech);
