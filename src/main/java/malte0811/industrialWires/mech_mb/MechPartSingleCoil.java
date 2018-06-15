@@ -13,7 +13,7 @@
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package malte0811.industrialWires.converter;
+package malte0811.industrialWires.mech_mb;
 
 import blusunrize.immersiveengineering.ImmersiveEngineering;
 import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0;
@@ -29,7 +29,7 @@ import net.minecraft.util.math.BlockPos;
 
 import static blusunrize.immersiveengineering.common.IEContent.blockMetalDecoration0;
 import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.COIL_LV;
-import static malte0811.industrialWires.converter.Waveform.Phases.get;
+import static malte0811.industrialWires.mech_mb.Waveform.Phases.get;
 import static malte0811.industrialWires.util.NBTKeys.BUFFER_IN;
 import static malte0811.industrialWires.util.NBTKeys.BUFFER_OUT;
 import static net.minecraft.util.math.BlockPos.ORIGIN;
@@ -79,17 +79,6 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 		} else {
 			bufferToMech += given;
 		}
-	}
-
-	//TODO clean this up once I know whether it works
-	@Override
-	public void setLastIOState(IOState state) {
-
-	}
-
-	@Override
-	public IOState getLastIOState() {
-		return IOState.NO_TRANSFER;
 	}
 
 	@Override

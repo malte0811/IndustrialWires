@@ -29,7 +29,7 @@ import malte0811.industrialWires.blocks.IBlockBoundsIW.IBlockBoundsDirectional;
 import malte0811.industrialWires.blocks.ISyncReceiver;
 import malte0811.industrialWires.blocks.TileEntityIWMultiblock;
 import malte0811.industrialWires.compat.Compat;
-import malte0811.industrialWires.converter.*;
+import malte0811.industrialWires.mech_mb.*;
 import malte0811.industrialWires.network.MessageTileSyncIW;
 import malte0811.industrialWires.util.LocalSidedWorld;
 import net.minecraft.block.Block;
@@ -45,6 +45,7 @@ import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
+import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.Optional;
@@ -57,7 +58,7 @@ import java.util.*;
 
 import static blusunrize.immersiveengineering.common.IEContent.blockMetalDecoration0;
 import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.HEAVY_ENGINEERING;
-import static malte0811.industrialWires.converter.EUCapability.ENERGY_IC2;
+import static malte0811.industrialWires.mech_mb.EUCapability.ENERGY_IC2;
 import static malte0811.industrialWires.util.MiscUtils.getOffset;
 import static malte0811.industrialWires.util.MiscUtils.offset;
 import static malte0811.industrialWires.util.NBTKeys.*;
@@ -111,14 +112,6 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 		}
 		if (world.isRemote) {
 			return;
-		}
-		if (shouldInitWorld) {
-			int offset = 1;
-			for (MechMBPart part : mechanical) {
-				part.world.setWorld(world);
-				part.world.setOrigin(offset(pos, facing, mirrored, 0, -offset, 0));
-				offset += part.getLength();
-			}
 		}
 		// Mechanical
 		for (MechMBPart part : mechanical) {
@@ -218,6 +211,19 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 			nbt.setDouble(SPEED, energyState.getSpeed());
 			IndustrialWires.packetHandler.sendToDimension(new MessageTileSyncIW(this, nbt), world.provider.getDimension());
 			lastSyncedSpeed = energyState.getSpeed();
+		}
+	}
+
+	@Override
+	public void setWorld(@Nonnull World worldIn) {
+		super.setWorld(worldIn);
+		if (!isLogicDummy()) {
+			int offset = 1;
+			for (MechMBPart part : mechanical) {
+				part.world.setWorld(world);
+				part.world.setOrigin(offset(pos, facing, mirrored, 0, -offset, 0));
+				offset += part.getLength();
+			}
 		}
 	}
 

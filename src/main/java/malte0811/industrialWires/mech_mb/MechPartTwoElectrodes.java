@@ -13,14 +13,13 @@
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package malte0811.industrialWires.converter;
+package malte0811.industrialWires.mech_mb;
 
 import com.google.common.collect.ImmutableSet;
 import malte0811.industrialWires.IWConfig;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
 import malte0811.industrialWires.util.LocalSidedWorld;
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
@@ -31,76 +30,65 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Set;
 
-import static net.minecraft.util.EnumFacing.EAST;
-import static net.minecraft.util.EnumFacing.WEST;
+import static blusunrize.immersiveengineering.common.IEContent.blockMetalDecoration0;
+import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.GENERATOR;
+import static net.minecraft.util.EnumFacing.UP;
+import static net.minecraft.util.math.BlockPos.ORIGIN;
 
-public class MechPartFourElectrodes extends MechPartTwoElectrodes {
+public class MechPartTwoElectrodes extends MechPartEnergyIO {
 	{
-		IBlockState lightEng = getLightEngineering();
-		for (int i = 0; i < 2; i++) {
-			for (int j = 0; j < 2; j++) {
-				original.put(new BlockPos(2*i-1, j-1, 0), lightEng);
-			}
-		}
-	}
-	@Override
-	protected double getMaxBuffer() {
-		return 8*super.getMaxBuffer();
-	}
-
-	@Override
-	protected boolean has4Phases() {
-		return true;
-	}
-
-	@Override
-	public boolean canForm(LocalSidedWorld w) {
-		return super.canForm(w) && hasSupportPillars(w);
-
-	}
-
-	@Override
-	public short getFormPattern(int offset) {
-		return 0b000_111_101;
-	}
-
-	private static final Set<Pair<BlockPos, EnumFacing>> outputs = ImmutableSet.of(
-			new ImmutablePair<>(new BlockPos(1, 0, 0), EAST),
-			new ImmutablePair<>(new BlockPos(1, -1, 0), EAST),
-			new ImmutablePair<>(new BlockPos(-1, 0, 0), WEST),
-			new ImmutablePair<>(new BlockPos(-1, -1, 0), WEST)
-	);
-	@Override
-	public Set<Pair<BlockPos, EnumFacing>> getEnergyConnections() {
-		return outputs;
-	}
-
-	@Override
-	public MechanicalMBBlockType getType() {
-		return MechanicalMBBlockType.SHAFT_4_PHASE;
+		original.put(ORIGIN, blockMetalDecoration0.getDefaultState().withProperty(
+				blockMetalDecoration0.property, GENERATOR));
 	}
 
 	@Override
 	public ResourceLocation getRotatingBaseModel() {
-		return new ResourceLocation(IndustrialWires.MODID, "block/mech_mb/shaft4.obj");
+		return new ResourceLocation(IndustrialWires.MODID, "block/mech_mb/shaft2.obj");
 	}
 
 	@Override
-	public double getMaxSpeed() {
-		return IWConfig.MechConversion.allowMBFE()?600:-1;
+	public boolean canForm(LocalSidedWorld w) {
+		if (!IWConfig.MechConversion.allowMBFE()) {
+			return false;
+		}
+		IBlockState state = w.getBlockState(ORIGIN);
+		return state.getBlock()== blockMetalDecoration0 &&
+				state.getValue(blockMetalDecoration0.property)== GENERATOR;
 	}
 
+	@Override
+	public short getFormPattern(int offset) {
+		return 0b000_010_000;
+	}
+
+	@Override
+	public void breakOnFailure(MechEnergy energy) {
+		//NOP
+	}
+
+	@Override
+	public MechanicalMBBlockType getType() {
+		return MechanicalMBBlockType.SHAFT_1_PHASE;
+	}
+
+	private static final ImmutableSet<Pair<BlockPos, EnumFacing>> outputs = ImmutableSet.of(
+			new ImmutablePair<>(ORIGIN, UP)
+	);
+	public Set<Pair<BlockPos, EnumFacing>> getEnergyConnections() {
+		return outputs;
+	}
+
+	protected double getMaxBuffer() {
+		return 10e3;//200kW
+	}
+
+	protected boolean has4Phases() {
+		return false;
+	}
 
 	@Override
 	public AxisAlignedBB getBoundingBox(BlockPos offsetPart) {
-		if (BlockPos.ORIGIN.equals(offsetPart)) {
-			return super.getBoundingBox(offsetPart);
-		}
-		if (offsetPart.getY()==0) {
-			return Block.FULL_BLOCK_AABB;
-		}
-		double xMin = offsetPart.getX()<=0?.5:0;
-		double xMax = offsetPart.getX()>=0?.5:1;
-		return new AxisAlignedBB(xMin, 0, 0, xMax, 1, 1);
+		return new AxisAlignedBB(0, .375, 0, 1, 1, 1);
 	}
+
 }

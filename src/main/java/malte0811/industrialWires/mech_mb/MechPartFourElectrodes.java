@@ -13,7 +13,7 @@
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package malte0811.industrialWires.converter;
+package malte0811.industrialWires.mech_mb;
 
 import com.google.common.collect.ImmutableSet;
 import malte0811.industrialWires.IWConfig;
@@ -34,7 +34,7 @@ import java.util.Set;
 import static net.minecraft.util.EnumFacing.EAST;
 import static net.minecraft.util.EnumFacing.WEST;
 
-public class MechPartCommutator4Phase extends MechPartCommutator {
+public class MechPartFourElectrodes extends MechPartTwoElectrodes {
 	{
 		IBlockState lightEng = getLightEngineering();
 		for (int i = 0; i < 2; i++) {
@@ -53,10 +53,10 @@ public class MechPartCommutator4Phase extends MechPartCommutator {
 		return true;
 	}
 
-
 	@Override
 	public boolean canForm(LocalSidedWorld w) {
-		return super.canForm(w)&&hasSupportPillars(w);
+		return super.canForm(w) && hasSupportPillars(w);
+
 	}
 
 	@Override
@@ -64,31 +64,32 @@ public class MechPartCommutator4Phase extends MechPartCommutator {
 		return 0b000_111_101;
 	}
 
-	@Override
-	public MechanicalMBBlockType getType() {
-		return MechanicalMBBlockType.SHAFT_COMMUTATOR_4;
-	}
-
-	@Override
-	public ResourceLocation getRotatingBaseModel() {
-		return new ResourceLocation(IndustrialWires.MODID, "block/mech_mb/shaft_comm4.obj");
-	}
-
-	@Override
-	public double getMaxSpeed() {
-		return IWConfig.MechConversion.allowMBEU()?100:-1;
-	}
-
 	private static final Set<Pair<BlockPos, EnumFacing>> outputs = ImmutableSet.of(
-			new ImmutablePair<>(new BlockPos(1, 0, 0), EAST), new ImmutablePair<>(new BlockPos(1, 0, 0), null),
-			new ImmutablePair<>(new BlockPos(1, -1, 0), EAST), new ImmutablePair<>(new BlockPos(1, -1, 0), null),
-			new ImmutablePair<>(new BlockPos(-1, 0, 0), WEST), new ImmutablePair<>(new BlockPos(-1, 0, 0), null),
-			new ImmutablePair<>(new BlockPos(-1, -1, 0), WEST), new ImmutablePair<>(new BlockPos(-1, -1, 0), null)
+			new ImmutablePair<>(new BlockPos(1, 0, 0), EAST),
+			new ImmutablePair<>(new BlockPos(1, -1, 0), EAST),
+			new ImmutablePair<>(new BlockPos(-1, 0, 0), WEST),
+			new ImmutablePair<>(new BlockPos(-1, -1, 0), WEST)
 	);
 	@Override
 	public Set<Pair<BlockPos, EnumFacing>> getEnergyConnections() {
 		return outputs;
 	}
+
+	@Override
+	public MechanicalMBBlockType getType() {
+		return MechanicalMBBlockType.SHAFT_4_PHASE;
+	}
+
+	@Override
+	public ResourceLocation getRotatingBaseModel() {
+		return new ResourceLocation(IndustrialWires.MODID, "block/mech_mb/shaft4.obj");
+	}
+
+	@Override
+	public double getMaxSpeed() {
+		return IWConfig.MechConversion.allowMBFE()?600:-1;
+	}
+
 
 	@Override
 	public AxisAlignedBB getBoundingBox(BlockPos offsetPart) {

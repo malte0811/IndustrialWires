@@ -20,8 +20,8 @@ public final class DummyTEs {
 		@Override
 		public void update() {
 			TileEntityIC2ConnectorTin newTe = getRaw();
-			newTe.inBuffer = inBuffer;
-			newTe.outBuffer = outBuffer;
+			newTe.bufferToNet = bufferToNet;
+			newTe.bufferToMachine = bufferToMachine;
 			newTe.maxToNet = maxToNet;
 			newTe.maxToMachine = maxToMachine;
 			newTe.relay = relay;

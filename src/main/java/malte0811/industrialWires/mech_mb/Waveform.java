@@ -13,12 +13,12 @@
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package malte0811.industrialWires.converter;
+package malte0811.industrialWires.mech_mb;
 
-import static malte0811.industrialWires.converter.Waveform.Phases.SINGLE;
-import static malte0811.industrialWires.converter.Waveform.Speed.EXTERNAL;
-import static malte0811.industrialWires.converter.Waveform.Speed.ROTATION;
-import static malte0811.industrialWires.converter.Waveform.Type.*;
+import static malte0811.industrialWires.mech_mb.Waveform.Phases.SINGLE;
+import static malte0811.industrialWires.mech_mb.Waveform.Speed.EXTERNAL;
+import static malte0811.industrialWires.mech_mb.Waveform.Speed.ROTATION;
+import static malte0811.industrialWires.mech_mb.Waveform.Type.*;
 
 public class Waveform {
 	public static final double EXTERNAL_SPEED = 20;

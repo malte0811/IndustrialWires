@@ -13,7 +13,7 @@
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package malte0811.industrialWires.converter;
+package malte0811.industrialWires.mech_mb;
 
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.util.EnumFacing;

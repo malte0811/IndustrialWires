@@ -21,7 +21,7 @@ import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import malte0811.industrialWires.blocks.converter.TileEntityMechMB;
 import malte0811.industrialWires.client.ClientUtilsIW;
 import malte0811.industrialWires.client.RawQuad;
-import malte0811.industrialWires.converter.MechMBPart;
+import malte0811.industrialWires.mech_mb.MechMBPart;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -43,7 +43,7 @@ import javax.annotation.Nonnull;
 import java.util.*;
 
 import static malte0811.industrialWires.blocks.converter.TileEntityMechMB.TICK_ANGLE_PER_SPEED;
-import static malte0811.industrialWires.converter.MechMBPart.SHAFT_KEY;
+import static malte0811.industrialWires.mech_mb.MechMBPart.SHAFT_KEY;
 
 public class TileRenderMechMB extends TileEntitySpecialRenderer<TileEntityMechMB> implements IResourceManagerReloadListener {
 	public static final Map<ResourceLocation, IBakedModel> BASE_MODELS = new HashMap<>();

@@ -26,9 +26,6 @@ package malte0811.industrialWires;
  import malte0811.industrialWires.compat.Compat;
  import malte0811.industrialWires.controlpanel.PanelComponent;
  import malte0811.industrialWires.controlpanel.PanelUtils;
- import malte0811.industrialWires.converter.EUCapability;
- import malte0811.industrialWires.converter.MechMBPart;
- import malte0811.industrialWires.converter.MultiblockMechMB;
  import malte0811.industrialWires.crafting.Recipes;
  import malte0811.industrialWires.entities.EntityBrokenPart;
  import malte0811.industrialWires.hv.MarxOreHandler;
@@ -36,6 +33,9 @@ package malte0811.industrialWires;
  import malte0811.industrialWires.items.ItemIC2Coil;
  import malte0811.industrialWires.items.ItemKey;
  import malte0811.industrialWires.items.ItemPanelComponent;
+ import malte0811.industrialWires.mech_mb.EUCapability;
+ import malte0811.industrialWires.mech_mb.MechMBPart;
+ import malte0811.industrialWires.mech_mb.MultiblockMechMB;
  import malte0811.industrialWires.network.MessageGUIInteract;
  import malte0811.industrialWires.network.MessageItemSync;
  import malte0811.industrialWires.network.MessagePanelInteract;
@@ -73,9 +73,9 @@ package malte0811.industrialWires;
  import java.util.List;
 
  import static malte0811.industrialWires.blocks.wire.BlockTypes_IC2_Connector.*;
- import static malte0811.industrialWires.converter.MechMBPart.EXAMPLE_MECHMB_LOC;
  import static malte0811.industrialWires.entities.EntityBrokenPart.MARKER_TEXTURE;
  import static malte0811.industrialWires.entities.EntityBrokenPart.RES_LOC_SERIALIZER;
+ import static malte0811.industrialWires.mech_mb.MechMBPart.EXAMPLE_MECHMB_LOC;
  import static malte0811.industrialWires.wires.IC2Wiretype.*;
 
 @Mod(modid = IndustrialWires.MODID, version = IndustrialWires.VERSION, dependencies = "required-after:immersiveengineering@[0.12-77,);after:ic2",

@@ -23,7 +23,7 @@ import malte0811.industrialWires.containers.ContainerPanelComponent;
 import malte0811.industrialWires.containers.ContainerPanelCreator;
 import malte0811.industrialWires.containers.ContainerRSPanelConn;
 import malte0811.industrialWires.containers.ContainerRenameKey;
-import malte0811.industrialWires.converter.MechEnergy;
+import malte0811.industrialWires.mech_mb.MechEnergy;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;

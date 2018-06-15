@@ -45,13 +45,13 @@ import malte0811.industrialWires.client.manual.TextSplitter;
 import malte0811.industrialWires.client.panelmodel.PanelModelLoader;
 import malte0811.industrialWires.client.render.*;
 import malte0811.industrialWires.controlpanel.PanelComponent;
-import malte0811.industrialWires.converter.*;
 import malte0811.industrialWires.crafting.IC2TRHelper;
 import malte0811.industrialWires.entities.EntityBrokenPart;
 import malte0811.industrialWires.hv.MarxOreHandler;
 import malte0811.industrialWires.hv.MultiblockMarx;
 import malte0811.industrialWires.items.ItemIC2Coil;
 import malte0811.industrialWires.items.ItemPanelComponent;
+import malte0811.industrialWires.mech_mb.*;
 import malte0811.industrialWires.util.CommandIWClient;
 import malte0811.industrialWires.util.ConversionUtil;
 import malte0811.industrialWires.util.MiscUtils;
@@ -468,6 +468,8 @@ public class ClientProxy extends CommonProxy {
 
 	@Override
 	public void stopAllSoundsExcept(BlockPos pos, Set<?> excluded) {
+		IndustrialWires.logger.info("Stopping all except {} at {} (playing {})",
+				excluded, pos, playingSounds.get(pos));
 		if (playingSounds.containsKey(pos)) {
 			SoundHandler manager = Minecraft.getMinecraft().getSoundHandler();
 			List<ISound> sounds = playingSounds.get(pos);
