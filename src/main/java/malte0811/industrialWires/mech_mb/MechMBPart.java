@@ -128,9 +128,9 @@ public abstract class MechMBPart {
 		return null;
 	}
 
-	public boolean interact(@Nonnull EnumFacing side, @Nonnull Vec3i offset, @Nonnull EntityPlayer player,
-							@Nonnull EnumHand hand, @Nonnull ItemStack heldItem) {
-		return false;
+	public int interact(@Nonnull EnumFacing side, @Nonnull Vec3i offset, @Nonnull EntityPlayer player,
+						@Nonnull EnumHand hand, @Nonnull ItemStack heldItem) {
+		return -1;
 	}
 
 	public static final BiMap<String, Class<? extends MechMBPart>> REGISTRY = HashBiMap.create();

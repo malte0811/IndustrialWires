@@ -101,4 +101,24 @@ public class BlockMechanicalMB extends BlockIWMultiblock implements IMetaEnum {
 	public Object[] getValues() {
 		return TYPE.getAllowedValues().toArray();
 	}
+
+	@Override
+	public boolean eventReceived(IBlockState state, World worldIn, BlockPos pos, int id, int param) {
+		if ((id&255)==255) {
+			IBlockState s = worldIn.getBlockState(pos);
+			worldIn.notifyBlockUpdate(pos, s, s, 3);
+			if (param>=0) {
+				TileEntity te = worldIn.getTileEntity(pos);
+				if (te instanceof TileEntityMechMB && !((TileEntityMechMB) te).isLogicDummy()) {
+					int[] offsets = ((TileEntityMechMB) te).offsets;
+					if (offsets!=null && param<offsets.length) {
+						BlockPos otherPos = pos.offset(((TileEntityMechMB) te).getFacing(), -offsets[param]);
+						s = worldIn.getBlockState(otherPos);
+						worldIn.notifyBlockUpdate(otherPos, s, s, 3);
+					}
+				}
+			}
+		}
+    	return super.eventReceived(state, worldIn, pos, id, param);
+	}
 }

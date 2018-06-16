@@ -34,8 +34,10 @@ import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.common.model.IModelState;
+import net.minecraftforge.common.model.TRSRTransformation;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -46,6 +48,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @SideOnly(Side.CLIENT)
@@ -57,16 +60,14 @@ public class BakedMBIOModel implements IBakedModel {
 	static TextureAtlasSprite IO_TEX = null;
 
 	private final IBakedModel base;
-	private final int rotationInt;
-	private final Rotation rotation;
+	private final TRSRTransformation transform;
 
 	private final Cache<MBSideConfig, List<BakedQuad>> cache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.MINUTES)
 			.maximumSize(100).build();
 
-	BakedMBIOModel(IBakedModel base, int rotationOffset) {
+	BakedMBIOModel(IBakedModel base, IModelState transform) {
 		this.base = base;
-		this.rotationInt = rotationOffset;
-		this.rotation = Rotation.values()[rotationOffset];
+		this.transform = TRSRTransformation.blockCornerToCenter(transform.apply(Optional.empty()).orElse(TRSRTransformation.identity()));
 	}
 
 	@Nonnull
@@ -84,18 +85,16 @@ public class BakedMBIOModel implements IBakedModel {
 			if (IO_TEX==null) {
 				IO_TEX = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(IO_LOC.toString());
 			}
+			Matrix4 mat = new Matrix4(transform.getMatrix());
 			ret = new ArrayList<>(base.getQuads(state, side, rand));
 			for (Map.Entry<BlockFace, SideConfig> f:config.sides.entrySet()) {
 				if (f.getKey().face==null) {
 					continue;
 				}
-				BlockPos transformedPos = f.getKey().offset.rotate(rotation);
-				EnumFacing transformedFace = f.getKey().face;
-				if (transformedFace.getAxis()!=EnumFacing.Axis.Y) {
-					for (int i = 0; i < rotationInt; i++) {
-						transformedFace = transformedFace.rotateY();
-					}
-				}
+				Vec3d transformedPos = mat.apply(new Vec3d(f.getKey().offset));
+				EnumFacing transformedFace = transform.rotate(f.getKey().face);
+				IndustrialWires.logger.info("Transformed {} and {} to {} and {} ({})", f.getKey().offset, f.getKey().face,
+						transformedPos, transformedFace);
 				Vector3f[] verts = getVerticesFromFace(transformedPos, transformedFace);
 				RawQuad q = new RawQuad(verts[0], verts[1], verts[2], verts[3], transformedFace,
 						IO_TEX, new float[]{1, 1, 1, 1}, getNormal(transformedFace),
@@ -130,10 +129,10 @@ public class BakedMBIOModel implements IBakedModel {
 		return new Vector3f(in[0], in[1], in[2]);
 	}
 
-	private Vector3f[] getVerticesFromFace(BlockPos p, EnumFacing f) {
+	private Vector3f[] getVerticesFromFace(Vec3d p, EnumFacing f) {
 		Vector3f[] orig = VERTICES[f.ordinal()];
 		Vector3f[] ret = new Vector3f[4];
-		Vector3f offset = new Vector3f(p.getX(), p.getY(), p.getZ());
+		Vector3f offset = new Vector3f((float) p.x, (float) p.y, (float) p.z);
 		for (int i = 0; i < 4; i++) {
 			ret[i] = Vector3f.add(orig[i], offset, null);
 		}

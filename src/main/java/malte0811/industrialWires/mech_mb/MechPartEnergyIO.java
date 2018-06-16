@@ -169,8 +169,8 @@ public abstract class MechPartEnergyIO extends MechMBPart implements IMBPartElec
 	}
 
 	@Override
-	public boolean interact(@Nonnull EnumFacing side, @Nonnull Vec3i offset, @Nonnull EntityPlayer player,
-							@Nonnull EnumHand hand, @Nonnull ItemStack heldItem) {
+	public int interact(@Nonnull EnumFacing side, @Nonnull Vec3i offset, @Nonnull EntityPlayer player,
+						@Nonnull EnumHand hand, @Nonnull ItemStack heldItem) {
 		if (Utils.isHammer(heldItem)) {
 			BlockFace s = new BlockFace(new BlockPos(offset), side);
 			if (sides.isValid(s)) {
@@ -178,10 +178,10 @@ public abstract class MechPartEnergyIO extends MechMBPart implements IMBPartElec
 					sides.cycleSide(s);
 					world.markForUpdate(BlockPos.ORIGIN);
 				}
-				return true;
+				return 0b11;
 			}
 		}
-		return false;
+		return -1;
 	}
 
 	@Override

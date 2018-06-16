@@ -73,7 +73,6 @@ public class MBIOModelLoader implements ICustomModelLoader {
 		);
 		private ResourceLocation baseModel = new ResourceLocation(IndustrialWires.MODID, "missing");
 		private ImmutableMap<String, String> custom = ImmutableMap.of();
-		private int rotationOffset = 0;
 
 		@Nonnull
 		@Override
@@ -89,13 +88,14 @@ public class MBIOModelLoader implements ICustomModelLoader {
 
 		@Nonnull
 		@Override
+		@SideOnly(CLIENT)
 		public IBakedModel bake(@Nonnull IModelState state, @Nonnull VertexFormat format,
 								@Nonnull Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter) {
 			try {
 				IModel baseBaked = ModelLoaderRegistry.getModel(baseModel);
 				baseBaked = baseBaked.process(custom);
 				IBakedModel baked = baseBaked.bake(state, format, bakedTextureGetter);
-				BakedMBIOModel ret = new BakedMBIOModel(baked, rotationOffset);
+				BakedMBIOModel ret = new BakedMBIOModel(baked, state);
 				activeModels.add(ret);
 				return ret;
 			} catch (Exception e) {
@@ -110,10 +110,6 @@ public class MBIOModelLoader implements ICustomModelLoader {
 			MBIOModel ret = new MBIOModel();
 			String bm = customData.get("base_model");
 			ret.baseModel = new ResourceLocation(bm.substring(1, bm.length()-1));
-			String rotOffsetTmp = customData.get("rotation_offset");
-			if (rotOffsetTmp!=null) {
-				ret.rotationOffset = Integer.parseInt(rotOffsetTmp)&3;
-			}
 			ret.custom = customData;
 			return ret;
 		}

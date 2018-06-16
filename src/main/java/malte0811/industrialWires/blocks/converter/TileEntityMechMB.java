@@ -20,6 +20,7 @@ import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IPlayerIn
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IRedstoneOutput;
 import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0;
 import blusunrize.immersiveengineering.common.util.Utils;
+import com.google.common.collect.MapMaker;
 import ic2.api.energy.tile.IEnergyAcceptor;
 import ic2.api.energy.tile.IEnergyEmitter;
 import ic2.api.energy.tile.IEnergySink;
@@ -72,8 +73,9 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 	private static final double DECAY_BASE = Math.exp(Math.log(.95) / (60 * 60 * 20));
 	public static final double TICK_ANGLE_PER_SPEED = 180 / 20 / Math.PI;
 	private static final double SYNC_THRESHOLD = .95;
+	private static final Map<BlockPos, TileEntityMechMB> CLIENT_MASTER_BY_POS = new MapMaker().weakValues().makeMap();
 	public MechMBPart[] mechanical = null;
-	private int[] offsets = null;
+	public int[] offsets = null;
 
 	private int[][] electricalStartEnd = null;
 
@@ -90,7 +92,7 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 	@Override
 	public void update() {
 		ApiUtils.checkForNeedlessTicking(this);
-		if (firstTick) {
+		if (firstTick && !world.isRemote) {
 			Compat.loadIC2Tile.accept(this);
 			firstTick = false;
 		}
@@ -100,6 +102,9 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 		if (world.isRemote) {
 			angle += energyState.getSpeed() * TICK_ANGLE_PER_SPEED;
 			angle %= 360;
+			if (firstTick) {
+				CLIENT_MASTER_BY_POS.put(pos, this);
+			}
 			if (energyState.clientUpdate()||firstTick) {
 				IndustrialWires.proxy.updateMechMBTurningSound(this, energyState);
 				int otherEndOffset = offsets[offsets.length-1]+mechanical[mechanical.length-1].getLength();
@@ -108,8 +113,6 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 					IndustrialWires.proxy.updateMechMBTurningSound((TileEntityMechMB) otherEnd, energyState);
 				}
 			}
-		}
-		if (world.isRemote) {
 			return;
 		}
 		// Mechanical
@@ -226,9 +229,11 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 		}
 	}
 
-	public IBlockState getExtState(IBlockState in) {//TODO make this work with multithreading
+	public IBlockState getExtState(IBlockState in) {
+		TileEntityMechMB master = CLIENT_MASTER_BY_POS.get(pos.subtract(offset));
+		if (master==null)
+			return in;
 		Vec3i offsetDirectional = getOffsetDir();
-		TileEntityMechMB master = masterOr(this, this);
 		int id = getPart(offsetDirectional.getZ(), master);
 		if (id < 0) {
 			return in;
@@ -586,6 +591,8 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 	public void invalidate() {
 		if (!world.isRemote && !firstTick)
 			Compat.unloadIC2Tile.accept(this);
+		else if (world.isRemote)
+			CLIENT_MASTER_BY_POS.remove(pos);
 		firstTick = true;
 		super.invalidate();
 	}
@@ -595,7 +602,9 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 		super.onChunkUnload();
 		if (!world.isRemote && !firstTick)
 			Compat.unloadIC2Tile.accept(this);
-		firstTick = true;
+		else if (world.isRemote)
+			CLIENT_MASTER_BY_POS.remove(pos);
+ 		firstTick = true;
 	}
 
 	@Override
@@ -606,9 +615,14 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 		if (id >= 0) {
 			MechMBPart part = master.mechanical[id];
 			side = part.world.realToTransformed(side);
-			if (part.interact(side, getOffsetDir().add(0, 0, - master.offsets[id]),
-					player, hand, heldItem)) {
-				master.triggerRenderUpdate();
+			int ret = part.interact(side, getOffsetDir().add(0, 0, - master.offsets[id]),
+					player, hand, heldItem);
+			if (ret>=0) {
+				if ((ret&1)!=0) {
+					IBlockState state = world.getBlockState(master.pos);
+					world.notifyBlockUpdate(master.pos, state, state, 3);
+					world.addBlockEvent(master.pos, state.getBlock(), 255, id);
+				}
 				return true;
 			}
 		}

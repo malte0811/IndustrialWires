@@ -158,7 +158,7 @@ public class MechPartSpeedometer extends MechMBPart implements IRedstoneOutput {
 	private static DecimalFormat format = new DecimalFormat("###.000");
 
 	@Override
-	public boolean interact(@Nonnull EnumFacing side, @Nonnull Vec3i offset, @Nonnull EntityPlayer player, @Nonnull EnumHand hand, @Nonnull ItemStack heldItem) {
+	public int interact(@Nonnull EnumFacing side, @Nonnull Vec3i offset, @Nonnull EntityPlayer player, @Nonnull EnumHand hand, @Nonnull ItemStack heldItem) {
 		if (voltMeter.isEmpty()) {
 			voltMeter = new ItemStack(IEContent.itemTool, 1, ItemIETool.VOLTMETER_META);
 		}
@@ -176,7 +176,7 @@ public class MechPartSpeedometer extends MechMBPart implements IRedstoneOutput {
 								speedFor15RS));
 				update(true);
 			}
-			return true;
+			return 0;
 		} else if (OreDictionary.itemMatches(heldItem, voltMeter, false)) {
 			if (!world.isRemote) {
 				double speed = energy != null ? energy.getSpeed() : 0;
@@ -184,9 +184,9 @@ public class MechPartSpeedometer extends MechMBPart implements IRedstoneOutput {
 						new TextComponentTranslation(IndustrialWires.MODID + ".chat.currSpeed",
 								format.format(speed), format.format(speed * 60D / (2 * Math.PI))));
 			}
-			return true;
+			return 0;
 		}
-		return false;
+		return -1;
 	}
 
 	@Override

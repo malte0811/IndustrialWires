@@ -43,29 +43,25 @@
       "shaft_commutator": {
         "model": "industrialwires:mbio",
         "custom": {
-          "base_model": "industrialwires:block/mech_mb/commutator.obj",
-          "rotation_offset": 3
+          "base_model": "industrialwires:block/mech_mb/commutator.obj"
         }
       },
       "shaft_1_phase": {
         "model": "industrialwires:mbio",
         "custom": {
-          "base_model": "industrialwires:block/mech_mb/two_electrodes.obj",
-          "rotation_offset": 3
+          "base_model": "industrialwires:block/mech_mb/two_electrodes.obj"
         }
       },
       "shaft_commutator_4": {
         "model": "industrialwires:mbio",
         "custom": {
-          "base_model": "industrialwires:block/mech_mb/commutator4.obj",
-          "rotation_offset": 3
+          "base_model": "industrialwires:block/mech_mb/commutator4.obj"
         }
       },
       "shaft_4_phase": {
         "model": "industrialwires:mbio",
         "custom": {
-          "base_model": "industrialwires:block/mech_mb/four_electrodes.obj",
-          "rotation_offset": 3
+          "base_model": "industrialwires:block/mech_mb/four_electrodes.obj"
         }
       },
       "speedometer": {

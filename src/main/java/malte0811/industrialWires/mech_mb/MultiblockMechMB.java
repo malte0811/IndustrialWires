@@ -76,6 +76,8 @@ public class MultiblockMechMB implements MultiblockHandler.IMultiblock {
 
 	@Override
 	public boolean createStructure(World world, BlockPos pos, EnumFacing side, EntityPlayer player) {
+		if (side.getAxis().isVertical())
+			return false;
 		BlockPos.PooledMutableBlockPos mutPos = BlockPos.PooledMutableBlockPos.retain();
 		try {
 			LocalSidedWorld w = new LocalSidedWorld(world, pos, side.getOpposite(), false);
