@@ -15,22 +15,20 @@
 
 package malte0811.industrialWires.mech_mb;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
 import malte0811.industrialWires.IWConfig;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
 import malte0811.industrialWires.util.LocalSidedWorld;
+import malte0811.industrialWires.util.MBSideConfig.BlockFace;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.Set;
+import java.util.List;
 
 import static net.minecraft.util.EnumFacing.UP;
 import static net.minecraft.util.math.BlockPos.ORIGIN;
@@ -113,10 +111,10 @@ public class MechPartCommutator extends MechPartEnergyIO {
 		return false;
 	}
 
-	private static final ImmutableSet<Pair<BlockPos, EnumFacing>> outputs = ImmutableSet.of(
-			new ImmutablePair<>(ORIGIN, UP), new ImmutablePair<>(ORIGIN, null)
+	private static final List<BlockFace> outputs = ImmutableList.of(
+			new BlockFace(ORIGIN, UP)
 	);
-	public Set<Pair<BlockPos, EnumFacing>> getEnergyConnections() {
+	public List<BlockFace> getEnergyConnections() {
 		return outputs;
 	}
 

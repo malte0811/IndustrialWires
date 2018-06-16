@@ -19,6 +19,7 @@ import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.BlockIWBase;
 import malte0811.industrialWires.blocks.IMetaEnum;
 import malte0811.industrialWires.wires.IC2Wiretype;
+import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
@@ -37,6 +38,8 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -55,7 +58,7 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 	}
 
 	@Override
-	public void onNeighborChange(IBlockAccess world, BlockPos pos, BlockPos posNeighbor) {
+	public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn, BlockPos fromPos) {
 		TileEntity te = world.getTileEntity(pos);
 		if (te instanceof TileEntityIC2ConnectorTin) {
 			TileEntityIC2ConnectorTin connector = (TileEntityIC2ConnectorTin) te;
@@ -150,6 +153,7 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag advanced) {
 		super.addInformation(stack, world, tooltip, advanced);
 		if (!stack.isEmpty() && stack.getMetadata() % 2 == 0) {

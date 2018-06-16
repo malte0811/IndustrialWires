@@ -26,7 +26,6 @@ import com.google.common.collect.ImmutableSet;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.hv.MultiblockMarx;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
@@ -40,10 +39,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.util.vector.Vector3f;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiPredicate;
 
 public final class MiscUtils {
@@ -52,16 +48,16 @@ public final class MiscUtils {
 
 	public static List<BlockPos> discoverLocal(World w, BlockPos here, BiPredicate<BlockPos, Integer> isValid) {
 		List<BlockPos> ret = new ArrayList<>();
-		List<BlockPos> open = new ArrayList<>();
+		Queue<BlockPos> open = new ArrayDeque<>();
 		open.add(here);
 		while (!open.isEmpty()) {
-			BlockPos curr = open.get(0);
+			BlockPos curr = open.poll();
+			assert curr!=null;
 			ret.add(curr);
-			open.remove(0);
 			for (EnumFacing f : EnumFacing.VALUES) {
 				BlockPos next = curr.offset(f);
 				if (!open.contains(next) && !ret.contains(next) && isValid.test(next, ret.size())) {
-					open.add(next);
+					open.offer(next);
 				}
 			}
 		}
@@ -199,7 +195,7 @@ public final class MiscUtils {
 
 	public static void loadConnsFromNBT(NBTTagCompound nbt, TileEntity te) {
 		World world = te.getWorld();
-		if (world != null && world.isRemote && !Minecraft.getMinecraft().isSingleplayer() && nbt != null) {
+		if (world != null && world.isRemote && !IndustrialWires.proxy.isSingleplayer() && nbt != null) {
 			NBTTagList connectionList = nbt.getTagList("connectionList", 10);
 			ImmersiveNetHandler.INSTANCE.clearConnectionsOriginatingFrom(Utils.toCC(te), world);
 			for (int i = 0; i < connectionList.tagCount(); i++) {

@@ -17,8 +17,6 @@ package malte0811.industrialWires.mech_mb;
 
 
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public final class MechEnergy {
 	private double speed = 0;
@@ -66,14 +64,12 @@ public final class MechEnergy {
 	private int ticksTillReached = -1;
 
 	//ONLY USE FOR SYNCING
-	@SideOnly(Side.CLIENT)
 	public void setTargetSpeed(double speed) {
 		targetSpeed = speed;
 		oldSpeed = getSpeed();
 		ticksTillReached = TICKS_FOR_ADJUSTMENT;
 	}
 
-	@SideOnly(Side.CLIENT)
 	public boolean clientUpdate() {
 		if (ticksTillReached >= 0) {
 			speed = ((TICKS_FOR_ADJUSTMENT - ticksTillReached) * targetSpeed +

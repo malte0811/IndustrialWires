@@ -16,7 +16,6 @@
 package malte0811.industrialWires.mech_mb;
 
 import blusunrize.immersiveengineering.common.IEContent;
-import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IPlayerInteraction;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IRedstoneOutput;
 import blusunrize.immersiveengineering.common.items.ItemIETool;
 import blusunrize.immersiveengineering.common.util.ChatUtils;
@@ -35,6 +34,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.oredict.OreDictionary;
 
@@ -49,7 +49,7 @@ import static net.minecraft.util.EnumFacing.Axis.X;
 import static net.minecraft.util.EnumFacing.AxisDirection.POSITIVE;
 import static net.minecraft.util.math.BlockPos.ORIGIN;
 
-public class MechPartSpeedometer extends MechMBPart implements IPlayerInteraction, IRedstoneOutput {
+public class MechPartSpeedometer extends MechMBPart implements IRedstoneOutput {
 	private double speedFor15RS = 2 * Waveform.EXTERNAL_SPEED;
 	private int currentOutputLin = -1;
 	private int currentOutputLog = -1;
@@ -156,9 +156,9 @@ public class MechPartSpeedometer extends MechMBPart implements IPlayerInteractio
 
 	private static ItemStack voltMeter = ItemStack.EMPTY;
 	private static DecimalFormat format = new DecimalFormat("###.000");
+
 	@Override
-	public boolean interact(@Nonnull EnumFacing side, @Nonnull EntityPlayer player, @Nonnull EnumHand hand,
-							@Nonnull ItemStack heldItem, float hitX, float hitY, float hitZ) {
+	public boolean interact(@Nonnull EnumFacing side, @Nonnull Vec3i offset, @Nonnull EntityPlayer player, @Nonnull EnumHand hand, @Nonnull ItemStack heldItem) {
 		if (voltMeter.isEmpty()) {
 			voltMeter = new ItemStack(IEContent.itemTool, 1, ItemIETool.VOLTMETER_META);
 		}

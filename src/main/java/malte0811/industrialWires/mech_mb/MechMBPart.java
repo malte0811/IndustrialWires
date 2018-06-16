@@ -32,19 +32,23 @@ import malte0811.industrialWires.util.MiscUtils;
 import malte0811.industrialWires.util.MultiblockTemplateManual;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nonnull;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -73,6 +77,10 @@ public abstract class MechMBPart {
 	public abstract double getMaxSpeed();
 	public abstract void writeToNBT(NBTTagCompound out);
 	public abstract void readFromNBT(NBTTagCompound in);
+
+	public IBlockState getExtState(IBlockState in) {
+		return in;
+	}
 
 	@SideOnly(Side.CLIENT)
 	public List<BakedQuad> getRotatingQuads() {
@@ -118,6 +126,11 @@ public abstract class MechMBPart {
 
 	public <T> T getCapability(Capability<T> cap, EnumFacing side, BlockPos pos) {
 		return null;
+	}
+
+	public boolean interact(@Nonnull EnumFacing side, @Nonnull Vec3i offset, @Nonnull EntityPlayer player,
+							@Nonnull EnumHand hand, @Nonnull ItemStack heldItem) {
+		return false;
 	}
 
 	public static final BiMap<String, Class<? extends MechMBPart>> REGISTRY = HashBiMap.create();

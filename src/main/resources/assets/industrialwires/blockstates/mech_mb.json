@@ -37,20 +37,36 @@
       "coil_1_phase": {
         "model": "industrialwires:mech_mb/mag_ring.obj"
       },
-      "shaft_commutator": {
-        "model": "industrialwires:mech_mb/commutator.obj"
-      },
-      "shaft_1_phase": {
-        "model": "industrialwires:mech_mb/two_electrodes.obj"
-      },
       "coil_4_phase": {
         "model": "industrialwires:mech_mb/mag_ring.obj"
       },
+      "shaft_commutator": {
+        "model": "industrialwires:mbio",
+        "custom": {
+          "base_model": "industrialwires:block/mech_mb/commutator.obj",
+          "rotation_offset": 3
+        }
+      },
+      "shaft_1_phase": {
+        "model": "industrialwires:mbio",
+        "custom": {
+          "base_model": "industrialwires:block/mech_mb/two_electrodes.obj",
+          "rotation_offset": 3
+        }
+      },
       "shaft_commutator_4": {
-        "model": "industrialwires:mech_mb/commutator4.obj"
+        "model": "industrialwires:mbio",
+        "custom": {
+          "base_model": "industrialwires:block/mech_mb/commutator4.obj",
+          "rotation_offset": 3
+        }
       },
       "shaft_4_phase": {
-        "model": "industrialwires:mech_mb/four_electrodes.obj"
+        "model": "industrialwires:mbio",
+        "custom": {
+          "base_model": "industrialwires:block/mech_mb/four_electrodes.obj",
+          "rotation_offset": 3
+        }
       },
       "speedometer": {
         "model": "industrialwires:mech_mb/speedometer.obj"

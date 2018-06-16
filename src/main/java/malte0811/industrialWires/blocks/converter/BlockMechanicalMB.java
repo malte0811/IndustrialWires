@@ -18,15 +18,21 @@ package malte0811.industrialWires.blocks.converter;
 import blusunrize.immersiveengineering.api.IEProperties;
 import malte0811.industrialWires.blocks.BlockIWMultiblock;
 import malte0811.industrialWires.blocks.IMetaEnum;
+import malte0811.industrialWires.blocks.IWProperties;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.common.property.ExtendedBlockState;
+import net.minecraftforge.common.property.IUnlistedProperty;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -49,6 +55,25 @@ public class BlockMechanicalMB extends BlockIWMultiblock implements IMetaEnum {
                 IEProperties.FACING_HORIZONTAL, TYPE
         };
     }
+
+	@Nonnull
+	@Override
+	protected BlockStateContainer createBlockState() {
+		BlockStateContainer base = super.createBlockState();
+		return new ExtendedBlockState(this, base.getProperties().toArray(new IProperty[0]), new IUnlistedProperty[]{
+				IWProperties.MB_SIDES
+		});
+	}
+
+	@Nonnull
+	@Override
+	public IBlockState getExtendedState(@Nonnull IBlockState state, IBlockAccess world, BlockPos pos) {
+		TileEntity te = world.getTileEntity(pos);
+		state = super.getExtendedState(state, world, pos);
+		if (te instanceof TileEntityMechMB)
+			state = ((TileEntityMechMB) te).getExtState(state);
+		return state;
+	}
 
 	@Override
 	public boolean hasTileEntity(IBlockState state) {

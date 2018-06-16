@@ -15,23 +15,35 @@
 
 package malte0811.industrialWires.mech_mb;
 
+import blusunrize.immersiveengineering.api.IEEnums.SideConfig;
+import blusunrize.immersiveengineering.common.util.Utils;
 import malte0811.industrialWires.IWConfig;
+import malte0811.industrialWires.blocks.IWProperties;
 import malte0811.industrialWires.mech_mb.EUCapability.IC2EnergyHandler;
 import malte0811.industrialWires.util.ConversionUtil;
+import malte0811.industrialWires.util.MBSideConfig;
+import malte0811.industrialWires.util.MBSideConfig.BlockFace;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3i;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.property.IExtendedBlockState;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.Set;
+import javax.annotation.Nonnull;
+import java.util.List;
 
+import static blusunrize.immersiveengineering.api.IEEnums.SideConfig.INPUT;
+import static blusunrize.immersiveengineering.api.IEEnums.SideConfig.OUTPUT;
 import static malte0811.industrialWires.mech_mb.EUCapability.ENERGY_IC2;
-import static malte0811.industrialWires.mech_mb.MechPartEnergyIO.IOState.*;
 import static malte0811.industrialWires.mech_mb.Waveform.Phases.get;
 import static malte0811.industrialWires.mech_mb.Waveform.Speed.EXTERNAL;
 import static malte0811.industrialWires.mech_mb.Waveform.Speed.ROTATION;
@@ -45,10 +57,9 @@ public abstract class MechPartEnergyIO extends MechMBPart implements IMBPartElec
 	private Waveform wfToMB = Waveform.forParameters(NONE, get(has4Phases()), ROTATION);
 	private double bufferToWorld;
 	private Waveform wfToWorld = Waveform.forParameters(NONE, get(has4Phases()), ROTATION);
-	private final IEnergyStorage capForge = new EnergyStorageMMB();
-	private final IC2EnergyHandler capIc2 = new IC2EHandlerMB();
-	private IOState lastIOState = NO_TRANSFER;
-	private long lastStateChange = Long.MIN_VALUE;
+	private final IEnergyStorage[] capForge = {new EnergyStorageMMB(INPUT), new EnergyStorageMMB(OUTPUT)};
+	private final IC2EnergyHandler[] capIc2 = {new IC2EHandlerMB(INPUT), new IC2EHandlerMB(OUTPUT)};
+	private MBSideConfig sides = new MBSideConfig(getEnergyConnections());
 
 	@Override
 	public Waveform getProduced(MechEnergy state) {
@@ -84,25 +95,16 @@ public abstract class MechPartEnergyIO extends MechMBPart implements IMBPartElec
 		bufferToWorld += given;
 	}
 
-	public void setLastIOState(IOState state) {
-		if (lastIOState.canSwitchTo(state)) {
-			lastIOState = state;
-			lastStateChange = world.getWorld().getTotalWorldTime();
-		}
-	}
-
-	public IOState getLastIOState() {
-		return lastIOState;
-	}
-
 	@Override
 	public <T> T getCapability(Capability<T> cap, EnumFacing side, BlockPos pos) {
-		if (getEnergyConnections().contains(new ImmutablePair<>(pos, side))) {
+		BlockFace s = new BlockFace(pos, side);
+		SideConfig conf = sides.getConfigForFace(s);
+		if (conf!=SideConfig.NONE) {
 			if (cap == ENERGY_IC2) {
-				return ENERGY_IC2.cast(capIc2);
+				return ENERGY_IC2.cast(capIc2[conf.ordinal()-1]);
 			}
 			if (cap == ENERGY) {
-				return ENERGY.cast(capForge);
+				return ENERGY.cast(capForge[conf.ordinal()-1]);
 			}
 		}
 		return super.getCapability(cap, side, pos);
@@ -110,7 +112,7 @@ public abstract class MechPartEnergyIO extends MechMBPart implements IMBPartElec
 
 	@Override
 	public <T> boolean hasCapability(Capability<T> cap, EnumFacing side, BlockPos pos) {
-		if (getEnergyConnections().contains(new ImmutablePair<>(pos, side))) {
+		if (sides.getConfigForFace(new BlockFace(pos, side))!=SideConfig.NONE) {
 			if (cap == ENERGY_IC2) {
 				return true;
 			}
@@ -131,9 +133,6 @@ public abstract class MechPartEnergyIO extends MechMBPart implements IMBPartElec
 
 	@Override
 	public void insertMEnergy(double added) {
-		if (world.getWorld().getTotalWorldTime()>lastStateChange+1) {
-			setLastIOState(NO_TRANSFER);
-		}
 		int available = (int) (Math.min(ConversionUtil.ifPerJoule() * bufferToWorld,
 				getMaxBuffer()/getEnergyConnections().size()));
 		if (available > 0 && wfToWorld.isAC()) {//The IC2 net will deal with DC by itself
@@ -157,6 +156,7 @@ public abstract class MechPartEnergyIO extends MechMBPart implements IMBPartElec
 		out.setDouble(BUFFER_OUT, bufferToWorld);
 		out.setString(BUFFER_IN+WAVEFORM, wfToMB.serializeToString());
 		out.setString(BUFFER_OUT+WAVEFORM, wfToWorld.serializeToString());
+		out.setTag(SIDE_CONFIG, sides.toNBT(getEnergyConnections()));
 	}
 
 	@Override
@@ -165,24 +165,48 @@ public abstract class MechPartEnergyIO extends MechMBPart implements IMBPartElec
 		bufferToWorld = in.getDouble(BUFFER_OUT);
 		wfToMB = Waveform.fromString(in.getString(BUFFER_IN+WAVEFORM));
 		wfToWorld = Waveform.fromString(in.getString(BUFFER_OUT+WAVEFORM));
+		sides = new MBSideConfig(getEnergyConnections(), in.getTagList(SIDE_CONFIG, Constants.NBT.TAG_INT));
+	}
+
+	@Override
+	public boolean interact(@Nonnull EnumFacing side, @Nonnull Vec3i offset, @Nonnull EntityPlayer player,
+							@Nonnull EnumHand hand, @Nonnull ItemStack heldItem) {
+		if (Utils.isHammer(heldItem)) {
+			BlockFace s = new BlockFace(new BlockPos(offset), side);
+			if (sides.isValid(s)) {
+				if (!world.isRemote) {
+					sides.cycleSide(s);
+					world.markForUpdate(BlockPos.ORIGIN);
+				}
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public IBlockState getExtState(IBlockState in) {
+		in = super.getExtState(in);
+		if (in instanceof IExtendedBlockState) {
+			in = ((IExtendedBlockState) in).withProperty(IWProperties.MB_SIDES, sides);
+		}
+		return in;
 	}
 
 	protected abstract double getMaxBuffer();
 
 	protected abstract boolean has4Phases();
 
-	public abstract Set<Pair<BlockPos, EnumFacing>> getEnergyConnections();
+	public abstract List<BlockFace> getEnergyConnections();
 
 	private double outputFE(int available) {
-		if (!getLastIOState().canSwitchToOutput())
-			return 0;
 		double extracted = 0;
-		for (Pair<BlockPos, EnumFacing> output : getEnergyConnections()) {
-			if (output.getRight()==null)
+		for (BlockFace output : getEnergyConnections()) {
+			if (output.face==null||sides.getConfigForFace(output)!=OUTPUT)
 				continue;
-			BlockPos outTE = output.getLeft().offset(output.getRight());
+			BlockPos outTE = output.offset.offset(output.face);
 			TileEntity te = world.getTileEntity(outTE);
-			EnumFacing sideReal = world.transformedToReal(output.getRight()).getOpposite();
+			EnumFacing sideReal = world.transformedToReal(output.face).getOpposite();
 			if (te != null && te.hasCapability(CapabilityEnergy.ENERGY, sideReal)) {
 				IEnergyStorage energy = te.getCapability(CapabilityEnergy.ENERGY, sideReal);
 				if (energy != null && energy.canReceive()) {
@@ -192,15 +216,18 @@ public abstract class MechPartEnergyIO extends MechMBPart implements IMBPartElec
 				}
 			}
 		}
-		if (extracted>0) {
-			setLastIOState(IOState.OUTPUT);
-		}
 		return extracted;
 	}
 
 	class IC2EHandlerMB extends IC2EnergyHandler {
+		private SideConfig type;
+
 		{
 			tier = 3;//TODO does this mean everything blows up?
+		}
+
+		IC2EHandlerMB(SideConfig type) {
+			this.type = type;
 		}
 
 		@Override
@@ -214,24 +241,23 @@ public abstract class MechPartEnergyIO extends MechMBPart implements IMBPartElec
 			buffer += input;
 			bufferToMB = buffer;
 			wfToMB = Waveform.forParameters(DC, get(has4Phases()), EXTERNAL);
-			setLastIOState(INPUT);
 			return amount-ConversionUtil.euPerJoule()*input;
 		}
 
 		@Override
 		public double getOfferedEnergy() {
-			if (wfToWorld.isDC() && getLastIOState().canSwitchToOutput()) {
+			if (wfToWorld.isDC() && type==OUTPUT) {
 				return Math.min(ConversionUtil.euPerJoule()*bufferToWorld,
-						ConversionUtil.euPerJoule()*getMaxBuffer())/getEnergyConnections().size()*2;
+						ConversionUtil.euPerJoule()*getMaxBuffer())/getEnergyConnections().size();
 			}
 			return 0;
 		}
 
 		@Override
 		public double getDemandedEnergy() {
-			if (getLastIOState().canSwitchToInput()) {
+			if (type==INPUT) {
 				return Math.min(ConversionUtil.euPerJoule()*(getMaxBuffer()-bufferToMB),
-						ConversionUtil.euPerJoule()*getMaxBuffer())/getEnergyConnections().size()*2;
+						ConversionUtil.euPerJoule()*getMaxBuffer())/getEnergyConnections().size();
 			}
 			return 0;
 		}
@@ -239,14 +265,19 @@ public abstract class MechPartEnergyIO extends MechMBPart implements IMBPartElec
 		@Override
 		public void drawEnergy(double amount) {
 			bufferToWorld -= ConversionUtil.joulesPerEu()*amount;
-			setLastIOState(OUTPUT);
 		}
-	};
+	}
 
 	class EnergyStorageMMB implements IEnergyStorage {
+		private SideConfig type;
+
+		EnergyStorageMMB(SideConfig type) {
+			this.type = type;
+		}
+
 		@Override
 		public int receiveEnergy(int maxReceive, boolean simulate) {
-			if (!getLastIOState().canSwitchToInput()) {
+			if (type!=INPUT) {
 				return 0;
 			}
 			double buffer = bufferToMB;
@@ -259,16 +290,13 @@ public abstract class MechPartEnergyIO extends MechMBPart implements IMBPartElec
 			if (!simulate) {
 				bufferToMB = buffer;
 				wfToMB = Waveform.forParameters(Waveform.Type.AC, get(has4Phases()), EXTERNAL);
-				if (input > 0) {
-					setLastIOState(INPUT);
-				}
 			}
 			return (int) (ConversionUtil.ifPerJoule() * input);
 		}
 
 		@Override
 		public int extractEnergy(int maxExtract, boolean simulate) {
-			if (!wfToWorld.isAC() || !getLastIOState().canSwitchToOutput()) {
+			if (!wfToWorld.isAC() || type!=OUTPUT) {
 				return 0;
 			}
 			double buffer = bufferToWorld;
@@ -277,9 +305,6 @@ public abstract class MechPartEnergyIO extends MechMBPart implements IMBPartElec
 			buffer -= output;
 			if (!simulate) {
 				bufferToWorld = buffer;
-				if (output > 0) {
-					setLastIOState(OUTPUT);
-				}
 			}
 			return (int) (ConversionUtil.ifPerJoule() * output);
 		}
@@ -301,32 +326,6 @@ public abstract class MechPartEnergyIO extends MechMBPart implements IMBPartElec
 
 		@Override
 		public boolean canReceive() {
-			return true;
-		}
-	}
-
-	enum IOState {
-		NO_TRANSFER,
-		OUTPUT,
-		INPUT;
-
-		boolean canSwitchToOutput() {
-			return NO_TRANSFER ==this||OUTPUT==this;
-		}
-
-		boolean canSwitchToInput() {
-			return NO_TRANSFER ==this||INPUT==this;
-		}
-
-		public boolean canSwitchTo(IOState state) {
-			switch (state) {
-				case NO_TRANSFER:
-					return true;
-				case OUTPUT:
-					return canSwitchToOutput();
-				case INPUT:
-					return canSwitchToInput();
-			}
 			return true;
 		}
 	}

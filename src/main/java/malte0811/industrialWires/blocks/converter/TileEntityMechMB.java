@@ -83,7 +83,6 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 	public double angle;
 	@SideOnly(Side.CLIENT)
 	public List<BakedQuad> rotatingModel;
-	private boolean shouldInitWorld;
 	private boolean firstTick = true;
 	// To allow changing the MB structure later on without resulting in dupes/conversion
 	private int structureVersion = 0;
@@ -227,6 +226,17 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 		}
 	}
 
+	public IBlockState getExtState(IBlockState in) {//TODO make this work with multithreading
+		Vec3i offsetDirectional = getOffsetDir();
+		TileEntityMechMB master = masterOr(this, this);
+		int id = getPart(offsetDirectional.getZ(), master);
+		if (id < 0) {
+			return in;
+		}
+		MechMBPart part = master.mechanical[id];
+		return part.getExtState(in);
+	}
+
 	//return value is maximized to choose the waveform to use
 	private double transferElectric(int[] section, double[] available, Waveform[] availableWf, Waveform waveform,
 									double[] requested, boolean simulate) {
@@ -240,19 +250,37 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 			}
 			totalRequested += requested[i];
 		}
-		double extractFactor = Math.min(1, totalRequested / totalAvailable);
-		double insertFactor = Math.min(1, totalAvailable / totalRequested);
-		double totalTransf = 0;
+		double[] ins = new double[section[1]-section[0]];
+		double[] extracted = new double[section[1]-section[0]];
 		for (int i = section[0]; i < section[1]; i++) {
 			int i0 = i - section[0];
-			double ins = requested[i0] * insertFactor;
+			double otherRequests = totalRequested-requested[i0];
+			double extractFactor = Math.min(1, otherRequests / totalAvailable);
 			double extr = available[i0] * extractFactor;
+			if (extr==0) {
+				continue;
+			}
+			for (int j = 0;j<section[1]-section[0];j++) {
+				if (j!=i0) {
+					ins[j] += extr*(requested[j]/otherRequests);
+				}
+			}
+			extracted[i0] = extr;
 			if (!simulate) {
 				IMBPartElectric electric = (IMBPartElectric) mechanical[i];
-				electric.insertEEnergy(ins, waveform, energyState);
 				electric.extractEEnergy(extr);
 			}
-			totalTransf += Math.abs(ins - extr);
+		}
+		if (!simulate) {
+			for (int i = section[0]; i < section[1]; i++) {
+				int i0 = i - section[0];
+				IMBPartElectric electric = (IMBPartElectric) mechanical[i];
+				electric.insertEEnergy(ins[i0], waveform, energyState);
+			}
+		}
+		double totalTransf = 0;
+		for (int i = 0; i < section[1] - section[0]; i++) {
+			totalTransf += Math.abs(ins[i]-extracted[i]);
 		}
 		return totalTransf;
 	}
@@ -284,9 +312,6 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 				offset += mech[i].getLength();
 			}
 			setMechanical(mech, in.getDouble(SPEED));
-			if (world == null) {
-				shouldInitWorld = true;
-			}
 		}
 		structureVersion = in.getInteger(VERSION);
 		rBB = null;
@@ -363,6 +388,7 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void onSync(NBTTagCompound nbt) {
 		energyState.setTargetSpeed(nbt.getDouble(SPEED));
 	}
@@ -577,13 +603,19 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 							@Nonnull ItemStack heldItem, float hitX, float hitY, float hitZ) {
 		TileEntityMechMB master = masterOr(this, this);
 		int id = getPart(getOffsetDir().getZ(), master);
-		if (id >= 0 && master.mechanical[id] instanceof IPlayerInteraction) {
-			return ((IPlayerInteraction) master.mechanical[id]).interact(side, player, hand, heldItem, hitX, hitY, hitZ);
+		if (id >= 0) {
+			MechMBPart part = master.mechanical[id];
+			side = part.world.realToTransformed(side);
+			if (part.interact(side, getOffsetDir().add(0, 0, - master.offsets[id]),
+					player, hand, heldItem)) {
+				master.triggerRenderUpdate();
+				return true;
+			}
 		}
 		return false;
 	}
 
-	private Vec3i getOffsetDir() {
+	private BlockPos getOffsetDir() {
 		BlockPos offset = getOffset(BlockPos.NULL_VECTOR, facing, mirrored, this.offset);
 		return new BlockPos(offset.getX(), offset.getZ(), offset.getY());
 	}

@@ -42,6 +42,7 @@ import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import malte0811.industrialWires.client.gui.GuiRSPanelConn;
 import malte0811.industrialWires.client.gui.GuiRenameKey;
 import malte0811.industrialWires.client.manual.TextSplitter;
+import malte0811.industrialWires.client.multiblock_io_model.MBIOModelLoader;
 import malte0811.industrialWires.client.panelmodel.PanelModelLoader;
 import malte0811.industrialWires.client.render.*;
 import malte0811.industrialWires.controlpanel.PanelComponent;
@@ -132,6 +133,7 @@ public class ClientProxy extends CommonProxy {
 
 		OBJLoader.INSTANCE.addDomain(IndustrialWires.MODID);
 		ModelLoaderRegistry.registerLoader(new PanelModelLoader());
+		ModelLoaderRegistry.registerLoader(new MBIOModelLoader());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityJacobsLadder.class, new TileRenderJacobsLadder());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMarx.class, new TileRenderMarx());
 		TileRenderMechMB tesr = new TileRenderMechMB();
@@ -485,6 +487,11 @@ public class ClientProxy extends CommonProxy {
 				playingSounds.remove(pos);
 			}
 		}
+	}
+
+	@Override
+	public boolean isSingleplayer() {
+		return Minecraft.getMinecraft().isSingleplayer();
 	}
 
 	@Override

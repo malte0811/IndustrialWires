@@ -116,7 +116,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 
 	@Override
 	@Nonnull
-	public ItemStack getTileDrop(@Nonnull EntityPlayer player, @Nonnull IBlockState state) {
+	public ItemStack getTileDrop(@Nullable EntityPlayer player, @Nonnull IBlockState state) {
 		NBTTagCompound ret = new NBTTagCompound();
 		writeToItemNBT(ret, true);
 		ItemStack retStack = new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.TOP.ordinal());

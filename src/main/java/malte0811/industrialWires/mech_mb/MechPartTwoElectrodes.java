@@ -15,20 +15,18 @@
 
 package malte0811.industrialWires.mech_mb;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
 import malte0811.industrialWires.IWConfig;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
 import malte0811.industrialWires.util.LocalSidedWorld;
+import malte0811.industrialWires.util.MBSideConfig.BlockFace;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.Set;
+import java.util.List;
 
 import static blusunrize.immersiveengineering.common.IEContent.blockMetalDecoration0;
 import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.GENERATOR;
@@ -71,10 +69,10 @@ public class MechPartTwoElectrodes extends MechPartEnergyIO {
 		return MechanicalMBBlockType.SHAFT_1_PHASE;
 	}
 
-	private static final ImmutableSet<Pair<BlockPos, EnumFacing>> outputs = ImmutableSet.of(
-			new ImmutablePair<>(ORIGIN, UP)
+	private static final List<BlockFace> outputs = ImmutableList.of(
+			new BlockFace(ORIGIN, UP)
 	);
-	public Set<Pair<BlockPos, EnumFacing>> getEnergyConnections() {
+	public List<BlockFace> getEnergyConnections() {
 		return outputs;
 	}
 

@@ -86,4 +86,8 @@ public class CommonProxy implements IGuiHandler {
 	public void updateMechMBTurningSound(TileEntityMechMB te, MechEnergy energy) {}
 
 	public void stopAllSoundsExcept(BlockPos pos, Set<?> excluded) {}
+
+	public boolean isSingleplayer() {
+		return false;
+	}
 }

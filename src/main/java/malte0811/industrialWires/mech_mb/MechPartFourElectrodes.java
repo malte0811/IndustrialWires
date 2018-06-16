@@ -15,21 +15,19 @@
 
 package malte0811.industrialWires.mech_mb;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
 import malte0811.industrialWires.IWConfig;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
 import malte0811.industrialWires.util.LocalSidedWorld;
+import malte0811.industrialWires.util.MBSideConfig.BlockFace;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.Set;
+import java.util.List;
 
 import static net.minecraft.util.EnumFacing.EAST;
 import static net.minecraft.util.EnumFacing.WEST;
@@ -64,14 +62,15 @@ public class MechPartFourElectrodes extends MechPartTwoElectrodes {
 		return 0b000_111_101;
 	}
 
-	private static final Set<Pair<BlockPos, EnumFacing>> outputs = ImmutableSet.of(
-			new ImmutablePair<>(new BlockPos(1, 0, 0), EAST),
-			new ImmutablePair<>(new BlockPos(1, -1, 0), EAST),
-			new ImmutablePair<>(new BlockPos(-1, 0, 0), WEST),
-			new ImmutablePair<>(new BlockPos(-1, -1, 0), WEST)
+
+	private static final List<BlockFace> outputs = ImmutableList.of(
+			new BlockFace(new BlockPos(1, 0, 0), EAST),
+			new BlockFace(new BlockPos(1, -1, 0), EAST),
+			new BlockFace(new BlockPos(-1, 0, 0), WEST),
+			new BlockFace(new BlockPos(-1, -1, 0), WEST)
 	);
 	@Override
-	public Set<Pair<BlockPos, EnumFacing>> getEnergyConnections() {
+	public List<BlockFace> getEnergyConnections() {
 		return outputs;
 	}
 

@@ -15,12 +15,15 @@
 
 package malte0811.industrialWires.blocks;
 
+import malte0811.industrialWires.util.MBSideConfig;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.util.IStringSerializable;
+import net.minecraftforge.common.property.IUnlistedProperty;
 
 public final class IWProperties {
 	private IWProperties() {}
-	public static PropertyEnum<MarxType> MARX_TYPE = PropertyEnum.create("marx_type", MarxType.class);
+	public static final PropertyEnum<MarxType> MARX_TYPE = PropertyEnum.create("marx_type", MarxType.class);
+	public static final IUnlistedProperty<MBSideConfig> MB_SIDES = new MBSideConfigProperty();
 	public enum MarxType implements IStringSerializable {
 		NO_MODEL,
 		BOTTOM,
@@ -31,6 +34,29 @@ public final class IWProperties {
 		@Override
 		public String getName() {
 			return name().toLowerCase();
+		}
+	}
+
+	public static class MBSideConfigProperty implements IUnlistedProperty<MBSideConfig> {
+
+		@Override
+		public String getName() {
+			return "mb_side";
+		}
+
+		@Override
+		public boolean isValid(MBSideConfig value) {
+			return value!=null;
+		}
+
+		@Override
+		public Class<MBSideConfig> getType() {
+			return MBSideConfig.class;
+		}
+
+		@Override
+		public String valueToString(MBSideConfig value) {
+			return value.toString();
 		}
 	}
 }
