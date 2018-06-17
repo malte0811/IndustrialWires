@@ -271,8 +271,6 @@ public class ClientProxy extends CommonProxy {
 				(s) -> new ManualPageMultiblock(m, s,
 						MultiblockMarx.INSTANCE));
 		splitter.split(text);
-		m.entryRenderPost();
-		m.fontRenderer.setUnicodeFlag(uni);
 		List<IManualPage> marxEntry = splitter.toManualEntry();
 		m.addEntry("industrialwires.marx", IndustrialWires.MODID, marxEntry.toArray(new IManualPage[0]));
 
@@ -280,12 +278,7 @@ public class ClientProxy extends CommonProxy {
 		splitter = new TextSplitter(m);
 		splitter.addSpecialPage(0, 0, 8, (s) -> new ManualPageMultiblock(m, s,
 				MiscUtils.getMBFromName(MechMBPart.EXAMPLE_MECHMB_LOC.toString())));
-		uni = m.fontRenderer.getUnicodeFlag();
-		m.fontRenderer.setUnicodeFlag(true);
-		m.entryRenderPre();
 		splitter.split(text);
-		m.entryRenderPost();
-		m.fontRenderer.setUnicodeFlag(uni);
 		List<IManualPage> mechMBEntry = splitter.toManualEntry();
 		m.addEntry("industrialwires.mech_mb", IndustrialWires.MODID, mechMBEntry.toArray(new IManualPage[0]));
 
@@ -300,24 +293,25 @@ public class ClientProxy extends CommonProxy {
 			}
 			flywheelTable = flywheelTableList.toArray(new String[0][]);
 		}
-
-		List<IManualPage> partsEntry = new ArrayList<>(ImmutableList.of(
-				new ManualPages.Text(m, "industrialwires.mech_mb_parts.shaft"),
-				new ManualPageMultiblock(m, "industrialwires.mech_mb_parts.flywheel",
-						MechMBPart.getManualMBForPart(MechPartFlywheel.class)),
-				new ManualPages.Table(m, "", flywheelTable, true),
-				new ManualPageMultiblock(m, "industrialwires.mech_mb_parts.coils0",
-						MechMBPart.getManualMBForPart(MechPartSingleCoil.class)),
-				new ManualPages.Text(m, "industrialwires.mech_mb_parts.coils1"),
-				new ManualPageMultiblock(m, "industrialwires.mech_mb_parts.electrodes",
-						MechMBPart.getManualMBForPart(MechPartFourElectrodes.class)),
-				new ManualPages.Text(m, "industrialwires.mech_mb_parts.speedometer0"),
-				new ManualPages.Text(m, "industrialwires.mech_mb_parts.speedometer1")));
+		text = I18n.format("ie.manual.entry.industrialwires.mech_mb_parts");
+		splitter = new TextSplitter(m);
+		splitter.addSpecialPage(0, 0, 10, (s) -> new ManualPageMultiblock(m, s,
+				MechMBPart.getManualMBForPart(MechPartFlywheel.class)));
+		splitter.addSpecialPage(1, 0, 1, s->new ManualPages.Table(m, "", flywheelTable, true));
+		splitter.addSpecialPage(2, 0, 10, (s) -> new ManualPageMultiblock(m, s,
+				MechMBPart.getManualMBForPart(MechPartSingleCoil.class)));
+		splitter.addSpecialPage(3, 0, 10, (s) -> new ManualPageMultiblock(m, s,
+				MechMBPart.getManualMBForPart(MechPartFourElectrodes.class)));
 		if (IWConfig.MechConversion.allowMBEU()) {
-			partsEntry.add(new ManualPageMultiblock(m, "industrialwires.mech_mb_parts.commutator",
+			text += I18n.format("ie.manual.entry.industrialwires.mech_mb_parts.commutator");
+			splitter.addSpecialPage(4, 0, 10, (s) -> new ManualPageMultiblock(m, s,
 					MechMBPart.getManualMBForPart(MechPartCommutator4Phase.class)));
 		}
+		splitter.split(text);
+		List<IManualPage> partsEntry = splitter.toManualEntry();
 		m.addEntry("industrialwires.mech_mb_parts", IndustrialWires.MODID, partsEntry.toArray(new IManualPage[0]));
+		m.entryRenderPost();
+		m.fontRenderer.setUnicodeFlag(uni);
 
 		ClientCommandHandler.instance.registerCommand(new CommandIWClient());
 	}

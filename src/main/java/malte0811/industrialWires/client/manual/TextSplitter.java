@@ -84,7 +84,7 @@ public class TextSplitter {
 		String[] wordsAndSpaces = splitWhitespace(in);
 		int pos = 0;
 		List<String> overflow = new ArrayList<>();
-		updateSpecials(-1, 0, 0);
+		updateSpecials(-1, 0, 0, -1);
 		entry:
 		while (pos < wordsAndSpaces.length) {
 			List<String> page = new ArrayList<>(overflow);
@@ -109,12 +109,12 @@ public class TextSplitter {
 							int pageForId = entry.size();
 							Map<Integer, Page> specialForId = specialByAnchor.get(id);
 							if (specialForId != null && specialForId.containsKey(0)) {
-								if (page.size() > getLinesOnPage(pageForId)) {
+								if (page.size() >= specialForId.get(0).lines) {
 									pageForId++;
 								}
 							}
 							//New page if there is already a special element on this page
-							if (updateSpecials(id, pageForId, page.size())) {
+							if (updateSpecials(id, pageForId, page.size(), entry.size())) {
 								page.add(line);
 								pos--;
 								break page;
@@ -131,7 +131,7 @@ public class TextSplitter {
 				if (!line.isEmpty())
 					page.add(line);
 			}
-			if (!page.stream().allMatch(String::isEmpty)) {
+			if (!(page.stream().allMatch(String::isEmpty) && pos == wordsAndSpaces.length)) {
 				int linesMax = getLinesOnPage(entry.size());
 				if (page.size() > linesMax) {
 					overflow.addAll(page.subList(linesMax, page.size()));
@@ -176,15 +176,15 @@ public class TextSplitter {
 		return linesPerPage;
 	}
 
-	private boolean updateSpecials(int ref, int page, int currLine) {
+	private boolean updateSpecials(int ref, int pageRef, int currLine, int currPage) {
 		if (specialByAnchor.containsKey(ref)) {
 			TIntObjectMap<Page> specialByPageTmp = new TIntObjectHashMap<>();
 			for (Map.Entry<Integer, Page> entry : specialByAnchor.get(ref).entrySet()) {
-				int specialPage = page + entry.getKey();
+				int specialPage = pageRef + entry.getKey();
 				if (specialByPage.containsKey(specialPage)) {
 					return true;
 				}
-				if (entry.getKey()==0&&entry.getValue().lines<=currLine) {
+				if (entry.getKey()==0 && currPage==pageRef&&entry.getValue().lines<=currLine) {
 					return true;
 				}
 				specialByPageTmp.put(specialPage, entry.getValue());
@@ -193,7 +193,7 @@ public class TextSplitter {
 		} else if (ref != -1) {//Default reference for page 0
 			System.out.println("WARNING: Reference " + ref + " was found, but no special pages were registered for it");
 		}
-		pageByAnchor.put(ref, page);
+		pageByAnchor.put(ref, pageRef);
 		return false;
 	}
 

@@ -93,8 +93,6 @@ public class BakedMBIOModel implements IBakedModel {
 				}
 				Vec3d transformedPos = mat.apply(new Vec3d(f.getKey().offset));
 				EnumFacing transformedFace = transform.rotate(f.getKey().face);
-				IndustrialWires.logger.info("Transformed {} and {} to {} and {} ({})", f.getKey().offset, f.getKey().face,
-						transformedPos, transformedFace);
 				Vector3f[] verts = getVerticesFromFace(transformedPos, transformedFace);
 				RawQuad q = new RawQuad(verts[0], verts[1], verts[2], verts[3], transformedFace,
 						IO_TEX, new float[]{1, 1, 1, 1}, getNormal(transformedFace),
@@ -110,16 +108,18 @@ public class BakedMBIOModel implements IBakedModel {
 	private static final Vector3f[] NORMALS = new Vector3f[6];
 	private static final Vector3f[][] VERTICES = new Vector3f[6][4];
 	static {
+		final float innerSize = .5F;
+		final float offsetInner = 1-innerSize/2;
 		float[] vec = new float[3];
 		for (int i = 0; i < EnumFacing.VALUES.length; i++) {
 			EnumFacing f = EnumFacing.VALUES[i];
 			NORMALS[i] = new Vector3f(f.getFrontOffsetX(), f.getFrontOffsetY(), f.getFrontOffsetZ());
 			int axis = f.getAxis().ordinal();
 			vec[axis] = f.getAxisDirection()==EnumFacing.AxisDirection.POSITIVE?1.001F:-.001F;
-			float x1 = f.getAxisDirection()==EnumFacing.AxisDirection.POSITIVE?.625F:.375F;
+			float x1 = f.getAxisDirection()==EnumFacing.AxisDirection.POSITIVE?offsetInner:1-offsetInner;
 			for (int j = 0;j<4;j++) {
 				vec[(axis+1)%3] = 0<j&&j<3?x1:1-x1;
-				vec[(axis+2)%3] = j<2?.375F:.625F;
+				vec[(axis+2)%3] = j<2?1-offsetInner:offsetInner;
 				VERTICES[i][j] = vecFromArray(vec);
 			}
 		}
@@ -140,7 +140,8 @@ public class BakedMBIOModel implements IBakedModel {
 	}
 
 	private float[] getUVsForConfig(SideConfig sc) {
-		return new float[]{sc.ordinal()*4, 0, (sc.ordinal()+1)*4, 4};
+		float u = (sc.ordinal()/2)*8, v = (sc.ordinal()%2)*8;
+		return new float[]{u, v, u+8, v+8};
 	}
 
 	private Vector3f getNormal(EnumFacing face) {
