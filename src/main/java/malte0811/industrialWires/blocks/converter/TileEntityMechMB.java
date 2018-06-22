@@ -248,13 +248,19 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 		double totalAvailable = 0;
 		double totalRequested = 0;
 		for (int i = 0; i < available.length; i++) {
-			if (availableWf[i].equals(waveform)) {
-				totalAvailable += available[i];
-			} else {
+			if (!availableWf[i].equals(waveform)) {
 				available[i] = 0;
 			}
 			totalRequested += requested[i];
 		}
+		for (int i = 0; i < available.length; i++) {
+			if (available[i]>0) {
+				available[i] = Math.min(available[i], totalRequested-requested[i]);
+				totalAvailable += available[i];
+			}
+		}
+		if (totalAvailable==0)
+			return 0;
 		double[] ins = new double[section[1]-section[0]];
 		double[] extracted = new double[section[1]-section[0]];
 		for (int i = section[0]; i < section[1]; i++) {
@@ -346,6 +352,9 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 		}
 		electricalStartEnd = electrical.toArray(new int[electrical.size()][]);
 		decay = Math.pow(DECAY_BASE, mechanical.length);
+		if (energyState!=null) {
+			energyState.invalid = true;
+		}
 		energyState = new MechEnergy(weight, speed);
 	}
 

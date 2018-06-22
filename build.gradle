@@ -71,7 +71,7 @@ repositories {
 
 dependencies {
     deobfCompile 'net.industrial-craft:industrialcraft-2:2.8.+'
-    deobfCompile "blusunrize:ImmersiveEngineering:0.12-+:deobf"
+    deobfCompile "blusunrize:ImmersiveEngineering:0.12-+"
     compileOnly "TechReborn:TechReborn-1.12:2.6.+:dev"
     compileOnly "RebornCore:RebornCore-1.12:3.2.+:dev"
     compileOnly 'com.elytradev:mirage:2.0.1-SNAPSHOT'

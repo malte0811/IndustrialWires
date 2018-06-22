@@ -271,7 +271,10 @@ public abstract class MechMBPart {
 			for (int x = -1; x <= 1; x++) {
 				for (int y = -1; y <= 1; y++) {
 					pos.setPos(x, y, -z);
-					world.setBlockState(pos, getOriginalBlock(pos));
+					IBlockState state = getOriginalBlock(pos);
+					if (state.getBlock()!=Blocks.AIR) {
+						world.setBlockState(pos, state);
+					}
 				}
 			}
 		}

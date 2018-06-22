@@ -20,6 +20,7 @@ import net.minecraft.util.math.MathHelper;
 
 public final class MechEnergy {
 	private double speed = 0;
+	public boolean invalid = false;
 	public final double weight;
 
 	public MechEnergy(double weight, double speed) {
@@ -97,6 +98,8 @@ public final class MechEnergy {
 	}
 
 	private float getTotalVolume() {
+		if (invalid)
+			return 0;
 		float ret = (float) (weight / 20e3 * Math.tanh(getSpeedForSound()/30));
 		ret = Math.min(ret, 1.5F);
 		return ret;

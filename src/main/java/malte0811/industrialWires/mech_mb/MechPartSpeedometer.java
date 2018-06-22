@@ -46,7 +46,7 @@ import static blusunrize.immersiveengineering.common.IEContent.blockMetalDecorat
 import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.RS_ENGINEERING;
 import static malte0811.industrialWires.blocks.converter.MechanicalMBBlockType.SPEEDOMETER;
 import static net.minecraft.util.EnumFacing.Axis.X;
-import static net.minecraft.util.EnumFacing.AxisDirection.POSITIVE;
+import static net.minecraft.util.EnumFacing.AxisDirection.NEGATIVE;
 import static net.minecraft.util.math.BlockPos.ORIGIN;
 
 public class MechPartSpeedometer extends MechMBPart implements IRedstoneOutput {
@@ -192,7 +192,7 @@ public class MechPartSpeedometer extends MechMBPart implements IRedstoneOutput {
 	@Override
 	public int getStrongRSOutput(@Nonnull IBlockState state, @Nonnull EnumFacing side) {
 		if (side.getAxis() == X) {
-			if (side.getAxisDirection() == POSITIVE) {
+			if (side.getAxisDirection() == NEGATIVE) {
 				return currentOutputLog;
 			} else {
 				return currentOutputLin;
