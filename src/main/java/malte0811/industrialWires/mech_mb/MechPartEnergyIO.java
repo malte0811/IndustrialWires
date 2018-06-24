@@ -70,28 +70,35 @@ public abstract class MechPartEnergyIO extends MechMBPart implements IMBPartElec
 		return wf;
 	}
 
-	@Override
-	public double getAvailableEEnergy() {
-		return bufferToMB;
+	protected double getTransformationLimit(MechEnergy me) {
+		return 1;
 	}
 
 	@Override
-	public void extractEEnergy(double energy) {
-		bufferToMB -= energy;
+	public double getAvailableEEnergy(MechEnergy energy) {
+		return bufferToMB* getTransformationLimit(energy);
+	}
+
+	@Override
+	public void extractEEnergy(double eEnergy, MechEnergy mEnergy) {
+		if (eEnergy>0) {
+			bufferToMB -= eEnergy/ getTransformationLimit(mEnergy);
+		}
 	}
 
 	@Override
 	public double requestEEnergy(Waveform waveform, MechEnergy energy) {
-		if (!has4Phases()==waveform.isSinglePhase()) {
-			return getMaxBuffer() - bufferToWorld;
+		Waveform transformed = transform(waveform, energy);
+		if (!has4Phases()==transformed.isSinglePhase()) {
+			double ret = getMaxBuffer() - bufferToWorld;
+			return ret* getTransformationLimit(energy);
 		}
 		return 0;
 	}
 
 	@Override
 	public void insertEEnergy(double given, Waveform waveform, MechEnergy mechEnergy) {
-		waveform = transform(waveform, mechEnergy);
-		wfToWorld = waveform;
+		wfToWorld = transform(waveform, mechEnergy);
 		bufferToWorld += given;
 	}
 
@@ -154,8 +161,8 @@ public abstract class MechPartEnergyIO extends MechMBPart implements IMBPartElec
 	public void writeToNBT(NBTTagCompound out) {
 		out.setDouble(BUFFER_IN, bufferToMB);
 		out.setDouble(BUFFER_OUT, bufferToWorld);
-		out.setString(BUFFER_IN+WAVEFORM, wfToMB.serializeToString());
-		out.setString(BUFFER_OUT+WAVEFORM, wfToWorld.serializeToString());
+		out.setString(BUFFER_IN+WAVEFORM, wfToMB.toString());
+		out.setString(BUFFER_OUT+WAVEFORM, wfToWorld.toString());
 		out.setTag(SIDE_CONFIG, sides.toNBT(getEnergyConnections()));
 	}
 

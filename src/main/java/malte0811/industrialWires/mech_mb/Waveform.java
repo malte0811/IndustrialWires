@@ -102,7 +102,8 @@ public class Waveform {
 		return this;
 	}
 
-	public String serializeToString() {
+	@Override
+	public String toString() {
 		return type+":"+phases+":"+speed;
 	}
 

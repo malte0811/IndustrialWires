@@ -18,8 +18,8 @@ package malte0811.industrialWires.mech_mb;
 public interface IMBPartElectric {
 	Waveform getProduced(MechEnergy state);
 	// All four in Joules
-	double getAvailableEEnergy();
-	void extractEEnergy(double energy);
+	double getAvailableEEnergy(MechEnergy energy);
+	void extractEEnergy(double eEnergy, MechEnergy mEnergy);
 	double requestEEnergy(Waveform waveform, MechEnergy energy);
 	void insertEEnergy(double given, Waveform waveform, MechEnergy energy);
 }

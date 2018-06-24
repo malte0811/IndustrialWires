@@ -55,13 +55,13 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 	}
 
 	@Override
-	public double getAvailableEEnergy() {
+	public double getAvailableEEnergy(MechEnergy energy) {
 		return bufferToE;
 	}
 
 	@Override
-	public void extractEEnergy(double energy) {
-		bufferToE -= energy;
+	public void extractEEnergy(double eEnergy, MechEnergy mEnergy) {
+		bufferToE -= eEnergy;
 	}
 
 	@Override
@@ -177,7 +177,7 @@ public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 				world.setBlockState(new BlockPos(i, y, 0), getLightEngineering());
 			}
 		}
-		spawnBrokenParts(8, energy, COIL_TEXTURE);
+		spawnBrokenParts(has4Phases()?8:4, energy, COIL_TEXTURE);
 	}
 
 	@Override

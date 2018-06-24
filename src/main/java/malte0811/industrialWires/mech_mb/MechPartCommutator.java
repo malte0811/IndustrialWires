@@ -27,6 +27,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 
 import java.util.List;
 
@@ -39,6 +40,33 @@ public class MechPartCommutator extends MechPartEnergyIO {
 	@Override
 	protected Waveform transform(Waveform wf, MechEnergy e) {
 		return wf.getCommutated(e.getSpeed(), has4Phases());
+	}
+
+	@Override
+	protected double getTransformationLimit(MechEnergy me) {
+		double s = me.getSpeed();
+		if (s<5) {
+			return 0;
+		} else if (s<10) {
+			return ramp(5, 10, s);
+		} else {
+			return 1;
+		}
+	}
+
+	@SuppressWarnings("SameParameterValue")
+	private double ramp(double min, double max, double pos) {
+		double diff = max-min;
+		//Formulas come from Hermite interpolation
+		if (max>min) {
+			return MathHelper.clamp((pos-min)*(pos-min)*(1/(diff*diff)-2/(diff*diff*diff)*(pos-max)), 0, 1);
+		} else {
+			diff *= -1;
+			double tmp = max;
+			max = min;
+			min = tmp;
+			return MathHelper.clamp(1+(pos-min)*(pos-min)*(-1/(diff*diff)+2/(diff*diff*diff)*(pos-max)), 0, 1);
+		}
 	}
 
 	@Override

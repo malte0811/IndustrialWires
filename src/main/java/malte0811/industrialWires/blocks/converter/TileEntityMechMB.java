@@ -75,7 +75,7 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 	private static final double SYNC_THRESHOLD = .95;
 	private static final Map<BlockPos, TileEntityMechMB> CLIENT_MASTER_BY_POS = new MapMaker().weakValues().makeMap();
 	public MechMBPart[] mechanical = null;
-	public int[] offsets = null;
+	int[] offsets = null;
 
 	private int[][] electricalStartEnd = null;
 
@@ -157,7 +157,7 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 				if (!localWf.isEnergyWaveform()) {
 					continue;
 				}
-				double availableLocal = electricalComp.getAvailableEEnergy();
+				double availableLocal = electricalComp.getAvailableEEnergy(energyState);
 				available[i - section[0]] = availableLocal;
 				availableWaveforms.add(localWf);
 				if (availableLocal > 0) {
@@ -259,27 +259,27 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 				totalAvailable += available[i];
 			}
 		}
-		if (totalAvailable==0)
-			return 0;
 		double[] ins = new double[section[1]-section[0]];
 		double[] extracted = new double[section[1]-section[0]];
-		for (int i = section[0]; i < section[1]; i++) {
-			int i0 = i - section[0];
-			double otherRequests = totalRequested-requested[i0];
-			double extractFactor = Math.min(1, otherRequests / totalAvailable);
-			double extr = available[i0] * extractFactor;
-			if (extr==0) {
-				continue;
-			}
-			for (int j = 0;j<section[1]-section[0];j++) {
-				if (j!=i0) {
-					ins[j] += extr*(requested[j]/otherRequests);
+		if (totalAvailable>0) {
+			for (int i = section[0]; i < section[1]; i++) {
+				int i0 = i - section[0];
+				double otherRequests = totalRequested - requested[i0];
+				double extractFactor = Math.min(1, otherRequests / totalAvailable);
+				double extr = available[i0] * extractFactor;
+				if (extr == 0) {
+					continue;
 				}
-			}
-			extracted[i0] = extr;
-			if (!simulate) {
-				IMBPartElectric electric = (IMBPartElectric) mechanical[i];
-				electric.extractEEnergy(extr);
+				for (int j = 0; j < section[1] - section[0]; j++) {
+					if (j != i0) {
+						ins[j] += extr * (requested[j] / otherRequests);
+					}
+				}
+				extracted[i0] = extr;
+				if (!simulate) {
+					IMBPartElectric electric = (IMBPartElectric) mechanical[i];
+					electric.extractEEnergy(extr, energyState);
+				}
 			}
 		}
 		if (!simulate) {

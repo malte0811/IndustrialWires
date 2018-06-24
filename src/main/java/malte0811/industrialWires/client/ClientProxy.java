@@ -464,8 +464,6 @@ public class ClientProxy extends CommonProxy {
 
 	@Override
 	public void stopAllSoundsExcept(BlockPos pos, Set<?> excluded) {
-		IndustrialWires.logger.info("Stopping all except {} at {} (playing {})",
-				excluded, pos, playingSounds.get(pos));
 		if (playingSounds.containsKey(pos)) {
 			SoundHandler manager = Minecraft.getMinecraft().getSoundHandler();
 			List<ISound> sounds = playingSounds.get(pos);
