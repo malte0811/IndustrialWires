@@ -15,68 +15,67 @@
 package malte0811.industrialWires;
 
  import blusunrize.immersiveengineering.ImmersiveEngineering;
- import blusunrize.immersiveengineering.api.MultiblockHandler;
- import blusunrize.immersiveengineering.api.energy.wires.WireApi;
- import com.google.common.collect.ImmutableMap;
- import malte0811.industrialWires.blocks.BlockIWBase;
- import malte0811.industrialWires.blocks.controlpanel.*;
- import malte0811.industrialWires.blocks.converter.*;
- import malte0811.industrialWires.blocks.hv.*;
- import malte0811.industrialWires.blocks.wire.*;
- import malte0811.industrialWires.compat.Compat;
- import malte0811.industrialWires.controlpanel.PanelComponent;
- import malte0811.industrialWires.controlpanel.PanelUtils;
- import malte0811.industrialWires.crafting.Recipes;
- import malte0811.industrialWires.entities.EntityBrokenPart;
- import malte0811.industrialWires.hv.MarxOreHandler;
- import malte0811.industrialWires.hv.MultiblockMarx;
- import malte0811.industrialWires.items.ItemIC2Coil;
- import malte0811.industrialWires.items.ItemKey;
- import malte0811.industrialWires.items.ItemPanelComponent;
- import malte0811.industrialWires.mech_mb.EUCapability;
- import malte0811.industrialWires.mech_mb.MechMBPart;
- import malte0811.industrialWires.mech_mb.MultiblockMechMB;
- import malte0811.industrialWires.network.MessageGUIInteract;
- import malte0811.industrialWires.network.MessageItemSync;
- import malte0811.industrialWires.network.MessagePanelInteract;
- import malte0811.industrialWires.network.MessageTileSyncIW;
- import malte0811.industrialWires.util.CommandIW;
- import malte0811.industrialWires.util.MultiblockTemplateManual;
- import net.minecraft.block.Block;
- import net.minecraft.creativetab.CreativeTabs;
- import net.minecraft.item.Item;
- import net.minecraft.item.ItemStack;
- import net.minecraft.item.crafting.IRecipe;
- import net.minecraft.network.datasync.DataSerializers;
- import net.minecraft.network.datasync.EntityDataManager;
- import net.minecraft.util.ResourceLocation;
- import net.minecraft.util.SoundEvent;
- import net.minecraftforge.event.RegistryEvent;
- import net.minecraftforge.fml.common.Loader;
- import net.minecraftforge.fml.common.Mod;
- import net.minecraftforge.fml.common.Mod.EventHandler;
- import net.minecraftforge.fml.common.SidedProxy;
- import net.minecraftforge.fml.common.event.FMLInitializationEvent;
- import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
- import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
- import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
- import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
- import net.minecraftforge.fml.common.network.NetworkRegistry;
- import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
- import net.minecraftforge.fml.common.registry.EntityRegistry;
- import net.minecraftforge.fml.common.registry.GameRegistry;
- import net.minecraftforge.fml.relauncher.Side;
- import net.minecraftforge.registries.IForgeRegistry;
- import org.apache.logging.log4j.Logger;
+import blusunrize.immersiveengineering.api.MultiblockHandler;
+import blusunrize.immersiveengineering.api.energy.wires.WireApi;
+import com.google.common.collect.ImmutableMap;
+import malte0811.industrialWires.blocks.BlockIWBase;
+import malte0811.industrialWires.blocks.controlpanel.*;
+import malte0811.industrialWires.blocks.converter.*;
+import malte0811.industrialWires.blocks.hv.*;
+import malte0811.industrialWires.blocks.wire.*;
+import malte0811.industrialWires.compat.Compat;
+import malte0811.industrialWires.controlpanel.PanelComponent;
+import malte0811.industrialWires.controlpanel.PanelUtils;
+import malte0811.industrialWires.crafting.Recipes;
+import malte0811.industrialWires.entities.EntityBrokenPart;
+import malte0811.industrialWires.hv.MarxOreHandler;
+import malte0811.industrialWires.hv.MultiblockMarx;
+import malte0811.industrialWires.items.ItemIC2Coil;
+import malte0811.industrialWires.items.ItemKey;
+import malte0811.industrialWires.items.ItemPanelComponent;
+import malte0811.industrialWires.mech_mb.EUCapability;
+import malte0811.industrialWires.mech_mb.MechMBPart;
+import malte0811.industrialWires.mech_mb.MultiblockMechMB;
+import malte0811.industrialWires.network.MessageGUIInteract;
+import malte0811.industrialWires.network.MessageItemSync;
+import malte0811.industrialWires.network.MessagePanelInteract;
+import malte0811.industrialWires.network.MessageTileSyncIW;
+import malte0811.industrialWires.util.CommandIW;
+import malte0811.industrialWires.util.MultiblockTemplateManual;
+import net.minecraft.block.Block;
+import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
+import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import net.minecraftforge.fml.common.registry.EntityRegistry;
+import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import org.apache.logging.log4j.Logger;
 
- import java.util.ArrayList;
- import java.util.List;
+import java.util.ArrayList;
+import java.util.List;
 
- import static malte0811.industrialWires.blocks.wire.BlockTypes_IC2_Connector.*;
- import static malte0811.industrialWires.entities.EntityBrokenPart.MARKER_TEXTURE;
- import static malte0811.industrialWires.entities.EntityBrokenPart.RES_LOC_SERIALIZER;
- import static malte0811.industrialWires.mech_mb.MechMBPart.EXAMPLE_MECHMB_LOC;
- import static malte0811.industrialWires.wires.IC2Wiretype.*;
+import static malte0811.industrialWires.blocks.wire.BlockTypes_IC2_Connector.*;
+import static malte0811.industrialWires.entities.EntityBrokenPart.MARKER_TEXTURE;
+import static malte0811.industrialWires.entities.EntityBrokenPart.RES_LOC_SERIALIZER;
+import static malte0811.industrialWires.mech_mb.MechMBPart.EXAMPLE_MECHMB_LOC;
+import static malte0811.industrialWires.wires.IC2Wiretype.*;
 
 @Mod(modid = IndustrialWires.MODID, version = IndustrialWires.VERSION, dependencies = "required-after:immersiveengineering@[0.12-77,);after:ic2",
 		certificateFingerprint = "7e11c175d1e24007afec7498a1616bef0000027d")
@@ -85,14 +84,19 @@ public class IndustrialWires {
 	public static final String MODID = "industrialwires";
 	public static final String VERSION = "${version}";
 	public static final String MODNAME = "Industrial Wires";
-	public static final ResourceLocation TINNITUS_LOC = new ResourceLocation(IndustrialWires.MODID, "tinnitus");
-	public static final ResourceLocation LADDER_START = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_start");//~470 ms ~=9 ticks
-	public static final ResourceLocation LADDER_MIDDLE = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_middle");
-	public static final ResourceLocation LADDER_END = new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_end");//~210 ms ~= 4 ticks
-	public static final ResourceLocation MARX_BANG = new ResourceLocation(IndustrialWires.MODID, "marx_bang");
-	public static final ResourceLocation MARX_POP = new ResourceLocation(IndustrialWires.MODID, "marx_pop");
-	public static final ResourceLocation TURN_FAST = new ResourceLocation(IndustrialWires.MODID, "mech_mb_fast");
-	public static final ResourceLocation TURN_SLOW = new ResourceLocation(IndustrialWires.MODID, "mech_mb_slow");
+	public static final SoundEvent TINNITUS = createSoundEvent(new ResourceLocation(IndustrialWires.MODID, "tinnitus"));
+	public static final SoundEvent LADDER_START = createSoundEvent(new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_start"));//~470 ms ~=9 ticks
+	public static final SoundEvent LADDER_MIDDLE = createSoundEvent(new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_middle"));
+	public static final SoundEvent LADDER_END = createSoundEvent(new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_end"));//~210 ms ~= 4 ticks
+	public static final SoundEvent MARX_BANG = createSoundEvent(new ResourceLocation(IndustrialWires.MODID, "marx_bang"));
+	public static final SoundEvent MARX_POP = createSoundEvent(new ResourceLocation(IndustrialWires.MODID, "marx_pop"));
+	public static final SoundEvent TURN_FAST = createSoundEvent(new ResourceLocation(IndustrialWires.MODID, "mech_mb_fast"));
+	public static final SoundEvent TURN_SLOW = createSoundEvent(new ResourceLocation(IndustrialWires.MODID, "mech_mb_slow"));
+	public static final SoundEvent MMB_BREAKING = createSoundEvent(new ResourceLocation(IndustrialWires.MODID, "mech_mb_breaking"));
+
+	private static final SoundEvent createSoundEvent(ResourceLocation loc) {
+		return new SoundEvent(loc).setRegistryName(loc);
+	}
 
 	public static final List<BlockIWBase> blocks = new ArrayList<>();
 	public static final List<Item> items = new ArrayList<>();
@@ -233,18 +237,15 @@ public class IndustrialWires {
 
 	@SubscribeEvent
 	public static void registerSounds(RegistryEvent.Register<SoundEvent> event) {
-		registerSound(event.getRegistry(), TINNITUS_LOC);
-		registerSound(event.getRegistry(), LADDER_START);
-		registerSound(event.getRegistry(), LADDER_MIDDLE);
-		registerSound(event.getRegistry(), LADDER_END);
-		registerSound(event.getRegistry(), MARX_BANG);
-		registerSound(event.getRegistry(), MARX_POP);
-		registerSound(event.getRegistry(), TURN_FAST);
-		registerSound(event.getRegistry(), TURN_SLOW);
-	}
-
-	private static void registerSound(IForgeRegistry<SoundEvent> reg, ResourceLocation loc) {
-		reg.register(new SoundEvent(loc).setRegistryName(loc));
+		event.getRegistry().register(TINNITUS);
+		event.getRegistry().register(LADDER_START);
+		event.getRegistry().register(LADDER_MIDDLE);
+		event.getRegistry().register(LADDER_END);
+		event.getRegistry().register(MARX_BANG);
+		event.getRegistry().register(MARX_POP);
+		event.getRegistry().register(TURN_FAST);
+		event.getRegistry().register(TURN_SLOW);
+		event.getRegistry().register(MMB_BREAKING);
 	}
 
 	@SubscribeEvent

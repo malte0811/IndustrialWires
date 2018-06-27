@@ -1,3 +1,10 @@
+#####Version 1.7-26
+ - Added Mechanical Multiblocks (energy storage and EU<->FE conversion)
+   - There will be an explanation video for these once I have time to make one
+ - Fixed the small mechanical converter blowing up tin wires
+ - Fixed wires not joining their outputs correctly
+ - Fixed wire connectors not breaking when the block they're on is broken
+
 #####Version 1.6-25
  - Updated to IE build 77
    - IC2 wires cause damage

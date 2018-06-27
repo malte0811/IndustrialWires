@@ -199,7 +199,7 @@ public class ClientProxy extends CommonProxy {
 				);
 			}
 		}
-		addUnblockableSounds(TINNITUS_LOC, TURN_FAST, TURN_SLOW);
+		addUnblockableSounds(TINNITUS, TURN_FAST, TURN_SLOW);
 
 		ClientUtils.mc().getItemColors().registerItemColorHandler((stack, pass) -> {
 			if (pass == 1) {
@@ -318,12 +318,12 @@ public class ClientProxy extends CommonProxy {
 
 	private static ISound playingTinnitus = null;
 
-	private void addUnblockableSounds(ResourceLocation... sounds) {
+	private void addUnblockableSounds(SoundEvent... sounds) {
 		int oldLength = Config.IEConfig.Tools.earDefenders_SoundBlacklist.length;
 		Config.IEConfig.Tools.earDefenders_SoundBlacklist =
 				Arrays.copyOf(Config.IEConfig.Tools.earDefenders_SoundBlacklist, oldLength + sounds.length);
 		for (int i = 0;i<sounds.length;i++) {
-			Config.IEConfig.Tools.earDefenders_SoundBlacklist[oldLength+i] = sounds[i].toString();
+			Config.IEConfig.Tools.earDefenders_SoundBlacklist[oldLength+i] = sounds[i].getSoundName().toString();
 		}
 	}
 	@Override
@@ -337,7 +337,7 @@ public class ClientProxy extends CommonProxy {
 
 	private ISound getTinnitus() {
 		final Minecraft mc = Minecraft.getMinecraft();
-		return  new MovingSound(new SoundEvent(TINNITUS_LOC), SoundCategory.PLAYERS) {
+		return  new MovingSound(TINNITUS, SoundCategory.PLAYERS) {
 			@Override
 			public void update() {
 				if (mc.player.getActivePotionEffect(IWPotions.tinnitus)==null) {
@@ -383,7 +383,7 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public void playJacobsLadderSound(TileEntityJacobsLadder te, int phase, Vec3d soundPos) {
 		stopAllSoundsExcept(te.getPos(), ImmutableSet.of());
-		ResourceLocation event;
+		SoundEvent event;
 		switch (phase) {
 		case 0:
 			event = LADDER_START;
@@ -397,7 +397,7 @@ public class ClientProxy extends CommonProxy {
 		default:
 			return;
 		}
-		PositionedSoundRecord sound = new PositionedSoundRecord(event, SoundCategory.BLOCKS, te.size.soundVolume, 1,
+		PositionedSoundRecord sound = new PositionedSoundRecord(event.getSoundName(), SoundCategory.BLOCKS, te.size.soundVolume, 1,
 				false, 0, ISound.AttenuationType.LINEAR, (float) soundPos.x, (float) soundPos.y, (float) soundPos.z);
 		ClientUtils.mc().getSoundHandler().playSound(sound);
 		addSound(te.getPos(), sound);
@@ -418,9 +418,9 @@ public class ClientProxy extends CommonProxy {
 		}
 		boolean hasSlow = false, hasFast = false;
 		for (ISound s:soundsAtPos) {
-			if (s.getSoundLocation().equals(TURN_FAST)) {
+			if (s.getSoundLocation().equals(TURN_FAST.getSoundName())) {
 				hasFast = true;
-			} else if (s.getSoundLocation().equals(TURN_SLOW)) {
+			} else if (s.getSoundLocation().equals(TURN_SLOW.getSoundName())) {
 				hasSlow = true;
 			}
 		}
@@ -440,12 +440,12 @@ public class ClientProxy extends CommonProxy {
 
 	@Override
 	public void playMarxBang(TileEntityMarx te, Vec3d pos, float energy) {
-		ResourceLocation soundLoc = MARX_BANG;
+		SoundEvent soundLoc = MARX_BANG;
 		if (energy<0) {
 			energy = -energy;
 			soundLoc = MARX_POP;
 		}
-		PositionedSoundRecord sound = new PositionedSoundRecord(soundLoc, SoundCategory.BLOCKS, 5*energy, 1,
+		PositionedSoundRecord sound = new PositionedSoundRecord(soundLoc.getSoundName(), SoundCategory.BLOCKS, 5*energy, 1,
 				false, 0, ISound.AttenuationType.LINEAR, (float) pos.x, (float) pos.y, (float) pos.z);
 		ClientUtils.mc().getSoundHandler().playSound(sound);
 		addSound(te.getPos(), sound);

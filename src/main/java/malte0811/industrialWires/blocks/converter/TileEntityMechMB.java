@@ -59,6 +59,7 @@ import java.util.*;
 
 import static blusunrize.immersiveengineering.common.IEContent.blockMetalDecoration0;
 import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.HEAVY_ENGINEERING;
+import static malte0811.industrialWires.IndustrialWires.MMB_BREAKING;
 import static malte0811.industrialWires.mech_mb.EUCapability.ENERGY_IC2;
 import static malte0811.industrialWires.util.MiscUtils.getOffset;
 import static malte0811.industrialWires.util.MiscUtils.offset;
@@ -485,7 +486,6 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 		}
 	}
 
-	private static ResourceLocation mmbBang = new ResourceLocation(IndustrialWires.MODID, "mech_mb_breaking");
 	private void disassemble(Set<MechMBPart> failed) {
 		if (!world.isRemote && formed) {
 			formed = false;
@@ -495,7 +495,8 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 					blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, HEAVY_ENGINEERING));
 			for (MechMBPart mech : mechanical) {
 				if (failed.contains(mech)) {
-					world.playSound(null, mech.world.getOrigin(), new SoundEvent(mmbBang), SoundCategory.BLOCKS, 1, 1);
+					world.playSound(null, mech.world.getOrigin(), MMB_BREAKING, SoundCategory.BLOCKS, 1, 1);
+
 					mech.breakOnFailure(energyState);
 				} else {
 					mech.disassemble();
@@ -603,6 +604,8 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 		else if (world.isRemote)
 			CLIENT_MASTER_BY_POS.remove(pos);
 		firstTick = true;
+		if (energyState!=null)
+			energyState.invalid = true;
 		super.invalidate();
 	}
 
@@ -613,6 +616,8 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 			Compat.unloadIC2Tile.accept(this);
 		else if (world.isRemote)
 			CLIENT_MASTER_BY_POS.remove(pos);
+		if (energyState!=null)
+			energyState.invalid = true;
  		firstTick = true;
 	}
 

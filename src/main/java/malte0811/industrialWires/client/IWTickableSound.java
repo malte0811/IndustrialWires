@@ -24,8 +24,8 @@ import net.minecraft.client.audio.ITickableSound;
 import net.minecraft.client.audio.PositionedSound;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
 
 import java.util.function.Supplier;
 
@@ -33,7 +33,7 @@ public class IWTickableSound extends PositionedSound implements ITickableSound {
 	private Supplier<Float> getVolume;
 	private Supplier<Float> getPitch;
 
-	protected IWTickableSound(ResourceLocation sound, SoundCategory category,
+	protected IWTickableSound(SoundEvent sound, SoundCategory category,
 							  Supplier<Float> getVolume, Supplier<Float> getPitch,
 							  float xPosF, float yPosF, float zPosF) {
 		super(sound, category);
