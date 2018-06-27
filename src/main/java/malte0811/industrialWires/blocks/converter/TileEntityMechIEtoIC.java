@@ -26,14 +26,13 @@ import net.minecraft.util.EnumFacing;
 
 import javax.annotation.Nonnull;
 
+import static malte0811.industrialWires.IWConfig.MechConversion.maxRotToKin;
 import static malte0811.industrialWires.util.NBTKeys.BUFFER;
 import static malte0811.industrialWires.util.NBTKeys.DIRECTION;
 
 public class TileEntityMechIEtoIC extends TileEntityIWBase implements IDirectionalTile, IRotationAcceptor, IKineticSource {
-	EnumFacing dir = EnumFacing.DOWN;
-	double rotBuffer = 0;
-	private final double rotBufMax = 2 * MechConversion.maxRotToKin;
-	private final int maxOutput = (int) (ConversionUtil.kinPerRot() * MechConversion.maxRotToKin);
+	private EnumFacing dir = EnumFacing.DOWN;
+	private double rotBuffer = 0;
 
 	@Override
 	public void writeNBT(NBTTagCompound out, boolean updatePacket) {
@@ -85,8 +84,7 @@ public class TileEntityMechIEtoIC extends TileEntityIWBase implements IDirection
 	@Override
 	public int getConnectionBandwidth(EnumFacing f) {
 		if (f == dir) {
-			int stored = (int) (ConversionUtil.kinPerRot() * rotBuffer);
-			return Math.min(maxOutput, stored);
+			return (int) (ConversionUtil.kinPerRot() * rotBuffer);
 		} else {
 			return 0;
 		}
@@ -102,8 +100,7 @@ public class TileEntityMechIEtoIC extends TileEntityIWBase implements IDirection
 	public int drawKineticEnergy(EnumFacing f, int requested, boolean simulate) {
 		if (f == dir) {
 			int stored = (int) (ConversionUtil.kinPerRot() * rotBuffer);
-			int out = Math.min(maxOutput, stored);
-			out = Math.min(requested, out);
+			int out = Math.min(requested, stored);
 			if (!simulate) {
 				rotBuffer -= out * ConversionUtil.rotPerKin();
 			}
@@ -117,7 +114,7 @@ public class TileEntityMechIEtoIC extends TileEntityIWBase implements IDirection
 	@Override
 	public void inputRotation(double rotation, @Nonnull EnumFacing side) {
 		if (side == dir) {
-			rotBuffer = Math.min(rotBufMax, rotBuffer + rotation);
+			rotBuffer = Math.min(Math.max(rotBuffer, rotation), maxRotToKin);
 		}
 	}
 

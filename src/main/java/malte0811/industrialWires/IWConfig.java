@@ -46,32 +46,36 @@ public class IWConfig {
 		public static double kinPerEu = 4;
 
 		@Comment({"The maximum amount of IF that can be converted to rotational energy", "by one motor in one tick (default: 100)"})
+		@Config.RequiresWorldRestart
 		public static int maxIfToMech = 100;
 		@Comment({"The efficiency of the IF motor. The default value of 0.9 means that 10% of the energy are lost in the conversion."})
 		public static double ifMotorEfficiency = .9;
 
 		@Comment({"The maximum amount of IE rotational energy that can be converted into IC2 kinetic energy", "by one converter in one tick"})
+		@Config.RequiresWorldRestart
 		public static double maxRotToKin = 200;
 		@Comment({"The efficiency of the conversion from IE rotational energy to IC2 kinetic energy"})
 		public static double rotToKinEfficiency = .7;
 
 		@Comment({"The maximum amount of IC2 kinetic energy that can be converted into IE rotational energy", "by one converter in one tick"})
+		@Config.RequiresWorldRestart
 		public static int maxKinToRot = 600;
 		@Comment({"The efficiency of the conversion from IC2 kinetic energy to IE rotational energy"})
 		public static double kinToRotEfficiency = .8;
-		@Comment({"The conversion factor between Joules (the SI unit) and RF. Used for the Marx generator and the rotary converters"})
-		//Default value assumes the IE diesel generator is 200kW
-		public static double joulesPerRF = 200e3/(20*IEConfig.Machines.dieselGen_output);
+
+		@Comment({"The conversion factor between Joules (the SI unit) and RF. Used for the Marx generator and the rotary converters",
+				"With the default value the IE diesel generator produces 200kW"})
+		public static double joulesPerRF = 200e3 / (20 * IEConfig.Machines.dieselGen_output);
 		@Comment({"What energy types can be used with the mechanical multiblock. 0: None (Probably useless),",
 				"1: EU (Currently useless), 2: FE, 3:EU and FE (allows conversion, default)"})
 		public static int multiblockEnergyType = 3;
 
 		public static boolean allowMBFE() {
-			return (multiblockEnergyType&2)!=0;
+			return (multiblockEnergyType & 2) != 0;
 		}
 
 		public static boolean allowMBEU() {
-			return (multiblockEnergyType&1)!=0 && IndustrialWires.hasIC2;
+			return (multiblockEnergyType & 1) != 0 && IndustrialWires.hasIC2;
 		}
 	}
 

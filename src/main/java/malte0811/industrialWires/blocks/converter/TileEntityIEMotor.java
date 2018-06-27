@@ -39,8 +39,6 @@ import java.util.Map;
 import static malte0811.industrialWires.util.NBTKeys.*;
 
 public class TileEntityIEMotor extends TileEntityIWBase implements ITickable, IFluxReceiver, IDirectionalTile {
-	public final double bufferMax = 2 * MechConversion.maxIfToMech * ConversionUtil.rotPerIf();
-
 	private double rotBuffer = 0;
 	private FluxStorage energy = new FluxStorage(20 * MechConversion.maxIfToMech, 2 * MechConversion.maxIfToMech);
 	private EnumFacing dir = EnumFacing.DOWN;
@@ -54,7 +52,8 @@ public class TileEntityIEMotor extends TileEntityIWBase implements ITickable, IF
 			}
 			int max = MechConversion.maxIfToMech;
 			boolean dirty = false;
-			if (rotBuffer < bufferMax && energy.extractEnergy(max, true) > 0) {
+			if (rotBuffer < 2 * MechConversion.maxIfToMech * ConversionUtil.rotPerIf()
+					&& energy.extractEnergy(max, true) > 0) {
 				int extracted = energy.extractEnergy(max, false);
 				rotBuffer += extracted * ConversionUtil.rotPerIf() * MechConversion.ifMotorEfficiency;
 				dirty = true;

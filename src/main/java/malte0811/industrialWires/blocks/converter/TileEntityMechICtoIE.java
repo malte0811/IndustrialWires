@@ -33,12 +33,10 @@ import static malte0811.industrialWires.util.NBTKeys.BUFFER;
 import static malte0811.industrialWires.util.NBTKeys.DIRECTION;
 
 public class TileEntityMechICtoIE extends TileEntityIWBase implements IDirectionalTile, ITickable {
-	EnumFacing dir = EnumFacing.DOWN;
-	int kinBuffer = 0;
-	private final int kinBufMax = 2 * MechConversion.maxKinToRot;
-	private final double maxInsert = ConversionUtil.rotPerKin() * MechConversion.maxKinToRot;
-	BlockPos to;
-	BlockPos from;
+	private EnumFacing dir = EnumFacing.DOWN;
+	private int kinBuffer = 0;
+	private BlockPos to;
+	private BlockPos from;
 
 	@Override
 	public void update() {
@@ -52,14 +50,15 @@ public class TileEntityMechICtoIE extends TileEntityIWBase implements IDirection
 			TileEntity teFrom = world.getTileEntity(from);
 			if (teFrom instanceof IKineticSource) {
 				int sourceMax = ((IKineticSource) teFrom).maxrequestkineticenergyTick(dir);
-				int draw = Math.min(kinBufMax - kinBuffer, sourceMax);
+				int draw = Math.min(2 * MechConversion.maxKinToRot - kinBuffer, sourceMax);
 				if (draw > 0) {
 					kinBuffer += ((IKineticSource) teFrom).requestkineticenergy(dir, draw) * MechConversion.kinToRotEfficiency;
 				}
 			}
 			TileEntity teTo = world.getTileEntity(to);
 			if (kinBuffer > 0 && teTo instanceof IRotationAcceptor) {
-				double out = Math.min(maxInsert, ConversionUtil.rotPerKin() * kinBuffer);
+				double out = Math.min(ConversionUtil.rotPerKin() * MechConversion.maxKinToRot,
+						ConversionUtil.rotPerKin() * kinBuffer);
 				((IRotationAcceptor) teTo).inputRotation(out, dir);
 				kinBuffer -= out * ConversionUtil.kinPerRot();
 			}
