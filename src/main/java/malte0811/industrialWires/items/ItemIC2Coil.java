@@ -45,6 +45,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -92,8 +94,8 @@ public class ItemIC2Coil extends Item implements IWireCoil {
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-
 		tooltip.add(I18n.format(IndustrialWires.MODID + ".desc.wireLength", getLength(stack)));
 		IC2Wiretype wireType = IC2Wiretype.ALL[stack.getMetadata()];
 		int transferRate = wireType.getTransferRate();

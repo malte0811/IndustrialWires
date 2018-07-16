@@ -69,6 +69,7 @@ public class ItemPanelComponent extends Item implements INetGUIItem {
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, World world, List<String> list, ITooltipFlag flag) {
 		if (GuiScreen.isShiftKeyDown()) {
 			NBTTagCompound nbt = getTagCompound(stack);

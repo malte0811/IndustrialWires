@@ -17,7 +17,6 @@ package malte0811.industrialWires.network;
 
 import io.netty.buffer.ByteBuf;
 import malte0811.industrialWires.items.INetGUIItem;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -54,7 +53,8 @@ public class MessageItemSync implements IMessage {
 	public static class HandlerServer implements IMessageHandler<MessageItemSync, IMessage> {
 		@Override
 		public IMessage onMessage(MessageItemSync message, MessageContext ctx) {
-			Minecraft.getMinecraft().addScheduledTask(()-> {
+			ctx.getServerHandler().player.getServerWorld()
+					.addScheduledTask(()-> {
 				EntityPlayer player = ctx.getServerHandler().player;
 				ItemStack held = player.getHeldItem(message.hand);
 				if (held.getItem() instanceof INetGUIItem) {

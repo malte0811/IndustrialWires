@@ -28,6 +28,8 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.*;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -50,6 +52,7 @@ public class ItemKey extends Item implements INetGUIItem {
 
 	@Nonnull
 	@Override
+	@SideOnly(Side.CLIENT)
 	public String getItemStackDisplayName(@Nonnull ItemStack stack) {
 		NBTTagCompound nbt = stack.getTagCompound();
 		if (nbt!=null&&nbt.hasKey(NAME)&&!nbt.getString(NAME).trim().isEmpty()) {
@@ -59,6 +62,7 @@ public class ItemKey extends Item implements INetGUIItem {
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
 		super.addInformation(stack, worldIn, tooltip, flagIn);
 		if (stack.getMetadata()==2&&stack.getTagCompound()!=null) {
