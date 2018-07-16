@@ -22,8 +22,8 @@ import blusunrize.immersiveengineering.api.crafting.IngredientStack;
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler;
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler.Connection;
 import blusunrize.immersiveengineering.api.energy.wires.WireType;
-import blusunrize.immersiveengineering.common.IEContent;
 import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_Connector;
+import malte0811.industrialWires.IEObjects;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.IWProperties;
 import malte0811.industrialWires.blocks.hv.BlockHVMultiblocks;
@@ -56,13 +56,13 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static blusunrize.immersiveengineering.api.IEProperties.*;
-import static blusunrize.immersiveengineering.common.IEContent.*;
 import static blusunrize.immersiveengineering.common.blocks.BlockTypes_MetalsIE.STEEL;
 import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_Connector.*;
 import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.HEAVY_ENGINEERING;
 import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration1.STEEL_FENCE;
 import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration2.STEEL_WALLMOUNT;
 import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDevice0.CAPACITOR_HV;
+import static malte0811.industrialWires.IEObjects.*;
 import static malte0811.industrialWires.blocks.IWProperties.MarxType.*;
 import static malte0811.industrialWires.blocks.hv.BlockTypes_HVMultiblocks.MARX;
 import static malte0811.industrialWires.util.MiscUtils.offset;
@@ -99,13 +99,13 @@ public class MultiblockMarx implements IMultiblock {
 				structureStacks[up][1][0] = structureStacks[0][1][1]
 						= new ItemStack(blockMetalDecoration0, 1, HEAVY_ENGINEERING.getMeta());
 				for (int i = 4; i < structureStacks[up].length; i++) {
-					structureStacks[up][i][0] = new ItemStack(IEContent.blockMetalDecoration1, 1, STEEL_FENCE.getMeta());
+					structureStacks[up][i][0] = new ItemStack(IEObjects.blockMetalDecoration1, 1, STEEL_FENCE.getMeta());
 				}
 				structureStacks[up][structureStacks[0].length - 1][1] = new ItemStack(blockStorage, 1, STEEL.getMeta());
 			} else if (up == 4) {
 				structureStacks[up][2][0] = structureStacks[up][2][1] = hvRel0Dummy;
 				for (int i = 4; i < structureStacks[up].length; i++) {
-					structureStacks[up][i][1] = new ItemStack(IEContent.blockMetalDecoration1, 1, STEEL_FENCE.getMeta());
+					structureStacks[up][i][1] = new ItemStack(IEObjects.blockMetalDecoration1, 1, STEEL_FENCE.getMeta());
 				}
 			}
 		}
@@ -168,9 +168,9 @@ public class MultiblockMarx implements IMultiblock {
 		};
 		BiPredicate<BlockPos, Boolean> wallmount = (local, up) -> {
 			IBlockState b = world.getBlockState(local);
-			if (b.getBlock()==IEContent.blockMetalDecoration2) {
+			if (b.getBlock()==IEObjects.blockMetalDecoration2) {
 				b = b.getActualState(world, local);
-				if (b.getValue(IEContent.blockMetalDecoration2.property)== STEEL_WALLMOUNT) {
+				if (b.getValue(IEObjects.blockMetalDecoration2.property)== STEEL_WALLMOUNT) {
 					int int_4_wanted = up ? 0 : 1;
 					return b.getValue(IEProperties.INT_4)==int_4_wanted;
 				}
@@ -186,10 +186,10 @@ public class MultiblockMarx implements IMultiblock {
 		Function<BlockPos, Byte> hvRelayWith = (local) -> {
 			IBlockState state = world.getBlockState(local);
 			state = state.getActualState(world, local);
-			if (state.getBlock() != IEContent.blockConnectors) {
+			if (state.getBlock() != IEObjects.blockConnectors) {
 				return (byte)-1;
 			}
-			if (state.getValue(IEContent.blockConnectors.property)!= BlockTypes_Connector.RELAY_HV) {
+			if (state.getValue(IEObjects.blockConnectors.property)!= BlockTypes_Connector.RELAY_HV) {
 				return (byte)-1;
 			}
 			if (state.getValue(FACING_ALL)!=facing) {
@@ -214,10 +214,10 @@ public class MultiblockMarx implements IMultiblock {
 		BiPredicate<BlockPos, BlockTypes_Connector> connNoConns = (local, type) -> {
 			IBlockState state = world.getBlockState(local);
 			state = state.getActualState(world, local);
-			if (state.getBlock() != IEContent.blockConnectors) {
+			if (state.getBlock() != IEObjects.blockConnectors) {
 				return false;
 			}
-			if (state.getValue(IEContent.blockConnectors.property)!= type) {
+			if (state.getValue(IEObjects.blockConnectors.property)!= type) {
 				return false;
 			}
 			if (state.getValue(FACING_ALL)!=(facing)) {
@@ -383,6 +383,7 @@ public class MultiblockMarx implements IMultiblock {
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public boolean overwriteBlockRender(ItemStack stack, int iterator) {
 		IBlockState here = getBlockstateFromStack(-1, stack);
 		if (stack == hvRel1Dummy) {

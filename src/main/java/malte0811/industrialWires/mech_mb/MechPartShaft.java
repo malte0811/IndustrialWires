@@ -27,7 +27,9 @@ import static malte0811.industrialWires.blocks.converter.MechanicalMBBlockType.S
 
 public class MechPartShaft extends MechMBPart {
 	{
-		original.put(BlockPos.ORIGIN, getDefaultShaft());
+		if (areBlocksRegistered()) {
+			original.put(BlockPos.ORIGIN, getDefaultShaft());
+		}
 	}
 	@Override
 	public void createMEnergy(MechEnergy e) {}

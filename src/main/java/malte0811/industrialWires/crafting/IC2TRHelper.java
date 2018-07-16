@@ -16,8 +16,8 @@
 package malte0811.industrialWires.crafting;
 
 import blusunrize.immersiveengineering.api.ApiUtils;
-import blusunrize.immersiveengineering.common.IEContent;
 import ic2.api.item.IC2Items;
+import malte0811.industrialWires.IEObjects;
 import malte0811.industrialWires.IndustrialWires;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
@@ -64,28 +64,28 @@ public final class IC2TRHelper {
 				case "crafting":
 					switch (variant) {
 						case "coil":
-							stacks.add(new ItemStack(IEContent.blockMetalDecoration0));
+							stacks.add(new ItemStack(IEObjects.blockMetalDecoration0));
 							break;
 						case "alloy":
 							return new OreIngredient("plateConstantan");
 						case "electric_motor":
-							stacks.add(new ItemStack(IEContent.itemMaterial, 1, 27));
+							stacks.add(new ItemStack(IEObjects.itemMaterial, 1, 27));
 							break;
 						case "rubber":
-							stacks.add(new ItemStack(IEContent.itemMaterial, 1, 13));
+							stacks.add(new ItemStack(IEObjects.itemMaterial, 1, 13));
 							break;
 					}
 					break;
 				case "te":
 					if (variant.equals("mv_transformer")) {
-						stacks.add(new ItemStack(IEContent.blockConnectors, 1, 7));
+						stacks.add(new ItemStack(IEObjects.blockConnectors, 1, 7));
 					}
 			}
 		}
 		if (stacks.size()==0) {
 			IndustrialWires.logger.info("No ingredient found for "+type+", "+variant);
 		}
-		return Ingredient.fromStacks(stacks.toArray(new ItemStack[stacks.size()]));
+		return Ingredient.fromStacks(stacks.toArray(new ItemStack[0]));
 	}
 
 	public static ItemStack getTRCable(String variant) {

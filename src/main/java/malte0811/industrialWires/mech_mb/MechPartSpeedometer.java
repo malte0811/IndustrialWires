@@ -15,11 +15,11 @@
 
 package malte0811.industrialWires.mech_mb;
 
-import blusunrize.immersiveengineering.common.IEContent;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IRedstoneOutput;
 import blusunrize.immersiveengineering.common.items.ItemIETool;
 import blusunrize.immersiveengineering.common.util.ChatUtils;
 import blusunrize.immersiveengineering.common.util.Utils;
+import malte0811.industrialWires.IEObjects;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.converter.MechanicalMBBlockType;
 import malte0811.industrialWires.util.LocalSidedWorld;
@@ -42,8 +42,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.text.DecimalFormat;
 
-import static blusunrize.immersiveengineering.common.IEContent.blockMetalDecoration0;
 import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.RS_ENGINEERING;
+import static malte0811.industrialWires.IEObjects.blockMetalDecoration0;
 import static malte0811.industrialWires.blocks.converter.MechanicalMBBlockType.SPEEDOMETER;
 import static net.minecraft.util.EnumFacing.Axis.X;
 import static net.minecraft.util.EnumFacing.AxisDirection.NEGATIVE;
@@ -55,8 +55,10 @@ public class MechPartSpeedometer extends MechMBPart implements IRedstoneOutput {
 	private int currentOutputLog = -1;
 	private double logFactor = 15 / Math.log(speedFor15RS + 1);
 	{
-		original.put(ORIGIN, blockMetalDecoration0
-				.getStateFromMeta(RS_ENGINEERING.getMeta()));
+		if (areBlocksRegistered()) {
+			original.put(ORIGIN, blockMetalDecoration0
+					.getStateFromMeta(RS_ENGINEERING.getMeta()));
+		}
 	}
 	@Nullable
 	private MechEnergy energy = null;
@@ -160,7 +162,7 @@ public class MechPartSpeedometer extends MechMBPart implements IRedstoneOutput {
 	@Override
 	public int interact(@Nonnull EnumFacing side, @Nonnull Vec3i offset, @Nonnull EntityPlayer player, @Nonnull EnumHand hand, @Nonnull ItemStack heldItem) {
 		if (voltMeter.isEmpty()) {
-			voltMeter = new ItemStack(IEContent.itemTool, 1, ItemIETool.VOLTMETER_META);
+			voltMeter = new ItemStack(IEObjects.itemTool, 1, ItemIETool.VOLTMETER_META);
 		}
 		if (Utils.isHammer(heldItem)) {
 			if (!world.isRemote) {

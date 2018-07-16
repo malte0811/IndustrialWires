@@ -57,8 +57,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 
-import static blusunrize.immersiveengineering.common.IEContent.blockMetalDecoration0;
 import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.HEAVY_ENGINEERING;
+import static malte0811.industrialWires.IEObjects.blockMetalDecoration0;
 import static malte0811.industrialWires.IndustrialWires.MMB_BREAKING;
 import static malte0811.industrialWires.mech_mb.EUCapability.ENERGY_IC2;
 import static malte0811.industrialWires.util.MiscUtils.getOffset;

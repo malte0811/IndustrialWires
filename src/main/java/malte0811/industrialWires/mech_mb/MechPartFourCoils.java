@@ -26,9 +26,11 @@ import static net.minecraft.util.math.BlockPos.ORIGIN;
 
 public class MechPartFourCoils extends MechPartSingleCoil {
 	{
-		IBlockState coil = getCoil();
-		original.put(new BlockPos(-1, 0, 0), coil);
-		original.put(new BlockPos(1, 0, 0), coil);
+		if (areBlocksRegistered()) {
+			IBlockState coil = getCoil();
+			original.put(new BlockPos(-1, 0, 0), coil);
+			original.put(new BlockPos(1, 0, 0), coil);
+		}
 	}
 	@Override
 	protected double getMaxBuffer() {

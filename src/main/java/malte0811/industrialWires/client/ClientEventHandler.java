@@ -59,6 +59,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.oredict.OreDictionary;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -69,6 +70,7 @@ import java.util.Map;
 import static malte0811.industrialWires.client.render.TileRenderMechMB.BASE_MODELS;
 
 @Mod.EventBusSubscriber(modid = IndustrialWires.MODID, value = Side.CLIENT)
+@SideOnly(Side.CLIENT)
 public class ClientEventHandler {
 	public static boolean shouldScreenshot = false;
 	@SubscribeEvent(priority = EventPriority.LOW)

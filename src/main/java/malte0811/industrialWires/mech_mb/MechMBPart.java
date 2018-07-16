@@ -16,7 +16,6 @@
 package malte0811.industrialWires.mech_mb;
 
 import blusunrize.immersiveengineering.api.MultiblockHandler;
-import blusunrize.immersiveengineering.common.IEContent;
 import blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0;
 import blusunrize.immersiveengineering.common.util.Utils;
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
@@ -45,6 +44,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.LoaderState;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -55,9 +56,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import static blusunrize.immersiveengineering.common.IEContent.blockMetalDecoration0;
 import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.HEAVY_ENGINEERING;
 import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.LIGHT_ENGINEERING;
+import static malte0811.industrialWires.IEObjects.blockMetalDecoration0;
 import static malte0811.industrialWires.IndustrialWires.MODID;
 import static malte0811.industrialWires.blocks.converter.MechanicalMBBlockType.NO_MODEL;
 import static malte0811.industrialWires.util.NBTKeys.TYPE;
@@ -86,7 +87,6 @@ public abstract class MechMBPart {
 	public List<BakedQuad> getRotatingQuads() {
 		return TileRenderMechMB.BASE_MODELS.get(getRotatingBaseModel())
 				.getQuads(null, null, 123);
-
 	}
 	@SideOnly(Side.CLIENT)
 	public abstract ResourceLocation getRotatingBaseModel();
@@ -169,6 +169,13 @@ public abstract class MechMBPart {
 		}
 	}
 
+	public static void init() {
+		//The old instances don't have block/blockstate references yet
+		for (String key : REGISTRY.keySet()) {
+			cacheNewInstance(key);
+		}
+	}
+
 	public static ResourceLocation getSchematicLocationForPart(Class<? extends MechMBPart> cl) {
 		String name = REGISTRY.inverse().get(cl);
 		return getSchematicLocationForPart(name);
@@ -218,8 +225,8 @@ public abstract class MechMBPart {
 	}
 
 	public static boolean isValidDefaultCenter(IBlockState state) {
-		return state.getBlock()== IEContent.blockMetalDecoration0&&
-				state.getValue(IEContent.blockMetalDecoration0.property)==BlockTypes_MetalDecoration0.HEAVY_ENGINEERING;
+		return state.getBlock()== blockMetalDecoration0&&
+				state.getValue(blockMetalDecoration0.property)==BlockTypes_MetalDecoration0.HEAVY_ENGINEERING;
 	}
 
 	public static boolean isHeavyEngineering(IBlockState state) {
@@ -227,8 +234,8 @@ public abstract class MechMBPart {
 	}
 
 	public static boolean isLightEngineering(IBlockState state) {
-		return state.getBlock()== IEContent.blockMetalDecoration0&&
-				state.getValue(IEContent.blockMetalDecoration0.property)==BlockTypes_MetalDecoration0.LIGHT_ENGINEERING;
+		return state.getBlock()== blockMetalDecoration0&&
+				state.getValue(blockMetalDecoration0.property)==BlockTypes_MetalDecoration0.LIGHT_ENGINEERING;
 	}
 
 	public IBlockState getDefaultShaft() {
@@ -241,6 +248,9 @@ public abstract class MechMBPart {
 				LIGHT_ENGINEERING);
 	}
 
+	protected boolean areBlocksRegistered() {
+		return Loader.instance().getLoaderState().ordinal()>LoaderState.PREINITIALIZATION.ordinal();
+	}
 
 	public void form(LocalSidedWorld w, Consumer<TileEntityMechMB> initializer) {
 		world = w;

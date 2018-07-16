@@ -28,15 +28,17 @@ import net.minecraft.util.math.BlockPos;
 
 import java.util.List;
 
-import static blusunrize.immersiveengineering.common.IEContent.blockMetalDecoration0;
 import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.GENERATOR;
+import static malte0811.industrialWires.IEObjects.blockMetalDecoration0;
 import static net.minecraft.util.EnumFacing.UP;
 import static net.minecraft.util.math.BlockPos.ORIGIN;
 
 public class MechPartTwoElectrodes extends MechPartEnergyIO {
 	{
-		original.put(ORIGIN, blockMetalDecoration0.getDefaultState().withProperty(
-				blockMetalDecoration0.property, GENERATOR));
+		if (areBlocksRegistered()) {
+			original.put(ORIGIN, blockMetalDecoration0.getDefaultState().withProperty(
+					blockMetalDecoration0.property, GENERATOR));
+		}
 	}
 
 	@Override

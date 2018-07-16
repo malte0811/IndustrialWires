@@ -23,7 +23,6 @@ import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler;
 import blusunrize.immersiveengineering.api.energy.wires.WireType;
 import blusunrize.immersiveengineering.api.energy.wires.redstone.IRedstoneConnector;
 import blusunrize.immersiveengineering.api.energy.wires.redstone.RedstoneWireNetwork;
-import blusunrize.immersiveengineering.common.IEContent;
 import blusunrize.immersiveengineering.common.blocks.BlockTypes_MetalsIE;
 import blusunrize.immersiveengineering.common.blocks.metal.*;
 import blusunrize.immersiveengineering.common.util.Utils;
@@ -168,26 +167,26 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		int right = getRight();
 		int up = offset.getY();
 		if (forward==0) {
-			return IEContent.blockMetalDevice0.getDefaultState().withProperty(IEContent.blockMetalDevice0.property, BlockTypes_MetalDevice0.CAPACITOR_HV);
+			return IEObjects.blockMetalDevice0.getDefaultState().withProperty(IEObjects.blockMetalDevice0.property, BlockTypes_MetalDevice0.CAPACITOR_HV);
 		} else if (forward==-1) {
-			return IEContent.blockConnectors.getDefaultState().withProperty(IEContent.blockConnectors.property, BlockTypes_Connector.RELAY_HV)
+			return IEObjects.blockConnectors.getDefaultState().withProperty(IEObjects.blockConnectors.property, BlockTypes_Connector.RELAY_HV)
 					.withProperty(IEProperties.FACING_ALL, facing);
 		} else if (forward==4&&up==0&&right==1) {
-			return IEContent.blockStorage.getDefaultState().withProperty(IEContent.blockStorage.property, BlockTypes_MetalsIE.STEEL);
+			return IEObjects.blockStorage.getDefaultState().withProperty(IEObjects.blockStorage.property, BlockTypes_MetalsIE.STEEL);
 		} else if (forward>0) {
 			if ((right==0&&up==0)||(right==1&&up==stageCount-1)) {
-				return IEContent.blockMetalDecoration1.getDefaultState().withProperty(IEContent.blockMetalDecoration1.property, BlockTypes_MetalDecoration1.STEEL_FENCE);
+				return IEObjects.blockMetalDecoration1.getDefaultState().withProperty(IEObjects.blockMetalDecoration1.property, BlockTypes_MetalDecoration1.STEEL_FENCE);
 			} else {
-				return IEContent.blockMetalDecoration2.getDefaultState().withProperty(IEContent.blockMetalDecoration2.property, BlockTypes_MetalDecoration2.STEEL_WALLMOUNT)
+				return IEObjects.blockMetalDecoration2.getDefaultState().withProperty(IEObjects.blockMetalDecoration2.property, BlockTypes_MetalDecoration2.STEEL_WALLMOUNT)
 						.withProperty(IEProperties.INT_4, 1-right).withProperty(IEProperties.FACING_ALL, facing.getOpposite());
 			}
 		} else if (forward==-2) {
-			return IEContent.blockMetalDecoration0.getDefaultState().withProperty(IEContent.blockMetalDecoration0.property, BlockTypes_MetalDecoration0.HEAVY_ENGINEERING);
+			return IEObjects.blockMetalDecoration0.getDefaultState().withProperty(IEObjects.blockMetalDecoration0.property, BlockTypes_MetalDecoration0.HEAVY_ENGINEERING);
 		} else if (right==0) {
-			return IEContent.blockConnectors.getDefaultState().withProperty(IEContent.blockConnectors.property, BlockTypes_Connector.CONNECTOR_REDSTONE)
+			return IEObjects.blockConnectors.getDefaultState().withProperty(IEObjects.blockConnectors.property, BlockTypes_Connector.CONNECTOR_REDSTONE)
 					.withProperty(IEProperties.FACING_ALL, facing);
 		} else {
-			return IEContent.blockConnectors.getDefaultState().withProperty(IEContent.blockConnectors.property, BlockTypes_Connector.CONNECTOR_HV)
+			return IEObjects.blockConnectors.getDefaultState().withProperty(IEObjects.blockConnectors.property, BlockTypes_Connector.CONNECTOR_HV)
 					.withProperty(IEProperties.FACING_ALL, facing);
 		}
 	}
@@ -353,7 +352,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 			}
 			if (distSqu<=tinnitusDistSqu && entity instanceof EntityPlayer) {
 				ItemStack helmet = ((EntityPlayer) entity).inventory.armorInventory.get(3);
-				boolean earMuff = helmet.getItem()==IEContent.itemEarmuffs;
+				boolean earMuff = helmet.getItem()==IEObjects.itemEarmuffs;
 				if (!earMuff&&helmet.hasTagCompound()) {
 					earMuff = helmet.getTagCompound().hasKey("IE:Earmuffs");
 				}

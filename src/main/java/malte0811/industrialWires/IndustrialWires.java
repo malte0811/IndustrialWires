@@ -203,6 +203,7 @@ public class IndustrialWires {
 		proxy.preInit();
 		Compat.preInit();
 		MarxOreHandler.preInit();
+		// This has to run before textures are stitched, i.e. in preInit
 		MechMBPart.preInit();
 	}
 
@@ -304,6 +305,7 @@ public class IndustrialWires {
 		Compat.init();
 		MarxOreHandler.init();
 		PanelComponent.init();
+		MechMBPart.init();
 		if (hasIC2) {
 			EUCapability.register();
 		}

@@ -27,8 +27,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 
-import static blusunrize.immersiveengineering.common.IEContent.blockMetalDecoration0;
 import static blusunrize.immersiveengineering.common.blocks.metal.BlockTypes_MetalDecoration0.COIL_LV;
+import static malte0811.industrialWires.IEObjects.blockMetalDecoration0;
 import static malte0811.industrialWires.mech_mb.Waveform.Phases.get;
 import static malte0811.industrialWires.util.NBTKeys.BUFFER_IN;
 import static malte0811.industrialWires.util.NBTKeys.BUFFER_OUT;
@@ -36,14 +36,16 @@ import static net.minecraft.util.math.BlockPos.ORIGIN;
 
 public class MechPartSingleCoil extends MechMBPart implements IMBPartElectric {
 	{
-		IBlockState lightEng = getLightEngineering();
-		IBlockState coil = getCoil();
-		for (int y = -1;y<=1;y++) {
-			original.put(new BlockPos(-1, y, 0), lightEng);
-			original.put(new BlockPos(0, y, 0), coil);
-			original.put(new BlockPos(1, y, 0), lightEng);
+		if (areBlocksRegistered()) {
+			IBlockState lightEng = getLightEngineering();
+			IBlockState coil = getCoil();
+			for (int y = -1; y <= 1; y++) {
+				original.put(new BlockPos(-1, y, 0), lightEng);
+				original.put(new BlockPos(0, y, 0), coil);
+				original.put(new BlockPos(1, y, 0), lightEng);
+			}
+			original.put(ORIGIN, getDefaultShaft());
 		}
-		original.put(ORIGIN, getDefaultShaft());
 	}
 
 	private double bufferToMech;

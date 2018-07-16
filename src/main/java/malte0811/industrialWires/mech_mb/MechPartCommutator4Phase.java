@@ -34,10 +34,12 @@ import static net.minecraft.util.EnumFacing.WEST;
 
 public class MechPartCommutator4Phase extends MechPartCommutator {
 	{
-		IBlockState lightEng = getLightEngineering();
-		for (int i = 0; i < 2; i++) {
-			for (int j = 0; j < 2; j++) {
-				original.put(new BlockPos(2*i-1, j-1, 0), lightEng);
+		if (areBlocksRegistered()) {
+			IBlockState lightEng = getLightEngineering();
+			for (int i = 0; i < 2; i++) {
+				for (int j = 0; j < 2; j++) {
+					original.put(new BlockPos(2 * i - 1, j - 1, 0), lightEng);
+				}
 			}
 		}
 	}
