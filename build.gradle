@@ -1,3 +1,5 @@
+import groovy.json.JsonOutput
+
 def mainVersion = "1.7"
 def buildNumber = "26"
 
@@ -123,3 +125,101 @@ processResources
         exclude 'mcmod.info'
     }
 }
+
+//Code for automatic update JSON generation
+class GenerateUpdateJSON extends DefaultTask {
+    static def IW_VERSION_PREFIX = "####Version "
+    static def MC_VERSION_PREFIX = "###Minecraft "
+    static def UNFINISHED_SUFFIX = " - UNFINISHED"
+    static def RECOMMENDED = "-recommended"
+    static def LATEST = "-latest"
+    static def CF_URL = "https://minecraft.curseforge.com/projects/industrial-wires"
+
+    int compareVersions(String vA, String vB) {
+        String[] vPartsA = vA.split("[\\D]")
+        String[] vPartsB = vB.split("[\\D]")
+        if (vPartsA.length==0&&vPartsB.length==0)
+            return vA <=> vB
+        else if (vPartsA.length==0)
+            return -1
+        else if (vPartsB.length==0)
+            return 1
+
+        int length = Math.min(vPartsA.length, vPartsB.length)
+        for (int i = 0;i<length;i++) {
+            int pA = Integer.parseInt(vPartsA[i])
+            int pB = Integer.parseInt(vPartsB[i])
+            if (pA!=pB) {
+                return pA<=>pB
+            }
+        }
+        if (vPartsA.length != vPartsB.length)
+            return vPartsA.length <=> vPartsB.length
+        return vA <=> vB
+    }
+
+    def addChangelog(Map<String, Map<String, String>> changelogForVersions, Map<String, String> promos,
+                     String currentMCVersion, String currentVersion, String currentChangelog) {
+        if (!changelogForVersions.containsKey(currentMCVersion)) {
+            promos.put(currentMCVersion+RECOMMENDED, currentVersion)
+            promos.put(currentMCVersion+LATEST, currentVersion)
+            changelogForVersions[currentMCVersion] = new TreeMap<>({String s1, String s2->
+                compareVersions(s1, s2)})
+        }
+        changelogForVersions[currentMCVersion][currentVersion] = currentChangelog
+    }
+
+    @TaskAction
+    def generate() {
+        File changelog = new File("changelog.md")
+        if (!changelog.exists())
+            println "Changelog does not exist! Aborting!"
+        else {
+            String currentMCVersion = "";
+            Map<String, Map<String, String>> changelogForVersions = new HashMap<>()
+            Map<String, String> promos = new TreeMap<>({String s1, String s2->
+                compareVersions(s1, s2)})
+            String currentVersion = null
+            String currentChangelog = ""
+            changelog.eachLine {line ->
+                if (line.startsWith(IW_VERSION_PREFIX)) {
+                    if (currentVersion!=null) {
+                        addChangelog(changelogForVersions, promos, currentMCVersion, currentVersion, currentChangelog)
+                    }
+                    if (!line.endsWith(UNFINISHED_SUFFIX)) {
+                        currentVersion = line.substring(IW_VERSION_PREFIX.length())
+                    } else {
+                        currentVersion = (String) null
+                    }
+                    currentChangelog = ""
+                } else if (line.startsWith(MC_VERSION_PREFIX)) {
+                    if (currentVersion!=null) {
+                        addChangelog(changelogForVersions, promos, currentMCVersion, currentVersion, currentChangelog)
+                    }
+                    currentChangelog = ""
+                    currentVersion = (String) null
+                    currentMCVersion = line.substring(MC_VERSION_PREFIX.length())
+                } else if (!line.isEmpty()) {
+                    if (currentChangelog.length()==0)
+                        currentChangelog += line
+                    else
+                        currentChangelog += "\n"+line
+                }
+            }
+            Map<String, Object> mainMap = new TreeMap<>({String s1, String s2->
+                compareVersions(s1, s2)})
+            mainMap.putAll(changelogForVersions)
+            mainMap["homepage"] = CF_URL
+            mainMap["promos"] = promos
+            def outJson = JsonOutput.toJson(mainMap)
+            outJson = JsonOutput.prettyPrint(outJson)
+            File outF = new File("changelog.json")
+            outF.delete()
+            outF << outJson
+        }
+    }
+}
+
+task updateJson(type: GenerateUpdateJSON)
+
+build.finalizedBy updateJson

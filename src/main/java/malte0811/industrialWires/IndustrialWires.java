@@ -78,7 +78,8 @@ import static malte0811.industrialWires.mech_mb.MechMBPart.EXAMPLE_MECHMB_LOC;
 import static malte0811.industrialWires.wires.IC2Wiretype.*;
 
 @Mod(modid = IndustrialWires.MODID, version = IndustrialWires.VERSION, dependencies = "required-after:immersiveengineering@[0.12-77,);after:ic2",
-		certificateFingerprint = "7e11c175d1e24007afec7498a1616bef0000027d")
+		certificateFingerprint = "7e11c175d1e24007afec7498a1616bef0000027d",
+		updateJSON = "https://raw.githubusercontent.com/malte0811/IndustrialWires/MC1.12/changelog.json")
 @Mod.EventBusSubscriber
 public class IndustrialWires {
 	public static final String MODID = "industrialwires";
