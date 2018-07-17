@@ -154,8 +154,8 @@ public class MultiblockMechMB implements MultiblockHandler.IMultiblock {
 		}
 	}
 
-	ItemStack[][][] fakeStructure = {{{new ItemStack(Blocks.COMMAND_BLOCK)}}};
-	IngredientStack[] fakeMats = {new IngredientStack(fakeStructure[0][0][0])};
+	private ItemStack[][][] fakeStructure = {{{new ItemStack(Blocks.COMMAND_BLOCK)}}};
+	private IngredientStack[] fakeMats = {new IngredientStack(fakeStructure[0][0][0])};
 	@Override
 	public ItemStack[][][] getStructureManual() {
 		return fakeStructure;

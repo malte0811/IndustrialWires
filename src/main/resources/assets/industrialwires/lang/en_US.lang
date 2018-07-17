@@ -116,6 +116,19 @@ industrialwires.chat.currSpeed=Current speed: %s radians/second = %s RPM
 death.attack.industrialwires.jacobs_ladder=%1$s was electrocuted by a Jacob's Ladder
 death.attack.industrialwires.marx=%1$s was struck by lightning produced by a Marx generator
 
+desc.immersiveengineering.info.multiblock.iw:marx_generator=Marx Generator
+desc.immersiveengineering.info.multiblock.industrialwires:mech_mb=Mechanical Multiblock
+desc.immersiveengineering.info.multiblock.industrialwires:example_mech_mb=Example Mechanical Multiblock
+desc.immersiveengineering.info.multiblock.industrialwires:flywheel=Mechanical Multiblock part: Flywheel
+desc.immersiveengineering.info.multiblock.industrialwires:single_coil=Mechanical Multiblock part: Single-phase coil
+desc.immersiveengineering.info.multiblock.industrialwires:two_electrodes=Mechanical Multiblock part: Single-phase electrodes
+desc.immersiveengineering.info.multiblock.industrialwires:shaft=Mechanical Multiblock part: Shaft
+desc.immersiveengineering.info.multiblock.industrialwires:commutator=Mechanical Multiblock part: Commutator
+desc.immersiveengineering.info.multiblock.industrialwires:speedometer=Mechanical Multiblock part: Speedometer
+desc.immersiveengineering.info.multiblock.industrialwires:comm_four=Mechanical Multiblock part: 4-phase commutator
+desc.immersiveengineering.info.multiblock.industrialwires:four_coils=Mechanical Multiblock part: 4-phase coils
+desc.immersiveengineering.info.multiblock.industrialwires:four_electrodes=Mechanical Multiblock part: 4-phase electrodes
+
 itemGroup.industrialwires=Industrial Wires
 
 ie.manual.category.industrialwires.name=Industrial Wires
