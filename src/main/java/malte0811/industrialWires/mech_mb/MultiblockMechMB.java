@@ -117,6 +117,9 @@ public class MultiblockMechMB implements MultiblockHandler.IMultiblock {
 					return false;
 				}
 			}
+			if (parts.isEmpty()) {
+				return false;
+			}
 			double finalWeight = weight;
 			w.setOrigin(pos);
 			formEnd(w, mutPos, END, (te, master) -> {

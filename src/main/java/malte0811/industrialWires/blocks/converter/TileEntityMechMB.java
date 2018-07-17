@@ -97,7 +97,7 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 			Compat.loadIC2Tile.accept(this);
 			firstTick = false;
 		}
-		if (isLogicDummy() || mechanical == null) {
+		if (isLogicDummy() || mechanical == null || mechanical.length==0) {
 			return;
 		}
 		if (world.isRemote) {
@@ -108,8 +108,7 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 			}
 			if (energyState.clientUpdate()||firstTick) {
 				IndustrialWires.proxy.updateMechMBTurningSound(this, energyState);
-				int otherEndOffset = offsets[offsets.length-1]+mechanical[mechanical.length-1].getLength();
-				TileEntity otherEnd = Utils.getExistingTileEntity(world, pos.offset(facing, -otherEndOffset));
+				TileEntity otherEnd = Utils.getExistingTileEntity(world, pos.offset(facing, -offsets[mechanical.length]));
 				if (otherEnd instanceof TileEntityMechMB) {
 					IndustrialWires.proxy.updateMechMBTurningSound((TileEntityMechMB) otherEnd, energyState);
 				}
@@ -332,7 +331,7 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 
 	public void setMechanical(MechMBPart[] mech, double speed) {
 		mechanical = mech;
-		offsets = new int[mechanical.length];
+		offsets = new int[mechanical.length+1];
 		double weight = 0;
 		int offset = 1;
 		List<int[]> electrical = new ArrayList<>();
@@ -348,6 +347,7 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 				lastEStart = -1;
 			}
 		}
+		offsets[mechanical.length] = offset;
 		if (lastEStart >= 0) {
 			electrical.add(new int[]{lastEStart, mechanical.length});
 		}
@@ -514,7 +514,7 @@ public class TileEntityMechMB extends TileEntityIWMultiblock implements ITickabl
 				}
 			}
 			BlockPos otherEnd = offset(pos, facing.getOpposite(), mirrored, 0,
-					offsets[offsets.length - 1] + mechanical[mechanical.length - 1].getLength(), 0);
+					offsets[mechanical.length], 0);
 			world.setBlockState(otherEnd,
 					blockMetalDecoration0.getDefaultState().withProperty(blockMetalDecoration0.property, HEAVY_ENGINEERING));
 			world.setBlockState(otherEnd.down(),
