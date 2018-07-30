@@ -84,9 +84,9 @@ public class GuiPanelComponent extends GuiContainer {
 				toAdd.setText(sc.value);
 				stringTexts.add(toAdd);
 			}
-			IConfigurableComponent.RSChannelConfig[] rs = confComp.getRSChannelOptions();
+			IConfigurableComponent.RSColorConfig[] rs = confComp.getRSChannelOptions();
 			rsChannelChoosers.clear();
-			for (IConfigurableComponent.RSChannelConfig rc : rs) {
+			for (IConfigurableComponent.RSColorConfig rc : rs) {
 				if (rc.small) {
 					rsChannelChoosers.add(new GuiChannelPickerSmall(0, componentLeft + rc.x, componentTop + rc.y, 10, 40, rc.value));
 				} else {

@@ -17,17 +17,15 @@ package malte0811.industrialWires.controlpanel;
 
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import malte0811.industrialWires.IndustrialWires;
-import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
-import malte0811.industrialWires.util.TriConsumer;
+import malte0811.industrialWires.controlpanel.ControlPanelNetwork.RSChannel;
+import malte0811.industrialWires.controlpanel.ControlPanelNetwork.RSChannelState;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
@@ -43,23 +41,22 @@ import static malte0811.industrialWires.util.NBTKeys.RS_CHANNEL;
 import static malte0811.industrialWires.util.NBTKeys.RS_ID;
 
 public class ToggleSwitch extends PanelComponent implements IConfigurableComponent {
-	public boolean active;
-	public int rsOutputId;
-	public byte rsOutputChannel;
+	protected boolean active;
+	@Nonnull
+	protected RSChannel outputChannel = RSChannel.INVALID_CHANNEL;
 
 	public ToggleSwitch() {
 		super("toggle_switch");
 	}
 
-	public ToggleSwitch(String name) {
+	protected ToggleSwitch(String name) {
 		super(name);
 	}
 
-	public ToggleSwitch(boolean active, int rsOutputId, byte rsOutputChannel) {
+	public ToggleSwitch(boolean active, @Nonnull RSChannel outputChannel) {
 		this();
 		this.active = active;
-		this.rsOutputChannel = rsOutputChannel;
-		this.rsOutputId = rsOutputId;
+		this.outputChannel = outputChannel;
 	}
 
 	@Override
@@ -67,15 +64,16 @@ public class ToggleSwitch extends PanelComponent implements IConfigurableCompone
 		if (!toItem) {
 			nbt.setBoolean("active", active);
 		}
-		nbt.setByte(RS_CHANNEL, rsOutputChannel);
-		nbt.setInteger(RS_ID, rsOutputId);
+		nbt.setByte(RS_CHANNEL, outputChannel.getColor());
+		nbt.setInteger(RS_ID, outputChannel.getController());
 	}
 
 	@Override
 	protected void readCustomNBT(NBTTagCompound nbt) {
 		active = nbt.getBoolean("active");
-		rsOutputChannel = nbt.getByte(RS_CHANNEL);
-		rsOutputId = nbt.getInteger(RS_ID);
+		int rsController = nbt.getInteger(RS_ID);
+		byte rsColor = nbt.getByte(RS_CHANNEL);
+		outputChannel = new RSChannel(rsController, rsColor);
 	}
 
 	protected float sizeX = .0625F;
@@ -102,7 +100,7 @@ public class ToggleSwitch extends PanelComponent implements IConfigurableCompone
 	@Override
 	@Nonnull
 	public PanelComponent copyOf() {
-		ToggleSwitch ret = new ToggleSwitch(active, rsOutputId, rsOutputChannel);
+		ToggleSwitch ret = new ToggleSwitch(active, outputChannel);
 		ret.setX(x);
 		ret.setY(y);
 		ret.panelHeight = panelHeight;
@@ -119,23 +117,13 @@ public class ToggleSwitch extends PanelComponent implements IConfigurableCompone
 	}
 
 	@Override
-	public void interactWith(Vec3d hitRel, TileEntityPanel tile, EntityPlayerMP player) {
-		setOut(!active, tile);
-		tile.markDirty();
-		tile.triggerRenderUpdate();
+	public void interactWith(Vec3d hitRel, EntityPlayerMP player) {
+		setOut(!active);
 	}
 
 	@Override
-	public void update(TileEntityPanel tile) {
+	public void update() {
 
-	}
-
-	@Override
-	public void registerRSOutput(int id, @Nonnull TriConsumer<Integer, Byte, PanelComponent> out) {
-		if (matchesId(rsOutputId, id)) {
-			super.registerRSOutput(id, out);
-			out.accept((int) rsOutputChannel, (byte) (active ? 15 : 0), this);
-		}
 	}
 
 	@Override
@@ -162,16 +150,11 @@ public class ToggleSwitch extends PanelComponent implements IConfigurableCompone
 
 	}
 
-	@Override
-	public void invalidate(TileEntityPanel te) {
-		setOut(rsOutputChannel, 0);
-	}
-
-	protected void setOut(boolean on, TileEntityPanel tile) {
+	protected void setOut(boolean on) {
 		active = on;
-		tile.markDirty();
-		tile.triggerRenderUpdate();
-		setOut(rsOutputChannel, active ? 15 : 0);
+		panel.markDirty();
+		panel.triggerRenderUpdate();
+		network.setOutputs(this, new RSChannelState(outputChannel, (byte) (active ? 15 : 0)));
 	}
 
 	@Override
@@ -183,16 +166,22 @@ public class ToggleSwitch extends PanelComponent implements IConfigurableCompone
 		ToggleSwitch that = (ToggleSwitch) o;
 
 		if (active != that.active) return false;
-		if (rsOutputId != that.rsOutputId) return false;
-		return rsOutputChannel == that.rsOutputChannel;
+		if (Float.compare(that.sizeX, sizeX) != 0) return false;
+		if (Float.compare(that.sizeY, sizeY) != 0) return false;
+		if (Float.compare(that.rodRadius, rodRadius) != 0) return false;
+		if (Float.compare(that.rodLength, rodLength) != 0) return false;
+		return outputChannel.equals(that.outputChannel);
 	}
 
 	@Override
 	public int hashCode() {
 		int result = super.hashCode();
 		result = 31 * result + (active ? 1 : 0);
-		result = 31 * result + rsOutputId;
-		result = 31 * result + (int) rsOutputChannel;
+		result = 31 * result + outputChannel.hashCode();
+		result = 31 * result + (sizeX != +0.0f ? Float.floatToIntBits(sizeX) : 0);
+		result = 31 * result + (sizeY != +0.0f ? Float.floatToIntBits(sizeY) : 0);
+		result = 31 * result + (rodRadius != +0.0f ? Float.floatToIntBits(rodRadius) : 0);
+		result = 31 * result + (rodLength != +0.0f ? Float.floatToIntBits(rodLength) : 0);
 		return result;
 	}
 
@@ -200,19 +189,16 @@ public class ToggleSwitch extends PanelComponent implements IConfigurableCompone
 	public void applyConfigOption(ConfigType type, int id, NBTBase value) {
 		switch (type) {
 		case RS_CHANNEL:
-			if (id == 0) {
-				rsOutputChannel = ((NBTTagByte) value).getByte();
-			}
+			outputChannel = outputChannel.withColor(value);
 			break;
 		case INT:
-			if (id == 0) {
-				rsOutputId = ((NBTTagInt) value).getInt();
-			}
+			outputChannel = outputChannel.withController(value);
 			break;
 		}
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public String fomatConfigName(ConfigType type, int id) {
 		switch (type) {
 		case RS_CHANNEL:
@@ -226,6 +212,7 @@ public class ToggleSwitch extends PanelComponent implements IConfigurableCompone
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public String fomatConfigDescription(ConfigType type, int id) {
 		switch (type) {
 		case RS_CHANNEL:
@@ -240,13 +227,13 @@ public class ToggleSwitch extends PanelComponent implements IConfigurableCompone
 	}
 
 	@Override
-	public RSChannelConfig[] getRSChannelOptions() {
-		return new RSChannelConfig[]{new RSChannelConfig("channel", 0, 0, (byte) rsOutputChannel)};
+	public RSColorConfig[] getRSChannelOptions() {
+		return new RSColorConfig[]{new RSColorConfig("channel", 0, 0, outputChannel.getColor())};
 	}
 
 	@Override
 	public IntConfig[] getIntegerOptions() {
-		return new IntConfig[]{new IntConfig("rsId", 0, 50, rsOutputId, 2, false)};
+		return new IntConfig[]{new IntConfig("rsId", 0, 50, outputChannel.getController(), 2, false)};
 	}
 
 	@Override

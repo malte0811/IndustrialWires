@@ -30,6 +30,6 @@ public class ContainerRSPanelConn extends Container {
 
 	@Override
 	public boolean canInteractWith(@Nonnull EntityPlayer playerIn) {
-		return playerIn.getDistanceSq(te.getPos()) < 64;
+		return playerIn.getDistanceSq(te.getBlockPos()) < 64;
 	}
 }

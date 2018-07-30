@@ -15,25 +15,8 @@
 
 package malte0811.industrialWires.blocks.controlpanel;
 
-import malte0811.industrialWires.controlpanel.PanelComponent;
-import malte0811.industrialWires.controlpanel.PropertyComponents;
-import malte0811.industrialWires.items.ItemPanelComponent;
-import net.minecraft.block.BlockRedstoneWire;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-
-import javax.annotation.Nonnull;
-import java.util.function.Consumer;
-
-import static malte0811.industrialWires.util.MiscUtils.apply;
-
 public class TileEntityComponentPanel extends TileEntityPanel {
-	private int rsOut = 0;
+	/*private int rsOut = 0; todo
 	private Consumer<byte[]> rsIn;
 	public TileEntityComponentPanel() {
 		components = new PropertyComponents.AABBPanelProperties();
@@ -42,7 +25,7 @@ public class TileEntityComponentPanel extends TileEntityPanel {
 	@Override
 	public void update() {
 		for (PanelComponent pc : components) {
-			pc.update(this);
+			pc.update();
 		}
 		if (!world.isRemote) {
 			if (firstTick&&components.size()>0) {
@@ -81,7 +64,7 @@ public class TileEntityComponentPanel extends TileEntityPanel {
 
 	public void markBlockForUpdate(BlockPos pos)
 	{
-		IBlockState state = world.getBlockState(getPos());
+		IBlockState state = world.getBlockState(getBlockPos());
 		world.notifyBlockUpdate(pos,state,state,3);
 		world.notifyNeighborsOfStateChange(pos, state.getBlock(), true);
 	}
@@ -122,4 +105,4 @@ public class TileEntityComponentPanel extends TileEntityPanel {
 		}
 		return ItemPanelComponent.stackFromComponent(components.get(0));
 	}
-}
+*/}

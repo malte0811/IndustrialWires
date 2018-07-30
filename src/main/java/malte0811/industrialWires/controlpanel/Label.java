@@ -16,7 +16,6 @@
 package malte0811.industrialWires.controlpanel;
 
 import malte0811.industrialWires.IndustrialWires;
-import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import malte0811.industrialWires.client.panelmodel.RawModelFontRenderer;
@@ -101,12 +100,12 @@ public class Label extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
-	public void interactWith(Vec3d hitRelative, TileEntityPanel tile, EntityPlayerMP player) {
+	public void interactWith(Vec3d hitRelative, EntityPlayerMP player) {
 	}
 
 	@Override
-	public void update(TileEntityPanel tile) {
-
+	public void update() {
+		//NOP
 	}
 
 	@Override
@@ -146,6 +145,7 @@ public class Label extends PanelComponent implements IConfigurableComponent {
 
 	@Nullable
 	@Override
+	@SideOnly(Side.CLIENT)
 	public String fomatConfigName(ConfigType type, int id) {
 		switch (type) {
 		case FLOAT:
@@ -157,6 +157,7 @@ public class Label extends PanelComponent implements IConfigurableComponent {
 
 	@Nullable
 	@Override
+	@SideOnly(Side.CLIENT)
 	public String fomatConfigDescription(ConfigType type, int id) {
 		switch (type) {
 		case STRING:

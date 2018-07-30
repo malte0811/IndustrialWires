@@ -126,7 +126,7 @@ public class ClientEventHandler {
 				TileEntityPanel panel = (TileEntityPanel) tile;
 				Pair<PanelComponent, RayTraceResult> pc = panel.getSelectedComponent(Minecraft.getMinecraft().player, event.getTarget().hitVec, true);
 				if (pc != null) {
-					pc.getLeft().renderBox(panel);
+					pc.getLeft().renderBox();
 					event.setCanceled(true);
 				}
 			}

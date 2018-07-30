@@ -17,6 +17,8 @@ package malte0811.industrialWires.controlpanel;
 
 import blusunrize.immersiveengineering.api.tool.IConfigurableTool.ToolConfig;
 import net.minecraft.nbt.NBTBase;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 
@@ -31,20 +33,22 @@ public interface IConfigurableComponent {
 	 * @return a TRANSLATED name for the config option. Try to keep this short.
 	 */
 	@Nullable
+	@SideOnly(Side.CLIENT)
 	String fomatConfigName(ConfigType type, int id);
 
 	/**
 	 * @return a TRANSLATED name for the config option, displayed when hovering over it
 	 */
 	@Nullable
+	@SideOnly(Side.CLIENT)
 	String fomatConfigDescription(ConfigType type, int id);
 
 	default StringConfig[] getStringOptions() {
 		return new StringConfig[0];
 	}
 
-	default RSChannelConfig[] getRSChannelOptions() {
-		return new RSChannelConfig[0];
+	default RSColorConfig[] getRSChannelOptions() {
+		return new RSColorConfig[0];
 	}
 
 	default IntConfig[] getIntegerOptions() {
@@ -80,14 +84,14 @@ public interface IConfigurableComponent {
 		}
 	}
 
-	class RSChannelConfig extends UniversalConfig<Byte> {
+	class RSColorConfig extends UniversalConfig<Byte> {
 		public boolean small;
 
-		public RSChannelConfig(String name, int x, int y, Byte value) {
+		public RSColorConfig(String name, int x, int y, Byte value) {
 			this(name, x, y, value, false);
 		}
 
-		public RSChannelConfig(String name, int x, int y, Byte value, boolean small) {
+		public RSColorConfig(String name, int x, int y, Byte value, boolean small) {
 			super(name, x, y, value);
 			this.small = small;
 		}

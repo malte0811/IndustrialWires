@@ -18,12 +18,10 @@ package malte0811.industrialWires.controlpanel;
 import blusunrize.immersiveengineering.api.Lib;
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import malte0811.industrialWires.IndustrialWires;
-import malte0811.industrialWires.blocks.controlpanel.BlockPanel;
 import malte0811.industrialWires.blocks.controlpanel.BlockTypes_Panel;
 import malte0811.industrialWires.client.ClientUtilsIW;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.controlpanel.PropertyComponents.PanelRenderProperties;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -38,9 +36,7 @@ import net.minecraft.nbt.NBTTagFloat;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJModel;
 import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad;
@@ -52,9 +48,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiPredicate;
 
-import static malte0811.industrialWires.util.MiscUtils.discoverLocal;
 import static malte0811.industrialWires.util.NBTKeys.*;
 
 public final class PanelUtils {
@@ -365,27 +359,6 @@ public final class PanelUtils {
 			panelBase = new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.UNFINISHED.ordinal());
 		}
 		return panelBase;
-	}
-
-	public static List<BlockPos> discoverPanelParts(World w, BlockPos here, int maxCount) {
-		BiPredicate<BlockPos, Integer> isValid = (pos, count) -> {
-			if (pos.equals(here)) {
-				return true;
-			}
-			if (here.distanceSq(pos) > 25 || count > maxCount || !w.isBlockLoaded(pos)) {
-				return false;
-			}
-			IBlockState state = w.getBlockState(pos);
-			return state.getBlock() == IndustrialWires.panel && state.getValue(BlockPanel.type).isPanelConnector();
-		};
-		List<BlockPos> all = discoverLocal(w, here, isValid);
-		List<BlockPos> ret = new ArrayList<>();
-		for (BlockPos pos : all) {
-			if (w.getBlockState(pos).getBlock() == IndustrialWires.panel && w.getBlockState(pos).getValue(BlockPanel.type) != BlockTypes_Panel.DUMMY) {
-				ret.add(pos);
-			}
-		}
-		return ret;
 	}
 
 	public static float getAngle(ItemStack inv) {

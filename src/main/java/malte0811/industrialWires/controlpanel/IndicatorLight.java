@@ -19,12 +19,11 @@ import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
+import malte0811.industrialWires.controlpanel.ControlPanelNetwork.RSChannel;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
@@ -41,8 +40,8 @@ import java.util.function.Consumer;
 import static malte0811.industrialWires.util.NBTKeys.*;
 
 public class IndicatorLight extends PanelComponent implements IConfigurableComponent {
-	private int rsInputId;
-	private byte rsInputChannel;
+	@Nonnull
+	private RSChannel inputChannel = RSChannel.INVALID_CHANNEL;
 	private int colorA = 0xff00;
 	private byte rsInput;
 
@@ -50,17 +49,16 @@ public class IndicatorLight extends PanelComponent implements IConfigurableCompo
 		super("indicator_light");
 	}
 
-	public IndicatorLight(int rsId, byte rsChannel, int color) {
+	public IndicatorLight(@Nonnull RSChannel input, int color) {
 		this();
 		colorA = color;
-		rsInputChannel = rsChannel;
-		rsInputId = rsId;
+		inputChannel = input;
 	}
 
 	@Override
 	protected void writeCustomNBT(NBTTagCompound nbt, boolean toItem) {
-		nbt.setInteger(RS_ID, rsInputId);
-		nbt.setByte(RS_CHANNEL, rsInputChannel);
+		nbt.setInteger(RS_ID, inputChannel.getController());
+		nbt.setByte(RS_CHANNEL, inputChannel.getColor());
 		nbt.setInteger(COLOR, colorA);
 		if (!toItem) {
 			nbt.setInteger("rsInput", rsInput);
@@ -69,8 +67,9 @@ public class IndicatorLight extends PanelComponent implements IConfigurableCompo
 
 	@Override
 	protected void readCustomNBT(NBTTagCompound nbt) {
-		rsInputId = nbt.getInteger(RS_ID);
-		rsInputChannel = nbt.getByte(RS_CHANNEL);
+		int rsController = nbt.getInteger(RS_ID);
+		byte rsColor = nbt.getByte(RS_CHANNEL);
+		inputChannel = new RSChannel(rsController, rsColor);
 		colorA = nbt.getInteger(COLOR);
 		rsInput = nbt.getByte("rsInput");
 	}
@@ -96,7 +95,7 @@ public class IndicatorLight extends PanelComponent implements IConfigurableCompo
 	@Nonnull
 	@Override
 	public PanelComponent copyOf() {
-		IndicatorLight ret = new IndicatorLight(rsInputId, rsInputChannel, colorA);
+		IndicatorLight ret = new IndicatorLight(inputChannel, colorA);
 		ret.rsInput = rsInput;
 		ret.setX(x);
 		ret.setY(y);
@@ -114,31 +113,27 @@ public class IndicatorLight extends PanelComponent implements IConfigurableCompo
 	}
 
 	@Override
-	public void interactWith(Vec3d hitRelative, TileEntityPanel tile, EntityPlayerMP player) {
+	public void interactWith(Vec3d hitRelative, EntityPlayerMP player) {
 	}
 
 	@Override
-	public void update(TileEntityPanel tile) {
+	public void update() {
 
 	}
 
-	private TileEntityPanel panel;
-	private Consumer<byte[]> handler = (input) -> {
-		if (input[rsInputChannel] != rsInput) {
-			rsInput = input[rsInputChannel];
+	private Consumer<ControlPanelNetwork.RSChannelState> handler = (state) -> {
+		if (state.getStrength() != rsInput) {
+			rsInput = state.getStrength();
 			panel.markDirty();
 			panel.triggerRenderUpdate();
 		}
 	};
 
-	@Nullable
+
 	@Override
-	public Consumer<byte[]> getRSInputHandler(int id, TileEntityPanel panel) {
-		if (matchesId(rsInputId, id)) {
-			this.panel = panel;
-			return handler;
-		}
-		return null;
+	public void setNetwork(ControlPanelNetwork net, TileEntityPanel panel) {
+		super.setNetwork(net, panel);
+		net.addListener(this, handler, inputChannel);
 	}
 
 	@Override
@@ -175,12 +170,16 @@ public class IndicatorLight extends PanelComponent implements IConfigurableCompo
 	@Override
 	public void applyConfigOption(ConfigType type, int id, NBTBase value) {
 		switch (type) {
-		case RS_CHANNEL:
-			rsInputChannel = ((NBTTagByte) value).getByte();
-			break;
-		case INT:
-			rsInputId = ((NBTTagInt) value).getInt();
-			break;
+			case RS_CHANNEL:
+				if (id == 0) {
+					inputChannel = inputChannel.withColor(value);
+				}
+				break;
+			case INT:
+				if (id == 0) {
+					inputChannel = inputChannel.withController(value);
+				}
+				break;
 		case FLOAT:
 			colorA = PanelUtils.setColor(colorA, id, value);
 			break;
@@ -189,6 +188,7 @@ public class IndicatorLight extends PanelComponent implements IConfigurableCompo
 
 	@Nullable
 	@Override
+	@SideOnly(Side.CLIENT)
 	public String fomatConfigName(ConfigType type, int id) {
 		switch (type) {
 		case FLOAT:
@@ -202,6 +202,7 @@ public class IndicatorLight extends PanelComponent implements IConfigurableCompo
 
 	@Nullable
 	@Override
+	@SideOnly(Side.CLIENT)
 	public String fomatConfigDescription(ConfigType type, int id) {
 		switch (type) {
 		case FLOAT:
@@ -216,16 +217,16 @@ public class IndicatorLight extends PanelComponent implements IConfigurableCompo
 	}
 
 	@Override
-	public RSChannelConfig[] getRSChannelOptions() {
-		return new RSChannelConfig[]{
-				new RSChannelConfig("channel", 0, 0, rsInputChannel)
+	public RSColorConfig[] getRSChannelOptions() {
+		return new RSColorConfig[]{
+				new RSColorConfig("channel", 0, 0, inputChannel.getColor())
 		};
 	}
 
 	@Override
 	public IntConfig[] getIntegerOptions() {
 		return new IntConfig[]{
-				new IntConfig("rsId", 0, 45, rsInputId, 2, false)
+				new IntConfig("rsId", 0, 45, inputChannel.getController(), 2, false)
 		};
 	}
 

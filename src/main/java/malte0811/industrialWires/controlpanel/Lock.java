@@ -17,11 +17,11 @@ package malte0811.industrialWires.controlpanel;
 
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import malte0811.industrialWires.IndustrialWires;
-import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
+import malte0811.industrialWires.controlpanel.ControlPanelNetwork.RSChannel;
+import malte0811.industrialWires.controlpanel.ControlPanelNetwork.RSChannelState;
 import malte0811.industrialWires.items.ItemKey;
-import malte0811.industrialWires.util.TriConsumer;
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.resources.I18n;
@@ -53,8 +53,8 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 	private NBTTagCompound keyNBT;
 	private boolean turned;
 	private boolean latching = false;
-	private int rsOutputId;
-	private int rsOutputChannel;
+	@Nonnull
+	private RSChannel outputChannel = RSChannel.INVALID_CHANNEL;
 	private int ticksTillOff;
 	private int lockID;
 
@@ -65,11 +65,10 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 		}
 	}
 
-	public Lock(boolean latching, int rsOutputId, int rsOutputChannel) {
+	public Lock(boolean latching, @Nonnull RSChannel out) {
 		this();
 		this.latching = latching;
-		this.rsOutputChannel = rsOutputChannel;
-		this.rsOutputId = rsOutputId;
+		outputChannel = out;
 	}
 
 	@Override
@@ -83,8 +82,8 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 		}
 		nbt.setInteger("lockId", lockID);
 		nbt.setBoolean(LATCHING, latching);
-		nbt.setInteger(RS_CHANNEL, rsOutputChannel);
-		nbt.setInteger(RS_ID, rsOutputId);
+		nbt.setByte(RS_CHANNEL, outputChannel.getColor());
+		nbt.setInteger(RS_ID, outputChannel.getController());
 	}
 
 	@Override
@@ -100,8 +99,9 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 			lockID = nbt.getInteger("lockId");
 		}
 		latching = nbt.getBoolean(LATCHING);
-		rsOutputChannel = nbt.getInteger(RS_CHANNEL);
-		rsOutputId = nbt.getInteger(RS_ID);
+		int rsController = nbt.getInteger(RS_CHANNEL);
+		byte rsColor = nbt.getByte(RS_ID);
+		outputChannel = new RSChannel(rsController, rsColor);
 	}
 
 	private final static float size = .0625F;
@@ -137,6 +137,7 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 		return ret;
 	}
 
+	@SideOnly(Side.CLIENT)
 	private void addKey(List<RawQuad> out, Matrix4 mat) {
 		PanelUtils.addColoredBox(DARK_GRAY, DARK_GRAY, null, new Vector3f(xOffset, size / 2, zOffsetLowerKey), new Vector3f(keyWidth, keyOffset, size / 2), out, false, mat);
 		PanelUtils.addColoredBox(DARK_GRAY, DARK_GRAY, null, new Vector3f(xOffset, size / 2 + keyOffset, zOffset), new Vector3f(keyWidth, size, size - 2 * zOffset), out, false, mat);
@@ -145,7 +146,7 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 	@Override
 	@Nonnull
 	public PanelComponent copyOf() {
-		Lock ret = new Lock(latching, rsOutputId, rsOutputChannel);
+		Lock ret = new Lock(latching, outputChannel);
 		ret.turned = turned;
 		ret.lockID = lockID;
 		ret.keyNBT = keyNBT == null ? null : keyNBT.copy();
@@ -166,7 +167,7 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
-	public void interactWith(Vec3d hitRel, TileEntityPanel tile, EntityPlayerMP player) {
+	public void interactWith(Vec3d hitRel, EntityPlayerMP player) {
 		boolean update = false;
 		if (keyNBT == null) {
 			for (EnumHand hand : EnumHand.values()) {
@@ -194,34 +195,25 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 			}
 		}
 		if (update) {
-			setOut(tile);
+			setOut();
 			if (!latching && turned) {
 				ticksTillOff = 10;
 			}
 		}
-		tile.markDirty();
-		tile.triggerRenderUpdate();
+		panel.markDirty();
+		panel.triggerRenderUpdate();
 	}
 
 	@Override
-	public void update(TileEntityPanel tile) {
+	public void update() {
 		if (!latching && ticksTillOff > 0) {
 			ticksTillOff--;
-			tile.markDirty();
 			if (ticksTillOff == 0) {
 				turned = false;
-				tile.markDirty();
-				tile.triggerRenderUpdate();
-				setOut(tile);
+				panel.triggerRenderUpdate();
+				setOut();
 			}
-		}
-	}
-
-	@Override
-	public void registerRSOutput(int id, @Nonnull TriConsumer<Integer, Byte, PanelComponent> out) {
-		if (matchesId(rsOutputId, id)) {
-			super.registerRSOutput(id, out);
-			out.accept(rsOutputChannel, (byte) (turned ? 15 : 0), this);
+			panel.markDirty();
 		}
 	}
 
@@ -242,22 +234,15 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 		Gui.drawRect(left, top, right, bottom, DARK_GRAY_INT);
 	}
 
-	@Override
-	public void invalidate(TileEntityPanel te) {
-		setOut(rsOutputChannel, 0);
-	}
-
-	private void setOut(TileEntityPanel tile) {
-		tile.markDirty();
-		tile.triggerRenderUpdate();
-		setOut(rsOutputChannel, turned ? 15 : 0);
+	private void setOut() {
+		network.setOutputs(this, new RSChannelState(outputChannel, (byte) (turned ? 15 : 0)));
 	}
 
 	@Override
-	public void dropItems(TileEntityPanel te) {
-		super.dropItems(te);
+	public void dropItems() {
+		super.dropItems();
 		if (keyNBT!=null) {
-			Block.spawnAsEntity(te.getWorld(), te.getPos(), new ItemStack(keyNBT));
+			Block.spawnAsEntity(panel.getWorld(), panel.getBlockPos(), new ItemStack(keyNBT));
 		}
 	}
 
@@ -271,11 +256,10 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 
 		if (turned != lock.turned) return false;
 		if (latching != lock.latching) return false;
-		if (rsOutputId != lock.rsOutputId) return false;
-		if (rsOutputChannel != lock.rsOutputChannel) return false;
 		if (ticksTillOff != lock.ticksTillOff) return false;
 		if (lockID != lock.lockID) return false;
-		return keyNBT != null ? keyNBT.equals(lock.keyNBT) : lock.keyNBT == null;
+		if (keyNBT != null ? !keyNBT.equals(lock.keyNBT) : lock.keyNBT != null) return false;
+		return outputChannel.equals(lock.outputChannel);
 	}
 
 	@Override
@@ -284,8 +268,7 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 		result = 31 * result + (keyNBT != null ? keyNBT.hashCode() : 0);
 		result = 31 * result + (turned ? 1 : 0);
 		result = 31 * result + (latching ? 1 : 0);
-		result = 31 * result + rsOutputId;
-		result = 31 * result + rsOutputChannel;
+		result = 31 * result + outputChannel.hashCode();
 		result = 31 * result + ticksTillOff;
 		result = 31 * result + lockID;
 		return result;
@@ -294,25 +277,28 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 	@Override
 	public void applyConfigOption(ConfigType type, int id, NBTBase value) {
 		switch (type) {
-		case BOOL:
-			if (id == 0) {
-				latching = ((NBTTagByte) value).getByte() != 0;
-			}
-			break;
-		case RS_CHANNEL:
-			if (id == 0) {
-				rsOutputChannel = ((NBTTagByte) value).getByte();
-			}
-			break;
-		case INT:
-			if (id == 0) {
-				rsOutputId = ((NBTTagInt) value).getInt();
-			}
-			break;
+			case BOOL:
+				if (id == 0) {
+					latching = ((NBTTagByte) value).getByte() != 0;
+				}
+				break;
+			case RS_CHANNEL:
+				if (id == 0) {
+					byte rsColor = ((NBTTagByte) value).getByte();
+					outputChannel = new RSChannel(outputChannel.getController(), rsColor);
+				}
+				break;
+			case INT:
+				if (id == 0) {
+					int rsController = ((NBTTagInt) value).getInt();
+					outputChannel = new RSChannel(rsController, outputChannel.getColor());
+				}
+				break;
 		}
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public String fomatConfigName(ConfigType type, int id) {
 		switch (type) {
 		case BOOL:
@@ -326,6 +312,7 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public String fomatConfigDescription(ConfigType type, int id) {
 		switch (type) {
 		case BOOL:
@@ -340,13 +327,13 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
-	public RSChannelConfig[] getRSChannelOptions() {
-		return new RSChannelConfig[]{new RSChannelConfig("channel", 0, 0, (byte) rsOutputChannel)};
+	public RSColorConfig[] getRSChannelOptions() {
+		return new RSColorConfig[]{new RSColorConfig("channel", 0, 0, outputChannel.getColor())};
 	}
 
 	@Override
 	public IntConfig[] getIntegerOptions() {
-		return new IntConfig[]{new IntConfig("rsId", 0, 50, rsOutputId, 2, false)};
+		return new IntConfig[]{new IntConfig("rsId", 0, 50, outputChannel.getController(), 2, false)};
 	}
 
 	@Override

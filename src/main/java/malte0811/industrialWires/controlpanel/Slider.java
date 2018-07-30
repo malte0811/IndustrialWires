@@ -16,14 +16,17 @@
 package malte0811.industrialWires.controlpanel;
 
 import malte0811.industrialWires.IndustrialWires;
-import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
-import malte0811.industrialWires.util.TriConsumer;
+import malte0811.industrialWires.controlpanel.ControlPanelNetwork.RSChannel;
+import malte0811.industrialWires.controlpanel.ControlPanelNetwork.RSChannelState;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTTagByte;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagFloat;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
@@ -33,9 +36,7 @@ import org.lwjgl.util.vector.Vector3f;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static malte0811.industrialWires.util.NBTKeys.*;
 
@@ -45,23 +46,18 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 	private int color = 0xffff00;
 	private boolean horizontal;
 	private int out;
-	private byte rsChannel;
-	private int rsId;
-	private boolean hasSecond;
-	private byte rsChannel2;
-	private int rsId2 = -1;
-	private Set<TriConsumer<Integer, Byte, PanelComponent>> secOutputs = new HashSet<>();
+	@Nonnull
+	private RSChannel primary = RSChannel.INVALID_CHANNEL;
+	@Nonnull
+	private RSChannel secondary = RSChannel.INVALID_CHANNEL;
 
-	public Slider(float length, int color, boolean horizontal, int rsId, byte rsChannel, boolean hasSecond, int rsId2, byte rsChannel2) {
+	public Slider(float length, int color, boolean horizontal, @Nonnull RSChannel primary, @Nonnull RSChannel secondary) {
 		this();
 		this.color = color;
 		this.length = length;
 		this.horizontal = horizontal;
-		this.rsChannel = rsChannel;
-		this.rsId = rsId;
-		this.hasSecond = hasSecond;
-		this.rsChannel2 = rsChannel2;
-		this.rsId2 = rsId2;
+		this.primary = primary;
+		this.secondary = secondary;
 	}
 
 	public Slider() {
@@ -75,10 +71,10 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 		if (!toItem) {
 			nbt.setInteger("output", out);
 		}
-		nbt.setByte(RS_CHANNEL, rsChannel);
-		nbt.setInteger(RS_ID, rsId);
-		nbt.setByte(RS_CHANNEL2, rsChannel2);
-		nbt.setInteger(RS_ID2, rsId2);
+		nbt.setInteger(RS_ID, primary.getController());
+		nbt.setByte(RS_CHANNEL, primary.getColor());
+		nbt.setInteger(RS_ID2, secondary.getController());
+		nbt.setByte(RS_CHANNEL2, secondary.getColor());
 		nbt.setBoolean(HORIZONTAL, horizontal);
 	}
 
@@ -88,14 +84,15 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 		length = nbt.getFloat(LENGTH);
 		horizontal = nbt.getBoolean(HORIZONTAL);
 		out = nbt.getInteger("output");
-		rsChannel = nbt.getByte(RS_CHANNEL);
-		rsId = nbt.getInteger(RS_ID);
-		rsChannel2 = nbt.getByte(RS_CHANNEL2);
-		rsId2 = nbt.getInteger(RS_ID2);
-		hasSecond = rsId2>=0&&rsChannel2>=0;
-		if (!hasSecond) {
-			rsChannel2 = -1;
-			rsId2 = -1;
+		int rsController = nbt.getInteger(RS_ID);
+		byte rsColor = nbt.getByte(RS_CHANNEL);
+		primary = new RSChannel(rsController, rsColor);
+		if (nbt.hasKey(RS_ID2)) {
+			rsController = nbt.getInteger(RS_ID2);
+			rsColor = nbt.getByte(RS_CHANNEL2);
+			secondary = new RSChannel(rsController, rsColor);
+		} else {
+			secondary = RSChannel.INVALID_CHANNEL;
 		}
 	}
 
@@ -129,7 +126,7 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 	@Nonnull
 	@Override
 	public PanelComponent copyOf() {
-		Slider ret = new Slider(length, color, horizontal, rsId, rsChannel, hasSecond, rsId2, rsChannel2);
+		Slider ret = new Slider(length, color, horizontal, primary, secondary);
 		ret.out = out;
 		ret.setX(x);
 		ret.setY(y);
@@ -147,37 +144,19 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
-	public void interactWith(Vec3d hitRelative, TileEntityPanel tile, EntityPlayerMP player) {
+	public void interactWith(Vec3d hitRelative, EntityPlayerMP player) {
 		double pos = horizontal ? hitRelative.x : (length - hitRelative.z);
 		int newLevel = (int) Math.min(pos * 256 / length, 255);
 		if (newLevel != out) {
 			setOut(newLevel);
 			out = newLevel;
-			tile.markDirty();
-			tile.triggerRenderUpdate();
+			panel.markDirty();
+			panel.triggerRenderUpdate();
 		}
 	}
 
 	@Override
-	public void registerRSOutput(int id, @Nonnull TriConsumer<Integer, Byte, PanelComponent> out) {
-		if (matchesId(rsId, id)) {
-			super.registerRSOutput(id, out);
-			out.accept((int) rsChannel, (byte) (this.out>>4), this);
-		}
-		if (matchesId(rsId2, id)&&hasSecond) {
-			secOutputs.add(out);
-			out.accept((int) rsChannel2, (byte) (this.out&0xf), this);
-		}
-	}
-
-	@Override
-	public void unregisterRSOutput(int id, @Nonnull TriConsumer<Integer, Byte, PanelComponent> out) {
-		super.unregisterRSOutput(id, out);
-		secOutputs.remove(out);
-	}
-
-	@Override
-	public void update(TileEntityPanel tile) {
+	public void update() {
 
 	}
 
@@ -199,18 +178,9 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 		Gui.drawRect(left, top, right, bottom, 0xff000000 | color);
 	}
 
-	@Override
-	public void invalidate(TileEntityPanel te) {
-		setOut(0);
-	}
-
 	public void setOut(int value) {
-		super.setOut(rsChannel, value>>4);
-		if (hasSecond) {
-			for (TriConsumer<Integer, Byte, PanelComponent> cons:secOutputs) {
-				cons.accept((int) rsChannel2, (byte) (value&0xf), this);
-			}
-		}
+		network.setOutputs(this, new RSChannelState(primary, (byte) (value>>4)));
+		network.setOutputs(this, new RSChannelState(secondary, (byte) (value&0xf)));
 	}
 
 	@Override
@@ -225,11 +195,8 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 		if (color != slider.color) return false;
 		if (horizontal != slider.horizontal) return false;
 		if (out != slider.out) return false;
-		if (rsChannel != slider.rsChannel) return false;
-		if (rsId != slider.rsId) return false;
-		if (hasSecond != slider.hasSecond) return false;
-		if (rsChannel2 != slider.rsChannel2) return false;
-		return rsId2 == slider.rsId2;
+		if (!primary.equals(slider.primary)) return false;
+		return secondary.equals(slider.secondary);
 	}
 
 	@Override
@@ -239,42 +206,38 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 		result = 31 * result + color;
 		result = 31 * result + (horizontal ? 1 : 0);
 		result = 31 * result + out;
-		result = 31 * result + (int) rsChannel;
-		result = 31 * result + rsId;
-		result = 31 * result + (hasSecond ? 1 : 0);
-		result = 31 * result + (int) rsChannel2;
-		result = 31 * result + rsId2;
+		result = 31 * result + primary.hashCode();
+		result = 31 * result + secondary.hashCode();
 		return result;
 	}
 
 	@Override
 	public void applyConfigOption(ConfigType type, int id, NBTBase value) {
 		switch (type) {
-		case BOOL:
-			horizontal = ((NBTTagByte) value).getByte() != 0;
-			break;
-		case RS_CHANNEL:
-			if (id==0) {
-				rsChannel = ((NBTTagByte) value).getByte();
-			} else {
-				rsChannel2 = ((NBTTagByte) value).getByte();
-			}
-			break;
-		case INT:
-			if (id==0) {
-				rsId = ((NBTTagInt) value).getInt();
-			} else {
-				rsId2 = ((NBTTagInt) value).getInt();
-				hasSecond = rsId2>=0;
-			}
-			break;
-		case FLOAT:
-			if (id < 3) {
-				color = PanelUtils.setColor(color, id, value);
-			} else {
-				length = scaleToRangePercent(((NBTTagFloat) value).getFloat(), .125F, 1);
-			}
-			break;
+			case BOOL:
+				horizontal = ((NBTTagByte) value).getByte() != 0;
+				break;
+			case RS_CHANNEL:
+				if (id == 0) {
+					primary = primary.withColor(value);
+				} else {
+					secondary = secondary.withColor(value);
+				}
+				break;
+			case INT:
+				if (id == 0) {
+					primary = primary.withController(value);
+				} else {
+					secondary = secondary.withController(value);
+				}
+				break;
+			case FLOAT:
+				if (id < 3) {
+					color = PanelUtils.setColor(color, id, value);
+				} else {
+					length = scaleToRangePercent(((NBTTagFloat) value).getFloat(), .125F, 1);
+				}
+				break;
 		}
 	}
 
@@ -283,6 +246,7 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public String fomatConfigName(ConfigType type, int id) {
 		switch (type) {
 		case BOOL:
@@ -298,6 +262,7 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public String fomatConfigDescription(ConfigType type, int id) {
 		switch (type) {
 		case BOOL:
@@ -314,18 +279,18 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
-	public RSChannelConfig[] getRSChannelOptions() {
-		return new RSChannelConfig[]{
-				new RSChannelConfig("channel", 0, 0, rsChannel, true),
-				new RSChannelConfig("channel", 30, 0, rsChannel2, true)
+	public RSColorConfig[] getRSChannelOptions() {
+		return new RSColorConfig[]{
+				new RSColorConfig("channel", 0, 0, primary.getColor(), false),
+				new RSColorConfig("channel2", 60, 0, secondary.getColor(), false)
 		};
 	}
 
 	@Override
 	public IntConfig[] getIntegerOptions() {
 		return new IntConfig[]{
-				new IntConfig("rsId", 0, 30, rsId, 2, false),
-				new IntConfig("rsId", 30, 30, rsId2, 2, true)
+				new IntConfig("rsId", 0, 60, primary.getController(), 2, false),
+				new IntConfig("rsId2", 60, 60, secondary.getController(), 2, true)
 		};
 	}
 

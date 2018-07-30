@@ -31,7 +31,7 @@ public class MessagePanelInteract implements IMessage {
 	private Vec3d hitRelative;
 
 	public MessagePanelInteract(TileEntityPanel tile, int id, Vec3d hit) {
-		pos = tile.getPos();
+		pos = tile.getBlockPos();
 		pcId = id;
 		hitRelative = hit;
 	}

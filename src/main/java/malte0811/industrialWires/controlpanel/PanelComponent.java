@@ -19,6 +19,7 @@ import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
+import malte0811.industrialWires.controlpanel.ControlPanelNetwork.IOwner;
 import malte0811.industrialWires.util.TriConsumer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
@@ -26,25 +27,26 @@ import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public abstract class PanelComponent {
+public abstract class PanelComponent implements IOwner {
 	public static final float Y_DELTA = .001F;
+	protected static final float[] GRAY = {.8F, .8F, .8F};
+	protected static final int GRAY_INT = 0xFFD0D0D0;
+	protected static final float[] BLACK = {0, 0, 0, 1};
 	protected float panelHeight;
 	protected AxisAlignedBB aabb = null;
 	protected float x, y;
 	private final String type;
-	protected final static float[] GRAY = {.8F, .8F, .8F};
-	protected final static int GRAY_INT = 0xFFD0D0D0;
-	protected static final float[] BLACK = {0, 0, 0, 1};
+	protected TileEntityPanel panel;
+	protected ControlPanelNetwork network;
 
 	private Set<TriConsumer<Integer, Byte, PanelComponent>> outputs = new HashSet<>();
 
@@ -95,33 +97,20 @@ public abstract class PanelComponent {
 	@Nonnull
 	public abstract AxisAlignedBB getBlockRelativeAABB();
 
-	public abstract void interactWith(Vec3d hitRelative, TileEntityPanel tile, EntityPlayerMP player);
+	public abstract void interactWith(Vec3d hitRelative, EntityPlayerMP player);
 
-	public abstract void update(TileEntityPanel tile);
+	public abstract void update();
 
 	public abstract int getColor();
 
-	@Nullable
-	public Consumer<byte[]> getRSInputHandler(int id, TileEntityPanel panel) {
-		return null;
+	public abstract float getHeight();
+
+	public void setNetwork(ControlPanelNetwork net, TileEntityPanel panel) {
+		this.panel = panel;
+		this.network = net;
 	}
 
-	public void registerRSOutput(int id, @Nonnull TriConsumer<Integer, Byte, PanelComponent> out) {
-		outputs.add(out);
-	}
-
-	public void unregisterRSOutput(int id, @Nonnull TriConsumer<Integer, Byte, PanelComponent> out) {
-		outputs.remove(out);
-	}
-
-	protected boolean matchesId(int myId, int theirId) {
-		return myId==theirId||theirId<0;
-	}
-
-	public void dropItems(TileEntityPanel te) {
-	}
-
-	public void invalidate(TileEntityPanel te) {
+	public void dropItems() {
 	}
 
 	public float getX() {
@@ -131,8 +120,6 @@ public abstract class PanelComponent {
 	public float getY() {
 		return y;
 	}
-
-	public abstract float getHeight();
 
 	public void setX(float x) {
 		this.x = x;
@@ -146,6 +133,11 @@ public abstract class PanelComponent {
 
 	public void setPanelHeight(float panelHeight) {
 		this.panelHeight = panelHeight;
+	}
+
+	@Override
+	public BlockPos getBlockPos() {
+		return panel.getBlockPos();
 	}
 
 	public void writeToNBT(NBTTagCompound nbt, boolean toItem) {
@@ -175,38 +167,6 @@ public abstract class PanelComponent {
 		setPanelHeight(nbt.getFloat("panelHeight"));
 	}
 
-	@SideOnly(Side.CLIENT)
-	public void renderBox(TileEntityPanel te) {
-		GlStateManager.pushMatrix();
-		GlStateManager.enableBlend();
-		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-		GlStateManager.glLineWidth(2.0F);
-		GlStateManager.disableTexture2D();
-		GlStateManager.depthMask(false);
-		te.getComponents().transformGLForTop(te.getPos());
-		RenderGlobal.drawSelectionBoundingBox(getBlockRelativeAABB().grow(0.002),
-				0.0F, 0.0F, 0.0F, 0.4F);
-		GlStateManager.depthMask(true);
-		GlStateManager.enableTexture2D();
-		GlStateManager.disableBlend();
-		GlStateManager.popMatrix();
-	}
-
-	@SideOnly(Side.CLIENT)
-	public abstract void renderInGUI(GuiPanelCreator gui);
-
-	@SideOnly(Side.CLIENT)
-	public void renderInGUIDefault(GuiPanelCreator gui, int color) {
-		color |= 0xff000000;
-		AxisAlignedBB aabb = getBlockRelativeAABB();
-		int left = (int) (gui.getX0() + aabb.minX * gui.panelSize);
-		int top = (int) (gui.getY0() + aabb.minZ * gui.panelSize);
-		int right = (int) (gui.getX0() + aabb.maxX * gui.panelSize);
-		int bottom = (int) (gui.getY0() + aabb.maxZ * gui.panelSize);
-		Gui.drawRect(left, top, right, bottom, color);
-	}
-
-
 	public boolean isValidPos(List<PanelComponent> components, float height, float angle) {
 		float h = PanelUtils.getHeightWithComponent(this, angle, height);
 		if (h < 0 || h > 1) {
@@ -233,11 +193,37 @@ public abstract class PanelComponent {
 		return true;
 	}
 
-	void setOut(int channel, int level) {
-		for (TriConsumer<Integer, Byte, PanelComponent> out : outputs) {
-			out.accept(channel, (byte) level, this);
-		}
+	@SideOnly(Side.CLIENT)
+	public void renderBox() {
+		GlStateManager.pushMatrix();
+		GlStateManager.enableBlend();
+		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+		GlStateManager.glLineWidth(2.0F);
+		GlStateManager.disableTexture2D();
+		GlStateManager.depthMask(false);
+		panel.getComponents().transformGLForTop(panel.getBlockPos());
+		RenderGlobal.drawSelectionBoundingBox(getBlockRelativeAABB().grow(0.002),
+				0.0F, 0.0F, 0.0F, 0.4F);
+		GlStateManager.depthMask(true);
+		GlStateManager.enableTexture2D();
+		GlStateManager.disableBlend();
+		GlStateManager.popMatrix();
 	}
+
+	@SideOnly(Side.CLIENT)
+	public abstract void renderInGUI(GuiPanelCreator gui);
+
+	@SideOnly(Side.CLIENT)
+	public void renderInGUIDefault(GuiPanelCreator gui, int color) {
+		color |= 0xff000000;
+		AxisAlignedBB aabb = getBlockRelativeAABB();
+		int left = (int) (gui.getX0() + aabb.minX * gui.panelSize);
+		int top = (int) (gui.getY0() + aabb.minZ * gui.panelSize);
+		int right = (int) (gui.getX0() + aabb.maxX * gui.panelSize);
+		int bottom = (int) (gui.getY0() + aabb.maxZ * gui.panelSize);
+		Gui.drawRect(left, top, right, bottom, color);
+	}
+
 
 	@Override
 	public boolean equals(Object o) {

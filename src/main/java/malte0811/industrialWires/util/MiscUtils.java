@@ -46,7 +46,10 @@ public final class MiscUtils {
 	private MiscUtils() {
 	}
 
-	public static List<BlockPos> discoverLocal(World w, BlockPos here, BiPredicate<BlockPos, Integer> isValid) {
+	public static List<BlockPos> discoverLocal(BlockPos here, BiPredicate<BlockPos, Integer> isValid) {
+		if (!isValid.test(here, 0)) {
+			return new ArrayList<>();
+		}
 		List<BlockPos> ret = new ArrayList<>();
 		Queue<BlockPos> open = new ArrayDeque<>();
 		open.add(here);
@@ -321,5 +324,16 @@ public final class MiscUtils {
 			}
 		}
 		return MultiblockMarx.INSTANCE;
+	}
+
+	public static <T extends TileEntity> T getExistingTE(World w, BlockPos pos, Class<T> clazz) {
+		if (w.isBlockLoaded(pos)) {
+			TileEntity te = w.getTileEntity(pos);
+			if (te!=null && clazz.isAssignableFrom(te.getClass())) {
+				//noinspection unchecked
+				return (T) te;
+			}
+		}
+		return null;
 	}
 }

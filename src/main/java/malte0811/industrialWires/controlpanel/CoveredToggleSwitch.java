@@ -17,7 +17,6 @@ package malte0811.industrialWires.controlpanel;
 
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import malte0811.industrialWires.IndustrialWires;
-import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import net.minecraft.client.resources.I18n;
@@ -32,7 +31,7 @@ import org.lwjgl.util.vector.Vector3f;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-import static malte0811.industrialWires.util.NBTKeys.*;
+import static malte0811.industrialWires.util.NBTKeys.COLOR;
 
 public class CoveredToggleSwitch extends ToggleSwitch {
 	private int color = 0xff0000;
@@ -62,15 +61,15 @@ public class CoveredToggleSwitch extends ToggleSwitch {
 	}
 
 	@Override
-	public void interactWith(Vec3d hitRel, TileEntityPanel tile, EntityPlayerMP player) {
+	public void interactWith(Vec3d hitRel, EntityPlayerMP player) {
 		if (player.isSneaking() && state == SwitchState.OPEN) {
 			state = SwitchState.CLOSED;
 		} else {
 			state = state.next();
 		}
-		setOut(state.active, tile);
-		tile.markDirty();
-		tile.triggerRenderUpdate();
+		setOut(state.active);
+		panel.markDirty();
+		panel.triggerRenderUpdate();
 	}
 
 	@Override
@@ -83,20 +82,18 @@ public class CoveredToggleSwitch extends ToggleSwitch {
 
 	@Override
 	protected void writeCustomNBT(NBTTagCompound nbt, boolean toItem) {
+		super.writeCustomNBT(nbt, toItem);
 		if (!toItem) {
-			nbt.setInteger("state", state.ordinal());
+			nbt.setInteger("active", state.ordinal());
 		}
-		nbt.setByte(RS_CHANNEL, rsOutputChannel);
-		nbt.setInteger(RS_ID, rsOutputId);
 		nbt.setInteger(COLOR, color);
 	}
 
 	@Override
 	protected void readCustomNBT(NBTTagCompound nbt) {
+		super.readCustomNBT(nbt);
 		state = SwitchState.values()[nbt.getInteger("state")];
 		color = nbt.getInteger(COLOR);
-		rsOutputChannel = nbt.getByte(RS_CHANNEL);
-		rsOutputId = nbt.getInteger(RS_ID);
 	}
 
 	@Nonnull
@@ -105,8 +102,7 @@ public class CoveredToggleSwitch extends ToggleSwitch {
 		CoveredToggleSwitch ret = new CoveredToggleSwitch();
 		ret.color = color;
 		ret.state = state;
-		ret.rsOutputChannel = rsOutputChannel;
-		ret.rsOutputId = rsOutputId;
+		ret.outputChannel = outputChannel;
 		ret.active = active;
 		ret.setX(getX());
 		ret.setY(getY());
@@ -135,6 +131,7 @@ public class CoveredToggleSwitch extends ToggleSwitch {
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public String fomatConfigName(ConfigType type, int id) {
 		if (type == ConfigType.FLOAT) {
 			return I18n.format(IndustrialWires.MODID + ".desc." + (id == 0 ? "red" : (id == 1 ? "green" : "blue")));
@@ -143,6 +140,7 @@ public class CoveredToggleSwitch extends ToggleSwitch {
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public String fomatConfigDescription(ConfigType type, int id) {
 		if (type == ConfigType.FLOAT) {
 			return null;
@@ -163,20 +161,15 @@ public class CoveredToggleSwitch extends ToggleSwitch {
 
 		CoveredToggleSwitch that = (CoveredToggleSwitch) o;
 
-		if (rsOutputId != that.rsOutputId) return false;
-		if (rsOutputChannel != that.rsOutputChannel) return false;
 		if (color != that.color) return false;
 		return state == that.state;
 	}
 
-
 	@Override
 	public int hashCode() {
 		int result = super.hashCode();
-		result = 31 * result + rsOutputId;
-		result = 31 * result + (int) rsOutputChannel;
 		result = 31 * result + color;
-		result = 31 * result + (state != null ? state.hashCode() : 0);
+		result = 31 * result + state.hashCode();
 		return result;
 	}
 

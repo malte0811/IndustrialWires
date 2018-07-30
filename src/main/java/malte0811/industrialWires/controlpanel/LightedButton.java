@@ -19,16 +19,15 @@ import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
-import malte0811.industrialWires.util.TriConsumer;
+import malte0811.industrialWires.controlpanel.ControlPanelNetwork.RSChannel;
+import malte0811.industrialWires.controlpanel.ControlPanelNetwork.RSChannelState;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
-import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -37,26 +36,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static malte0811.industrialWires.util.NBTKeys.*;
+import static net.minecraftforge.fml.relauncher.Side.CLIENT;
 
 public class LightedButton extends PanelComponent implements IConfigurableComponent {
 	public int color = 0xFF0000;
-	public boolean active;
-	public boolean latching;
-	public int rsOutputId;
-	public int rsOutputChannel;
+	private boolean active;
+	private boolean latching;
+	@Nonnull
+	private RSChannel outputChannel = RSChannel.INVALID_CHANNEL;
 	private int ticksTillOff;
 
-	public LightedButton() {
+	LightedButton() {
 		super("lighted_button");
 	}
 
-	public LightedButton(int color, boolean active, boolean latching, int rsOutputId, int rsOutputChannel) {
+	public LightedButton(int color, boolean active, boolean latching, @Nonnull RSChannel out) {
 		this();
 		this.color = color;
 		this.active = active;
 		this.latching = latching;
-		this.rsOutputChannel = rsOutputChannel;
-		this.rsOutputId = rsOutputId;
+		this.outputChannel = out;
 	}
 
 	@Override
@@ -67,8 +66,8 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 			nbt.setBoolean("active", active);
 		}
 		nbt.setBoolean(LATCHING, latching);
-		nbt.setInteger(RS_CHANNEL, rsOutputChannel);
-		nbt.setInteger(RS_ID, rsOutputId);
+		nbt.setByte(RS_CHANNEL, outputChannel.getColor());
+		nbt.setInteger(RS_ID, outputChannel.getController());
 	}
 
 	@Override
@@ -77,14 +76,15 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 		ticksTillOff = nbt.getInteger("timeout");
 		active = nbt.getBoolean("active");
 		latching = nbt.getBoolean(LATCHING);
-		rsOutputChannel = nbt.getInteger(RS_CHANNEL);
-		rsOutputId = nbt.getInteger(RS_ID);
+		byte rsOutputChannel = nbt.getByte(RS_CHANNEL);
+		int rsOutputId = nbt.getInteger(RS_ID);
+		this.outputChannel = new RSChannel(rsOutputId, rsOutputChannel);
 	}
 
 	private final static float size = .0625F;
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@SideOnly(CLIENT)
 	public List<RawQuad> getQuads() {
 		float[] color = PanelUtils.getFloatColor(active, this.color);
 		List<RawQuad> ret = new ArrayList<>(5);
@@ -99,7 +99,7 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 	@Override
 	@Nonnull
 	public PanelComponent copyOf() {
-		LightedButton ret = new LightedButton(color, active, latching, rsOutputId, rsOutputChannel);
+		LightedButton ret = new LightedButton(color, active, latching, outputChannel);
 		ret.setX(x);
 		ret.setY(y);
 		ret.panelHeight = panelHeight;
@@ -116,36 +116,34 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 	}
 
 	@Override
-	public void interactWith(Vec3d hitRel, TileEntityPanel tile, EntityPlayerMP player) {
+	public void interactWith(Vec3d hitRel, EntityPlayerMP player) {
 		if (!latching && active) {
 			ticksTillOff = 10;
 		} else {
-			setOut(!active, tile);
+			setOut(!active);
 			if (!latching) {
 				ticksTillOff = 10;
 			}
 		}
-		tile.markDirty();
-		tile.triggerRenderUpdate();
+		panel.markDirty();
+		panel.triggerRenderUpdate();
 	}
 
 	@Override
-	public void update(TileEntityPanel tile) {
-		if (!latching && ticksTillOff > 0) {
+	public void update() {
+		if (!latching && active) {
 			ticksTillOff--;
-			tile.markDirty();
-			if (ticksTillOff == 0) {
-				setOut(false, tile);
+			panel.markDirty();
+			if (ticksTillOff <= 0) {
+				setOut(false);
 			}
 		}
 	}
 
 	@Override
-	public void registerRSOutput(int id, @Nonnull TriConsumer<Integer, Byte, PanelComponent> out) {
-		if (matchesId(rsOutputId, id)) {
-			super.registerRSOutput(id, out);
-			out.accept(rsOutputChannel, (byte) (active ? 15 : 0), this);
-		}
+	public void setNetwork(ControlPanelNetwork net, TileEntityPanel te) {
+		super.setNetwork(net, te);
+		net.setOutputs(this, new RSChannelState(outputChannel, (byte) (active?15:0)));
 	}
 
 	@Override
@@ -154,21 +152,16 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@SideOnly(CLIENT)
 	public void renderInGUI(GuiPanelCreator gui) {
 		renderInGUIDefault(gui, 0xff000000 | color);
 	}
 
-	@Override
-	public void invalidate(TileEntityPanel te) {
-		setOut(rsOutputChannel, 0);
-	}
-
-	private void setOut(boolean on, TileEntityPanel tile) {
+	private void setOut(boolean on) {
 		active = on;
-		tile.markDirty();
-		tile.triggerRenderUpdate();
-		setOut(rsOutputChannel, active ? 15 : 0);
+		panel.markDirty();
+		panel.triggerRenderUpdate();
+		network.setOutputs(this, new RSChannelState(outputChannel, (byte)(active?15:0)));
 	}
 
 	@Override
@@ -203,12 +196,12 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 			break;
 		case RS_CHANNEL:
 			if (id == 0) {
-				rsOutputChannel = ((NBTTagByte) value).getByte();
+				outputChannel = outputChannel.withColor(value);
 			}
 			break;
 		case INT:
 			if (id == 0) {
-				rsOutputId = ((NBTTagInt) value).getInt();
+				outputChannel = outputChannel.withController(value);
 			}
 			break;
 		case FLOAT:
@@ -218,6 +211,7 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 	}
 
 	@Override
+	@SideOnly(CLIENT)
 	public String fomatConfigName(ConfigType type, int id) {
 		switch (type) {
 		case BOOL:
@@ -233,6 +227,7 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 	}
 
 	@Override
+	@SideOnly(CLIENT)
 	public String fomatConfigDescription(ConfigType type, int id) {
 		switch (type) {
 		case BOOL:
@@ -249,13 +244,14 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 	}
 
 	@Override
-	public RSChannelConfig[] getRSChannelOptions() {
-		return new RSChannelConfig[]{new RSChannelConfig("channel", 0, 0, (byte) rsOutputChannel)};
+	public RSColorConfig[] getRSChannelOptions() {
+		return new RSColorConfig[]{new RSColorConfig("channel", 0, 0, outputChannel.getColor())};
 	}
 
 	@Override
 	public IntConfig[] getIntegerOptions() {
-		return new IntConfig[]{new IntConfig("rsId", 0, 50, rsOutputId, 2, false)};
+		return new IntConfig[]{new IntConfig("rsId", 0, 50,
+				outputChannel.getController(), 2, false)};
 	}
 
 	@Override

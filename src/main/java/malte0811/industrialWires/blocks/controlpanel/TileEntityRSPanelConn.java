@@ -18,22 +18,19 @@ package malte0811.industrialWires.blocks.controlpanel;
 import blusunrize.immersiveengineering.api.TargetingInfo;
 import blusunrize.immersiveengineering.api.energy.wires.IImmersiveConnectable;
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler;
-import blusunrize.immersiveengineering.api.energy.wires.TileEntityImmersiveConnectable;
 import blusunrize.immersiveengineering.api.energy.wires.WireType;
 import blusunrize.immersiveengineering.api.energy.wires.redstone.IRedstoneConnector;
 import blusunrize.immersiveengineering.api.energy.wires.redstone.RedstoneWireNetwork;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
 import malte0811.industrialWires.blocks.IBlockBoundsIW;
 import malte0811.industrialWires.blocks.INetGUI;
-import malte0811.industrialWires.controlpanel.PanelComponent;
-import malte0811.industrialWires.controlpanel.PanelUtils;
-import malte0811.industrialWires.controlpanel.PropertyComponents;
-import malte0811.industrialWires.util.TriConsumer;
+import malte0811.industrialWires.controlpanel.ControlPanelNetwork;
+import malte0811.industrialWires.controlpanel.ControlPanelNetwork.RSChannel;
+import malte0811.industrialWires.controlpanel.ControlPanelNetwork.RSChannelState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -44,190 +41,111 @@ import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.ref.WeakReference;
-import java.util.*;
+import java.util.Arrays;
 import java.util.function.Consumer;
 
 import static blusunrize.immersiveengineering.api.energy.wires.WireType.REDSTONE_CATEGORY;
 
-public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implements IRedstoneConnector, ITickable, INetGUI, IEBlockInterfaces.IDirectionalTile, IBlockBoundsIW {
+public class TileEntityRSPanelConn extends TileEntityGeneralCP//TODO what parts of TEIIC do I need?
+		implements IRedstoneConnector, INetGUI, IEBlockInterfaces.IDirectionalTile, IBlockBoundsIW,
+		ITickable {
 	private byte[] out = new byte[16];
 	private boolean dirty = true;
 	private byte[] oldInput = new byte[16];
-	private Set<Consumer<byte[]>> changeListeners = new HashSet<>();
-	private Set<TileEntityPanel> connectedPanels = new HashSet<>();
+	private final RSChannel[] channels = new RSChannel[16];
 	private EnumFacing facing = EnumFacing.NORTH;
 	@Nonnull
-	private RedstoneWireNetwork network = new RedstoneWireNetwork().add(this);
+	private RedstoneWireNetwork wireNetwork = new RedstoneWireNetwork().add(this);
 	private boolean hasConn = false;
-	private int id;
+	private int controller = 0;
 
 	{
 		for (int i = 0; i < 16; i++) {
 			oldInput[i] = -1;
 		}
+		updateChannelsArray();
 	}
-
-	private boolean loaded = false;
 
 	@Override
 	public void update() {
-		if (hasWorld() && !world.isRemote) {
-			if (!loaded) {
-				loaded = true;
-				// completely reload the network
-				network.removeFromNetwork(null);
-				List<BlockPos> parts = PanelUtils.discoverPanelParts(world, pos, 100);
-				for (BlockPos bp : parts) {
-					TileEntity te = world.getTileEntity(bp);
-					if (te instanceof TileEntityPanel) {
-						registerPanel(((TileEntityPanel) te));
-					}
-				}
-			}
-			if (dirty) {
-				network.updateValues();
-				dirty = false;
-			}
+		if (dirty) {
+			wireNetwork.updateValues();
+			dirty = false;
+		}
+	}
+
+	private void updateChannelsArray() {
+		for (byte i = 0;i<16;i++) {
+			channels[i] = new RSChannel(controller, i);
 		}
 	}
 
 	@Override
-	public void writeCustomNBT(@Nonnull NBTTagCompound out, boolean updatePacket) {
-		super.writeCustomNBT(out, updatePacket);
-		out.setByteArray("out", this.out);
-		out.setBoolean("hasConn", hasConn);
-		out.setInteger("rsId", id);
-		out.setInteger("facing", facing.getIndex());
+	public void writeNBT(NBTTagCompound nbt, boolean updatePacket) {
+		nbt.setByteArray("out", this.out);
+		nbt.setBoolean("hasConn", hasConn);
+		nbt.setInteger("rsId", controller);
+		nbt.setInteger("facing", facing.getIndex());
 	}
 
 	@Override
-	public void readCustomNBT(@Nonnull NBTTagCompound in, boolean updatePacket) {
-		super.readCustomNBT(in, updatePacket);
-		out = in.getByteArray("out");
-		hasConn = in.getBoolean("hasConn");
-		id = in.getInteger("rsId");
-		facing = EnumFacing.VALUES[in.getInteger("facing")];
+	public void readNBT(NBTTagCompound nbt, boolean updatePacket) {
+		out = nbt.getByteArray("out");
+		hasConn = nbt.getBoolean("hasConn");
+		controller = nbt.getInteger("rsId");
+		updateChannelsArray();
+		facing = EnumFacing.VALUES[nbt.getInteger("facing")];
 		aabb = null;
-	}
-
-	private final Map<PCWrapper, byte[]> outputs = new HashMap<>();
-	private TriConsumer<Integer, Byte, PanelComponent> rsOut = (channel, value, pc) -> {
-		PCWrapper wrapper = new PCWrapper(pc);
-		if (!outputs.containsKey(wrapper)) {
-			outputs.put(wrapper, new byte[16]);
-		}
-		if (outputs.get(wrapper)[channel] != value) {
-			outputs.get(wrapper)[channel] = value;
-			byte max = 0;
-			Iterator<Map.Entry<PCWrapper, byte[]>> it = outputs.entrySet().iterator();
-			while (it.hasNext()) {
-				Map.Entry<PCWrapper, byte[]> curr = it.next();
-				if (curr.getKey().pc.get() == null) {
-					it.remove();
-					continue;
-				}
-				if (curr.getValue()[channel] > max) {
-					max = curr.getValue()[channel];
-				}
-			}
-			dirty = true;
-			out[channel] = max;
-		}
-	};
-
-	private class PCWrapper {
-		@Nonnull
-		private final WeakReference<PanelComponent> pc;
-
-		public PCWrapper(@Nonnull PanelComponent pc) {
-			this.pc = new WeakReference<>(pc);
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
-
-			PCWrapper pcWrapper = (PCWrapper) o;
-
-			return pcWrapper.pc.get() == pc.get();
-		}
-
-		@Override
-		public int hashCode() {
-			return System.identityHashCode(pc.get());
-		}
-	}
-
-	public void registerPanel(TileEntityPanel panel) {
-		if (panel.interactsWithRSWires()) {
-			PropertyComponents.PanelRenderProperties p = panel.getComponents();
-			for (PanelComponent pc : p) {
-				Consumer<byte[]> listener = pc.getRSInputHandler(id, panel);
-				if (listener != null) {
-					changeListeners.add(listener);
-					listener.accept(network.channelValues);
-				}
-				pc.registerRSOutput(id, rsOut);
-			}
-			panel.registerRS(this);
-			connectedPanels.add(panel);
-		}
-	}
-
-	public void unregisterPanel(TileEntityPanel panel, boolean remove, boolean callPanel) {
-		out = new byte[16];
-		PropertyComponents.PanelRenderProperties p = panel.getComponents();
-		for (PanelComponent pc : p) {
-			Consumer<byte[]> listener = pc.getRSInputHandler(id, panel);
-			if (listener != null) {
-				listener.accept(new byte[16]);
-				changeListeners.remove(listener);
-			}
-			pc.unregisterRSOutput(id, rsOut);
-			outputs.remove(new PCWrapper(pc));
-		}
-		if (callPanel) {
-			panel.unregisterRS(this);
-		}
-		if (remove) {
-			connectedPanels.remove(panel);
-		}
-		for (TileEntityPanel te : connectedPanels) {
-			for (PanelComponent pc : te.getComponents()) {
-				pc.registerRSOutput(id, rsOut);
-			}
-		}
-		network.updateValues();
 	}
 
 	@Override
 	public void setNetwork(@Nonnull RedstoneWireNetwork net) {
-		network = net;
+		wireNetwork = net;
 	}
 
 	@Nonnull
 	@Override
 	public RedstoneWireNetwork getNetwork() {
-		return network;
+		return wireNetwork;
 	}
 
 	@Override
 	public void onChange() {
-		if (!Arrays.equals(oldInput, network.channelValues)) {
-			oldInput = Arrays.copyOf(network.channelValues, 16);
-			for (Consumer<byte[]> c : changeListeners) {
-				c.accept(oldInput);
+		if (!Arrays.equals(oldInput, wireNetwork.channelValues)) {
+			RSChannelState[] newStates = new RSChannelState[16];
+			for (byte i = 0; i < 16; i++) {
+				if (wireNetwork.channelValues[i]>out[i]) {
+					newStates[i] = new RSChannelState(channels[i], wireNetwork.channelValues[i]);
+				} else {
+					newStates[i] = new RSChannelState(channels[i], (byte) 0);
+				}
 			}
+			panelNetwork.setOutputs(this, newStates);
+			oldInput = Arrays.copyOf(wireNetwork.channelValues, 16);
 		}
 	}
 
 	@Override
 	public void updateInput(byte[] currIn) {
+		byte[] oldIn = Arrays.copyOf(currIn, 16);
 		for (int i = 0; i < 16; i++) {
 			currIn[i] = (byte) Math.max(currIn[i], out[i]);
 		}
+	}
+
+	@Override
+	public boolean canConnect() {
+		return true;
+	}
+
+	@Override
+	public boolean isEnergyOutput() {
+		return false;
+	}
+
+	@Override
+	public int outputEnergy(int amount, boolean simulate, int energyType) {
+		return 0;
 	}
 
 	@Override
@@ -243,8 +161,8 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 	@Override
 	public void connectCable(WireType wireType, TargetingInfo targetingInfo, IImmersiveConnectable other) {
 		hasConn = true;
-		if (other instanceof IRedstoneConnector && ((IRedstoneConnector) other).getNetwork() != network) {
-			network.mergeNetwork(((IRedstoneConnector) other).getNetwork());
+		if (other instanceof IRedstoneConnector && ((IRedstoneConnector) other).getNetwork() != wireNetwork) {
+			wireNetwork.mergeNetwork(((IRedstoneConnector) other).getNetwork());
 		}
 	}
 
@@ -261,7 +179,7 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 	@Override
 	public void removeCable(ImmersiveNetHandler.Connection connection) {
 		hasConn = false;
-		network.removeFromNetwork(this);
+		wireNetwork.removeFromNetwork(this);
 		this.markDirty();
 		if (world != null) {
 			IBlockState state = world.getBlockState(pos);
@@ -277,42 +195,24 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 	}
 
 	@Override
-	public void onChunkUnload() {
-		super.onChunkUnload();
-		for (TileEntityPanel panel : connectedPanels) {
-			unregisterPanel(panel, false, true);
-		}
-	}
-
-	@Override
-	public void invalidate() {
-		super.invalidate();
-		for (TileEntityPanel panel : connectedPanels) {
-			unregisterPanel(panel, false, true);
-		}
+	public void setNetworkAndInit(ControlPanelNetwork newNet) {
+		super.setNetworkAndInit(newNet);
+		onChange();
+		Consumer<RSChannelState> listener = state -> {
+			if (out[state.getColor()] != state.getStrength()) {
+				out[state.getColor()] = state.getStrength();
+				dirty = true;
+				Thread.dumpStack();
+			}
+		};
+		panelNetwork.addListener(this, listener, channels);
 	}
 
 	@Override
 	public void onChange(NBTTagCompound nbt, EntityPlayer p) {
 		if (nbt.hasKey("rsId")) {
-			List<BlockPos> parts = PanelUtils.discoverPanelParts(world, pos, 100);
-			List<TileEntityPanel> tes = new ArrayList<>(parts.size());
-			for (BlockPos bp : parts) {
-				TileEntity te = world.getTileEntity(bp);
-				if (te instanceof TileEntityPanel) {
-					tes.add((TileEntityPanel) te);
-					unregisterPanel((TileEntityPanel) te, true, true);
-				}
-			}
-			id = nbt.getInteger("rsId");
-			out = new byte[16];
-			for (TileEntityPanel panel : tes) {
-				registerPanel(panel);
-			}
-			network.updateValues();
-			IBlockState state = world.getBlockState(pos);
-			world.notifyBlockUpdate(pos, state, state, 3);
-			world.addBlockEvent(pos, state.getBlock(), 255, 0);
+			panelNetwork.removeIOFor(this);
+			setNetworkAndInit(panelNetwork);
 		}
 	}
 
@@ -322,7 +222,7 @@ public class TileEntityRSPanelConn extends TileEntityImmersiveConnectable implem
 	}
 
 	public int getRsId() {
-		return id;
+		return controller;
 	}
 
 	@Nonnull

@@ -17,18 +17,15 @@ package malte0811.industrialWires.controlpanel;
 
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import malte0811.industrialWires.IndustrialWires;
-import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
-import malte0811.industrialWires.util.TriConsumer;
+import malte0811.industrialWires.controlpanel.ControlPanelNetwork.RSChannel;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
@@ -38,9 +35,7 @@ import org.lwjgl.util.vector.Vector3f;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static malte0811.industrialWires.util.NBTKeys.*;
 
@@ -55,20 +50,15 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 	private static final float arrowSize = .0625F / 2;
 
 	private int out;
-	private byte rsChannel;
-	private int rsId;
-	private boolean hasSecond;
-	private byte rsChannel2;
-	private int rsId2 = -1;
-	private Set<TriConsumer<Integer, Byte, PanelComponent>> secOutputs = new HashSet<>();
+	@Nonnull
+	private RSChannel primary = RSChannel.INVALID_CHANNEL;
+	@Nonnull
+	private RSChannel secondary = RSChannel.INVALID_CHANNEL;
 
-	public Variac(int rsId, byte rsChannel, int rsId2, byte rsChannel2, boolean hasSecond) {
+	public Variac(@Nonnull RSChannel primary, @Nonnull RSChannel secondary) {
 		this();
-		this.rsChannel = rsChannel;
-		this.rsId = rsId;
-		this.hasSecond = hasSecond;
-		this.rsChannel2 = rsChannel2;
-		this.rsId2 = rsId2;
+		this.primary = primary;
+		this.secondary = secondary;
 	}
 
 	public Variac() {
@@ -80,23 +70,24 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 		if (!toItem) {
 			nbt.setInteger("output", out);
 		}
-		nbt.setByte(RS_CHANNEL, rsChannel);
-		nbt.setInteger(RS_ID, rsId);
-		nbt.setByte(RS_CHANNEL2, rsChannel2);
-		nbt.setInteger(RS_ID2, rsId2);
+		nbt.setInteger(RS_ID, primary.getController());
+		nbt.setByte(RS_CHANNEL, primary.getColor());
+		nbt.setInteger(RS_ID2, secondary.getController());
+		nbt.setByte(RS_CHANNEL2, secondary.getColor());
 	}
 
 	@Override
 	protected void readCustomNBT(NBTTagCompound nbt) {
 		out = nbt.getInteger("output");
-		rsChannel = nbt.getByte(RS_CHANNEL);
-		rsId = nbt.getInteger(RS_ID);
-		rsChannel2 = nbt.getByte(RS_CHANNEL2);
-		rsId2 = nbt.getInteger(RS_ID2);
-		hasSecond = rsChannel2>=0&&rsId2>=0;
-		if (!hasSecond) {
-			rsChannel2 = -1;
-			rsId2 = -1;
+		int rsController = nbt.getInteger(RS_ID);
+		byte rsColor = nbt.getByte(RS_CHANNEL);
+		primary = new RSChannel(rsController, rsColor);
+		if (nbt.hasKey(RS_ID2)) {
+			rsController = nbt.getInteger(RS_ID2);
+			rsColor = nbt.getByte(RS_CHANNEL2);
+			secondary = new RSChannel(rsController, rsColor);
+		} else {
+			secondary = RSChannel.INVALID_CHANNEL;
 		}
 	}
 
@@ -130,7 +121,7 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 	@Nonnull
 	@Override
 	public PanelComponent copyOf() {
-		Variac ret = new Variac(rsId, rsChannel, rsId2, rsChannel2, hasSecond);
+		Variac ret = new Variac(primary, secondary);
 		ret.out = out;
 		ret.setX(x);
 		ret.setY(y);
@@ -148,7 +139,7 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
-	public void interactWith(Vec3d hitRelative, TileEntityPanel tile, EntityPlayerMP player) {
+	public void interactWith(Vec3d hitRelative, EntityPlayerMP player) {
 		double xRel = hitRelative.x - SIZE / 2;
 		double yRel = -(hitRelative.z - SIZE / 2);
 		double angle = 1.5 * Math.PI - Math.atan2(yRel, xRel);
@@ -158,7 +149,7 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 			angle -= 2 * Math.PI;
 		}
 		angle /= 2 * Math.PI;
-		int step = (hasSecond&&player.isSneaking())?1:16;
+		int step = (secondary.isValid()&&player.isSneaking())?1:16;
 		int newLevel = (int) ((angle-1/34F) * 17 * 16);
 		int diff = Math.abs(newLevel-out);
 		if (diff>step) {
@@ -172,31 +163,13 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 		if (newLevel != out) {
 			setOut(newLevel);
 			out = newLevel;
-			tile.markDirty();
-			tile.triggerRenderUpdate();
+			panel.markDirty();
+			panel.triggerRenderUpdate();
 		}
 	}
 
 	@Override
-	public void registerRSOutput(int id, @Nonnull TriConsumer<Integer, Byte, PanelComponent> out) {
-		if (matchesId(rsId, id)) {
-			super.registerRSOutput(id, out);
-			out.accept((int) rsChannel, (byte) (this.out>>4), this);
-		}
-		if (matchesId(rsId2, id)&&hasSecond) {
-			secOutputs.add(out);
-			out.accept((int)rsChannel2, (byte) (this.out&0xf), this);
-		}
-	}
-
-	@Override
-	public void unregisterRSOutput(int id, @Nonnull TriConsumer<Integer, Byte, PanelComponent> out) {
-		super.unregisterRSOutput(id, out);
-		secOutputs.remove(out);
-	}
-
-	@Override
-	public void update(TileEntityPanel tile) {
+	public void update() {
 
 	}
 
@@ -226,18 +199,9 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 		GlStateManager.popMatrix();
 	}
 
-	@Override
-	public void invalidate(TileEntityPanel te) {
-		setOut(0);
-	}
-
-	public void setOut(int level) {
-		if (hasSecond) {
-			for (TriConsumer<Integer, Byte, PanelComponent> cons:secOutputs) {
-				cons.accept((int)rsChannel2, (byte) (level&0xf), this);
-			}
-		}
-		super.setOut(rsChannel, (byte)(level>>4));
+	public void setOut(int value) {
+		network.setOutputs(this, new ControlPanelNetwork.RSChannelState(primary, (byte) (value>>4)));
+		network.setOutputs(this, new ControlPanelNetwork.RSChannelState(secondary, (byte) (value&0xf)));
 	}
 
 	@Override
@@ -249,43 +213,36 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 		Variac variac = (Variac) o;
 
 		if (out != variac.out) return false;
-		if (rsChannel != variac.rsChannel) return false;
-		if (rsId != variac.rsId) return false;
-		if (hasSecond != variac.hasSecond) return false;
-		if (rsChannel2 != variac.rsChannel2) return false;
-		return rsId2 == variac.rsId2;
+		if (!primary.equals(variac.primary)) return false;
+		return secondary.equals(variac.secondary);
 	}
 
 	@Override
 	public int hashCode() {
 		int result = super.hashCode();
 		result = 31 * result + out;
-		result = 31 * result + (int) rsChannel;
-		result = 31 * result + rsId;
-		result = 31 * result + (hasSecond ? 1 : 0);
-		result = 31 * result + (int) rsChannel2;
-		result = 31 * result + rsId2;
+		result = 31 * result + primary.hashCode();
+		result = 31 * result + secondary.hashCode();
 		return result;
 	}
 
 	@Override
 	public void applyConfigOption(IConfigurableComponent.ConfigType type, int id, NBTBase value) {
 		switch (type) {
-		case RS_CHANNEL:
-			if (id==0) {
-				rsChannel = ((NBTTagByte) value).getByte();
-			} else {
-				rsChannel2 = ((NBTTagByte) value).getByte();
-			}
-			break;
-		case INT:
-			if (id==0) {
-				rsId = ((NBTTagInt) value).getInt();
-			} else {
-				rsId2 = ((NBTTagInt) value).getInt();
-				hasSecond = rsId2>=0;
-			}
-			break;
+			case RS_CHANNEL:
+				if (id == 0) {
+					primary = primary.withColor(value);
+				} else {
+					secondary = secondary.withColor(value);
+				}
+				break;
+			case INT:
+				if (id == 0) {
+					primary = primary.withController(value);
+				} else {
+					secondary = secondary.withController(value);
+				}
+				break;
 		}
 	}
 
@@ -295,6 +252,7 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public String fomatConfigDescription(IConfigurableComponent.ConfigType type, int id) {
 		switch (type) {
 			case RS_CHANNEL:
@@ -307,18 +265,18 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 	}
 
 	@Override
-	public IConfigurableComponent.RSChannelConfig[] getRSChannelOptions() {
-		return new IConfigurableComponent.RSChannelConfig[]{
-				new IConfigurableComponent.RSChannelConfig("channel", 0, 0, rsChannel),
-				new IConfigurableComponent.RSChannelConfig("channel", 90, 0, rsChannel2)
+	public RSColorConfig[] getRSChannelOptions() {
+		return new RSColorConfig[]{
+				new RSColorConfig("channel", 0, 0, primary.getColor(), false),
+				new RSColorConfig("channel2", 60, 0, secondary.getColor(), false)
 		};
 	}
 
 	@Override
-	public IConfigurableComponent.IntConfig[] getIntegerOptions() {
-		return new IConfigurableComponent.IntConfig[]{
-				new IConfigurableComponent.IntConfig("rsId", 0, 50, rsId, 2, false),
-				new IConfigurableComponent.IntConfig("rsId", 90, 50, rsId2, 2, true)
+	public IntConfig[] getIntegerOptions() {
+		return new IntConfig[]{
+				new IntConfig("rsId", 0, 60, primary.getController(), 2, false),
+				new IntConfig("rsId2", 60, 60, secondary.getController(), 2, true)
 		};
 	}
 

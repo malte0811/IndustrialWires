@@ -21,8 +21,8 @@ import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IPlayerIn
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.IBlockBoundsIW;
-import malte0811.industrialWires.blocks.TileEntityIWBase;
 import malte0811.industrialWires.controlpanel.*;
+import malte0811.industrialWires.controlpanel.ControlPanelNetwork.RSChannel;
 import malte0811.industrialWires.network.MessagePanelInteract;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
@@ -31,7 +31,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ITickable;
@@ -44,17 +43,12 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import static malte0811.industrialWires.util.MiscUtils.apply;
 
-public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTile, IBlockBoundsIW, IPlayerInteraction, ITickable, IEBlockInterfaces.ITileDrop {
+public class TileEntityPanel extends TileEntityGeneralCP implements IDirectionalTile, IBlockBoundsIW, IPlayerInteraction, ITickable, IEBlockInterfaces.ITileDrop {
 	protected PropertyComponents.PanelRenderProperties components = new PropertyComponents.PanelRenderProperties();
 	public boolean firstTick = true;
-	// non-rendered properties
-	private Set<TileEntityRSPanelConn> rsPorts = new HashSet<>();
 
 	{
 		int[] colors = {
@@ -62,9 +56,10 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 				4673362, 10329495, 1481884, 8991416, 3949738, 8606770, 6192150
 		};
 		for (int i = 2; i < 14; i++) {
-			int color = colors[i];
-			IndicatorLight ind = new IndicatorLight(0, (byte) (i - 2), color);
-			LightedButton btn = new LightedButton(color, false, true, 1, i - 2);
+			int color = colors[i-2];
+			IndicatorLight ind = new IndicatorLight(new RSChannel(0, (byte) (i - 2)), color);
+			LightedButton btn = new LightedButton(color, false, true,
+					new RSChannel(0, (byte)(i-2)));
 			Label lbl = new Label("->", color);
 			ind.setX(0);
 			ind.setY(i / 16F);
@@ -84,19 +79,15 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 	@Override
 	public void update() {
 		for (PanelComponent pc : components) {
-			pc.update(this);
+			pc.update();
 		}
-		if (!world.isRemote) {
-			if (firstTick) {
-				List<BlockPos> parts = PanelUtils.discoverPanelParts(world, pos, 100);
-				for (BlockPos bp : parts) {
-					TileEntity te = world.getTileEntity(bp);
-					if (te instanceof TileEntityRSPanelConn && !rsPorts.contains(te)) {
-						((TileEntityRSPanelConn) te).registerPanel(this);
-					}
-				}
-				firstTick = false;
-			}
+	}
+
+	@Override
+	public void setNetworkAndInit(ControlPanelNetwork newNet) {
+		super.setNetworkAndInit(newNet);
+		for (PanelComponent pc : components) {
+			pc.setNetwork(newNet, this);
 		}
 	}
 
@@ -278,47 +269,7 @@ public class TileEntityPanel extends TileEntityIWBase implements IDirectionalTil
 
 	public void interactServer(Vec3d hitRelative, int pcId, EntityPlayerMP player) {
 		if (pcId >= 0 && pcId < components.size()) {
-			components.get(pcId).interactWith(hitRelative, this, player);
+			components.get(pcId).interactWith(hitRelative, player);
 		}
-	}
-
-	public void registerRS(TileEntityRSPanelConn te) {
-		rsPorts.add(te);
-	}
-
-	public void unregisterRS(TileEntityRSPanelConn te) {
-		if (!tileEntityInvalid) {
-			rsPorts.remove(te);
-		}
-	}
-
-	@Override
-	public void onChunkUnload() {
-		super.onChunkUnload();
-		for (PanelComponent pc : components) {
-			pc.invalidate(this);
-		}
-		removeAllRSCons();
-	}
-
-	public void removeAllRSCons() {
-		for (TileEntityRSPanelConn rs : rsPorts) {
-			rs.unregisterPanel(this, true, false);
-		}
-		rsPorts.clear();
-		firstTick = true;
-	}
-
-	@Override
-	public void invalidate() {
-		super.invalidate();
-		for (PanelComponent pc : components) {
-			pc.invalidate(this);
-		}
-		removeAllRSCons();
-	}
-
-	public boolean interactsWithRSWires() {
-		return true;
 	}
 }

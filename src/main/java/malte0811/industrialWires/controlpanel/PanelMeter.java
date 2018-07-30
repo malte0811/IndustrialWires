@@ -21,6 +21,8 @@ import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import malte0811.industrialWires.client.panelmodel.RawModelFontRenderer;
+import malte0811.industrialWires.controlpanel.ControlPanelNetwork.RSChannel;
+import malte0811.industrialWires.controlpanel.ControlPanelNetwork.RSChannelState;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -28,7 +30,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
@@ -45,33 +46,30 @@ import java.util.function.Consumer;
 import static malte0811.industrialWires.util.NBTKeys.*;
 
 public class PanelMeter extends PanelComponent implements IConfigurableComponent {
-
-	private int rsInputId, rsInputId2 = -1;
-	private byte rsInputChannel, rsInputChannel2;
+	@Nonnull
+	private RSChannel primary = RSChannel.INVALID_CHANNEL;
+	@Nonnull
+	private RSChannel secondary = RSChannel.INVALID_CHANNEL;
 	private int rsInput;
 	private boolean wide = true;
-	private boolean hasSecond;
 
 	public PanelMeter() {
 		super("panel_meter");
 	}
 
-	public PanelMeter(int rsId, byte rsChannel, int rsId2, byte rsChannel2, boolean wide, boolean hasSecond) {
+	public PanelMeter(@Nonnull RSChannel primary, @Nonnull RSChannel secondary, boolean wide) {
 		this();
-		rsInputChannel = rsChannel;
-		rsInputId = rsId;
-		rsInputChannel2 = rsChannel2;
-		rsInputId2 = rsId2;
-		this.hasSecond = hasSecond;
+		this.primary = primary;
+		this.secondary = secondary;
 		this.wide = wide;
 	}
 
 	@Override
 	protected void writeCustomNBT(NBTTagCompound nbt, boolean toItem) {
-		nbt.setInteger(RS_ID, rsInputId);
-		nbt.setByte(RS_CHANNEL, rsInputChannel);
-		nbt.setInteger(RS_ID2, rsInputId2);
-		nbt.setByte(RS_CHANNEL2, rsInputChannel2);
+		nbt.setInteger(RS_ID, primary.getController());
+		nbt.setByte(RS_CHANNEL, primary.getColor());
+		nbt.setInteger(RS_ID2, secondary.getController());
+		nbt.setByte(RS_CHANNEL2, secondary.getColor());
 		nbt.setBoolean(WIDE, wide);
 		if (!toItem) {
 			nbt.setInteger("rsInput", rsInput);
@@ -80,20 +78,17 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 
 	@Override
 	protected void readCustomNBT(NBTTagCompound nbt) {
-		rsInputId = nbt.getInteger(RS_ID);
-		rsInputChannel = nbt.getByte(RS_CHANNEL);
+		int rsController = nbt.getInteger(RS_ID);
+		byte rsColor = nbt.getByte(RS_CHANNEL);
+		primary = new RSChannel(rsController, rsColor);
 		rsInput = nbt.getInteger("rsInput");
 		wide = nbt.getBoolean(WIDE);
 		if (nbt.hasKey(RS_ID2)) {
-			rsInputId2 = nbt.getInteger(RS_ID2);
-			rsInputChannel2 = nbt.getByte(RS_CHANNEL2);
-			hasSecond = rsInputId2>=0&&rsInputChannel2>=0;
+			rsController = nbt.getInteger(RS_ID2);
+			rsColor = nbt.getByte(RS_CHANNEL2);
+			secondary = new RSChannel(rsController, rsColor);
 		} else {
-			hasSecond = false;
-		}
-		if (!hasSecond) {
-			rsInputId2 = -1;
-			rsInputChannel2 = -1;
+			secondary = RSChannel.INVALID_CHANNEL;
 		}
 	}
 
@@ -169,7 +164,7 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 	@Nonnull
 	@Override
 	public PanelComponent copyOf() {
-		PanelMeter ret = new PanelMeter(rsInputId, rsInputChannel, rsInputId2, rsInputChannel2, wide, hasSecond);
+		PanelMeter ret = new PanelMeter(primary, secondary, wide);
 		ret.rsInput = rsInput;
 		ret.setX(x);
 		ret.setY(y);
@@ -187,48 +182,40 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 	}
 
 	@Override
-	public void interactWith(Vec3d hitRelative, TileEntityPanel tile, EntityPlayerMP player) {
+	public void interactWith(Vec3d hitRelative, EntityPlayerMP player) {
 	}
 
 	@Override
-	public void update(TileEntityPanel tile) {
+	public void update() {
 
 	}
 
-	private TileEntityPanel panel;
-	private Consumer<byte[]> handlerSec = (input) -> {
-		if (input[rsInputChannel2] != (rsInput&0xf)) {
-			rsInput = (input[rsInputChannel2]&0xf)|(rsInput&0xf0);
-			panel.markDirty();
-			panel.triggerRenderUpdate();
-		}
-	};
-	private Consumer<byte[]> handler = (input) -> {
-		if (input[rsInputChannel] != rsInput>>4) {
-			if (hasSecond) {
-				rsInput = (input[rsInputChannel]<<4)|(rsInput&0xf);
-			} else {
-				rsInput = input[rsInputChannel]*17;
+	@Override
+	public void setNetwork(ControlPanelNetwork net, TileEntityPanel panel) {
+		super.setNetwork(net, panel);
+		Consumer<RSChannelState> listenerPrimary = (input) -> {
+			byte strength = input.getStrength();
+			if (strength != rsInput >> 4) {
+				if (secondary.isValid()) {
+					rsInput = (strength << 4) | (rsInput & 0xf);
+				} else {
+					rsInput = strength * 17;
+				}
+				panel.markDirty();
+				panel.triggerRenderUpdate();
 			}
-			panel.markDirty();
-			panel.triggerRenderUpdate();
+		};
+		net.addListener(this, listenerPrimary, primary);
+		if (secondary.isValid()) {
+			Consumer<RSChannelState> listenerSec = (input) -> {
+				if (input.getStrength() != (rsInput & 0xf)) {
+					rsInput = (input.getStrength() & 0xf) | (rsInput & 0xf0);
+					panel.markDirty();
+					panel.triggerRenderUpdate();
+				}
+			};
+			net.addListener(this, listenerSec, secondary);
 		}
-		if (rsInputId2==rsInputId) {
-			handlerSec.accept(input);
-		}
-	};
-
-	@Nullable
-	@Override
-	public Consumer<byte[]> getRSInputHandler(int id, TileEntityPanel panel) {
-		if (matchesId(rsInputId, id)) {
-			this.panel = panel;
-			return handler;
-		} else if (matchesId(rsInputId2, id)) {
-			this.panel = panel;
-			return handlerSec;
-		}
-		return null;
 	}
 
 	@Override
@@ -244,25 +231,19 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 
 		PanelMeter that = (PanelMeter) o;
 
-		if (rsInputId != that.rsInputId) return false;
-		if (rsInputId2 != that.rsInputId2) return false;
-		if (rsInputChannel != that.rsInputChannel) return false;
-		if (rsInputChannel2 != that.rsInputChannel2) return false;
 		if (rsInput != that.rsInput) return false;
 		if (wide != that.wide) return false;
-		return hasSecond == that.hasSecond;
+		if (!primary.equals(that.primary)) return false;
+		return secondary.equals(that.secondary);
 	}
 
 	@Override
 	public int hashCode() {
 		int result = super.hashCode();
-		result = 31 * result + rsInputId;
-		result = 31 * result + rsInputId2;
-		result = 31 * result + (int) rsInputChannel;
-		result = 31 * result + (int) rsInputChannel2;
+		result = 31 * result + primary.hashCode();
+		result = 31 * result + secondary.hashCode();
 		result = 31 * result + rsInput;
 		result = 31 * result + (wide ? 1 : 0);
-		result = 31 * result + (hasSecond ? 1 : 0);
 		return result;
 	}
 
@@ -279,7 +260,6 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 		GlStateManager.pushMatrix();
 		int border = (int) Math.ceil(BORDER*gui.panelSize);
 		int width = right-left;
-		int height = bottom-top;
 		if (wide) {
 			GlStateManager.translate(left+width/2D, bottom-2*border, 0);
 			GlStateManager.rotate(135, 0, 0, 1);
@@ -300,17 +280,16 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 		switch (type) {
 			case RS_CHANNEL:
 				if (id == 0) {
-					rsInputChannel = ((NBTTagByte) value).getByte();
+					primary = primary.withColor(value);
 				} else {
-					rsInputChannel2 = ((NBTTagByte) value).getByte();
+					secondary = secondary.withColor(value);
 				}
 				break;
 			case INT:
 				if (id == 0) {
-					rsInputId = ((NBTTagInt) value).getInt();
+					primary = primary.withController(value);
 				} else {
-					rsInputId2 = ((NBTTagInt) value).getInt();
-					hasSecond = rsInputId2>=0;
+					secondary = secondary.withController(value);
 				}
 				break;
 			case BOOL:
@@ -320,6 +299,7 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 
 	@Nullable
 	@Override
+	@SideOnly(Side.CLIENT)
 	public String fomatConfigName(ConfigType type, int id) {
 		switch (type) {
 		case FLOAT:
@@ -335,6 +315,7 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 
 	@Nullable
 	@Override
+	@SideOnly(Side.CLIENT)
 	public String fomatConfigDescription(ConfigType type, int id) {
 		switch (type) {
 		case FLOAT:
@@ -349,18 +330,18 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 	}
 
 	@Override
-	public RSChannelConfig[] getRSChannelOptions() {
-		return new RSChannelConfig[]{
-				new RSChannelConfig("channel", 0, 0, rsInputChannel, false),
-				new RSChannelConfig("channel2", 60, 0, rsInputChannel2, false)
+	public RSColorConfig[] getRSChannelOptions() {
+		return new RSColorConfig[]{
+				new RSColorConfig("channel", 0, 0, primary.getColor(), false),
+				new RSColorConfig("channel2", 60, 0, secondary.getColor(), false)
 		};
 	}
 
 	@Override
 	public IntConfig[] getIntegerOptions() {
 		return new IntConfig[]{
-				new IntConfig("rsId", 0, 60, rsInputId, 2, false),
-				new IntConfig("rsId2", 60, 60, rsInputId2, 2, true)
+				new IntConfig("rsId", 0, 60, primary.getController(), 2, false),
+				new IntConfig("rsId2", 60, 60, secondary.getController(), 2, true)
 		};
 	}
 
