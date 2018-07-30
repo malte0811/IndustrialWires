@@ -17,7 +17,6 @@ package malte0811.industrialWires.controlpanel;
 
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import malte0811.industrialWires.IndustrialWires;
-import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import malte0811.industrialWires.client.panelmodel.RawModelFontRenderer;
@@ -47,7 +46,7 @@ import static malte0811.industrialWires.util.NBTKeys.*;
 
 public class PanelMeter extends PanelComponent implements IConfigurableComponent {
 	@Nonnull
-	private RSChannel primary = RSChannel.INVALID_CHANNEL;
+	private RSChannel primary = RSChannel.DEFAULT_CHANNEL;
 	@Nonnull
 	private RSChannel secondary = RSChannel.INVALID_CHANNEL;
 	private int rsInput;
@@ -191,8 +190,8 @@ public class PanelMeter extends PanelComponent implements IConfigurableComponent
 	}
 
 	@Override
-	public void setNetwork(ControlPanelNetwork net, TileEntityPanel panel) {
-		super.setNetwork(net, panel);
+	public void setNetwork(ControlPanelNetwork net) {
+		super.setNetwork(net);
 		Consumer<RSChannelState> listenerPrimary = (input) -> {
 			byte strength = input.getStrength();
 			if (strength != rsInput >> 4) {

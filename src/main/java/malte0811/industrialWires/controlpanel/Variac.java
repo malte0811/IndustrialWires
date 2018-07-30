@@ -20,6 +20,7 @@ import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import malte0811.industrialWires.controlpanel.ControlPanelNetwork.RSChannel;
+import malte0811.industrialWires.controlpanel.ControlPanelNetwork.RSChannelState;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -51,7 +52,7 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 
 	private int out;
 	@Nonnull
-	private RSChannel primary = RSChannel.INVALID_CHANNEL;
+	private RSChannel primary = RSChannel.DEFAULT_CHANNEL;
 	@Nonnull
 	private RSChannel secondary = RSChannel.INVALID_CHANNEL;
 
@@ -162,15 +163,19 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 		newLevel = Math.max(0, Math.min(newLevel, 255));
 		if (newLevel != out) {
 			setOut(newLevel);
-			out = newLevel;
-			panel.markDirty();
-			panel.triggerRenderUpdate();
 		}
 	}
 
 	@Override
 	public void update() {
 
+	}
+
+	@Override
+	public void setNetwork(ControlPanelNetwork net) {
+		super.setNetwork(net);
+		network.setOutputs(this, new RSChannelState(primary, (byte) (out>>4)));
+		network.setOutputs(this, new RSChannelState(secondary, (byte) (out&0xf)));
 	}
 
 	@Override
@@ -200,8 +205,11 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 	}
 
 	public void setOut(int value) {
-		network.setOutputs(this, new ControlPanelNetwork.RSChannelState(primary, (byte) (value>>4)));
-		network.setOutputs(this, new ControlPanelNetwork.RSChannelState(secondary, (byte) (value&0xf)));
+		network.setOutputs(this, new RSChannelState(primary, (byte) (value>>4)));
+		network.setOutputs(this, new RSChannelState(secondary, (byte) (value&0xf)));
+		out = value;
+		panel.markDirty();
+		panel.triggerRenderUpdate();
 	}
 
 	@Override
@@ -267,16 +275,16 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 	@Override
 	public RSColorConfig[] getRSChannelOptions() {
 		return new RSColorConfig[]{
-				new RSColorConfig("channel", 0, 0, primary.getColor(), false),
-				new RSColorConfig("channel2", 60, 0, secondary.getColor(), false)
+				new RSColorConfig("channel", 0, 0, primary.getColor()),
+				new RSColorConfig("channel2", 90, 0, secondary.getColor())
 		};
 	}
 
 	@Override
 	public IntConfig[] getIntegerOptions() {
 		return new IntConfig[]{
-				new IntConfig("rsId", 0, 60, primary.getController(), 2, false),
-				new IntConfig("rsId2", 60, 60, secondary.getController(), 2, true)
+				new IntConfig("rsId", 0, 50, primary.getController(), 2, false),
+				new IntConfig("rsId2", 90, 50, secondary.getController(), 2, true)
 		};
 	}
 

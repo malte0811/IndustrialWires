@@ -43,7 +43,7 @@ import static malte0811.industrialWires.util.NBTKeys.RS_ID;
 public class ToggleSwitch extends PanelComponent implements IConfigurableComponent {
 	protected boolean active;
 	@Nonnull
-	protected RSChannel outputChannel = RSChannel.INVALID_CHANNEL;
+	protected RSChannel outputChannel = RSChannel.DEFAULT_CHANNEL;
 
 	public ToggleSwitch() {
 		super("toggle_switch");
@@ -74,6 +74,12 @@ public class ToggleSwitch extends PanelComponent implements IConfigurableCompone
 		int rsController = nbt.getInteger(RS_ID);
 		byte rsColor = nbt.getByte(RS_CHANNEL);
 		outputChannel = new RSChannel(rsController, rsColor);
+	}
+
+	@Override
+	public void setNetwork(ControlPanelNetwork net) {
+		super.setNetwork(net);
+		network.setOutputs(this, new RSChannelState(outputChannel, (byte) (active ? 15 : 0)));
 	}
 
 	protected float sizeX = .0625F;
@@ -152,9 +158,9 @@ public class ToggleSwitch extends PanelComponent implements IConfigurableCompone
 
 	protected void setOut(boolean on) {
 		active = on;
+		network.setOutputs(this, new RSChannelState(outputChannel, (byte) (active ? 15 : 0)));
 		panel.markDirty();
 		panel.triggerRenderUpdate();
-		network.setOutputs(this, new RSChannelState(outputChannel, (byte) (active ? 15 : 0)));
 	}
 
 	@Override

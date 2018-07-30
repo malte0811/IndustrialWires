@@ -68,8 +68,6 @@ public class CoveredToggleSwitch extends ToggleSwitch {
 			state = state.next();
 		}
 		setOut(state.active);
-		panel.markDirty();
-		panel.triggerRenderUpdate();
 	}
 
 	@Override
@@ -84,7 +82,7 @@ public class CoveredToggleSwitch extends ToggleSwitch {
 	protected void writeCustomNBT(NBTTagCompound nbt, boolean toItem) {
 		super.writeCustomNBT(nbt, toItem);
 		if (!toItem) {
-			nbt.setInteger("active", state.ordinal());
+			nbt.setInteger("state", state.ordinal());
 		}
 		nbt.setInteger(COLOR, color);
 	}

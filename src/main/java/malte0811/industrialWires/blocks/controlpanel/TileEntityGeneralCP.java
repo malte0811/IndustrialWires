@@ -35,22 +35,24 @@ public abstract class TileEntityGeneralCP extends TileEntityIWBase implements IO
 	@Override
 	public void onLoad() {
 		super.onLoad();
-		boolean isFinalNet = false;
-		for (EnumFacing side:EnumFacing.VALUES) {
-			BlockPos posSide = pos.offset(side);
-			TileEntityGeneralCP neighbour = MiscUtils.getExistingTE(world, posSide, TileEntityGeneralCP.class);
-			if (neighbour!=null) {
-				if (!isFinalNet) {
-					panelNetwork = neighbour.panelNetwork;
-					panelNetwork.addMember(this);
-					isFinalNet = true;
-				} else {
-					neighbour.panelNetwork.replaceWith(panelNetwork, world);
+		if (!world.isRemote) {
+			boolean isFinalNet = false;
+			for (EnumFacing side : EnumFacing.VALUES) {
+				BlockPos posSide = pos.offset(side);
+				TileEntityGeneralCP neighbour = MiscUtils.getExistingTE(world, posSide, TileEntityGeneralCP.class);
+				if (neighbour != null) {
+					if (!isFinalNet) {
+						panelNetwork = neighbour.panelNetwork;
+						panelNetwork.addMember(this);
+						isFinalNet = true;
+					} else {
+						neighbour.panelNetwork.replaceWith(panelNetwork, world);
+					}
 				}
 			}
-		}
-		if (!isFinalNet) {
-			panelNetwork.addMember(this);
+			if (!isFinalNet) {
+				panelNetwork.addMember(this);
+			}
 		}
 	}
 

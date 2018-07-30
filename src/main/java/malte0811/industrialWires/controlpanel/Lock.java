@@ -54,7 +54,7 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 	private boolean turned;
 	private boolean latching = false;
 	@Nonnull
-	private RSChannel outputChannel = RSChannel.INVALID_CHANNEL;
+	private RSChannel outputChannel = RSChannel.DEFAULT_CHANNEL;
 	private int ticksTillOff;
 	private int lockID;
 
@@ -102,6 +102,12 @@ public class Lock extends PanelComponent implements IConfigurableComponent {
 		int rsController = nbt.getInteger(RS_CHANNEL);
 		byte rsColor = nbt.getByte(RS_ID);
 		outputChannel = new RSChannel(rsController, rsColor);
+	}
+
+	@Override
+	public void setNetwork(ControlPanelNetwork net) {
+		super.setNetwork(net);
+		net.setOutputs(this, new RSChannelState(outputChannel, (byte) (turned?15:0)));
 	}
 
 	private final static float size = .0625F;

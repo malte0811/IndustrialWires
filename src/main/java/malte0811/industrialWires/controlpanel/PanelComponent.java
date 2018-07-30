@@ -105,8 +105,7 @@ public abstract class PanelComponent implements IOwner {
 
 	public abstract float getHeight();
 
-	public void setNetwork(ControlPanelNetwork net, TileEntityPanel panel) {
-		this.panel = panel;
+	public void setNetwork(ControlPanelNetwork net) {
 		this.network = net;
 	}
 
@@ -245,5 +244,9 @@ public abstract class PanelComponent implements IOwner {
 		result = 31 * result + (y != +0.0f ? Float.floatToIntBits(y) : 0);
 		result = 31 * result + type.hashCode();
 		return result;
+	}
+
+	public void setPanel(TileEntityPanel tile) {
+		panel = tile;
 	}
 }

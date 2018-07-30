@@ -74,12 +74,17 @@ public class TileEntityPanel extends TileEntityGeneralCP implements IDirectional
 			components.add(lbl);
 			components.add(btn);
 		}
+		for (PanelComponent pc:components) {
+			pc.setPanel(this);
+		}
 	}
 
 	@Override
 	public void update() {
-		for (PanelComponent pc : components) {
-			pc.update();
+		if (!world.isRemote) {
+			for (PanelComponent pc : components) {
+				pc.update();
+			}
 		}
 	}
 
@@ -87,7 +92,7 @@ public class TileEntityPanel extends TileEntityGeneralCP implements IDirectional
 	public void setNetworkAndInit(ControlPanelNetwork newNet) {
 		super.setNetworkAndInit(newNet);
 		for (PanelComponent pc : components) {
-			pc.setNetwork(newNet, this);
+			pc.setNetwork(newNet);
 		}
 	}
 
@@ -126,6 +131,11 @@ public class TileEntityPanel extends TileEntityGeneralCP implements IDirectional
 		if (nbt != null) {
 			NBTTagList l = nbt.getTagList("components", 10);
 			PanelUtils.readListFromNBT(l, components);
+			panelNetwork.removeIOFor(this);
+			for (PanelComponent pc:components) {
+				pc.setPanel(this);
+				pc.setNetwork(panelNetwork);
+			}
 			components.setHeight(nbt.getFloat("height"));
 			components.setAngle(nbt.getFloat("angle"));
 		}

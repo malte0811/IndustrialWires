@@ -149,12 +149,14 @@ public class ControlPanelNetwork {
 		OutputValue oldSecMax = secondActiveOutputs.get(channel);
 		OutputValue newMax = null;
 		OutputValue newSecMax = null;
-		for (OutputValue v : allOutputs.get(channel)) {
-			if (v.isStrongerThan(newMax)) {
-				newSecMax = newMax;
-				newMax = v;
-			} else if (v.isStrongerThan(newSecMax)) {
-				newSecMax = v;
+		if (allOutputs.containsKey(channel)) {
+			for (OutputValue v : allOutputs.get(channel)) {
+				if (v.isStrongerThan(newMax)) {
+					newSecMax = newMax;
+					newMax = v;
+				} else if (v.isStrongerThan(newSecMax)) {
+					newSecMax = v;
+				}
 			}
 		}
 		if (newMax == null) {
@@ -185,6 +187,9 @@ public class ControlPanelNetwork {
 	}
 
 	private <T extends Owned> boolean removeForChannel(IOwner owner, List<T> l, Iterator<?> it) {
+		if (l==null) {
+			return false;
+		}
 		l.removeIf(val -> val.isOwnedBy(owner));
 		if (l.isEmpty()) {
 			if (it!=null) {
@@ -295,7 +300,8 @@ public class ControlPanelNetwork {
 	}
 
 	public static class RSChannel {
-		public static final RSChannel INVALID_CHANNEL = new RSChannel(-1, (byte)-1);
+		public static final RSChannel INVALID_CHANNEL = new RSChannel(-1, (byte)0);
+		public static final RSChannel DEFAULT_CHANNEL = new RSChannel(0, (byte)0);
 		private final int controller;
 		private final byte color;
 

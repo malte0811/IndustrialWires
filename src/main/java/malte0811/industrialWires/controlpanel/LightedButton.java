@@ -16,7 +16,6 @@
 package malte0811.industrialWires.controlpanel;
 
 import malte0811.industrialWires.IndustrialWires;
-import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import malte0811.industrialWires.controlpanel.ControlPanelNetwork.RSChannel;
@@ -43,7 +42,7 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 	private boolean active;
 	private boolean latching;
 	@Nonnull
-	private RSChannel outputChannel = RSChannel.INVALID_CHANNEL;
+	private RSChannel outputChannel = RSChannel.DEFAULT_CHANNEL;
 	private int ticksTillOff;
 
 	LightedButton() {
@@ -141,8 +140,8 @@ public class LightedButton extends PanelComponent implements IConfigurableCompon
 	}
 
 	@Override
-	public void setNetwork(ControlPanelNetwork net, TileEntityPanel te) {
-		super.setNetwork(net, te);
+	public void setNetwork(ControlPanelNetwork net) {
+		super.setNetwork(net);
 		net.setOutputs(this, new RSChannelState(outputChannel, (byte) (active?15:0)));
 	}
 

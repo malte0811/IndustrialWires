@@ -16,7 +16,6 @@
 package malte0811.industrialWires.controlpanel;
 
 import malte0811.industrialWires.IndustrialWires;
-import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import malte0811.industrialWires.controlpanel.ControlPanelNetwork.RSChannel;
@@ -85,7 +84,7 @@ public class SevenSegDisplay extends PanelComponent implements IConfigurableComp
 	private int color = 0xff00;
 	private byte input = 0;
 	@Nonnull
-	private RSChannel inputChannel = RSChannel.INVALID_CHANNEL;
+	private RSChannel inputChannel = RSChannel.DEFAULT_CHANNEL;
 
 	public SevenSegDisplay() {
 		super(NAME);
@@ -118,8 +117,8 @@ public class SevenSegDisplay extends PanelComponent implements IConfigurableComp
 
 
 	@Override
-	public void setNetwork(ControlPanelNetwork net, TileEntityPanel panel) {
-		super.setNetwork(net, panel);
+	public void setNetwork(ControlPanelNetwork net) {
+		super.setNetwork(net);
 		Consumer<RSChannelState> handler = (inputNew) -> {
 			if (inputNew.getStrength() != input) {
 				input = inputNew.getStrength();

@@ -47,7 +47,7 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 	private boolean horizontal;
 	private int out;
 	@Nonnull
-	private RSChannel primary = RSChannel.INVALID_CHANNEL;
+	private RSChannel primary = RSChannel.DEFAULT_CHANNEL;
 	@Nonnull
 	private RSChannel secondary = RSChannel.INVALID_CHANNEL;
 
@@ -149,15 +149,19 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 		int newLevel = (int) Math.min(pos * 256 / length, 255);
 		if (newLevel != out) {
 			setOut(newLevel);
-			out = newLevel;
-			panel.markDirty();
-			panel.triggerRenderUpdate();
 		}
 	}
 
 	@Override
 	public void update() {
 
+	}
+
+	@Override
+	public void setNetwork(ControlPanelNetwork net) {
+		super.setNetwork(net);
+		network.setOutputs(this, new RSChannelState(primary, (byte) (out>>4)));
+		network.setOutputs(this, new RSChannelState(secondary, (byte) (out&0xf)));
 	}
 
 	@Override
@@ -181,6 +185,9 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 	public void setOut(int value) {
 		network.setOutputs(this, new RSChannelState(primary, (byte) (value>>4)));
 		network.setOutputs(this, new RSChannelState(secondary, (byte) (value&0xf)));
+		out = value;
+		panel.markDirty();
+		panel.triggerRenderUpdate();
 	}
 
 	@Override
@@ -281,23 +288,23 @@ public class Slider extends PanelComponent implements IConfigurableComponent {
 	@Override
 	public RSColorConfig[] getRSChannelOptions() {
 		return new RSColorConfig[]{
-				new RSColorConfig("channel", 0, 0, primary.getColor(), false),
-				new RSColorConfig("channel2", 60, 0, secondary.getColor(), false)
+				new RSColorConfig("channel", 0, 0, primary.getColor(), true),
+				new RSColorConfig("channel2", 30, 0, secondary.getColor(), true)
 		};
 	}
 
 	@Override
 	public IntConfig[] getIntegerOptions() {
 		return new IntConfig[]{
-				new IntConfig("rsId", 0, 60, primary.getController(), 2, false),
-				new IntConfig("rsId2", 60, 60, secondary.getController(), 2, true)
+				new IntConfig("rsId", 0, 30, primary.getController(), 2, false),
+				new IntConfig("rsId2", 30, 30, secondary.getController(), 2, true)
 		};
 	}
 
 	@Override
 	public BoolConfig[] getBooleanOptions() {
 		return new BoolConfig[]{
-				new BoolConfig("horizontal", 0, 70, horizontal)
+				new BoolConfig("horizontal", 0, 40, horizontal)
 		};
 	}
 

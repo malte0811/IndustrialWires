@@ -16,7 +16,6 @@
 package malte0811.industrialWires.controlpanel;
 
 import malte0811.industrialWires.IndustrialWires;
-import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import malte0811.industrialWires.controlpanel.ControlPanelNetwork.RSChannel;
@@ -41,7 +40,7 @@ import static malte0811.industrialWires.util.NBTKeys.*;
 
 public class IndicatorLight extends PanelComponent implements IConfigurableComponent {
 	@Nonnull
-	private RSChannel inputChannel = RSChannel.INVALID_CHANNEL;
+	private RSChannel inputChannel = RSChannel.DEFAULT_CHANNEL;
 	private int colorA = 0xff00;
 	private byte rsInput;
 
@@ -131,8 +130,8 @@ public class IndicatorLight extends PanelComponent implements IConfigurableCompo
 
 
 	@Override
-	public void setNetwork(ControlPanelNetwork net, TileEntityPanel panel) {
-		super.setNetwork(net, panel);
+	public void setNetwork(ControlPanelNetwork net) {
+		super.setNetwork(net);
 		net.addListener(this, handler, inputChannel);
 	}
 
