@@ -63,9 +63,11 @@ public abstract class TileEntityIWBase extends TileEntity {
 	}
 
 	public void triggerRenderUpdate() {
-		IBlockState state = world.getBlockState(pos);
-		world.notifyBlockUpdate(pos, state, state, 3);
-		world.addBlockEvent(pos, state.getBlock(), 255, 0);
+		if (world!=null) {
+			IBlockState state = world.getBlockState(pos);
+			world.notifyBlockUpdate(pos, state, state, 3);
+			world.addBlockEvent(pos, state.getBlock(), 255, 0);
+		}
 	}
 
 	@Override

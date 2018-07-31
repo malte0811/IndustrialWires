@@ -46,9 +46,9 @@ import javax.annotation.Nullable;
 
 import static malte0811.industrialWires.util.MiscUtils.apply;
 
-public class TileEntityPanel extends TileEntityGeneralCP implements IDirectionalTile, IBlockBoundsIW, IPlayerInteraction, ITickable, IEBlockInterfaces.ITileDrop {
+public class TileEntityPanel extends TileEntityGeneralCP implements IDirectionalTile, IBlockBoundsIW, IPlayerInteraction,
+		ITickable, IEBlockInterfaces.ITileDrop {
 	protected PropertyComponents.PanelRenderProperties components = new PropertyComponents.PanelRenderProperties();
-	public boolean firstTick = true;
 
 	{
 		int[] colors = {
@@ -132,9 +132,11 @@ public class TileEntityPanel extends TileEntityGeneralCP implements IDirectional
 			NBTTagList l = nbt.getTagList("components", 10);
 			PanelUtils.readListFromNBT(l, components);
 			panelNetwork.removeIOFor(this);
-			for (PanelComponent pc:components) {
+			for (PanelComponent pc : components) {
 				pc.setPanel(this);
-				pc.setNetwork(panelNetwork);
+				if (world == null || !world.isRemote) {
+					pc.setNetwork(panelNetwork);
+				}
 			}
 			components.setHeight(nbt.getFloat("height"));
 			components.setAngle(nbt.getFloat("angle"));

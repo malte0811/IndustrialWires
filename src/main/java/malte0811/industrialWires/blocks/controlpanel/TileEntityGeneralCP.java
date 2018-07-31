@@ -19,12 +19,13 @@ import malte0811.industrialWires.blocks.TileEntityIWBase;
 import malte0811.industrialWires.controlpanel.ControlPanelNetwork;
 import malte0811.industrialWires.controlpanel.ControlPanelNetwork.IOwner;
 import malte0811.industrialWires.util.MiscUtils;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 
 import javax.annotation.Nonnull;
 
-public abstract class TileEntityGeneralCP extends TileEntityIWBase implements IOwner {
+public class TileEntityGeneralCP extends TileEntityIWBase implements IOwner {
 	@Nonnull
 	protected ControlPanelNetwork panelNetwork = new ControlPanelNetwork();
 
@@ -37,16 +38,18 @@ public abstract class TileEntityGeneralCP extends TileEntityIWBase implements IO
 		super.onLoad();
 		if (!world.isRemote) {
 			boolean isFinalNet = false;
-			for (EnumFacing side : EnumFacing.VALUES) {
-				BlockPos posSide = pos.offset(side);
-				TileEntityGeneralCP neighbour = MiscUtils.getExistingTE(world, posSide, TileEntityGeneralCP.class);
-				if (neighbour != null) {
-					if (!isFinalNet) {
-						panelNetwork = neighbour.panelNetwork;
-						panelNetwork.addMember(this);
-						isFinalNet = true;
-					} else {
-						neighbour.panelNetwork.replaceWith(panelNetwork, world);
+			if (canJoinNetwork()) {
+				for (EnumFacing side : EnumFacing.VALUES) {
+					BlockPos posSide = pos.offset(side);
+					TileEntityGeneralCP neighbour = MiscUtils.getExistingTE(world, posSide, TileEntityGeneralCP.class);
+					if (neighbour != null && neighbour.canJoinNetwork()) {
+						if (!isFinalNet) {
+							panelNetwork = neighbour.panelNetwork;
+							panelNetwork.addMember(this);
+							isFinalNet = true;
+						} else {
+							neighbour.panelNetwork.replaceWith(panelNetwork, world);
+						}
 					}
 				}
 			}
@@ -63,6 +66,12 @@ public abstract class TileEntityGeneralCP extends TileEntityIWBase implements IO
 	}
 
 	@Override
+	public void writeNBT(NBTTagCompound out, boolean updatePacket) {}
+
+	@Override
+	public void readNBT(NBTTagCompound in, boolean updatePacket) {}
+
+	@Override
 	public void invalidate() {
 		super.invalidate();
 		panelNetwork.removeMember(pos, world);
@@ -71,5 +80,9 @@ public abstract class TileEntityGeneralCP extends TileEntityIWBase implements IO
 	@Override
 	public BlockPos getBlockPos() {
 		return pos;
+	}
+
+	public boolean canJoinNetwork() {
+		return true;
 	}
 }

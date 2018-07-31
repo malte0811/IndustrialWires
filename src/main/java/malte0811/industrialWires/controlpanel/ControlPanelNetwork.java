@@ -32,11 +32,11 @@ import java.util.function.Consumer;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class ControlPanelNetwork {
-	private Map<RSChannel, List<ChangeListener>> listeners = new HashMap<>();
-	private Map<RSChannel, List<OutputValue>> allOutputs = new HashMap<>();
-	private Map<RSChannel, OutputValue> activeOutputs = new HashMap<>();
-	private Map<RSChannel, OutputValue> secondActiveOutputs = new HashMap<>();
-	private Set<BlockPos> members = new HashSet<>();
+	protected Map<RSChannel, List<ChangeListener>> listeners = new HashMap<>();
+	protected Map<RSChannel, List<OutputValue>> allOutputs = new HashMap<>();
+	protected Map<RSChannel, OutputValue> activeOutputs = new HashMap<>();
+	protected Map<RSChannel, OutputValue> secondActiveOutputs = new HashMap<>();
+	protected Set<BlockPos> members = new HashSet<>();
 
 	public void addListener(IOwner owner, Consumer<RSChannelState> listener, RSChannel... channels) {
 		ChangeListener l = new ChangeListener(owner, listener);
@@ -232,7 +232,7 @@ public class ControlPanelNetwork {
 		}
 	}
 
-	private static class ChangeListener extends Owned {
+	protected static class ChangeListener extends Owned {
 		private final Consumer<RSChannelState> listener;
 
 		private ChangeListener(IOwner owner, Consumer<RSChannelState> listener) {
@@ -245,7 +245,7 @@ public class ControlPanelNetwork {
 		}
 	}
 
-	private static class OutputValue extends Owned {
+	protected static class OutputValue extends Owned {
 		private final RSChannelState targetState;
 
 		private OutputValue(@Nullable IOwner owner, RSChannelState targetState) {

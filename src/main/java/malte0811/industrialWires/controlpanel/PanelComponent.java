@@ -136,7 +136,7 @@ public abstract class PanelComponent implements IOwner {
 
 	@Override
 	public BlockPos getBlockPos() {
-		return panel.getBlockPos();
+		return panel.getPos();
 	}
 
 	public void writeToNBT(NBTTagCompound nbt, boolean toItem) {

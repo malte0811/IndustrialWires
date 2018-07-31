@@ -17,14 +17,14 @@ package malte0811.industrialWires.items;
 
 import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.client.ClientProxy;
-import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.controlpanel.BlockTypes_Panel;
-import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
+import malte0811.industrialWires.blocks.controlpanel.TileEntityComponentPanel;
 import malte0811.industrialWires.controlpanel.IConfigurableComponent;
 import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.controlpanel.PanelUtils;
 import malte0811.industrialWires.controlpanel.SevenSegDisplay;
+import malte0811.industrialWires.util.MiscUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;
@@ -33,13 +33,11 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -187,7 +185,7 @@ public class ItemPanelComponent extends Item implements INetGUIItem {
 
 			ItemStack itemstack = player.getHeldItem(hand);
 
-			if (!itemstack.isEmpty() && player.canPlayerEdit(pos, facing, itemstack) && worldIn.mayPlace(IndustrialWires.panel, pos, false, facing, (Entity) null)) {
+			if (!itemstack.isEmpty() && player.canPlayerEdit(pos, facing, itemstack) && worldIn.mayPlace(IndustrialWires.panel, pos, false, facing, null)) {
 				placeBlockAt(itemstack, player, worldIn, pos, facing, hitX, hitY, hitZ);
 				SoundType soundtype = worldIn.getBlockState(pos).getBlock().getSoundType(worldIn.getBlockState(pos), worldIn, pos, player);
 				worldIn.playSound(player, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
@@ -202,17 +200,11 @@ public class ItemPanelComponent extends Item implements INetGUIItem {
 	private void placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ) {
 		IBlockState state = IndustrialWires.panel.getStateFromMeta(BlockTypes_Panel.SINGLE_COMP.ordinal());
 		world.setBlockState(pos, state);
-		TileEntity te = world.getTileEntity(pos);
-		if (te instanceof IEBlockInterfaces.IDirectionalTile) {
-			EnumFacing dir = ((IEBlockInterfaces.IDirectionalTile) te).getFacingForPlacement(player, pos, side, hitX, hitY, hitZ);
-			((IEBlockInterfaces.IDirectionalTile) te).setFacing(dir);
-		}
-		if (te instanceof IEBlockInterfaces.ITileDrop) {
-			((IEBlockInterfaces.ITileDrop) te).readOnPlacement(player, stack);
-		}
-		if (te instanceof TileEntityPanel) {
-			((TileEntityPanel) te).getComponents().clear();
-			((TileEntityPanel) te).getComponents().add(componentFromStack(stack));
+		TileEntityComponentPanel te = MiscUtils.getExistingTE(world, pos, TileEntityComponentPanel.class);
+		if (te!=null) {
+			EnumFacing dir = te.getFacingForPlacement(player, pos, side, hitX, hitY, hitZ);
+			te.setFacing(dir);
+			te.setComponent(componentFromStack(stack));
 		}
 	}
 

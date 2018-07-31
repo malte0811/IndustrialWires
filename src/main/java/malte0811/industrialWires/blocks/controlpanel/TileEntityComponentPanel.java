@@ -15,58 +15,57 @@
 
 package malte0811.industrialWires.blocks.controlpanel;
 
+import malte0811.industrialWires.controlpanel.ControlPanelNetwork;
+import malte0811.industrialWires.controlpanel.PanelComponent;
+import malte0811.industrialWires.controlpanel.PropertyComponents;
+import malte0811.industrialWires.items.ItemPanelComponent;
+import net.minecraft.block.BlockRedstoneWire;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+
+import javax.annotation.Nonnull;
+
+import static malte0811.industrialWires.util.MiscUtils.apply;
+
 public class TileEntityComponentPanel extends TileEntityPanel {
-	/*private int rsOut = 0; todo
-	private Consumer<byte[]> rsIn;
+	private byte rsOut = 0;
 	public TileEntityComponentPanel() {
 		components = new PropertyComponents.AABBPanelProperties();
+		panelNetwork = new SingleCompNetwork();
 	}
 
 	@Override
-	public void update() {
-		for (PanelComponent pc : components) {
-			pc.update();
-		}
+	public void onLoad() {
+		super.onLoad();
 		if (!world.isRemote) {
-			if (firstTick&&components.size()>0) {
-				PanelComponent pc = components.get(0);
-				pc.registerRSOutput(-1, (channel, value, pcTmp)->{
-					rsOut = value;
-					if (!isInvalid()) {
-						markBlockForUpdate(pos);
-						markBlockForUpdate(pos.offset(components.getTop(), -1));
-					}
-				});
-				rsIn = pc.getRSInputHandler(-1, this);
-				updateRS();
-				firstTick = false;
-			}
+			updateRSInput();
 		}
 	}
 
-	public void updateRS() {
-		if (rsIn != null) {
-			int value = world.isBlockIndirectlyGettingPowered(pos);
-			if (value == 0) {
-				for (EnumFacing f : EnumFacing.HORIZONTALS) {
-					IBlockState state = world.getBlockState(pos.offset(f));
-					if (state.getBlock() == Blocks.REDSTONE_WIRE && state.getValue(BlockRedstoneWire.POWER) > value)
-						value = state.getValue(BlockRedstoneWire.POWER);
-				}
+	public void updateRSInput() {
+		int value = world.isBlockIndirectlyGettingPowered(pos);
+		if (value == 0) {
+			for (EnumFacing f : EnumFacing.HORIZONTALS) {
+				IBlockState state = world.getBlockState(pos.offset(f));
+				if (state.getBlock() == Blocks.REDSTONE_WIRE && state.getValue(BlockRedstoneWire.POWER) > value)
+					value = state.getValue(BlockRedstoneWire.POWER);
 			}
-			byte[] tmp = new byte[16];
-			for (int i = 0; i < tmp.length; i++) {
-				tmp[i] = (byte) value;
-			}
-			rsIn.accept(tmp);
 		}
+		((SingleCompNetwork)panelNetwork).setGlobalInput((byte) value);
 	}
 
 	public void markBlockForUpdate(BlockPos pos)
 	{
-		IBlockState state = world.getBlockState(getBlockPos());
-		world.notifyBlockUpdate(pos,state,state,3);
-		world.notifyNeighborsOfStateChange(pos, state.getBlock(), true);
+		if (world!=null) {
+			IBlockState state = world.getBlockState(getBlockPos());
+			world.notifyBlockUpdate(pos, state, state, 3);
+			world.notifyNeighborsOfStateChange(pos, state.getBlock(), true);
+		}
 	}
 
 	@Override
@@ -78,31 +77,52 @@ public class TileEntityComponentPanel extends TileEntityPanel {
 		return defAABB;
 	}
 
-	@Override
-	public void registerRS(TileEntityRSPanelConn te) {
-		//NO-OP
-	}
-
-	@Override
-	public void unregisterRS(TileEntityRSPanelConn te) {
-		//NO-OP
-	}
-
-	@Override
-	public boolean interactsWithRSWires() {
-		return false;
-	}
-
 	public int getRSOutput() {
 		return rsOut;
 	}
 
 	@Nonnull
 	@Override
-	public ItemStack getTileDrop(@Nonnull EntityPlayer player, @Nonnull IBlockState state) {
+	public ItemStack getTileDrop(EntityPlayer player, @Nonnull IBlockState state) {
 		if (components.size()<1) {
 			return ItemStack.EMPTY;
 		}
 		return ItemPanelComponent.stackFromComponent(components.get(0));
 	}
-*/}
+
+	@Override
+	public boolean canJoinNetwork() {
+		return false;
+	}
+
+	public void setComponent(PanelComponent comp) {
+		components.clear();
+		components.add(comp);
+		comp.setPanel(this);
+		comp.setNetwork(panelNetwork);
+	}
+
+	private class SingleCompNetwork extends ControlPanelNetwork {
+		@Override
+		public void setOutputs(IOwner owner, RSChannelState... out) {
+			super.setOutputs(owner, out);
+			byte oldOut = rsOut;
+			rsOut = 0;
+			for (OutputValue s:activeOutputs.values()) {
+				rsOut = (byte) Math.max(rsOut, s.getTargetState().getStrength());
+			}
+			if (oldOut!=rsOut) {
+				markBlockForUpdate(pos);
+			}
+		}
+
+		public void setGlobalInput(byte value) {
+			for (RSChannel channel: listeners.keySet()) {
+				RSChannelState state = new RSChannelState(channel, value);
+				for (ChangeListener l:listeners.get(channel)) {
+					l.onChange(state);
+				}
+			}
+		}
+	}
+}

@@ -21,6 +21,8 @@ import malte0811.industrialWires.blocks.BlockIWBase;
 import malte0811.industrialWires.blocks.IMetaEnum;
 import malte0811.industrialWires.controlpanel.PanelComponent;
 import malte0811.industrialWires.controlpanel.PropertyComponents;
+import malte0811.industrialWires.util.MiscUtils;
+import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
@@ -86,6 +88,8 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 				return new TileEntityUnfinishedPanel();
 			case SINGLE_COMP:
 				return new TileEntityComponentPanel();
+			case DUMMY:
+				return new TileEntityGeneralCP();
 			default:
 				return null;
 		}
@@ -235,7 +239,7 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 		return state.getValue(type)==BlockTypes_Panel.SINGLE_COMP;
 	}
 
-	/*@Override
+	@Override
 	public int getStrongPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
 		if (blockState.getValue(type)==BlockTypes_Panel.SINGLE_COMP) {
 			TileEntity te = blockAccess.getTileEntity(pos);
@@ -256,5 +260,16 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 			}
 		}
 		return 0;
-	}*/
+	}
+
+	@Override
+	public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
+		super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
+		if (!worldIn.isRemote) {
+			TileEntityComponentPanel panel = MiscUtils.getExistingTE(worldIn, pos, TileEntityComponentPanel.class);
+			if (panel != null) {
+				panel.updateRSInput();
+			}
+		}
+	}
 }
