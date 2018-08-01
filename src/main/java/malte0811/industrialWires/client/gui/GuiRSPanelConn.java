@@ -16,7 +16,7 @@
 package malte0811.industrialWires.client.gui;
 
 import malte0811.industrialWires.IndustrialWires;
-import malte0811.industrialWires.blocks.controlpanel.TileEntityRSPanelConn;
+import malte0811.industrialWires.blocks.controlpanel.TileEntityRSPanel;
 import malte0811.industrialWires.client.gui.elements.GuiIntChooser;
 import malte0811.industrialWires.containers.ContainerRSPanelConn;
 import malte0811.industrialWires.network.MessageGUIInteract;
@@ -30,10 +30,10 @@ import net.minecraft.util.ResourceLocation;
 import java.io.IOException;
 
 public class GuiRSPanelConn extends GuiContainer {
-	private TileEntityRSPanelConn te;
+	private TileEntityRSPanel te;
 	private GuiIntChooser chooser;
 
-	public GuiRSPanelConn(TileEntityRSPanelConn tile) {
+	public GuiRSPanelConn(TileEntityRSPanel tile) {
 		super(new ContainerRSPanelConn(tile));
 		te = tile;
 	}

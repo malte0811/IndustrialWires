@@ -13,27 +13,29 @@
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package malte0811.industrialWires.blocks.controlpanel;
+package malte0811.industrialWires.blocks;
 
-import net.minecraft.util.IStringSerializable;
+import malte0811.industrialWires.IndustrialWires;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.datafix.IFixableData;
 
-import java.util.Locale;
+import javax.annotation.Nonnull;
 
-public enum BlockTypes_Panel implements IStringSerializable {
-	TOP,
-	RS_WIRE,
-	DUMMY,
-	CREATOR,
-	UNFINISHED,
-	SINGLE_COMP,
-	OTHER_RS_WIRES;
-
+public class TEDataFixer implements IFixableData {
+	private static final String PREFIX = "minecraft:"+IndustrialWires.MODID;
+	private static final int PREFIX_LEN = PREFIX.length();
+	@Nonnull
 	@Override
-	public String getName() {
-		return toString().toLowerCase(Locale.ENGLISH);
+	public NBTTagCompound fixTagCompound(@Nonnull NBTTagCompound compound) {
+		String id = compound.getString("id");
+		if (id.startsWith(PREFIX)) {
+			compound.setString("id", IndustrialWires.MODID+":"+id.substring(PREFIX_LEN));
+		}
+		return compound;
 	}
 
-	public boolean showInCreative() {
-		return this != SINGLE_COMP;
+	@Override
+	public int getFixVersion() {
+		return 0;
 	}
 }

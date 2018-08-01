@@ -15,16 +15,16 @@
 
 package malte0811.industrialWires.containers;
 
-import malte0811.industrialWires.blocks.controlpanel.TileEntityRSPanelConn;
+import malte0811.industrialWires.blocks.controlpanel.TileEntityRSPanel;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 
 import javax.annotation.Nonnull;
 
 public class ContainerRSPanelConn extends Container {
-	private final TileEntityRSPanelConn te;
+	private final TileEntityRSPanel te;
 
-	public ContainerRSPanelConn(TileEntityRSPanelConn tile) {
+	public ContainerRSPanelConn(TileEntityRSPanel tile) {
 		te = tile;
 	}
 

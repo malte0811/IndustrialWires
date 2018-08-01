@@ -15,67 +15,71 @@
 package malte0811.industrialWires;
 
  import blusunrize.immersiveengineering.ImmersiveEngineering;
-import blusunrize.immersiveengineering.api.MultiblockHandler;
-import blusunrize.immersiveengineering.api.energy.wires.WireApi;
-import com.google.common.collect.ImmutableMap;
-import malte0811.industrialWires.blocks.BlockIWBase;
-import malte0811.industrialWires.blocks.controlpanel.*;
-import malte0811.industrialWires.blocks.converter.*;
-import malte0811.industrialWires.blocks.hv.*;
-import malte0811.industrialWires.blocks.wire.*;
-import malte0811.industrialWires.compat.Compat;
-import malte0811.industrialWires.controlpanel.PanelComponent;
-import malte0811.industrialWires.controlpanel.PanelUtils;
-import malte0811.industrialWires.crafting.Recipes;
-import malte0811.industrialWires.entities.EntityBrokenPart;
-import malte0811.industrialWires.hv.MarxOreHandler;
-import malte0811.industrialWires.hv.MultiblockMarx;
-import malte0811.industrialWires.items.ItemIC2Coil;
-import malte0811.industrialWires.items.ItemKey;
-import malte0811.industrialWires.items.ItemPanelComponent;
-import malte0811.industrialWires.mech_mb.EUCapability;
-import malte0811.industrialWires.mech_mb.MechMBPart;
-import malte0811.industrialWires.mech_mb.MultiblockMechMB;
-import malte0811.industrialWires.network.MessageGUIInteract;
-import malte0811.industrialWires.network.MessageItemSync;
-import malte0811.industrialWires.network.MessagePanelInteract;
-import malte0811.industrialWires.network.MessageTileSyncIW;
-import malte0811.industrialWires.util.CommandIW;
-import malte0811.industrialWires.util.MultiblockTemplateManual;
-import net.minecraft.block.Block;
-import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvent;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import net.minecraftforge.fml.common.registry.EntityRegistry;
-import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.relauncher.Side;
-import org.apache.logging.log4j.Logger;
+ import blusunrize.immersiveengineering.api.MultiblockHandler;
+ import blusunrize.immersiveengineering.api.energy.wires.WireApi;
+ import com.google.common.collect.ImmutableMap;
+ import malte0811.industrialWires.blocks.BlockIWBase;
+ import malte0811.industrialWires.blocks.TEDataFixer;
+ import malte0811.industrialWires.blocks.controlpanel.*;
+ import malte0811.industrialWires.blocks.converter.*;
+ import malte0811.industrialWires.blocks.hv.*;
+ import malte0811.industrialWires.blocks.wire.*;
+ import malte0811.industrialWires.compat.Compat;
+ import malte0811.industrialWires.controlpanel.PanelComponent;
+ import malte0811.industrialWires.controlpanel.PanelUtils;
+ import malte0811.industrialWires.crafting.Recipes;
+ import malte0811.industrialWires.entities.EntityBrokenPart;
+ import malte0811.industrialWires.hv.MarxOreHandler;
+ import malte0811.industrialWires.hv.MultiblockMarx;
+ import malte0811.industrialWires.items.ItemIC2Coil;
+ import malte0811.industrialWires.items.ItemKey;
+ import malte0811.industrialWires.items.ItemPanelComponent;
+ import malte0811.industrialWires.mech_mb.EUCapability;
+ import malte0811.industrialWires.mech_mb.MechMBPart;
+ import malte0811.industrialWires.mech_mb.MultiblockMechMB;
+ import malte0811.industrialWires.network.MessageGUIInteract;
+ import malte0811.industrialWires.network.MessageItemSync;
+ import malte0811.industrialWires.network.MessagePanelInteract;
+ import malte0811.industrialWires.network.MessageTileSyncIW;
+ import malte0811.industrialWires.util.CommandIW;
+ import malte0811.industrialWires.util.MultiblockTemplateManual;
+ import net.minecraft.block.Block;
+ import net.minecraft.creativetab.CreativeTabs;
+ import net.minecraft.item.Item;
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.item.crafting.IRecipe;
+ import net.minecraft.network.datasync.DataSerializers;
+ import net.minecraft.network.datasync.EntityDataManager;
+ import net.minecraft.util.ResourceLocation;
+ import net.minecraft.util.SoundEvent;
+ import net.minecraft.util.datafix.FixTypes;
+ import net.minecraftforge.common.util.ModFixs;
+ import net.minecraftforge.event.RegistryEvent;
+ import net.minecraftforge.fml.common.FMLCommonHandler;
+ import net.minecraftforge.fml.common.Loader;
+ import net.minecraftforge.fml.common.Mod;
+ import net.minecraftforge.fml.common.Mod.EventHandler;
+ import net.minecraftforge.fml.common.SidedProxy;
+ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+ import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+ import net.minecraftforge.fml.common.network.NetworkRegistry;
+ import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+ import net.minecraftforge.fml.common.registry.EntityRegistry;
+ import net.minecraftforge.fml.common.registry.GameRegistry;
+ import net.minecraftforge.fml.relauncher.Side;
+ import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
+ import java.util.ArrayList;
+ import java.util.List;
 
-import static malte0811.industrialWires.blocks.wire.BlockTypes_IC2_Connector.*;
-import static malte0811.industrialWires.entities.EntityBrokenPart.MARKER_TEXTURE;
-import static malte0811.industrialWires.entities.EntityBrokenPart.RES_LOC_SERIALIZER;
-import static malte0811.industrialWires.mech_mb.MechMBPart.EXAMPLE_MECHMB_LOC;
-import static malte0811.industrialWires.wires.IC2Wiretype.*;
+ import static malte0811.industrialWires.blocks.wire.BlockTypes_IC2_Connector.*;
+ import static malte0811.industrialWires.entities.EntityBrokenPart.MARKER_TEXTURE;
+ import static malte0811.industrialWires.entities.EntityBrokenPart.RES_LOC_SERIALIZER;
+ import static malte0811.industrialWires.mech_mb.MechMBPart.EXAMPLE_MECHMB_LOC;
+ import static malte0811.industrialWires.wires.IC2Wiretype.*;
 
 @Mod(modid = IndustrialWires.MODID, version = IndustrialWires.VERSION, dependencies = "required-after:immersiveengineering@[0.12-77,);after:ic2",
 		certificateFingerprint = "7e11c175d1e24007afec7498a1616bef0000027d",
@@ -85,6 +89,7 @@ public class IndustrialWires {
 	public static final String MODID = "industrialwires";
 	public static final String VERSION = "${version}";
 	public static final String MODNAME = "Industrial Wires";
+	public static final int DATAFIXER_VER = 1;
 	public static final SoundEvent TINNITUS = createSoundEvent(new ResourceLocation(IndustrialWires.MODID, "tinnitus"));
 	public static final SoundEvent LADDER_START = createSoundEvent(new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_start"));//~470 ms ~=9 ticks
 	public static final SoundEvent LADDER_MIDDLE = createSoundEvent(new ResourceLocation(IndustrialWires.MODID, "jacobs_ladder_middle"));
@@ -168,33 +173,28 @@ public class IndustrialWires {
 		logger = e.getModLog();
 		new IWConfig();
 		if (hasIC2) {
-			GameRegistry.registerTileEntity(TileEntityIC2ConnectorTin.class, MODID + ":ic2ConnectorTin");
-			GameRegistry.registerTileEntity(TileEntityIC2ConnectorCopper.class, MODID + ":ic2ConnectorCopper");
-			GameRegistry.registerTileEntity(TileEntityIC2ConnectorGold.class, MODID + ":ic2ConnectorGold");
-			GameRegistry.registerTileEntity(TileEntityIC2ConnectorHV.class, MODID + ":ic2ConnectorHV");
-			GameRegistry.registerTileEntity(TileEntityIC2ConnectorGlass.class, MODID + ":ic2ConnectorGlass");
-			// Dummy TE's with bad names used to update old TE's to the proper names
-			GameRegistry.registerTileEntity(DummyTEs.TinDummy.class, MODID + "ic2ConnectorTin");
-			GameRegistry.registerTileEntity(DummyTEs.CopperDummy.class, MODID + "ic2ConnectorCopper");
-			GameRegistry.registerTileEntity(DummyTEs.GoldDummy.class, MODID + "ic2ConnectorGold");
-			GameRegistry.registerTileEntity(DummyTEs.HVDummy.class, MODID + "ic2ConnectorHV");
-			GameRegistry.registerTileEntity(DummyTEs.GlassDummy.class, MODID + "ic2ConnectorGlass");
+			GameRegistry.registerTileEntity(TileEntityIC2ConnectorTin.class, new ResourceLocation(MODID, "ic2ConnectorTin"));
+			GameRegistry.registerTileEntity(TileEntityIC2ConnectorCopper.class, new ResourceLocation(MODID, "ic2ConnectorCopper"));
+			GameRegistry.registerTileEntity(TileEntityIC2ConnectorGold.class, new ResourceLocation(MODID, "ic2ConnectorGold"));
+			GameRegistry.registerTileEntity(TileEntityIC2ConnectorHV.class, new ResourceLocation(MODID, "ic2ConnectorHV"));
+			GameRegistry.registerTileEntity(TileEntityIC2ConnectorGlass.class, new ResourceLocation(MODID, "ic2ConnectorGlass"));
 
 			if (IWConfig.enableConversion) {
-				GameRegistry.registerTileEntity(TileEntityIEMotor.class, MODID + ":ieMotor");
-				GameRegistry.registerTileEntity(TileEntityMechICtoIE.class, MODID + ":mechIcToIe");
-				GameRegistry.registerTileEntity(TileEntityMechIEtoIC.class, MODID + ":mechIeToIc");
+				GameRegistry.registerTileEntity(TileEntityIEMotor.class, new ResourceLocation(MODID, "ieMotor"));
+				GameRegistry.registerTileEntity(TileEntityMechICtoIE.class, new ResourceLocation(MODID, "mechIcToIe"));
+				GameRegistry.registerTileEntity(TileEntityMechIEtoIC.class, new ResourceLocation(MODID, "mechIeToIc"));
 			}
 		}
-		GameRegistry.registerTileEntity(TileEntityMechMB.class, MODID + ":mechMB");
-		GameRegistry.registerTileEntity(TileEntityJacobsLadder.class, MODID + ":jacobsLadder");
-		GameRegistry.registerTileEntity(TileEntityMarx.class, MODID + ":marx_generator");
-		GameRegistry.registerTileEntity(TileEntityPanel.class, MODID + ":control_panel");
-		GameRegistry.registerTileEntity(TileEntityRSPanelConn.class, MODID + ":control_panel_rs");
-		GameRegistry.registerTileEntity(TileEntityPanelCreator.class, MODID + ":panel_creator");
-		GameRegistry.registerTileEntity(TileEntityUnfinishedPanel.class, MODID + ":unfinished_panel");
-		GameRegistry.registerTileEntity(TileEntityComponentPanel.class, MODID + ":single_component_panel");
-		GameRegistry.registerTileEntity(TileEntityDischargeMeter.class, MODID + ":discharge_meter");
+		GameRegistry.registerTileEntity(TileEntityMechMB.class, new ResourceLocation(MODID, "mechMB"));
+		GameRegistry.registerTileEntity(TileEntityJacobsLadder.class, new ResourceLocation(MODID, "jacobsLadder"));
+		GameRegistry.registerTileEntity(TileEntityMarx.class, new ResourceLocation(MODID, "marx_generator"));
+		GameRegistry.registerTileEntity(TileEntityPanel.class, new ResourceLocation(MODID, "control_panel"));
+		GameRegistry.registerTileEntity(TileEntityRSPanelIE.class, new ResourceLocation(MODID, "control_panel_rs"));
+		GameRegistry.registerTileEntity(TileEntityRSPanelOthers.class, new ResourceLocation(MODID, "control_panel_rs_compat"));
+		GameRegistry.registerTileEntity(TileEntityPanelCreator.class, new ResourceLocation(MODID, "panel_creator"));
+		GameRegistry.registerTileEntity(TileEntityUnfinishedPanel.class, new ResourceLocation(MODID, "unfinished_panel"));
+		GameRegistry.registerTileEntity(TileEntityComponentPanel.class, new ResourceLocation(MODID, "single_component_panel"));
+		GameRegistry.registerTileEntity(TileEntityDischargeMeter.class, new ResourceLocation(MODID, "discharge_meter"));
 
 		DataSerializers.registerSerializer(RES_LOC_SERIALIZER);
 		MARKER_TEXTURE = EntityDataManager.createKey(EntityBrokenPart.class, RES_LOC_SERIALIZER);
@@ -310,6 +310,8 @@ public class IndustrialWires {
 		if (hasIC2) {
 			EUCapability.register();
 		}
+		ModFixs fixer = FMLCommonHandler.instance().getDataFixer().init(MODID, DATAFIXER_VER);
+		fixer.registerFix(FixTypes.BLOCK_ENTITY, new TEDataFixer());
 	}
 
 	@EventHandler

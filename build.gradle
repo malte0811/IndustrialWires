@@ -32,7 +32,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 minecraft {
-    version = "14.23.3.2655"
+    version = "14.23.4.2745"
     runDir = "run"
 
     replace '${version}', project.version
@@ -69,16 +69,33 @@ repositories {
         name "TehNut"
         url "http://tehnut.info/maven/"
     }
+    repositories {//Curseforge maven for project red
+        maven {
+            name = "CurseForge"
+            url = "https://minecraft.curseforge.com/api/maven/"
+        }
+    }
+    maven {
+        name = "chickenbones"
+        url = "http://chickenbones.net/maven"
+    }
 }
 
 dependencies {
     deobfCompile 'net.industrial-craft:industrialcraft-2:2.8.+'
     deobfCompile "blusunrize:ImmersiveEngineering:0.12-+"
+    deobfCompile "project-red-base:ProjectRed-1.12.2:4.9.1.92:Base"
+    runtime "project-red-integration:ProjectRed-1.12.2:4.9.1.92:integration"
+    runtime "forge-multipart-cbe:ForgeMultipart-1.12.2:2.5.0.69:universal"
+    runtime "codechicken:CodeChickenLib:1.12.2-3.2.1.349:universal"
+    runtime "codechicken:ChickenASM:1.12-1.0.2.7"
+    runtime "mrtjpcore:MrTJPCore-1.12.2:2.1.3.35:universal"
     compileOnly "TechReborn:TechReborn-1.12:2.6.+:dev"
     compileOnly "RebornCore:RebornCore-1.12:3.2.+:dev"
     compileOnly 'com.elytradev:mirage:2.0.1-SNAPSHOT'
     compileOnly "mezz.jei:jei_1.12:4.+"
     compileOnly "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.8.460"
+
 }
 
 jar {

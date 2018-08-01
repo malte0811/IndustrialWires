@@ -23,16 +23,10 @@ import blusunrize.immersiveengineering.api.energy.wires.redstone.IRedstoneConnec
 import blusunrize.immersiveengineering.api.energy.wires.redstone.RedstoneWireNetwork;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
 import malte0811.industrialWires.blocks.IBlockBoundsIW;
-import malte0811.industrialWires.blocks.INetGUI;
-import malte0811.industrialWires.controlpanel.ControlPanelNetwork;
-import malte0811.industrialWires.controlpanel.ControlPanelNetwork.RSChannel;
-import malte0811.industrialWires.controlpanel.ControlPanelNetwork.RSChannelState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -41,61 +35,32 @@ import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.function.Consumer;
 
 import static blusunrize.immersiveengineering.api.energy.wires.WireType.REDSTONE_CATEGORY;
 
-public class TileEntityRSPanelConn extends TileEntityGeneralCP//TODO what parts of TEIIC do I need?
-		implements IRedstoneConnector, INetGUI, IEBlockInterfaces.IDirectionalTile, IBlockBoundsIW,
-		ITickable {
-	private byte[] out = new byte[16];
-	private boolean dirty = true;
-	private byte[] oldInput = new byte[16];
-	private final RSChannel[] channels = new RSChannel[16];
+public class TileEntityRSPanelIE extends TileEntityRSPanel//TODO what parts of TEIIC do I need?
+		implements IRedstoneConnector, IEBlockInterfaces.IDirectionalTile, IBlockBoundsIW {
 	private EnumFacing facing = EnumFacing.NORTH;
 	@Nonnull
 	private RedstoneWireNetwork wireNetwork = new RedstoneWireNetwork().add(this);
 	private boolean hasConn = false;
-	private int controller = 0;
-
-	{
-		for (int i = 0; i < 16; i++) {
-			oldInput[i] = -1;
-		}
-		updateChannelsArray();
-	}
-
-	@Override
-	public void update() {
-		if (dirty) {
-			wireNetwork.updateValues();
-			dirty = false;
-		}
-	}
-
-	private void updateChannelsArray() {
-		for (byte i = 0;i<16;i++) {
-			channels[i] = new RSChannel(controller, i);
-		}
-	}
 
 	@Override
 	public void writeNBT(NBTTagCompound nbt, boolean updatePacket) {
-		nbt.setByteArray("out", this.out);
 		nbt.setBoolean("hasConn", hasConn);
-		nbt.setInteger("rsId", controller);
 		nbt.setInteger("facing", facing.getIndex());
 	}
 
 	@Override
 	public void readNBT(NBTTagCompound nbt, boolean updatePacket) {
-		out = nbt.getByteArray("out");
 		hasConn = nbt.getBoolean("hasConn");
-		controller = nbt.getInteger("rsId");
-		updateChannelsArray();
 		facing = EnumFacing.VALUES[nbt.getInteger("facing")];
 		aabb = null;
+	}
+
+	@Override
+	protected void updateOutput() {
+		wireNetwork.updateValues();
 	}
 
 	@Override
@@ -111,23 +76,11 @@ public class TileEntityRSPanelConn extends TileEntityGeneralCP//TODO what parts 
 
 	@Override
 	public void onChange() {
-		if (!Arrays.equals(oldInput, wireNetwork.channelValues)) {
-			RSChannelState[] newStates = new RSChannelState[16];
-			for (byte i = 0; i < 16; i++) {
-				if (wireNetwork.channelValues[i]>out[i]) {
-					newStates[i] = new RSChannelState(channels[i], wireNetwork.channelValues[i]);
-				} else {
-					newStates[i] = new RSChannelState(channels[i], (byte) 0);
-				}
-			}
-			panelNetwork.setOutputs(this, newStates);
-			oldInput = Arrays.copyOf(wireNetwork.channelValues, 16);
-		}
+		inputUpdate(wireNetwork.channelValues);
 	}
 
 	@Override
 	public void updateInput(byte[] currIn) {
-		byte[] oldIn = Arrays.copyOf(currIn, 16);
 		for (int i = 0; i < 16; i++) {
 			currIn[i] = (byte) Math.max(currIn[i], out[i]);
 		}
@@ -195,34 +148,8 @@ public class TileEntityRSPanelConn extends TileEntityGeneralCP//TODO what parts 
 	}
 
 	@Override
-	public void setNetworkAndInit(ControlPanelNetwork newNet) {
-		super.setNetworkAndInit(newNet);
-		onChange();
-		Consumer<RSChannelState> listener = state -> {
-			if (out[state.getColor()] != state.getStrength()) {
-				out[state.getColor()] = state.getStrength();
-				dirty = true;
-				Thread.dumpStack();
-			}
-		};
-		panelNetwork.addListener(this, listener, channels);
-	}
-
-	@Override
-	public void onChange(NBTTagCompound nbt, EntityPlayer p) {
-		if (nbt.hasKey("rsId")) {
-			panelNetwork.removeIOFor(this);
-			setNetworkAndInit(panelNetwork);
-		}
-	}
-
-	@Override
 	public World getConnectorWorld() {
 		return world;
-	}
-
-	public int getRsId() {
-		return controller;
 	}
 
 	@Nonnull

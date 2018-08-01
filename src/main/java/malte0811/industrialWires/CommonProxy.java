@@ -15,7 +15,7 @@
 package malte0811.industrialWires;
 
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanelCreator;
-import malte0811.industrialWires.blocks.controlpanel.TileEntityRSPanelConn;
+import malte0811.industrialWires.blocks.controlpanel.TileEntityRSPanelIE;
 import malte0811.industrialWires.blocks.converter.TileEntityMechMB;
 import malte0811.industrialWires.blocks.hv.TileEntityJacobsLadder;
 import malte0811.industrialWires.blocks.hv.TileEntityMarx;
@@ -59,8 +59,8 @@ public class CommonProxy implements IGuiHandler {
 			if (te instanceof TileEntityPanelCreator) {
 				return new ContainerPanelCreator(player.inventory, (TileEntityPanelCreator) te);
 			}
-			if (te instanceof TileEntityRSPanelConn) {
-				return new ContainerRSPanelConn((TileEntityRSPanelConn) te);
+			if (te instanceof TileEntityRSPanelIE) {
+				return new ContainerRSPanelConn((TileEntityRSPanelIE) te);
 			}
 		} else if (ID == 1) {//ITEM GUI
 			EnumHand h = z == 1 ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;

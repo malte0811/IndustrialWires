@@ -81,7 +81,7 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 			case TOP:
 				return new TileEntityPanel();
 			case RS_WIRE:
-				return new TileEntityRSPanelConn();
+				return new TileEntityRSPanelIE();
 			case CREATOR:
 				return new TileEntityPanelCreator();
 			case UNFINISHED:
@@ -90,6 +90,8 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 				return new TileEntityComponentPanel();
 			case DUMMY:
 				return new TileEntityGeneralCP();
+			case OTHER_RS_WIRES:
+				return new TileEntityRSPanelOthers();
 			default:
 				return null;
 		}
@@ -123,7 +125,7 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 			state.withProperty(type, BlockTypes_Panel.SINGLE_COMP);
 		} else if (te instanceof TileEntityPanel) {
 			state.withProperty(type, BlockTypes_Panel.TOP);
-		} else if (te instanceof TileEntityRSPanelConn) {
+		} else if (te instanceof TileEntityRSPanelIE) {
 			state.withProperty(type, BlockTypes_Panel.RS_WIRE);
 		}
 		return state;
@@ -192,7 +194,7 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) {
 		if (!super.onBlockActivated(world, pos, state, player, hand, side, hitX, hitY, hitZ) && hand == EnumHand.MAIN_HAND) {
 			TileEntity te = world.getTileEntity(pos);
-			if (te instanceof TileEntityRSPanelConn) {
+			if (te instanceof TileEntityRSPanelIE) {
 				if (!world.isRemote) {
 					player.openGui(IndustrialWires.instance, 0, te.getWorld(), te.getPos().getX(), te.getPos().getY(), te.getPos().getZ());
 				}
@@ -266,9 +268,11 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 	public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
 		super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
 		if (!worldIn.isRemote) {
-			TileEntityComponentPanel panel = MiscUtils.getExistingTE(worldIn, pos, TileEntityComponentPanel.class);
-			if (panel != null) {
-				panel.updateRSInput();
+			TileEntityGeneralCP panel = MiscUtils.getExistingTE(worldIn, pos, TileEntityGeneralCP.class);
+			if (panel instanceof TileEntityComponentPanel) {
+				((TileEntityComponentPanel) panel).updateRSInput();
+			} else if (panel instanceof TileEntityRSPanelOthers) {
+				((TileEntityRSPanelOthers)panel).updateInput();
 			}
 		}
 	}
