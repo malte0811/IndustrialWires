@@ -47,12 +47,14 @@ public class TileEntityRSPanelIE extends TileEntityRSPanel//TODO what parts of T
 
 	@Override
 	public void writeNBT(NBTTagCompound nbt, boolean updatePacket) {
+		super.writeNBT(nbt, updatePacket);
 		nbt.setBoolean("hasConn", hasConn);
 		nbt.setInteger("facing", facing.getIndex());
 	}
 
 	@Override
 	public void readNBT(NBTTagCompound nbt, boolean updatePacket) {
+		super.readNBT(nbt, updatePacket);
 		hasConn = nbt.getBoolean("hasConn");
 		facing = EnumFacing.VALUES[nbt.getInteger("facing")];
 		aabb = null;

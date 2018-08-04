@@ -34,6 +34,9 @@ public enum BlockTypes_Panel implements IStringSerializable {
 	}
 
 	public boolean showInCreative() {
+		if (this==OTHER_RS_WIRES) {
+
+		}
 		return this != SINGLE_COMP;
 	}
 }

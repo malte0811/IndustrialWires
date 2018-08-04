@@ -20,7 +20,6 @@ import malte0811.industrialWires.blocks.controlpanel.TileEntityPanel;
 import malte0811.industrialWires.client.RawQuad;
 import malte0811.industrialWires.client.gui.GuiPanelCreator;
 import malte0811.industrialWires.controlpanel.ControlPanelNetwork.IOwner;
-import malte0811.industrialWires.util.TriConsumer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
@@ -33,7 +32,9 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 public abstract class PanelComponent implements IOwner {
@@ -47,8 +48,6 @@ public abstract class PanelComponent implements IOwner {
 	private final String type;
 	protected TileEntityPanel panel;
 	protected ControlPanelNetwork network;
-
-	private Set<TriConsumer<Integer, Byte, PanelComponent>> outputs = new HashSet<>();
 
 	protected PanelComponent(String type) {
 		this.type = type;

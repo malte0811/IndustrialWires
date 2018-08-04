@@ -20,10 +20,11 @@ tile.industrialwires.jacobs_ladder.normal.name=Jacob's ladder
 tile.industrialwires.jacobs_ladder.huge.name=Huge Jacob's ladder
 
 tile.industrialwires.control_panel.top.name=Control Panel
-tile.industrialwires.control_panel.rs_wire.name=Redstone Wire Controller
+tile.industrialwires.control_panel.rs_wire.name=Redstone Controller: Redstone Wires
 tile.industrialwires.control_panel.dummy.name=Panel Connector
 tile.industrialwires.control_panel.creator.name=Control Panel Creator
 tile.industrialwires.control_panel.unfinished.name=Unfinished Control Panel
+tile.industrialwires.control_panel.other_rs_wires.name=Redstone Controller: Others
 
 item.industrialwires.ic2_wire_coil.tin.name=Tin Wire Coil
 item.industrialwires.ic2_wire_coil.copper.name=Copper Wire Coil

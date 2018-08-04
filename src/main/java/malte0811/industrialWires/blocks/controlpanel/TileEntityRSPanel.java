@@ -17,6 +17,7 @@ package malte0811.industrialWires.blocks.controlpanel;
 
 import malte0811.industrialWires.blocks.INetGUI;
 import malte0811.industrialWires.controlpanel.ControlPanelNetwork;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ITickable;
@@ -66,7 +67,7 @@ public abstract class TileEntityRSPanel extends TileEntityGeneralCP implements I
 		controller = nbt.getInteger("rsId");
 		updateChannelsArray();
 	}
-	
+
 	protected void markRSDirty() {
 		dirty = true;
 	}
@@ -102,8 +103,12 @@ public abstract class TileEntityRSPanel extends TileEntityGeneralCP implements I
 	@Override
 	public void onChange(NBTTagCompound nbt, EntityPlayer p) {
 		if (nbt.hasKey("rsId")) {
+			controller = nbt.getInteger("rsId");
+			markDirty();
 			panelNetwork.removeIOFor(this);
 			setNetworkAndInit(panelNetwork);
+			IBlockState state = world.getBlockState(pos);
+			world.notifyBlockUpdate(pos, state, state, 3);
 		}
 	}
 

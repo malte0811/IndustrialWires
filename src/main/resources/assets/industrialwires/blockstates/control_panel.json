@@ -70,6 +70,10 @@
       },
       "single_comp": {
         "model": "industrialwires:smartmodel/panel_single_comp"
+      },
+      "other_rs_wires": {
+        "model": "cube_all",
+        "textures": {"all": "industrialwires:blocks/rs_panel_others"}
       }
     },
     "inventory,type=rs_wire": {
@@ -107,7 +111,10 @@
     "inventory,type=unfinished": {
       "model": "industrialwires:block/panel_creator.obj"
       //Doesn't matter, this will be overridden in code
+    },
+    "other_rs_wires": {
+      "model": "cube_all",
+      "textures": {"all": "industrialwires:blocks/rs_panel_others"}
     }
-
   }
 }

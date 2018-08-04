@@ -33,7 +33,7 @@ import malte0811.industrialWires.IWPotions;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.controlpanel.BlockTypes_Panel;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanelCreator;
-import malte0811.industrialWires.blocks.controlpanel.TileEntityRSPanelIE;
+import malte0811.industrialWires.blocks.controlpanel.TileEntityRSPanel;
 import malte0811.industrialWires.blocks.converter.TileEntityMechMB;
 import malte0811.industrialWires.blocks.hv.TileEntityJacobsLadder;
 import malte0811.industrialWires.blocks.hv.TileEntityMarx;
@@ -490,8 +490,8 @@ public class ClientProxy extends CommonProxy {
 	public Gui getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
 		if (ID == 0) {
 			TileEntity te = world.getTileEntity(new BlockPos(x, y, z));
-			if (te instanceof TileEntityRSPanelIE) {
-				return new GuiRSPanelConn((TileEntityRSPanelIE) te);
+			if (te instanceof TileEntityRSPanel) {
+				return new GuiRSPanelConn((TileEntityRSPanel) te);
 			}
 			if (te instanceof TileEntityPanelCreator) {
 				return new GuiPanelCreator(player.inventory, (TileEntityPanelCreator) te);

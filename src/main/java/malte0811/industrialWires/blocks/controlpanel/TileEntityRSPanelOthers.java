@@ -15,7 +15,7 @@
 
 package malte0811.industrialWires.blocks.controlpanel;
 
-import malte0811.industrialWires.IndustrialWires;
+import malte0811.industrialWires.compat.Compat;
 import mrtjp.projectred.api.IBundledTile;
 import mrtjp.projectred.api.ProjectRedAPI;
 import net.minecraft.util.EnumFacing;
@@ -40,17 +40,14 @@ public class TileEntityRSPanelOthers extends TileEntityRSPanel implements IBundl
 
 	public void updateInput() {
 		byte[] data = new byte[16];
-		//TODO make safe without P:R
 		for (EnumFacing f:EnumFacing.VALUES) {
-			byte[] tmp = ProjectRedAPI.transmissionAPI.getBundledInput(world, pos, f);
+			byte[] tmp = Compat.getBundledRS.getBundledInput(world, pos, f);
 			if (tmp!=null) {
 				for (int i = 0;i<16;i++) {
-					byte actual = (byte) ((tmp[i]&255)/17);
-					if (actual>data[i]) {
-						data[i] = actual;
+					if (tmp[i]>data[i]) {
+						data[i] = tmp[i];
 					}
 				}
-				IndustrialWires.logger.info("Side: {}, PR input: {}, proper input: {}", f, tmp, data);
 			}
 		}
 		inputUpdate(data);

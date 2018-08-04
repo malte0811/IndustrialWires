@@ -194,7 +194,7 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) {
 		if (!super.onBlockActivated(world, pos, state, player, hand, side, hitX, hitY, hitZ) && hand == EnumHand.MAIN_HAND) {
 			TileEntity te = world.getTileEntity(pos);
-			if (te instanceof TileEntityRSPanelIE) {
+			if (te instanceof TileEntityRSPanel) {
 				if (!world.isRemote) {
 					player.openGui(IndustrialWires.instance, 0, te.getWorld(), te.getPos().getX(), te.getPos().getY(), te.getPos().getZ());
 				}

@@ -27,6 +27,7 @@ import ic2.api.item.IC2Items;
 import ic2.core.block.TileEntityBlock;
 import malte0811.industrialWires.hv.MarxOreHandler;
 import malte0811.industrialWires.mech_mb.MechPartCommutator;
+import mrtjp.projectred.api.ProjectRedAPI;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -53,9 +54,10 @@ public class Compat {
 	};
 	public static Consumer<TileEntity> unloadIC2Tile = te -> {
 	};
+	public static IBundledRSGetter getBundledRS = (w, p, f) -> new byte[16];
+	public static boolean enableOtherRS = false;
 	private static Map<String, Class<? extends CompatModule>> modules = ImmutableMap.of("ic2", CompatIC2.class,
-			"crafttweaker", CompatCT.class);
-
+			"crafttweaker", CompatCT.class, ProjectRedAPI.modIDCore, CompatProjectRed.class);
 	private static Method preInit;
 	private static Method init;
 
@@ -153,6 +155,25 @@ public class Compat {
 				x.printStackTrace();
 			}
 
+		}
+	}
+
+	public static class CompatProjectRed extends CompatModule {
+		@Override
+		public void init() {
+			super.init();
+			IBundledRSGetter old = getBundledRS;
+			enableOtherRS = true;
+			getBundledRS = (w, p, f) -> {
+				byte[] oldIn = old.getBundledInput(w, p, f);
+				byte[] prIn = ProjectRedAPI.transmissionAPI.getBundledInput(w, p, f);
+				if (prIn!=null) {
+					for (int i = 0; i < 16; i++) {
+						oldIn[i] = (byte)((prIn[i]&255)/17);
+					}
+				}
+				return oldIn;
+			};
 		}
 	}
 }

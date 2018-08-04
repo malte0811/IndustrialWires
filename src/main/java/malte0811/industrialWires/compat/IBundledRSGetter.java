@@ -13,8 +13,12 @@
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package malte0811.industrialWires.util;
+package malte0811.industrialWires.compat;
 
-public interface TriConsumer<A, B, C> {
-	void accept(A a, B b, C c);
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+
+public interface IBundledRSGetter {
+	byte[] getBundledInput(World w, BlockPos pos, EnumFacing f);
 }
