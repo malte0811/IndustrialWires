@@ -168,11 +168,16 @@ public class Compat {
 	}
 
 	public static class CompatProjectRed extends CompatModule {
+
+		@Override
+		public void preInit() {
+			enableOtherRS = true;
+		}
+
 		@Override
 		public void init() {
 			super.init();
 			IBlockAction<EnumFacing, byte[]> oldGet = getBundledRS;
-			enableOtherRS = true;
 			getBundledRS = (w, p, f) -> {
 				byte[] oldIn = oldGet.run(w, p, f);
 				byte[] prIn = ProjectRedAPI.transmissionAPI.getBundledInput(w, p, f);
@@ -193,11 +198,16 @@ public class Compat {
 	}
 
 	public static class CompatCharset extends CompatModule {
+
+		@Override
+		public void preInit() {
+			enableOtherRS = true;
+		}
+
 		@Override
 		public void init() {
 			super.init();
 			IBlockAction<EnumFacing, byte[]> old = getBundledRS;
-			enableOtherRS = true;
 			getBundledRS = (w, p, f) -> {
 				byte[] oldIn = old.run(w, p, f);
 				TileEntity te = w.getTileEntity(p.offset(f));

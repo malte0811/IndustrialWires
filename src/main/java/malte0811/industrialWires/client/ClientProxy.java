@@ -148,6 +148,9 @@ public class ClientProxy extends CommonProxy {
 	public void postInit() {
 		super.postInit();
 		ManualInstance m = ManualHelper.getManual();
+		boolean uni = m.fontRenderer.getUnicodeFlag();
+		m.fontRenderer.setUnicodeFlag(true);
+		m.entryRenderPre();
 		if (IndustrialWires.hasIC2) {
 			PositionedItemStack[][] wireRecipes = new PositionedItemStack[3][10];
 			int xBase = 15;
@@ -232,9 +235,14 @@ public class ClientProxy extends CommonProxy {
 				new ManualPages.Text(m, "industrialwires.panel_creator1"),
 				new ManualPages.Text(m, "industrialwires.panel_creator2")
 		);
+		String text = I18n.format("ie.manual.entry.industrialwires.redstone");
+		TextSplitter splitter = new TextSplitter(m);
+		splitter.addSpecialPage(-1, 0, 10, s->new ManualPages.CraftingMulti(m, s,
+				new ResourceLocation(IndustrialWires.MODID, "control_panel_rs_other"),
+				new ResourceLocation(IndustrialWires.MODID, "control_panel_rs_wire")));
+		splitter.split(text);
 		m.addEntry("industrialwires.redstone", "control_panels",
-				new ManualPages.Crafting(m, "industrialwires.redstone0", new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.RS_WIRE.ordinal())),
-				new ManualPages.Text(m, "industrialwires.redstone1")
+				splitter.toManualEntry().toArray(new IManualPage[0])
 		);
 		m.addEntry("industrialwires.components", "control_panels",
 				new ManualPages.Text(m, "industrialwires.components.general"),
@@ -251,7 +259,7 @@ public class ClientProxy extends CommonProxy {
 				new ManualPages.Crafting(m, "industrialwires.7seg", new ItemStack(IndustrialWires.panelComponent, 1, 9))
 		);
 		List<MarxOreHandler.OreInfo> ores = MarxOreHandler.getRecipes();
-		String text = I18n.format("ie.manual.entry.industrialwires.marx");
+		text = I18n.format("ie.manual.entry.industrialwires.marx");
 		for (int i = 0; i < ores.size(); i++) {
 			MarxOreHandler.OreInfo curr = ores.get(i);
 			if (!curr.exampleInput.isEmpty()) {
@@ -263,10 +271,7 @@ public class ClientProxy extends CommonProxy {
 				text += I18n.format(IndustrialWires.MODID + ".desc.ideal_e") + ": " + Utils.formatDouble(curr.avgEnergy * MarxOreHandler.defaultEnergy / 1000, "0.#") + " kJ<br><br>";
 			}
 		}
-		boolean uni = m.fontRenderer.getUnicodeFlag();
-		m.fontRenderer.setUnicodeFlag(true);
-		m.entryRenderPre();
-		TextSplitter splitter = new TextSplitter(m);
+		splitter = new TextSplitter(m);
 		splitter.addSpecialPage(0, 0, 6,
 				(s) -> new ManualPageMultiblock(m, s,
 						MultiblockMarx.INSTANCE));
