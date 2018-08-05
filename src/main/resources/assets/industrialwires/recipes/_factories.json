@@ -1,6 +1,7 @@
 {
   "conditions" : {
-    "conversion": "malte0811.industrialWires.crafting.factories.IsConversionEnabled"
+    "conversion": "malte0811.industrialWires.crafting.factories.IsConversionEnabled",
+    "other_bundled_redstone": "malte0811.industrialWires.crafting.factories.OtherBundledRedstone"
   },
   "recipes": {
     "component_init": "malte0811.industrialWires.crafting.factories.InitPCFactory",

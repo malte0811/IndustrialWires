@@ -1,0 +1,26 @@
+{
+  "result": {
+    "item": "industrialwires:control_panel",
+    "data": 6
+  },
+  "pattern": [
+    " r ",
+    "rdr",
+    " r "
+  ],
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "r": {
+      "type": "forge:ore_dict", "ore": "dustRedstone"
+    },
+    "d": {
+      "item": "industrialwires:control_panel",
+      "data": 2
+    }
+  },
+  "conditions": [
+    {
+      "type": "industrialwires:other_bundled_redstone"
+    }
+  ]
+}

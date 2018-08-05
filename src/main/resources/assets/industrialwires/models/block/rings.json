@@ -1,0 +1,16 @@
+{
+  "parent": "block/block",
+  "elements": [
+    {   "from": [ 0, 0, 0 ],
+      "to": [ 16, 16, 16 ],
+      "faces": {
+        "down":  { "texture": "#flipped", "cullface": "down", "rotation": 90 },
+        "up":    { "texture": "#normal", "cullface": "up", "rotation": 0 },
+        "north": { "texture": "#flipped", "cullface": "north", "rotation": 0 },
+        "south": { "texture": "#normal", "cullface": "south", "rotation": 270 },
+        "west":  { "texture": "#flipped", "cullface": "west", "rotation": 90 },
+        "east":  { "texture": "#normal", "cullface": "east", "rotation": 180 }
+      }
+    }
+  ]
+}

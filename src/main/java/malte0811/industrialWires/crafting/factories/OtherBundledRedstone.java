@@ -13,31 +13,19 @@
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package malte0811.industrialWires.blocks.controlpanel;
+package malte0811.industrialWires.crafting.factories;
 
+import com.google.gson.JsonObject;
 import malte0811.industrialWires.compat.Compat;
-import net.minecraft.util.IStringSerializable;
+import net.minecraftforge.common.crafting.IConditionFactory;
+import net.minecraftforge.common.crafting.JsonContext;
 
-import java.util.Locale;
+import java.util.function.BooleanSupplier;
 
-public enum BlockTypes_Panel implements IStringSerializable {
-	TOP,
-	RS_WIRE,
-	DUMMY,
-	CREATOR,
-	UNFINISHED,
-	SINGLE_COMP,
-	OTHER_RS_WIRES;
+public class OtherBundledRedstone implements IConditionFactory {
 
 	@Override
-	public String getName() {
-		return toString().toLowerCase(Locale.ENGLISH);
-	}
-
-	public boolean showInCreative() {
-		if (this==OTHER_RS_WIRES) {
-			return Compat.enableOtherRS;
-		}
-		return this != SINGLE_COMP;
+	public BooleanSupplier parse(JsonContext context, JsonObject json) {
+		return () -> Compat.enableOtherRS;
 	}
 }

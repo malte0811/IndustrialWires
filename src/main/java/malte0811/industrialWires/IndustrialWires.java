@@ -189,6 +189,7 @@ public class IndustrialWires {
 		GameRegistry.registerTileEntity(TileEntityJacobsLadder.class, new ResourceLocation(MODID, "jacobsLadder"));
 		GameRegistry.registerTileEntity(TileEntityMarx.class, new ResourceLocation(MODID, "marx_generator"));
 		GameRegistry.registerTileEntity(TileEntityPanel.class, new ResourceLocation(MODID, "control_panel"));
+		GameRegistry.registerTileEntity(TileEntityGeneralCP.class, new ResourceLocation(MODID, "gcp"));
 		GameRegistry.registerTileEntity(TileEntityRSPanelIE.class, new ResourceLocation(MODID, "control_panel_rs"));
 		GameRegistry.registerTileEntity(TileEntityRSPanelOthers.class, new ResourceLocation(MODID, "control_panel_rs_compat"));
 		GameRegistry.registerTileEntity(TileEntityPanelCreator.class, new ResourceLocation(MODID, "panel_creator"));

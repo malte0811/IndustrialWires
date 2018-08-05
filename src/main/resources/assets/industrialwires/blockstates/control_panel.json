@@ -72,8 +72,11 @@
         "model": "industrialwires:smartmodel/panel_single_comp"
       },
       "other_rs_wires": {
-        "model": "cube_all",
-        "textures": {"all": "industrialwires:blocks/rs_panel_others"}
+        "model": "industrialwires:rings",
+        "textures": {
+          "normal": "industrialwires:blocks/rs_panel_others",
+          "flipped": "industrialwires:blocks/rs_panel_others_flipped"
+        }
       }
     },
     "inventory,type=rs_wire": {
@@ -113,8 +116,11 @@
       //Doesn't matter, this will be overridden in code
     },
     "inventory,type=other_rs_wires": {
-      "model": "cube_all",
-      "textures": {"all": "industrialwires:blocks/rs_panel_others"}
+      "model": "industrialwires:rings",
+      "textures": {
+        "normal": "industrialwires:blocks/rs_panel_others",
+        "flipped": "industrialwires:blocks/rs_panel_others_flipped"
+      }
     }
   }
 }
