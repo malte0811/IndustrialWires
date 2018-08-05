@@ -1,5 +1,11 @@
 ###Minecraft 1.12.2
 
+####Version 1.7-28
+ - Added the Redstone Controller: Others, it allows control panels to interface with Project:Red and Charset wires
+ - Rewrote the control panel redstone code
+ - Added localization for IW's multiblocks
+ - Fixed issues with zero-length mechanical multiblocks
+
 ####Version 1.7-27
  - Fixed panel components causing issues on dedicated servers
  - Added an automatic update checker (Using the Forge update JSON)
