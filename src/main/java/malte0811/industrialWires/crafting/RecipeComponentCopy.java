@@ -31,7 +31,7 @@ import javax.annotation.Nullable;
 public class RecipeComponentCopy extends IForgeRegistryEntry.Impl<IRecipe> implements IRecipe {
 
 	@Override
-	public boolean matches(@Nonnull InventoryCrafting inv, World worldIn) {
+	public boolean matches(@Nonnull InventoryCrafting inv, @Nullable World worldIn) {
 		boolean found = false;
 		int foundX = -1;
 		int foundY = -1;

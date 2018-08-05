@@ -29,11 +29,12 @@ import net.minecraft.world.World;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class RecipeKeyLock extends IForgeRegistryEntry.Impl<IRecipe> implements IRecipe {
 
 	@Override
-	public boolean matches(@Nonnull InventoryCrafting inv, World worldIn) {
+	public boolean matches(@Nonnull InventoryCrafting inv, @Nullable World worldIn) {
 		return getLockId(inv) != 0;
 	}
 

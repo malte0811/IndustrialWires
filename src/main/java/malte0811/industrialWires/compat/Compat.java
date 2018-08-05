@@ -25,6 +25,7 @@ import ic2.api.energy.tile.IEnergyTile;
 import ic2.api.item.IBoxable;
 import ic2.api.item.IC2Items;
 import ic2.core.block.TileEntityBlock;
+import malte0811.industrialWires.compat.CompatCapabilities.Charset;
 import malte0811.industrialWires.hv.MarxOreHandler;
 import malte0811.industrialWires.mech_mb.MechPartCommutator;
 import mrtjp.projectred.api.ProjectRedAPI;
@@ -32,11 +33,14 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.gen.structure.template.Template;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Loader;
+import pl.asie.charset.api.wires.IBundledEmitter;
+import pl.asie.charset.api.wires.IBundledReceiver;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -45,6 +49,9 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 public class Compat {
+	public static final String IC2_ID = "ic2";
+	public static final String CRAFTTWEAKER_ID = "crafttweaker";
+	public static final String CHARSET_ID = "charset";
 	public static BiFunction<ItemStack, Template.BlockInfo, ItemStack> stackFromInfo = (s, i)->s;
 	static Consumer<MarxOreHandler.OreInfo> addMarx = (o) -> {
 	};
@@ -54,10 +61,12 @@ public class Compat {
 	};
 	public static Consumer<TileEntity> unloadIC2Tile = te -> {
 	};
-	public static IBundledRSGetter getBundledRS = (w, p, f) -> new byte[16];
+	public static IBlockAction<EnumFacing, byte[]> getBundledRS = (w, p, f) -> new byte[16];
+	public static IBlockAction<Void, Void> updateBundledRS = (w, p, f) -> null;
 	public static boolean enableOtherRS = false;
-	private static Map<String, Class<? extends CompatModule>> modules = ImmutableMap.of("ic2", CompatIC2.class,
-			"crafttweaker", CompatCT.class, ProjectRedAPI.modIDCore, CompatProjectRed.class);
+	private static Map<String, Class<? extends CompatModule>> modules = ImmutableMap.of(IC2_ID, CompatIC2.class,
+			CRAFTTWEAKER_ID, CompatCT.class, ProjectRedAPI.modIDCore, CompatProjectRed.class,
+			CHARSET_ID, CompatCharset.class);
 	private static Method preInit;
 	private static Method init;
 
@@ -162,10 +171,10 @@ public class Compat {
 		@Override
 		public void init() {
 			super.init();
-			IBundledRSGetter old = getBundledRS;
+			IBlockAction<EnumFacing, byte[]> oldGet = getBundledRS;
 			enableOtherRS = true;
 			getBundledRS = (w, p, f) -> {
-				byte[] oldIn = old.getBundledInput(w, p, f);
+				byte[] oldIn = oldGet.run(w, p, f);
 				byte[] prIn = ProjectRedAPI.transmissionAPI.getBundledInput(w, p, f);
 				if (prIn!=null) {
 					for (int i = 0; i < 16; i++) {
@@ -173,6 +182,51 @@ public class Compat {
 					}
 				}
 				return oldIn;
+			};
+			IBlockAction<Void, Void> oldUpdate = updateBundledRS;
+			updateBundledRS = (w, p, f)-> {
+				oldUpdate.run(w, p, f);
+				w.notifyNeighborsOfStateChange(p, w.getBlockState(p).getBlock(), true);
+				return null;
+			};
+		}
+	}
+
+	public static class CompatCharset extends CompatModule {
+		@Override
+		public void init() {
+			super.init();
+			IBlockAction<EnumFacing, byte[]> old = getBundledRS;
+			enableOtherRS = true;
+			getBundledRS = (w, p, f) -> {
+				byte[] oldIn = old.run(w, p, f);
+				TileEntity te = w.getTileEntity(p.offset(f));
+				if (te!=null && te.hasCapability(Charset.EMITTER_CAP, f.getOpposite())) {
+					IBundledEmitter emitter = te.getCapability(Charset.EMITTER_CAP, f.getOpposite());
+					assert emitter!=null;
+					byte[] charIn = emitter.getBundledSignal();
+					if (charIn!=null) {
+						for (int i = 0;i<16;i++) {
+							if (charIn[i]>oldIn[i]) {
+								oldIn[i] = charIn[i];
+							}
+						}
+					}
+				}
+				return oldIn;
+			};
+			IBlockAction<Void, Void> oldUpdate = updateBundledRS;
+			updateBundledRS = (w, p, __)-> {
+				oldUpdate.run(w, p, __);
+				for (EnumFacing face : EnumFacing.VALUES) {
+					TileEntity te = w.getTileEntity(p.offset(face.getOpposite()));
+					if (te != null && te.hasCapability(Charset.RECEIVER_CAP, face)) {
+						IBundledReceiver receiver = te.getCapability(Charset.RECEIVER_CAP, face);
+						assert receiver != null;
+						receiver.onBundledInputChange();
+					}
+				}
+				return null;
 			};
 		}
 	}

@@ -15,10 +15,9 @@
 
 package malte0811.industrialWires.compat;
 
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public interface IBundledRSGetter {
-	byte[] getBundledInput(World w, BlockPos pos, EnumFacing f);
+public interface IBlockAction<P, R> {
+	R run(World w, BlockPos pos, P f);
 }

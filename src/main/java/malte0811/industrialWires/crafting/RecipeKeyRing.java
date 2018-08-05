@@ -27,6 +27,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static malte0811.industrialWires.util.NBTKeys.*;
 
@@ -38,7 +39,7 @@ public class RecipeKeyRing extends IForgeRegistryEntry.Impl<IRecipe> implements 
 	}
 
 	@Override
-	public boolean matches(@Nonnull InventoryCrafting inv, World worldIn) {
+	public boolean matches(@Nonnull InventoryCrafting inv, @Nullable World worldIn) {
 		return isValid(inv);
 	}
 

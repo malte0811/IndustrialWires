@@ -112,7 +112,7 @@
       "model": "industrialwires:block/panel_creator.obj"
       //Doesn't matter, this will be overridden in code
     },
-    "other_rs_wires": {
+    "inventory,type=other_rs_wires": {
       "model": "cube_all",
       "textures": {"all": "industrialwires:blocks/rs_panel_others"}
     }
