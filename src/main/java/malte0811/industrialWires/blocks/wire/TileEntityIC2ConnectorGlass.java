@@ -14,26 +14,14 @@
  */
 package malte0811.industrialWires.blocks.wire;
 
-import blusunrize.immersiveengineering.api.energy.wires.WireType;
+import static malte0811.industrialWires.wires.MixedWireType.GLASS;
 
-import static malte0811.industrialWires.wires.IC2Wiretype.GLASS;
-import static malte0811.industrialWires.wires.IC2Wiretype.IC2_GLASS_CAT;
-
-public class TileEntityIC2ConnectorGlass extends TileEntityIC2ConnectorHV {
+public class TileEntityIC2ConnectorGlass extends TileEntityIC2ConnectorTin {
 	public TileEntityIC2ConnectorGlass(boolean rel) {
-		super(rel);
+		super(rel, GLASS, 5, .875, .75);
 	}
 
 	public TileEntityIC2ConnectorGlass() {
-	}
-
-	{
-		tier = 5;
-		maxStored = GLASS.getTransferRate() / GLASS.getFactor();
-	}
-
-	@Override
-	public boolean canConnect(WireType t) {
-		return IC2_GLASS_CAT.equals(t.getCategory());
+		this(false);
 	}
 }

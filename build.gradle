@@ -84,7 +84,7 @@ repositories {
 dependencies {
     deobfCompile 'net.industrial-craft:industrialcraft-2:2.8.+'
     deobfCompile "blusunrize:ImmersiveEngineering:0.12-+"
-    deobfCompile "pl.asie.charset:charset:0.5.4.2.3:full"
+    compileOnly "pl.asie.charset:charset:0.5.4.2.3:full"
     //Project red and runtime dependencies
     compileOnly "project-red-base:ProjectRed-1.12.2:4.9.1.92:Base"
     //runtime "project-red-integration:ProjectRed-1.12.2:4.9.1.92:integration"

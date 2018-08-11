@@ -14,52 +14,15 @@
  */
 package malte0811.industrialWires.blocks.wire;
 
-import blusunrize.immersiveengineering.api.energy.wires.IImmersiveConnectable;
-import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler.Connection;
-import blusunrize.immersiveengineering.api.energy.wires.WireType;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.Vec3d;
-
-import static malte0811.industrialWires.wires.IC2Wiretype.HV;
-import static malte0811.industrialWires.wires.IC2Wiretype.IC2_HV_CAT;
+import static malte0811.industrialWires.wires.MixedWireType.HV;
 
 public class TileEntityIC2ConnectorHV extends TileEntityIC2ConnectorTin {
 
 	public TileEntityIC2ConnectorHV(boolean rel) {
-		super(rel);
+		super(rel, HV, 4, .875, .75);
 	}
 
 	public TileEntityIC2ConnectorHV() {
-	}
-
-	{
-		tier = 4;
-		maxStored = HV.getTransferRate() / HV.getFactor();
-	}
-
-	@Override
-	public boolean canConnect(WireType t) {
-		return IC2_HV_CAT.equals(t.getCategory());
-	}
-
-	@Override
-	public Vec3d getRaytraceOffset(IImmersiveConnectable link) {
-		EnumFacing side = facing.getOpposite();
-		if (relay) {
-			return new Vec3d(.5 + side.getFrontOffsetX() * .4375, .5 + side.getFrontOffsetY() * .4375, .5 + side.getFrontOffsetZ() * .4375);
-		} else {
-			return new Vec3d(.5 + side.getFrontOffsetX() * .3125, .5 + side.getFrontOffsetY() * .3125, .5 + side.getFrontOffsetZ() * .3125);
-		}
-	}
-
-	@Override
-	public Vec3d getConnectionOffset(Connection con) {
-		EnumFacing side = facing.getOpposite();
-		double conRadius = con.cableType.getRenderDiameter() / 2;
-		if (relay) {
-			return new Vec3d(.5 + side.getFrontOffsetX() * (.375 - conRadius), .5 + side.getFrontOffsetY() * (.375 - conRadius), .5 + side.getFrontOffsetZ() * (.375 - conRadius));
-		} else {
-			return new Vec3d(.5 + side.getFrontOffsetX() * (.25 - conRadius), .5 + side.getFrontOffsetY() * (.25 - conRadius), .5 + side.getFrontOffsetZ() * (.25 - conRadius));
-		}
+		this(false);
 	}
 }

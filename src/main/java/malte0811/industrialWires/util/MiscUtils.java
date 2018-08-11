@@ -326,7 +326,7 @@ public final class MiscUtils {
 		return MultiblockMarx.INSTANCE;
 	}
 
-	public static <T extends TileEntity> T getExistingTE(World w, BlockPos pos, Class<T> clazz) {
+	public static <T extends TileEntity> T getLoadedTE(World w, BlockPos pos, Class<T> clazz) {
 		if (w.isBlockLoaded(pos)) {
 			TileEntity te = w.getTileEntity(pos);
 			if (te!=null && clazz.isAssignableFrom(te.getClass())) {

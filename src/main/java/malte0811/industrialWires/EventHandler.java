@@ -32,7 +32,6 @@ public class EventHandler {
 			InventoryPlayer playerInv = ev.getEntityPlayer().inventory;
 			boolean changed = false;
 			int lengthOnEntity = ItemIC2Coil.getLength(stack);
-			IndustrialWires.logger.info(lengthOnEntity+", "+stack);
 			final int lengthPerCoilOrig = lengthOnEntity/stack.getCount();
 			for (int i = 0;i<playerInv.getSizeInventory();i++) {
 				ItemStack inInv = playerInv.getStackInSlot(i);

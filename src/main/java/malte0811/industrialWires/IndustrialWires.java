@@ -79,7 +79,7 @@ package malte0811.industrialWires;
  import static malte0811.industrialWires.entities.EntityBrokenPart.MARKER_TEXTURE;
  import static malte0811.industrialWires.entities.EntityBrokenPart.RES_LOC_SERIALIZER;
  import static malte0811.industrialWires.mech_mb.MechMBPart.EXAMPLE_MECHMB_LOC;
- import static malte0811.industrialWires.wires.IC2Wiretype.*;
+ import static malte0811.industrialWires.wires.MixedWireType.*;
 
 @Mod(modid = IndustrialWires.MODID, version = IndustrialWires.VERSION, dependencies = "required-after:immersiveengineering@[0.12-77,);after:ic2;required-after:forge@[14.23.3.2694,)",
 		certificateFingerprint = "7e11c175d1e24007afec7498a1616bef0000027d",

@@ -21,6 +21,7 @@ import blusunrize.immersiveengineering.api.energy.wires.WireType;
 import malte0811.industrialWires.IWConfig;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.items.ItemIC2Coil;
+import malte0811.industrialWires.util.ConversionUtil;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
@@ -28,14 +29,14 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 
-public class IC2Wiretype extends WireType {
+public class MixedWireType extends WireType {
 	public static final String IC2_TIN_CAT = "IC_TIN";
 	public static final String IC2_COPPER_CAT = "IC_COPPER";
 	public static final String IC2_GOLD_CAT = "IC_GOLD";
 	public static final String IC2_HV_CAT = "IC_HV";
 	public static final String IC2_GLASS_CAT = "IC_GLASS";
 	private final int type;
-	private final int[] ic2Rates = {32, 128, 512, 2048, 8192};
+	private final int[] ratesEU = {32, 128, 512, 2048, 8192};
 	private final int[] ic2Colors = {0xa5bcc7, 0xbc7945, 0xfeff73, 0xb9d6d9, 0xf1f1f1};
 	private final String[] ic2Names = {"ic2Tin", "ic2Copper", "ic2Gold", "ic2Hv", "ic2Glass",
 			"ic2TinIns", "ic2CopperIns", "ic2GoldIns"};
@@ -44,19 +45,19 @@ public class IC2Wiretype extends WireType {
 			.03125, .03125, .046875, .0625, .75 * .03125, .0625, .0625, 2*.046875
 	};
 
-	public static final IC2Wiretype TIN = new IC2Wiretype(0);
-	public static final IC2Wiretype COPPER_IC2 = new IC2Wiretype(1);
-	public static final IC2Wiretype GOLD = new IC2Wiretype(2);
-	public static final IC2Wiretype HV = new IC2Wiretype(3);
-	public static final IC2Wiretype GLASS = new IC2Wiretype(4);
-	public static final IC2Wiretype TIN_INSULATED = new IC2Wiretype(5);
-	public static final IC2Wiretype COPPER_IC2_INSULATED = new IC2Wiretype(6);
-	public static final IC2Wiretype GOLD_INSULATED = new IC2Wiretype(7);
-	public static final IC2Wiretype[] ALL = {
+	public static final MixedWireType TIN = new MixedWireType(0);
+	public static final MixedWireType COPPER_IC2 = new MixedWireType(1);
+	public static final MixedWireType GOLD = new MixedWireType(2);
+	public static final MixedWireType HV = new MixedWireType(3);
+	public static final MixedWireType GLASS = new MixedWireType(4);
+	public static final MixedWireType TIN_INSULATED = new MixedWireType(5);
+	public static final MixedWireType COPPER_IC2_INSULATED = new MixedWireType(6);
+	public static final MixedWireType GOLD_INSULATED = new MixedWireType(7);
+	public static final MixedWireType[] ALL = {
 		TIN, COPPER_IC2, GOLD, HV, GLASS, TIN_INSULATED, COPPER_IC2_INSULATED, GOLD_INSULATED
 	};
 
-	public IC2Wiretype(int ordinal) {
+	public MixedWireType(int ordinal) {
 		super();
 		this.type = ordinal;
 		WireApi.registerWireType(this);
@@ -72,7 +73,11 @@ public class IC2Wiretype extends WireType {
 
 	@Override
 	public int getTransferRate() {
-		return ic2Rates[type%5]*getFactor();
+		return (int) (getIORate()*getFactor());
+	}
+
+	public double getIORate() {
+		return ratesEU[type%5] * ConversionUtil.joulesPerEu();
 	}
 
 	@Override

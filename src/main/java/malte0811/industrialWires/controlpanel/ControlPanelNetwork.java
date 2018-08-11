@@ -137,7 +137,7 @@ public class ControlPanelNetwork {
 	private void replaceWith(ControlPanelNetwork newNet, World w, Collection<BlockPos> toReplace) {
 		removeAllMembers(ImmutableList.copyOf(toReplace));
 		for (BlockPos member:toReplace) {
-			TileEntityGeneralCP te = MiscUtils.getExistingTE(w, member, TileEntityGeneralCP.class);
+			TileEntityGeneralCP te = MiscUtils.getLoadedTE(w, member, TileEntityGeneralCP.class);
 			if (te!=null) {
 				newNet.addMember(te);
 			}

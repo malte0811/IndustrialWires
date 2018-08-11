@@ -28,7 +28,8 @@ import blusunrize.immersiveengineering.common.util.ItemNBTHelper;
 import blusunrize.immersiveengineering.common.util.Utils;
 import malte0811.industrialWires.IWConfig;
 import malte0811.industrialWires.IndustrialWires;
-import malte0811.industrialWires.wires.IC2Wiretype;
+import malte0811.industrialWires.util.ConversionUtil;
+import malte0811.industrialWires.wires.MixedWireType;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
@@ -89,19 +90,21 @@ public class ItemIC2Coil extends Item implements IWireCoil {
 	}
 
 	@Override
-	public IC2Wiretype getWireType(ItemStack stack) {
-		return IC2Wiretype.ALL[stack.getMetadata()];
+	public MixedWireType getWireType(ItemStack stack) {
+		return MixedWireType.ALL[stack.getMetadata()];
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
 		tooltip.add(I18n.format(IndustrialWires.MODID + ".desc.wireLength", getLength(stack)));
-		IC2Wiretype wireType = IC2Wiretype.ALL[stack.getMetadata()];
-		int transferRate = wireType.getTransferRate();
-		tooltip.add(I18n.format(IndustrialWires.MODID + ".tooltip.transfer_rate", transferRate));
+		MixedWireType wireType = MixedWireType.ALL[stack.getMetadata()];
+		double ioRate = wireType.getIORate();
+		double transferRate = ioRate*wireType.getFactor();
+		tooltip.add(I18n.format(IndustrialWires.MODID + ".tooltip.transfer_rate",
+				transferRate*ConversionUtil.euPerJoule(), transferRate*ConversionUtil.ifPerJoule()));
 		tooltip.add(I18n.format(IndustrialWires.MODID + ".tooltip.input_rate",
-				transferRate / wireType.getFactor()));
+				ioRate*ConversionUtil.euPerJoule(), ioRate*ConversionUtil.ifPerJoule()));
 		if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("linkingPos")) {
 			int[] link = stack.getTagCompound().getIntArray("linkingPos");
 			if (link.length > 3) {
@@ -124,7 +127,7 @@ public class ItemIC2Coil extends Item implements IWireCoil {
 			TileEntity tileEntity = world.getTileEntity(pos);
 			if (tileEntity instanceof IImmersiveConnectable && ((IImmersiveConnectable) tileEntity).canConnect()) {
 				TargetingInfo target = new TargetingInfo(side, hitX, hitY, hitZ);
-				IC2Wiretype wire = getWireType(stack);
+				MixedWireType wire = getWireType(stack);
 				BlockPos masterPos = ((IImmersiveConnectable) tileEntity).getConnectionMaster(wire, target);
 				Vec3i offset = pos.subtract(masterPos);
 				tileEntity = world.getTileEntity(masterPos);

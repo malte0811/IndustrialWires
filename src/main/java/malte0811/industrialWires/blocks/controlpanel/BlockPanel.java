@@ -268,7 +268,7 @@ public class BlockPanel extends BlockIWBase implements IMetaEnum {
 	public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
 		super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
 		if (!worldIn.isRemote) {
-			TileEntityGeneralCP panel = MiscUtils.getExistingTE(worldIn, pos, TileEntityGeneralCP.class);
+			TileEntityGeneralCP panel = MiscUtils.getLoadedTE(worldIn, pos, TileEntityGeneralCP.class);
 			if (panel instanceof TileEntityComponentPanel) {
 				((TileEntityComponentPanel) panel).updateRSInput();
 			} else if (panel instanceof TileEntityRSPanelOthers) {

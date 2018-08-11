@@ -12,22 +12,27 @@
  * You should have received a copy of the GNU General Public License
  * along with Industrial Wires.  If not, see <http://www.gnu.org/licenses/>.
  */
-package malte0811.industrialWires;
 
-import blusunrize.immersiveengineering.api.energy.wires.IImmersiveConnectable;
-import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler;
-import net.minecraft.entity.Entity;
+package malte0811.industrialWires.wires;
 
-public interface IIC2Connector extends IImmersiveConnectable {
-	/**
-	 * @return leftover energy.
-	 */
-	double insertEnergy(double eu, boolean simulate);
+import malte0811.industrialWires.util.ConversionUtil;
 
-	@Override
-	default float getDamageAmount(Entity e, ImmersiveNetHandler.Connection c)
-	{
-		return (float) Math.ceil(IImmersiveConnectable.super.getDamageAmount(e, c));//Same as IC2 uses
+public enum EnergyType {
+	FE_AC() {
+		@Override
+		public double getLoss(double averageLossRate, double available, double outMax) {
+			return Math.min(averageLossRate, 1)*outMax;//TODO fix this
+		}
+	},
+	EU_DC() {
+		@Override
+		public double getLoss(double averageLossRate, double available, double outMax) {
+			return averageLossRate * ConversionUtil.joulesPerEu();
+		}
+	},
+	NONE;
+
+	public double getLoss(double averageLossRate, double available, double outMax) {
+		return available;
 	}
-
 }

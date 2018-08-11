@@ -40,7 +40,8 @@ import malte0811.industrialWires.network.MessageTileSyncIW;
 import malte0811.industrialWires.util.ConversionUtil;
 import malte0811.industrialWires.util.JouleEnergyStorage;
 import malte0811.industrialWires.util.MiscUtils;
-import malte0811.industrialWires.wires.IC2Wiretype;
+import malte0811.industrialWires.wires.EnergyType;
+import malte0811.industrialWires.wires.MixedWireType;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -74,7 +75,7 @@ import static malte0811.industrialWires.blocks.hv.TileEntityMarx.FiringState.FIR
 import static malte0811.industrialWires.util.MiscUtils.getOffset;
 import static malte0811.industrialWires.util.MiscUtils.offset;
 import static malte0811.industrialWires.util.NBTKeys.*;
-import static malte0811.industrialWires.wires.IC2Wiretype.IC2_HV_CAT;
+import static malte0811.industrialWires.wires.MixedWireType.IC2_HV_CAT;
 import static net.minecraft.item.EnumDyeColor.*;
 
 /**
@@ -88,7 +89,7 @@ import static net.minecraft.item.EnumDyeColor.*;
  * Pink:	Fine top cap voltage
  */
 @Mod.EventBusSubscriber
-public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable, ISyncReceiver, IBlockBoundsIW, IImmersiveConnectable, IIC2Connector,
+public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable, ISyncReceiver, IBlockBoundsIW, IImmersiveConnectable, IMixedConnector,
 		IRedstoneConnector {
 	//Only relevant client-side.
 	private static final Set<TileEntityMarx> FIRING_GENERATORS = Collections.newSetFromMap(new WeakHashMap<>());
@@ -532,12 +533,12 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	}
 
 	@Override
-	public double insertEnergy(double eu, boolean simulate) {
+	public double insertEnergy(double joules, boolean simulate, EnergyType type) {
 		TileEntityMarx master = master(this);
 		if (master!=null) {
-			double ret = master.storage.insert(eu, ConversionUtil.joulesPerEu(), simulate, master.leftover);
+			double ret = master.storage.insert(joules, ConversionUtil.joulesPerEu(), simulate, master.leftover);
 			master.leftover -= ret;
-			return eu-ret;
+			return joules -ret;
 		} else {
 			return 0;
 		}
@@ -567,7 +568,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 
 	@Override
 	public WireType getCableLimiter(TargetingInfo target) {
-		return getRight()==0?WireType.REDSTONE:IC2Wiretype.HV;
+		return getRight()==0?WireType.REDSTONE:MixedWireType.HV;
 	}
 
 	@Override

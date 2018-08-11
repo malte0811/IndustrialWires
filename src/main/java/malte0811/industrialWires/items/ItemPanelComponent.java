@@ -200,7 +200,7 @@ public class ItemPanelComponent extends Item implements INetGUIItem {
 	private void placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ) {
 		IBlockState state = IndustrialWires.panel.getStateFromMeta(BlockTypes_Panel.SINGLE_COMP.ordinal());
 		world.setBlockState(pos, state);
-		TileEntityComponentPanel te = MiscUtils.getExistingTE(world, pos, TileEntityComponentPanel.class);
+		TileEntityComponentPanel te = MiscUtils.getLoadedTE(world, pos, TileEntityComponentPanel.class);
 		if (te!=null) {
 			EnumFacing dir = te.getFacingForPlacement(player, pos, side, hitX, hitY, hitZ);
 			te.setFacing(dir);

@@ -18,7 +18,7 @@ import blusunrize.immersiveengineering.api.IEProperties;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.BlockIWBase;
 import malte0811.industrialWires.blocks.IMetaEnum;
-import malte0811.industrialWires.wires.IC2Wiretype;
+import malte0811.industrialWires.wires.MixedWireType;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -62,7 +62,7 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 		TileEntity te = world.getTileEntity(pos);
 		if (te instanceof TileEntityIC2ConnectorTin) {
 			TileEntityIC2ConnectorTin connector = (TileEntityIC2ConnectorTin) te;
-			if (world.isAirBlock(pos.offset(connector.facing))) {
+			if (world.isAirBlock(pos.offset(connector.getFacing()))) {
 				this.dropBlockAsItem(connector.getWorld(), pos, world.getBlockState(pos), 0);
 				connector.getWorld().setBlockToAir(pos);
 			}
@@ -122,10 +122,11 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 	public TileEntity createTileEntity(@Nonnull World world, @Nonnull IBlockState state) {
 		TileEntityIC2ConnectorTin base = getBaseTE(state.getValue(TYPE));
 		if (base!=null) {
-			base.facing = state.getValue(IEProperties.FACING_ALL);
+			base.setFacing(state.getValue(IEProperties.FACING_ALL));
 		}
 		return base;
 	}
+
 	private TileEntityIC2ConnectorTin getBaseTE(BlockTypes_IC2_Connector type) {
 		switch (type) {
 		case TIN_CONN:
@@ -159,7 +160,7 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 		if (!stack.isEmpty() && stack.getMetadata() % 2 == 0) {
 			int type = stack.getMetadata() / 2;
 			tooltip.add(I18n.format(IndustrialWires.MODID + ".tooltip.power_tier", (type%5) + 1));
-			IC2Wiretype wire = IC2Wiretype.ALL[type];
+			MixedWireType wire = MixedWireType.ALL[type];
 			tooltip.add(I18n.format(IndustrialWires.MODID + ".tooltip.eu_per_tick",
 					wire.getTransferRate() / wire.getFactor()));
 		}

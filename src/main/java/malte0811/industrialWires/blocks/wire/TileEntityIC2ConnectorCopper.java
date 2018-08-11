@@ -14,28 +14,15 @@
  */
 package malte0811.industrialWires.blocks.wire;
 
-import blusunrize.immersiveengineering.api.energy.wires.WireType;
-
-import static malte0811.industrialWires.wires.IC2Wiretype.COPPER_IC2;
-import static malte0811.industrialWires.wires.IC2Wiretype.IC2_COPPER_CAT;
+import static malte0811.industrialWires.wires.MixedWireType.COPPER_IC2;
 
 public class TileEntityIC2ConnectorCopper extends TileEntityIC2ConnectorTin {
 
 	public TileEntityIC2ConnectorCopper(boolean rel) {
-		super(rel);
+		super(rel, COPPER_IC2, 2, .5, .5);
 	}
 
 	public TileEntityIC2ConnectorCopper() {
+		this(false);
 	}
-
-	{
-		tier = 2;
-		maxStored = COPPER_IC2.getTransferRate() / COPPER_IC2.getFactor();
-	}
-
-	@Override
-	public boolean canConnect(WireType t) {
-		return IC2_COPPER_CAT.equals(t.getCategory());
-	}
-
 }

@@ -30,7 +30,7 @@ import malte0811.industrialWires.items.ItemIC2Coil;
 import malte0811.industrialWires.items.ItemKey;
 import malte0811.industrialWires.items.ItemPanelComponent;
 import malte0811.industrialWires.mech_mb.MechMBPart;
-import malte0811.industrialWires.wires.IC2Wiretype;
+import malte0811.industrialWires.wires.MixedWireType;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -82,7 +82,7 @@ public class ClientEventHandler {
 				if (!player.getHeldItem(hand).isEmpty()) {
 					ItemStack equipped = player.getHeldItem(hand);
 					if (OreDictionary.itemMatches(new ItemStack(IndustrialWires.coil, 1, OreDictionary.WILDCARD_VALUE), equipped, false)) {
-						IC2Wiretype type = IC2Wiretype.ALL[equipped.getItemDamage()];
+						MixedWireType type = MixedWireType.ALL[equipped.getItemDamage()];
 						int color = type.getColour(null);
 						final int threshold = 0x40-1;
 						for (int i = 0;i<3;i++) {

@@ -41,7 +41,7 @@ public class TileEntityGeneralCP extends TileEntityIWBase implements IOwner {
 			if (canJoinNetwork()) {
 				for (EnumFacing side : EnumFacing.VALUES) {
 					BlockPos posSide = pos.offset(side);
-					TileEntityGeneralCP neighbour = MiscUtils.getExistingTE(world, posSide, TileEntityGeneralCP.class);
+					TileEntityGeneralCP neighbour = MiscUtils.getLoadedTE(world, posSide, TileEntityGeneralCP.class);
 					if (neighbour != null && neighbour.canJoinNetwork()) {
 						if (!isFinalNet) {
 							panelNetwork = neighbour.panelNetwork;
