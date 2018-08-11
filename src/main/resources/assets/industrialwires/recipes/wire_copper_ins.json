@@ -1,18 +1,24 @@
 {
   "type": "industrialwires:wire_coil",
-  "cable": {
-    "type": "industrialwires:ic2_item",
-    "name": "cable",
-    "variant": "type:copper,insulation:1"
-  },
+  "cables": [
+    {
+      "length": 1,
+      "ingredient": {
+        "type": "industrialwires:ic2_item",
+        "name": "cable",
+        "variant": "type:copper,insulation:1"
+      }
+    },
+    {
+      "length": 8,
+      "ingredient": {
+        "item": "immersiveengineering:wirecoil",
+        "data": 6
+      }
+    }
+  ],
   "coil": {
     "item": "industrialwires:ic2_wire_coil",
     "data": 6
-  },
-  "conditions": [
-    {
-      "type": "forge:mod_loaded",
-      "modid": "ic2"
-    }
-  ]
+  }
 }

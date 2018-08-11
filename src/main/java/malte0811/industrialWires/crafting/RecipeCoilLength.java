@@ -26,19 +26,21 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.registries.IForgeRegistryEntry;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Random;
 
 public class RecipeCoilLength extends IForgeRegistryEntry.Impl<IRecipe> implements IRecipe {
 	public final ItemStack coil;
-	public final Ingredient cable;
+	public final List<Pair<Ingredient, Integer>> cables;
 	private final int maxLength;
 
-	public RecipeCoilLength(ItemStack coil, Ingredient cable) {
+	public RecipeCoilLength(ItemStack coil, List<Pair<Ingredient, Integer>> cables) {
 		this.coil = coil;
-		this.cable = cable;
+		this.cables = cables;
 		maxLength = ItemIC2Coil.getMaxWireLength(this.coil);
 	}
 
@@ -81,26 +83,29 @@ public class RecipeCoilLength extends IForgeRegistryEntry.Impl<IRecipe> implemen
 					ret.set(i, currStack);
 					ItemIC2Coil.setLength(currStack, -length);
 				}
-			} else if (isCable(curr)) {
-				length--;
+			} else {
+				length -= getCableLength(curr);
 			}
 		}
 		return ret;
 	}
 
 	private int getLength(InventoryCrafting inv) {
-		int cableLength = 0;
+		int totalLength = 0;
 		for (int i = 0; i < inv.getSizeInventory(); i++) {
 			ItemStack curr = inv.getStackInSlot(i);
 			if (OreDictionary.itemMatches(curr, coil, false)) {
-				cableLength += ItemIC2Coil.getLength(curr);
-			} else if (isCable(curr)) {
-				cableLength++;
-			} else if (!curr.isEmpty()) {
-				return -1;
+				totalLength += ItemIC2Coil.getLength(curr);
+			} else {
+				int slotLength = getCableLength(curr);
+				if (slotLength>0) {
+					totalLength += slotLength;
+				} else if (!curr.isEmpty()) {
+					return -1;
+				}
 			}
 		}
-		return cableLength;
+		return totalLength;
 	}
 
 	@Nonnull
@@ -109,8 +114,11 @@ public class RecipeCoilLength extends IForgeRegistryEntry.Impl<IRecipe> implemen
 		Random r = new Random();
 		NonNullList<Ingredient> ret = NonNullList.withSize(9, Ingredient.EMPTY);
 		for (int i = 0;i<ret.size();i++) {
-			ItemStack[] types = new ItemStack[cable.getMatchingStacks().length+1];
-			int length = types.length;
+			int length = 1;
+			for (Pair<Ingredient, Integer> cable:cables) {
+				length += cable.getLeft().getMatchingStacks().length;
+			}
+			ItemStack[] types = new ItemStack[length];
 			int cablePos = 0;
 			if (r.nextBoolean()) {
 				types[length-1] = coil;
@@ -118,19 +126,23 @@ public class RecipeCoilLength extends IForgeRegistryEntry.Impl<IRecipe> implemen
 				types[0] = coil;
 				cablePos = 1;
 			}
-			System.arraycopy(cable.getMatchingStacks(), 0, types, cablePos, length-1);
+			for (Pair<Ingredient, Integer> cable : cables) {
+				ItemStack[] matching = cable.getLeft().getMatchingStacks();
+				System.arraycopy(matching, 0, types, cablePos, matching.length);
+				cablePos += matching.length;
+			}
 			ret.set(i, new UnmatchedIngredient(types));
 		}
 		return ret;
 	}
 
-	private boolean isCable(ItemStack stack) {
-		for (ItemStack curr:cable.getMatchingStacks()) {
-			if (ItemStack.areItemsEqual(stack, curr) && ItemStack.areItemStackTagsEqual(stack, curr)) {
-				return true;
+	private int getCableLength(ItemStack stack) {
+		for (Pair<Ingredient, Integer> ingred:cables) {
+			if (ingred.getLeft().apply(stack)) {
+				return ingred.getRight();
 			}
 		}
-		return false;
+		return 0;
 	}
 
 	//There is probably a better way to do this...

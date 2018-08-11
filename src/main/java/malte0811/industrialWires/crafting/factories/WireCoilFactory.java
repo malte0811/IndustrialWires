@@ -15,17 +15,32 @@
 
 package malte0811.industrialWires.crafting.factories;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import malte0811.industrialWires.crafting.RecipeCoilLength;
+import net.minecraft.item.crafting.Ingredient;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.IRecipeFactory;
 import net.minecraftforge.common.crafting.JsonContext;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class WireCoilFactory implements IRecipeFactory {
 	@Override
 	public RecipeCoilLength parse(JsonContext context, JsonObject json) {
 		JsonObject coil = json.getAsJsonObject("coil");
-		JsonObject cable = json.getAsJsonObject("cable");
-		return new RecipeCoilLength(CraftingHelper.getItemStack(coil, context), CraftingHelper.getIngredient(cable, context));
+		JsonArray cables = json.getAsJsonArray("cables");
+		List<Pair<Ingredient, Integer>> cablesList = new ArrayList<>(cables.size());
+		for (JsonElement ele:cables) {
+			JsonObject obj = ele.getAsJsonObject();
+			int length = obj.get("length").getAsInt();
+			Ingredient ingred = CraftingHelper.getIngredient(obj.getAsJsonObject("ingredient"), context);
+			cablesList.add(new ImmutablePair<>(ingred, length));
+		}
+		return new RecipeCoilLength(CraftingHelper.getItemStack(coil, context), cablesList);
 	}
 }

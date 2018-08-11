@@ -1,10 +1,13 @@
 {
   "type": "industrialwires:wire_coil",
-  "cable": {
-    "type": "industrialwires:ic2_item",
-    "name": "cable",
-    "variant": "type:tin,insulation:1"
-  },
+  "cables": [{
+    "length": 1,
+    "ingredient": {
+      "type": "industrialwires:ic2_item",
+      "name": "cable",
+      "variant": "type:tin,insulation:1"
+    }
+  }],
   "coil": {
     "item": "industrialwires:ic2_wire_coil",
     "data": 5
