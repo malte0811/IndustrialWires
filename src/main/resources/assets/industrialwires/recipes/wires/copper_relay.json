@@ -1,0 +1,35 @@
+{
+  "result": {
+    "item": "industrialwires:ic2_connector",
+    "data": 3,
+    "count": 4
+  },
+  "pattern": [
+    " c ",
+    "rcr"
+  ],
+  "type": "forge:ore_shaped",
+  "key": {
+    "r": {
+      "type": "forge:ore_dict", "ore": "itemRubber"
+    },
+    "c": {
+      "type": "forge:ore_dict", "ore": "ingotCopper"
+    }
+  },
+  "conditions": [
+    {
+      "type": "forge:or",
+      "values": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "ic2"
+        },
+        {
+          "type": "forge:mod_loaded",
+          "modid": "techreborn"
+        }
+      ]
+    }
+  ]
+}
