@@ -103,7 +103,7 @@ industrialwires.tooltip.latching=Stays on indefinitely
 industrialwires.tooltip.instantaneous=Turns off after half a second
 industrialwires.tooltip.length=Length: %1s
 industrialwires.tooltip.power_tier=Power Tier: %s
-industrialwires.tooltip.eu_per_tick=%s EU/t
+industrialwires.tooltip.energy_per_tick=%s EU/t=%s IF/t
 industrialwires.tooltip.transfer_rate=Burns at %s EU/t (%s IF/t)
 industrialwires.tooltip.input_rate=%s EU/t (%s IF/t) per connector
 

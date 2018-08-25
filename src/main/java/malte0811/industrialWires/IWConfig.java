@@ -30,6 +30,9 @@ public class IWConfig {
 	public static int[] maxLengthPerConn = {16, 16, 16, 32, 32};
 	@Comment({"The maximum length of wire a coil item.", "Order: Tin, Copper, Gold, HV, Glass Fiber (as above)"})
 	public static int[] maxLengthOnCoil = {1024, 1024, 1024, 2048, 2048};
+	@Comment({"The factor between the IF transfer rate of the wires and the IF transfer rate corresponding to the EU transfer rate.",
+				"The default value results in the same transfer rates as the standard IE wires"})
+	public static double wireRatio = .5;
 
 	@Comment({"Set this to false to completely disable any conversion between IF and EU (default: true)"})
 	@RequiresMcRestart

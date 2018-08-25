@@ -18,6 +18,7 @@ import blusunrize.immersiveengineering.api.IEProperties;
 import malte0811.industrialWires.IndustrialWires;
 import malte0811.industrialWires.blocks.BlockIWBase;
 import malte0811.industrialWires.blocks.IMetaEnum;
+import malte0811.industrialWires.util.ConversionUtil;
 import malte0811.industrialWires.wires.MixedWireType;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -161,8 +162,8 @@ public class BlockIC2Connector extends BlockIWBase implements IMetaEnum {
 			int type = stack.getMetadata() / 2;
 			tooltip.add(I18n.format(IndustrialWires.MODID + ".tooltip.power_tier", (type%5) + 1));
 			MixedWireType wire = MixedWireType.ALL[type];
-			tooltip.add(I18n.format(IndustrialWires.MODID + ".tooltip.eu_per_tick",
-					wire.getTransferRate() / wire.getFactor()));
+			tooltip.add(I18n.format(IndustrialWires.MODID + ".tooltip.energy_per_tick",
+					wire.getIORate()*ConversionUtil.euPerJoule(), wire.getIORate()*ConversionUtil.ifPerJoule()));
 		}
 	}
 

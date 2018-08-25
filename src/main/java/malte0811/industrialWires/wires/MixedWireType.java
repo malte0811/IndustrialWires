@@ -40,7 +40,8 @@ public class MixedWireType extends WireType {
 	private final int[] ic2Colors = {0xa5bcc7, 0xbc7945, 0xfeff73, 0xb9d6d9, 0xf1f1f1};
 	private final String[] ic2Names = {"ic2Tin", "ic2Copper", "ic2Gold", "ic2Hv", "ic2Glass",
 			"ic2TinIns", "ic2CopperIns", "ic2GoldIns"};
-	private final double[] lossPerBlock = {.2, .2, .4, .8, .025};
+	private final double[] euLossPerBlock = {.2, .2, .4, .8, .025};
+	private final double[] ifLossRate = new double[euLossPerBlock.length];
 	private final double[] ic2RenderDiameter = {
 			.03125, .03125, .046875, .0625, .75 * .03125, .0625, .0625, 2*.046875
 	};
@@ -61,14 +62,20 @@ public class MixedWireType extends WireType {
 		super();
 		this.type = ordinal;
 		WireApi.registerWireType(this);
+		for (int i = 0;i<ifLossRate.length;i++) {
+			//Loss is the same at full single-connector load
+			double lossPerBlockIF = euLossPerBlock[i] * ConversionUtil.ifPerEu();
+			ifLossRate[i] = lossPerBlockIF/(getIORate()*ConversionUtil.ifPerJoule());
+		}
 	}
 
-	/**
-	 * In this case, this does not return the loss RATIO but the loss PER BLOCK
-	 */
 	@Override
 	public double getLossRatio() {
-		return lossPerBlock[type%5];
+		return ifLossRate[type%5];
+	}
+
+	public double getLossRateEU() {
+		return euLossPerBlock[type%5];
 	}
 
 	@Override
@@ -166,5 +173,18 @@ public class MixedWireType extends WireType {
 
 	public boolean isHV() {
 		return this==HV||this==GLASS;
+	}
+
+	public double getLoss(EnergyType energyType) {
+		switch (energyType) {
+
+			case FE_AC:
+				return getLossRatio();
+			case EU_DC:
+				return getLossRateEU();
+			case NONE:
+			default:
+				return 10;
+		}
 	}
 }

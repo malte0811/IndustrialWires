@@ -29,11 +29,11 @@ public class ConversionUtil {
 		return Config.IEConfig.Machines.dynamo_output;
 	}
 
-	public static double euPerIfIdeal() {
+	public static double euPerIf() {
 		return MechConversion.euPerIf;
 	}
 
-	public static double ifPerEuIdeal() {
+	public static double ifPerEu() {
 		return 1 / MechConversion.euPerIf;
 	}
 
@@ -46,7 +46,7 @@ public class ConversionUtil {
 	}
 
 	public static double kinPerRot() {
-		return kinPerEu() * euPerIfIdeal() * ifPerRot();
+		return kinPerEu() * euPerIf() * ifPerRot();
 	}
 
 	public static double rotPerKin() {
@@ -62,10 +62,10 @@ public class ConversionUtil {
 	}
 
 	public static double joulesPerEu() {
-		return joulesPerIf()*ifPerEuIdeal();
+		return joulesPerIf()* ifPerEu();
 	}
 
 	public static double euPerJoule() {
-		return euPerIfIdeal()*ifPerJoule();
+		return euPerIf()*ifPerJoule();
 	}
 }
