@@ -105,7 +105,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	public FiringState state = FiringState.CHARGING;
 	public Discharge dischargeData;
 	// Voltage=10*storedJ
-	private JouleEnergyStorage storage = new JouleEnergyStorage(5_000, 3_200);
+	private JouleEnergyStorage storage = new JouleEnergyStorage(50_000, 20*32_000);
 	private boolean hasConnection;
 	private double[] capVoltages;
 	private int voltageControl = 0;
@@ -536,8 +536,10 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	public double insertEnergy(double joules, boolean simulate, EnergyType type) {
 		TileEntityMarx master = master(this);
 		if (master!=null) {
-			double ret = master.storage.insert(joules, ConversionUtil.joulesPerEu(), simulate, master.leftover);
-			master.leftover -= ret;
+			double ret = master.storage.insert(joules, 1, simulate, master.leftover);
+			if (!simulate) {
+				master.leftover -= ret;
+			}
 			return joules -ret;
 		} else {
 			return 0;
