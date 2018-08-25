@@ -21,7 +21,7 @@ public enum EnergyType {
 	FE_AC() {
 		@Override
 		public double getLoss(double averageLossRate, double available, double outMax) {
-			return Math.min(averageLossRate, 1)*outMax;//TODO fix this
+			return Math.min(averageLossRate, 1)*outMax;
 		}
 	},
 	EU_DC() {

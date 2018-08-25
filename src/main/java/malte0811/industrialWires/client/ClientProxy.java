@@ -27,10 +27,9 @@ import blusunrize.lib.manual.ManualPages.PositionedItemStack;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import malte0811.industrialWires.CommonProxy;
-import malte0811.industrialWires.IWConfig;
-import malte0811.industrialWires.IWPotions;
-import malte0811.industrialWires.IndustrialWires;
+import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import malte0811.industrialWires.*;
 import malte0811.industrialWires.blocks.controlpanel.BlockTypes_Panel;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityPanelCreator;
 import malte0811.industrialWires.blocks.controlpanel.TileEntityRSPanel;
@@ -151,56 +150,64 @@ public class ClientProxy extends CommonProxy {
 		boolean uni = m.fontRenderer.getUnicodeFlag();
 		m.fontRenderer.setUnicodeFlag(true);
 		m.entryRenderPre();
-		if (IndustrialWires.hasIC2) {
+		TextSplitter splitter;
+		{
 			PositionedItemStack[][] wireRecipes = new PositionedItemStack[3][10];
 			int xBase = 15;
-			Ingredient tinCable = IC2TRHelper.getStack("cable", "type:tin,insulation:0");
-			List<ItemStack> tinCableList = Arrays.asList(tinCable.getMatchingStacks());
+			Ingredient copperCable = IC2TRHelper.getStack("cable", "type:copper,insulation:0");
+			Object2IntMap<ItemStack> copperCables = new Object2IntLinkedOpenHashMap<>();
+			for (ItemStack itemStack : copperCable.getMatchingStacks()) {
+				copperCables.put(itemStack, 1);
+			}
+			copperCables.put(new ItemStack(IEObjects.itemWireCoil, 1, 0), 8);
+			List<ItemStack> copperCableList = new ArrayList<>(copperCables.keySet());
 			for (int i = 0; i < 3; i++) {
 				for (int j = 0; j < 3; j++) {
-					wireRecipes[0][3 * i + j] = new PositionedItemStack(tinCableList, 18 * i + xBase, 18 * j);
+					wireRecipes[0][3 * i + j] = new PositionedItemStack(copperCableList, 18 * i + xBase, 18 * j);
 				}
 			}
-			ItemStack tmp = new ItemStack(IndustrialWires.coil);
-			ItemIC2Coil.setLength(tmp, 9);
-			wireRecipes[0][9] = new PositionedItemStack(tmp, 18 * 4 + xBase, 18);
+			ItemStack copperCoil = new ItemStack(IndustrialWires.coil, 1, 1);
+			ItemIC2Coil.setLength(copperCoil, 9);
+			wireRecipes[0][9] = new PositionedItemStack(copperCoil, 18 * 4 + xBase, 18);
 			Random r = new Random();
 			for (int i = 1; i < 3; i++) {
 				int lengthSum = 0;
 				for (int j1 = 0; j1 < 3; j1++) {
 					for (int j2 = 0; j2 < 3; j2++) {
-						if (r.nextBoolean()) {
+						if (r.nextDouble() > 1 / (1. + copperCables.size())) {
 							// cable
-							lengthSum++;
-							wireRecipes[i][3 * j1 + j2] = new PositionedItemStack(tinCableList, 18 * j1 + xBase, 18 * j2);
+							ItemStack chosen = copperCableList.get(r.nextInt(copperCables.size()));
+							lengthSum += copperCables.getInt(chosen);
+							wireRecipes[i][3 * j1 + j2] = new PositionedItemStack(chosen, 18 * j1 + xBase, 18 * j2);
 						} else {
 							// wire coil
 							int length = r.nextInt(99) + 1;
-							tmp = new ItemStack(IndustrialWires.coil);
-							ItemIC2Coil.setLength(tmp, length);
-							wireRecipes[i][3 * j1 + j2] = new PositionedItemStack(tmp, 18 * j1 + xBase, 18 * j2);
+							copperCoil = new ItemStack(IndustrialWires.coil, 1, 1);
+							ItemIC2Coil.setLength(copperCoil, length);
+							wireRecipes[i][3 * j1 + j2] = new PositionedItemStack(copperCoil, 18 * j1 + xBase, 18 * j2);
 							lengthSum += length;
 						}
 					}
 				}
-				tmp = new ItemStack(IndustrialWires.coil);
-				ItemIC2Coil.setLength(tmp, lengthSum);
-				wireRecipes[i][9] = new PositionedItemStack(tmp, 18 * 4 + xBase, 18);
+				copperCoil = new ItemStack(IndustrialWires.coil);
+				ItemIC2Coil.setLength(copperCoil, lengthSum);
+				wireRecipes[i][9] = new PositionedItemStack(copperCoil, 18 * 4 + xBase, 18);
 			}
 
-			m.addEntry("industrialwires.wires", "industrialwires",
-					new ManualPages.CraftingMulti(m, "industrialwires.wires0", new ItemStack(IndustrialWires.ic2conn, 1, 0), new ItemStack(IndustrialWires.ic2conn, 1, 1), new ItemStack(IndustrialWires.ic2conn, 1, 2), new ItemStack(IndustrialWires.ic2conn, 1, 3),
-							new ItemStack(IndustrialWires.ic2conn, 1, 4), new ItemStack(IndustrialWires.ic2conn, 1, 5), new ItemStack(IndustrialWires.ic2conn, 1, 6), new ItemStack(IndustrialWires.ic2conn, 1, 7)),
-					new ManualPages.Text(m, "industrialwires.wires1"),
-					new ManualPages.CraftingMulti(m, "industrialwires.wires2", (Object[]) wireRecipes)
+			splitter = new TextSplitter(m);
+			splitter.addSpecialPage(0, 0, 10,
+					s->new ManualPages.CraftingMulti(m, s, (Object[]) wireRecipes));
+			String text = I18n.format("ie.manual.entry.industrialwires.wires");
+			splitter.split(text);
+			List<IManualPage> entry = splitter.toManualEntry();
+			m.addEntry("industrialwires.wires", IndustrialWires.MODID, entry.toArray(new IManualPage[0]));
+		}
+		if (hasIC2 && IndustrialWires.mechConv != null) {
+			m.addEntry("industrialwires.mechConv", "industrialwires",
+					new ManualPages.Crafting(m, "industrialwires.mechConv0", new ItemStack(IndustrialWires.mechConv, 1, 1)),
+					new ManualPages.Crafting(m, "industrialwires.mechConv1", new ItemStack(IndustrialWires.mechConv, 1, 2)),
+					new ManualPages.Crafting(m, "industrialwires.mechConv2", new ItemStack(IndustrialWires.mechConv, 1, 0))
 			);
-			if (IndustrialWires.mechConv != null) {
-				m.addEntry("industrialwires.mechConv", "industrialwires",
-						new ManualPages.Crafting(m, "industrialwires.mechConv0", new ItemStack(IndustrialWires.mechConv, 1, 1)),
-						new ManualPages.Crafting(m, "industrialwires.mechConv1", new ItemStack(IndustrialWires.mechConv, 1, 2)),
-						new ManualPages.Crafting(m, "industrialwires.mechConv2", new ItemStack(IndustrialWires.mechConv, 1, 0))
-				);
-			}
 		}
 		addUnblockableSounds(TINNITUS, TURN_FAST, TURN_SLOW);
 
@@ -236,8 +243,8 @@ public class ClientProxy extends CommonProxy {
 				new ManualPages.Text(m, "industrialwires.panel_creator2")
 		);
 		String text = I18n.format("ie.manual.entry.industrialwires.redstone");
-		TextSplitter splitter = new TextSplitter(m);
-		splitter.addSpecialPage(-1, 0, 10, s->new ManualPages.CraftingMulti(m, s,
+		splitter = new TextSplitter(m);
+		splitter.addSpecialPage(-1, 0, 10, s -> new ManualPages.CraftingMulti(m, s,
 				new ResourceLocation(IndustrialWires.MODID, "control_panel_rs_other"),
 				new ResourceLocation(IndustrialWires.MODID, "control_panel_rs_wire")));
 		splitter.split(text);
@@ -289,9 +296,9 @@ public class ClientProxy extends CommonProxy {
 
 		String[][] flywheelTable;
 		{
-			List<String[]> flywheelTableList = new ArrayList<>(1+Material.values().length);
+			List<String[]> flywheelTableList = new ArrayList<>(1 + Material.values().length);
 			flywheelTableList.add(new String[]{"industrialwires.desc.material", "industrialwires.desc.inertia", "industrialwires.desc.max_speed"});
-			for (Material mat:Material.values()) {
+			for (Material mat : Material.values()) {
 				MechPartFlywheel f = new MechPartFlywheel(mat);
 				flywheelTableList.add(new String[]{mat.oreName(), Utils.formatDouble(f.getInertia(), "0.#"),
 						Utils.formatDouble(f.getMaxSpeed(), "0.#")});
@@ -302,7 +309,7 @@ public class ClientProxy extends CommonProxy {
 		splitter = new TextSplitter(m);
 		splitter.addSpecialPage(0, 0, 10, (s) -> new ManualPageMultiblock(m, s,
 				MechMBPart.getManualMBForPart(MechPartFlywheel.class)));
-		splitter.addSpecialPage(1, 0, 1, s->new ManualPages.Table(m, "", flywheelTable, true));
+		splitter.addSpecialPage(1, 0, 1, s -> new ManualPages.Table(m, "", flywheelTable, true));
 		splitter.addSpecialPage(2, 0, 10, (s) -> new ManualPageMultiblock(m, s,
 				MechMBPart.getManualMBForPart(MechPartSingleCoil.class)));
 		splitter.addSpecialPage(3, 0, 10, (s) -> new ManualPageMultiblock(m, s,

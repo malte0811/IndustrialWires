@@ -29,7 +29,6 @@ public interface IMixedConnector extends IImmersiveConnectable {
 	@Override
 	default float getDamageAmount(Entity e, ImmersiveNetHandler.Connection c)
 	{
-		//TODO different damage for EU anf FE
 		return (float) Math.ceil(IImmersiveConnectable.super.getDamageAmount(e, c) * ConversionUtil.euPerJoule());//Same as IC2 uses
 	}
 }

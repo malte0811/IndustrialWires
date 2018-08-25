@@ -163,27 +163,25 @@ public class IndustrialWires {
 			double ieThreshold = 12.74275;
 			String ieVer = Loader.instance().getIndexedModList().get(ImmersiveEngineering.MODID).getDisplayVersion();
 			int firstDash = ieVer.indexOf('-');
-			String end = ieVer.substring(firstDash+1);
+			String end = ieVer.substring(firstDash + 1);
 			String start = ieVer.substring(0, firstDash);
 			end = end.replaceAll("[^0-9]", "");
 			start = start.replaceAll("[^0-9]", "");
-			double ieVerDouble = Double.parseDouble(start+"."+end);
-			isOldIE = ieVerDouble<ieThreshold;
+			double ieVerDouble = Double.parseDouble(start + "." + end);
+			isOldIE = ieVerDouble < ieThreshold;
 		}
 		logger = e.getModLog();
 		new IWConfig();
-		if (hasIC2) {
-			GameRegistry.registerTileEntity(TileEntityIC2ConnectorTin.class, new ResourceLocation(MODID, "ic2ConnectorTin"));
-			GameRegistry.registerTileEntity(TileEntityIC2ConnectorCopper.class, new ResourceLocation(MODID, "ic2ConnectorCopper"));
-			GameRegistry.registerTileEntity(TileEntityIC2ConnectorGold.class, new ResourceLocation(MODID, "ic2ConnectorGold"));
-			GameRegistry.registerTileEntity(TileEntityIC2ConnectorHV.class, new ResourceLocation(MODID, "ic2ConnectorHV"));
-			GameRegistry.registerTileEntity(TileEntityIC2ConnectorGlass.class, new ResourceLocation(MODID, "ic2ConnectorGlass"));
+		GameRegistry.registerTileEntity(TileEntityIC2ConnectorTin.class, new ResourceLocation(MODID, "ic2ConnectorTin"));
+		GameRegistry.registerTileEntity(TileEntityIC2ConnectorCopper.class, new ResourceLocation(MODID, "ic2ConnectorCopper"));
+		GameRegistry.registerTileEntity(TileEntityIC2ConnectorGold.class, new ResourceLocation(MODID, "ic2ConnectorGold"));
+		GameRegistry.registerTileEntity(TileEntityIC2ConnectorHV.class, new ResourceLocation(MODID, "ic2ConnectorHV"));
+		GameRegistry.registerTileEntity(TileEntityIC2ConnectorGlass.class, new ResourceLocation(MODID, "ic2ConnectorGlass"));
 
-			if (IWConfig.enableConversion) {
-				GameRegistry.registerTileEntity(TileEntityIEMotor.class, new ResourceLocation(MODID, "ieMotor"));
-				GameRegistry.registerTileEntity(TileEntityMechICtoIE.class, new ResourceLocation(MODID, "mechIcToIe"));
-				GameRegistry.registerTileEntity(TileEntityMechIEtoIC.class, new ResourceLocation(MODID, "mechIeToIc"));
-			}
+		if (hasIC2 && IWConfig.enableConversion) {
+			GameRegistry.registerTileEntity(TileEntityIEMotor.class, new ResourceLocation(MODID, "ieMotor"));
+			GameRegistry.registerTileEntity(TileEntityMechICtoIE.class, new ResourceLocation(MODID, "mechIcToIe"));
+			GameRegistry.registerTileEntity(TileEntityMechIEtoIC.class, new ResourceLocation(MODID, "mechIeToIc"));
 		}
 		GameRegistry.registerTileEntity(TileEntityMechMB.class, new ResourceLocation(MODID, "mechMB"));
 		GameRegistry.registerTileEntity(TileEntityJacobsLadder.class, new ResourceLocation(MODID, "jacobsLadder"));
@@ -215,9 +213,7 @@ public class IndustrialWires {
 		if (IWConfig.enableConversion&&hasIC2) {
 			event.getRegistry().register(new BlockMechanicalConverter());
 		}
-		if (hasIC2) {
-			event.getRegistry().register(new BlockIC2Connector());
-		}
+		event.getRegistry().register(new BlockIC2Connector());
 		event.getRegistry().register(new BlockJacobsLadder());
 		event.getRegistry().register(new BlockPanel());
 		event.getRegistry().register(new BlockHVMultiblocks());
@@ -231,9 +227,7 @@ public class IndustrialWires {
 			event.getRegistry().register(b.createItemBlock());
 		}
 
-		if (hasIC2) {
-			event.getRegistry().register(new ItemIC2Coil());
-		}
+		event.getRegistry().register(new ItemIC2Coil());
 		event.getRegistry().register(new ItemPanelComponent());
 		event.getRegistry().register(new ItemKey());
 	}
