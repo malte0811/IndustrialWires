@@ -1,5 +1,9 @@
 ###Minecraft 1.12.2
 
+####Version 1.7-29
+ - The wires can now transmit FE as well as EU, but not both at once
+ - Fixed the Marx generator not charging beyond a quite low voltage
+
 ####Version 1.7-28
  - Added the Redstone Controller: Others, it allows control panels to interface with Project:Red and Charset wires
  - Rewrote the control panel redstone code

@@ -5,8 +5,8 @@
         "1.10.2-recommended": "1.4-18",
         "1.11.2-latest": "1.5-19",
         "1.11.2-recommended": "1.5-19",
-        "1.12.2-latest": "1.7-28",
-        "1.12.2-recommended": "1.7-28"
+        "1.12.2-latest": "1.7-29",
+        "1.12.2-recommended": "1.7-29"
     },
     "1.10.2": {
         "1.1-3": " - fixed incompatibility with IE build 48\n   - reduced the amount of calls to core IE classes to make such incompatibilities less likely\n - fixed localization of the creative tab",
@@ -38,6 +38,7 @@
         "1.6-25": " - Updated to IE build 77\n   - IC2 wires cause damage\n   - Added insulated versions of gold, copper and tin wires. Due to heat sensitive insulation the transfer capacity is half of the normal capacity\n   - Added feedthrough insulators for all IC2 wire types\n - Wire coils now automatically \"merge\" when picked up\n - Config values are applied to the game directly now",
         "1.7-26": " - Added Mechanical Multiblocks (energy storage and EU<->FE conversion)\n   - There will be an explanation video for these once I have time to make one\n - Fixed the small mechanical converter blowing up tin wires\n - Fixed wires not joining their outputs correctly\n - Fixed wire connectors not breaking when the block they're on is broken",
         "1.7-27": " - Fixed panel components causing issues on dedicated servers\n - Added an automatic update checker (Using the Forge update JSON)",
-        "1.7-28": " - Added the Redstone Controller: Others, it allows control panels to interface with Project:Red and Charset wires\n - Rewrote the control panel redstone code\n - Added localization for IW's multiblocks\n - Fixed issues with zero-length mechanical multiblocks"
+        "1.7-28": " - Added the Redstone Controller: Others, it allows control panels to interface with Project:Red and Charset wires\n - Rewrote the control panel redstone code\n - Added localization for IW's multiblocks\n - Fixed issues with zero-length mechanical multiblocks",
+        "1.7-29": " - The wires can now transmit FE as well as EU, but not both at once\n - Fixed the Marx generator not charging beyond a quite low voltage"
     }
 }
