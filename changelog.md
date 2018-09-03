@@ -1,5 +1,11 @@
 ###Minecraft 1.12.2
 
+####Version 1.7-30
+ - Fixed crashes when IC2 isn't installed
+ - Fixed connectors allowing too much power output
+ - Added a config option for some of the wires' properties
+ - Updated chinese translation (thanks @DepletedPrism)
+
 ####Version 1.7-29
  - The wires can now transmit FE as well as EU, but not both at once
  - Fixed the Marx generator not charging beyond a quite low voltage

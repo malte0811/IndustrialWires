@@ -35,6 +35,8 @@ public class IWConfig {
 	public static double wireRatio = .5;
 	@Comment({"The EU IO rates of the wires. Order is Tin, Copper, Gold, HV, Glass Fiber"})
 	public static double[] ioRatesEU = {32, 128, 512, 2048, 8192};
+	@Comment({"The EU loss rates of the wires (EU per block). Order is Tin, Copper, Gold, HV, Glass Fiber"})
+	public static double[] euLossPerBlock = {.2, .2, .4, .8, .025};
 
 	@Comment({"Set this to false to completely disable any conversion between IF and EU (default: true)"})
 	@RequiresMcRestart
