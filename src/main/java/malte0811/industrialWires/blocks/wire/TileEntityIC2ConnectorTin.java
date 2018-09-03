@@ -20,7 +20,6 @@ import blusunrize.immersiveengineering.api.energy.wires.*;
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler.AbstractConnection;
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler.Connection;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDirectionalTile;
-import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergyAcceptor;
 import ic2.api.energy.tile.IEnergyEmitter;
 import ic2.api.energy.tile.IEnergySink;
@@ -40,7 +39,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.*;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
@@ -295,7 +293,7 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	@Override
 	public void invalidate() {
 		if (!world.isRemote)
-			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
+			Compat.unloadIC2Tile.accept(this);
 		super.invalidate();
 	}
 
@@ -303,7 +301,7 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	public void onChunkUnload() {
 		super.onChunkUnload();
 		if (!world.isRemote)
-			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
+			Compat.unloadIC2Tile.accept(this);
 	}
 
 	@Override

@@ -17,6 +17,7 @@ package malte0811.industrialWires.compat;
 
 import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.api.tool.ToolboxHandler;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import crafttweaker.CraftTweakerAPI;
 import ic2.api.energy.event.EnergyTileLoadEvent;
@@ -44,6 +45,7 @@ import pl.asie.charset.api.wires.IBundledReceiver;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -53,6 +55,7 @@ public class Compat {
 	public static final String CRAFTTWEAKER_ID = "crafttweaker";
 	public static final String CHARSET_ID = "charset";
 	public static BiFunction<ItemStack, Template.BlockInfo, ItemStack> stackFromInfo = (s, i)->s;
+	public static BiFunction<String, String, List<ItemStack>> getIC2Item = (s, s2)->ImmutableList.of();
 	static Consumer<MarxOreHandler.OreInfo> addMarx = (o) -> {
 	};
 	static Consumer<MarxOreHandler.OreInfo> removeMarx = (o) -> {
@@ -143,6 +146,7 @@ public class Compat {
 					MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent((IEnergyTile) te));
 				}
 			};
+			getIC2Item = (type, variant)->ImmutableList.of(IC2Items.getItem(type, variant));
 			try {
 				Class<?> teb = Class.forName("ic2.core.block.TileEntityBlock");
 				Method getPickBlock = teb.getDeclaredMethod("getPickBlock", EntityPlayer.class, RayTraceResult.class);

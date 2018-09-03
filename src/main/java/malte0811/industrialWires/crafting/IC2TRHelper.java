@@ -16,9 +16,9 @@
 package malte0811.industrialWires.crafting;
 
 import blusunrize.immersiveengineering.api.ApiUtils;
-import ic2.api.item.IC2Items;
 import malte0811.industrialWires.IEObjects;
 import malte0811.industrialWires.IndustrialWires;
+import malte0811.industrialWires.compat.Compat;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraftforge.oredict.OreIngredient;
@@ -35,9 +35,7 @@ public final class IC2TRHelper {
 				return new OreIngredient("itemRubber");
 			}
 		}
-		if (IndustrialWires.hasIC2) {
-			stacks.add(IC2Items.getItem(type, variant));
-		}
+		stacks.addAll(Compat.getIC2Item.apply(type, variant));
 		if (IndustrialWires.hasTechReborn) {
 			switch (type) {
 				case "cable":
