@@ -36,7 +36,6 @@ public class MixedWireType extends WireType {
 	public static final String IC2_HV_CAT = "IC_HV";
 	public static final String IC2_GLASS_CAT = "IC_GLASS";
 	private final int type;
-	private final int[] ratesEU = {32, 128, 512, 2048, 8192};
 	private final int[] ic2Colors = {0xa5bcc7, 0xbc7945, 0xfeff73, 0xb9d6d9, 0xf1f1f1};
 	private final String[] ic2Names = {"ic2Tin", "ic2Copper", "ic2Gold", "ic2Hv", "ic2Glass",
 			"ic2TinIns", "ic2CopperIns", "ic2GoldIns"};
@@ -84,7 +83,7 @@ public class MixedWireType extends WireType {
 	}
 
 	public double getIORate() {
-		return ratesEU[type%5] * ConversionUtil.joulesPerEu();
+		return IWConfig.ioRatesEU[type % 5] * ConversionUtil.joulesPerEu();
 	}
 
 	@Override

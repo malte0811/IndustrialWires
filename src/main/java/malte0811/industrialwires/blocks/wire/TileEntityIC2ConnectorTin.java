@@ -149,7 +149,7 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 			if (bufferToMachine < maxToMachine) {
 				maxToMachine = bufferToMachine;
 			}
-			potentialIEInputInTick = Math.max(Math.max(potentialIEInputInTick, actualIEInputInTick), getMaxIO());
+			potentialIEInputInTick = Math.min(Math.max(potentialIEInputInTick, actualIEInputInTick), getMaxIO());
 			if (potentialIEInputInTick > maxToMachine) {
 				maxToMachine = potentialIEInputInTick;
 			}

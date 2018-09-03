@@ -122,6 +122,21 @@ public class Compat {
 	}
 
 	public static class CompatIC2 extends CompatModule {
+		@Override
+		public void preInit() {
+			loadIC2Tile = (te) -> {
+				if (!te.getWorld().isRemote) {
+					MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent((IEnergyTile) te));
+				}
+			};
+			unloadIC2Tile = (te) -> {
+				if (!te.getWorld().isRemote) {
+					MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent((IEnergyTile) te));
+				}
+			};
+			getIC2Item = (type, variant) -> ImmutableList.of(IC2Items.getItem(type, variant));
+		}
+
 		public void init() {
 			Item tinnedFood = IC2Items.getItem("filled_tin_can").getItem();
 			ItemStack emptyMug = IC2Items.getItem("mug", "empty");
@@ -136,17 +151,6 @@ public class Compat {
 				return a instanceof IBoxable && ((IBoxable) a).canBeStoredInToolbox(s);
 			});
 			MechPartCommutator.originalStack = IC2Items.getItem("te", "kinetic_generator");
-			loadIC2Tile = (te) -> {
-				if (!te.getWorld().isRemote) {
-					MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent((IEnergyTile) te));
-				}
-			};
-			unloadIC2Tile = (te) ->{
-				if (!te.getWorld().isRemote) {
-					MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent((IEnergyTile) te));
-				}
-			};
-			getIC2Item = (type, variant)->ImmutableList.of(IC2Items.getItem(type, variant));
 			try {
 				Class<?> teb = Class.forName("ic2.core.block.TileEntityBlock");
 				Method getPickBlock = teb.getDeclaredMethod("getPickBlock", EntityPlayer.class, RayTraceResult.class);

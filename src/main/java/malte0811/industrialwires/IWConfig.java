@@ -33,6 +33,8 @@ public class IWConfig {
 	@Comment({"The factor between the IF transfer rate of the wires and the IF transfer rate corresponding to the EU transfer rate.",
 				"The default value results in the same transfer rates as the standard IE wires"})
 	public static double wireRatio = .5;
+	@Comment({"The EU IO rates of the wires. Order is Tin, Copper, Gold, HV, Glass Fiber"})
+	public static double[] ioRatesEU = {32, 128, 512, 2048, 8192};
 
 	@Comment({"Set this to false to completely disable any conversion between IF and EU (default: true)"})
 	@RequiresMcRestart

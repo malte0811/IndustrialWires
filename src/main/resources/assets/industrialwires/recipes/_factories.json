@@ -1,13 +1,13 @@
 {
   "conditions" : {
-    "conversion": "malte0811.industrialWires.crafting.factories.IsConversionEnabled",
-    "other_bundled_redstone": "malte0811.industrialWires.crafting.factories.OtherBundledRedstone"
+    "conversion": "malte0811.industrialwires.crafting.factories.IsConversionEnabled",
+    "other_bundled_redstone": "malte0811.industrialwires.crafting.factories.OtherBundledRedstone"
   },
   "recipes": {
-    "component_init": "malte0811.industrialWires.crafting.factories.InitPCFactory",
-    "wire_coil": "malte0811.industrialWires.crafting.factories.WireCoilFactory"
+    "component_init": "malte0811.industrialwires.crafting.factories.InitPCFactory",
+    "wire_coil": "malte0811.industrialwires.crafting.factories.WireCoilFactory"
   },
   "ingredients": {
-    "ic2_item": "malte0811.industrialWires.crafting.factories.IC2ItemFactory"
+    "ic2_item": "malte0811.industrialwires.crafting.factories.IC2ItemFactory"
   }
 }

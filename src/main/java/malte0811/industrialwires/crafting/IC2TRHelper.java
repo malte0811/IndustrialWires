@@ -29,13 +29,12 @@ import java.util.Set;
 
 public final class IC2TRHelper {
 	public static Ingredient getStack(String type, String variant) {
-		Set<ItemStack> stacks = new HashSet<>();
 		if (type.equals("crafting")&&variant.equals("rubber")) {
 			if (ApiUtils.isExistingOreName("itemRubber")) {
 				return new OreIngredient("itemRubber");
 			}
 		}
-		stacks.addAll(Compat.getIC2Item.apply(type, variant));
+		Set<ItemStack> stacks = new HashSet<>(Compat.getIC2Item.apply(type, variant));
 		if (IndustrialWires.hasTechReborn) {
 			switch (type) {
 				case "cable":
