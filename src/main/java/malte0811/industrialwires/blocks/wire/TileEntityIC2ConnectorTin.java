@@ -349,7 +349,7 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	@Override
 	@Optional.Method(modid="ic2")
 	public double getDemandedEnergy() {
-		double ret = (getMaxIO() - bufferToNet) *ConversionUtil.euPerJoule() + .5;
+		double ret = (getMaxIO() - bufferToNet) * ConversionUtil.euPerJoule() + .05;
 		if (ret < .1)
 			ret = 0;
 		return ret;
@@ -370,12 +370,18 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	@Override
 	@Optional.Method(modid="ic2")
 	public double getOfferedEnergy() {
+		if (energyType != NONE && energyType != EU_DC) {
+			return .01;
+		}
 		return Math.min(maxToMachine, bufferToMachine) * ConversionUtil.euPerJoule();
 	}
 
 	@Override
 	@Optional.Method(modid="ic2")
 	public void drawEnergy(double amount) {
+		if (energyType != NONE && energyType != EU_DC) {
+			shouldBreak = true;
+		}
 		bufferToMachine -= amount*ConversionUtil.joulesPerEu();
 		markDirty();
 	}
@@ -405,7 +411,7 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 		} else if (energyType!=type) {
 			shouldBreak = true;
 		}
-		joules = Math.min(getMaxIO()-externalInputInTick, joules);
+		joules = Math.min(getMaxIO() - externalInputInTick + .5, joules);
 		if (bufferToNet < getMaxIO()) {
 			if (!simulate) {
 				bufferToNet += joules;
