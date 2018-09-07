@@ -1,5 +1,9 @@
 ###Minecraft 1.12.2
 
+####Version 1.7-31
+ - Fixed accidental conversion from FE to EU
+ - Fixed connectors not blowing up as intended
+ 
 ####Version 1.7-30
  - Fixed crashes when IC2 isn't installed
  - Fixed connectors allowing too much power output
