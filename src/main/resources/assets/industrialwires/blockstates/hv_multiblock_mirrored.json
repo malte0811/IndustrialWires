@@ -77,7 +77,11 @@
 				"model": "builtin/generated"
 			},
 			"connector": {
-				"model": "immersiveengineering:smartmodel/conn_empty"
+				"model": "immersiveengineering:smartmodel/connector",
+				"custom": {
+					"base": "builtin/generated",
+					"layers": []
+				}
 			}
 		},
 		"boolean0":

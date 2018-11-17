@@ -73,6 +73,8 @@ public class BakedMBIOModel implements IBakedModel {
 	@Nonnull
 	@Override
 	public List<BakedQuad> getQuads(@Nullable IBlockState state, @Nullable EnumFacing side, long rand) {
+		if (side != null)
+			return ImmutableList.of();
 		MBSideConfig config = NULL_CONFIG;
 		if (state instanceof IExtendedBlockState) {
 			MBSideConfig tmpConfig = ((IExtendedBlockState) state).getValue(IWProperties.MB_SIDES);
