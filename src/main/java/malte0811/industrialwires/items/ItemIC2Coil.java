@@ -47,7 +47,7 @@ public class ItemIC2Coil extends Item implements IWireCoil {
 	public final static String NAME = "ic2_wire_coil";
 
 	public ItemIC2Coil() {
-		setUnlocalizedName(IndustrialWires.MODID + "."+NAME);
+		setTranslationKey(IndustrialWires.MODID + "." + NAME);
 		setHasSubtypes(true);
 		this.setCreativeTab(IndustrialWires.creativeTab);
 		setMaxStackSize(1);
@@ -67,10 +67,11 @@ public class ItemIC2Coil extends Item implements IWireCoil {
 		}
 	}
 
+
 	@Nonnull
 	@Override
-	public String getUnlocalizedName(ItemStack stack) {
-		return this.getUnlocalizedName() + "." + subNames[stack.getMetadata()];
+	public String getTranslationKey(ItemStack stack) {
+		return this.getTranslationKey() + "." + subNames[stack.getMetadata()];
 	}
 
 	@Override

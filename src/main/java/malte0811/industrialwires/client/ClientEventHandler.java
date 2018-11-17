@@ -193,7 +193,7 @@ public class ClientEventHandler {
 	public static void renderWorldLastLow(RenderWorldLastEvent ev) {
 		if (shouldScreenshot) {
 			Minecraft mc = Minecraft.getMinecraft();
-			ITextComponent comp = ScreenShotHelper.saveScreenshot(mc.mcDataDir, mc.displayWidth, mc.displayHeight, mc.getFramebuffer());//TODO
+			ITextComponent comp = ScreenShotHelper.saveScreenshot(mc.gameDir, mc.displayWidth, mc.displayHeight, mc.getFramebuffer());//TODO
 			mc.player.sendMessage(comp);
 			shouldScreenshot = false;
 		}

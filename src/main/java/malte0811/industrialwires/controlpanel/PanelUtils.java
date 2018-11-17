@@ -304,7 +304,7 @@ public final class PanelUtils {
 		if (rs && data.hasKey(RS_CHANNEL)) {
 			EnumDyeColor channColor = EnumDyeColor.byMetadata(data.getInteger(RS_CHANNEL));
 			String hexCol = Integer.toHexString(channColor.getColorValue());
-			list.add(I18n.format("desc.immersiveengineering.info.redstoneChannel", "<hexcol=" + hexCol + ":" + channColor.getUnlocalizedName() + ">"));
+			list.add(I18n.format("desc.immersiveengineering.info.redstoneChannel", "<hexcol=" + hexCol + ":" + channColor.getTranslationKey() + ">"));
 		}
 		if (rs && data.hasKey(RS_ID)) {
 			list.add(I18n.format(IndustrialWires.MODID + ".tooltip.rsId", data.getInteger(RS_ID)));

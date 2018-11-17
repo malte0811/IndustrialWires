@@ -45,12 +45,12 @@ public class ItemBlockIW extends ItemBlock {
 
 	@Nonnull
 	@Override
-	public String getUnlocalizedName(ItemStack stack) {
+	public String getTranslationKey(ItemStack stack) {
 		int meta = stack.getMetadata();
 		if (values != null) {
-			return block.getUnlocalizedName() + "." + values[meta].toString().toLowerCase();
+			return block.getTranslationKey() + "." + values[meta].toString().toLowerCase();
 		} else {
-			return block.getUnlocalizedName();
+			return block.getTranslationKey();
 		}
 	}
 

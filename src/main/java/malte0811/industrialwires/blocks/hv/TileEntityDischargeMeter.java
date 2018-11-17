@@ -52,7 +52,7 @@ public class TileEntityDischargeMeter extends TileEntityIWBase implements IPlaye
 	@Override
 	public void readNBT(NBTTagCompound in, boolean updatePacket) {
 		hasWire = in.getBoolean(HAS_WIRE);
-		facing = EnumFacing.getHorizontal(in.getByte(FACING));
+		facing = EnumFacing.byHorizontalIndex(in.getByte(FACING));
 		lastDischarge = in.getDouble(LAST_DISCHARGE);
 		aabb = null;
 	}

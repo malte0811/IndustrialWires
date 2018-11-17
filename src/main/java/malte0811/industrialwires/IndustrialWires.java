@@ -140,8 +140,9 @@ public class IndustrialWires {
 	public static IndustrialWires instance = new IndustrialWires();
 	public static CreativeTabs creativeTab = new CreativeTabs(MODID) {
 
+
 		@Override
-		public ItemStack getTabIconItem() {
+		public ItemStack createIcon() {
 			if (coil!=null) {
 				return new ItemStack(coil, 1, 2);
 			} else {

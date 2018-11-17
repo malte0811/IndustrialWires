@@ -31,7 +31,7 @@ public final class Beziers {
 		int n = controls.length - 1;
 		for (int i = 0; i <= n; i++) {
 			double coeff = binomialCoeff(n, i) * Math.pow(t, i) * Math.pow(1 - t, n - i);
-			ret = ret.addVector(coeff * controls[i].x, coeff * controls[i].y, coeff * controls[i].z);
+			ret = ret.add(coeff * controls[i].x, coeff * controls[i].y, coeff * controls[i].z);
 		}
 		return ret;
 	}

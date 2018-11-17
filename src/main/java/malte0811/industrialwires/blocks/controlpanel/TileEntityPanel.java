@@ -106,8 +106,8 @@ public class TileEntityPanel extends TileEntityGeneralCP implements IDirectional
 	@Override
 	public void readNBT(NBTTagCompound in, boolean updatePacket) {
 		readFromItemNBT(in);
-		components.setFacing(EnumFacing.getHorizontal(in.getInteger("facing")));
-		components.setTop(EnumFacing.getFront(in.getInteger("top")));
+		components.setFacing(EnumFacing.byHorizontalIndex(in.getInteger("facing")));
+		components.setTop(EnumFacing.byIndex(in.getInteger("top")));
 	}
 
 	@Override
@@ -226,9 +226,9 @@ public class TileEntityPanel extends TileEntityGeneralCP implements IDirectional
 		Matrix4 mat = components.getPanelTopTransformInverse();
 		PanelComponent retPc = null;
 		RayTraceResult retRay = null;
-		Vec3d playerPosRelative = player.getPositionVector().addVector(-pos.getX(), player.getEyeHeight() - pos.getY(), -pos.getZ());
+		Vec3d playerPosRelative = player.getPositionVector().add(-pos.getX(), player.getEyeHeight() - pos.getY(), -pos.getZ());
 		Vec3d playerPosTransformed = mat.apply(playerPosRelative);
-		Vec3d hitRel = hitAbs ? hitVec.addVector(-pos.getX(), -pos.getY(), -pos.getZ()) : hitVec;
+		Vec3d hitRel = hitAbs ? hitVec.add(-pos.getX(), -pos.getY(), -pos.getZ()) : hitVec;
 		RayTraceResult r = getBoundingBox().calculateIntercept(playerPosRelative, playerPosRelative.add(player.getLookVec().scale(200)));
 		if (r != null && r.hitVec != null) {
 			hitRel = r.hitVec;

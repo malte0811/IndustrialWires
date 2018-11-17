@@ -113,7 +113,7 @@ public class BakedMBIOModel implements IBakedModel {
 		float[] vec = new float[3];
 		for (int i = 0; i < EnumFacing.VALUES.length; i++) {
 			EnumFacing f = EnumFacing.VALUES[i];
-			NORMALS[i] = new Vector3f(f.getFrontOffsetX(), f.getFrontOffsetY(), f.getFrontOffsetZ());
+			NORMALS[i] = new Vector3f(f.getXOffset(), f.getYOffset(), f.getZOffset());
 			int axis = f.getAxis().ordinal();
 			vec[axis] = f.getAxisDirection()==EnumFacing.AxisDirection.POSITIVE?1.001F:-.001F;
 			float x1 = f.getAxisDirection()==EnumFacing.AxisDirection.POSITIVE?offsetInner:1-offsetInner;

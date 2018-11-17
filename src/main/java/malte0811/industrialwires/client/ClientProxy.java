@@ -16,7 +16,6 @@ package malte0811.industrialwires.client;
 
 import blusunrize.immersiveengineering.api.ManualHelper;
 import blusunrize.immersiveengineering.api.ManualPageMultiblock;
-import blusunrize.immersiveengineering.api.energy.wires.WireApi;
 import blusunrize.immersiveengineering.client.ClientUtils;
 import blusunrize.immersiveengineering.common.Config;
 import blusunrize.immersiveengineering.common.util.Utils;
@@ -25,7 +24,6 @@ import blusunrize.lib.manual.ManualInstance;
 import blusunrize.lib.manual.ManualPages;
 import blusunrize.lib.manual.ManualPages.PositionedItemStack;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -91,45 +89,6 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public void preInit() {
 		super.preInit();
-
-		if (IndustrialWires.hasIC2) {
-			WireApi.registerConnectorForRender("ic2_conn_tin", new ResourceLocation("immersiveengineering:block/connector/connector_lv.obj"),
-					ImmutableMap.of("#immersiveengineering:blocks/connector_connector_lv",
-					IndustrialWires.MODID + ":blocks/ic2_conn_tin"));
-			WireApi.registerConnectorForRender("ic2_relay_tin", new ResourceLocation("immersiveengineering:block/connector/connector_lv.obj"),
-					ImmutableMap.of("#immersiveengineering:blocks/connector_connector_lv",
-					IndustrialWires.MODID + ":blocks/ic2_relay_tin"));
-
-			WireApi.registerConnectorForRender("ic2_conn_copper", new ResourceLocation("immersiveengineering:block/connector/connector_lv.obj"),
-					ImmutableMap.of("#immersiveengineering:blocks/connector_connector_lv",
-					IndustrialWires.MODID + ":blocks/ic2_conn_copper"));
-			WireApi.registerConnectorForRender("ic2_relay_copper", new ResourceLocation("immersiveengineering:block/connector/connector_lv.obj"),
-					ImmutableMap.of("#immersiveengineering:blocks/connector_connector_lv",
-					IndustrialWires.MODID + ":blocks/ic2_relay_copper"));
-
-			WireApi.registerConnectorForRender("ic2_conn_gold", new ResourceLocation("immersiveengineering:block/connector/connector_mv.obj"),
-					ImmutableMap.of("#immersiveengineering:blocks/connector_connector_mv",
-					IndustrialWires.MODID + ":blocks/ic2_conn_gold"));
-			WireApi.registerConnectorForRender("ic2_relay_gold", new ResourceLocation("immersiveengineering:block/connector/connector_mv.obj"),
-					ImmutableMap.of("#immersiveengineering:blocks/connector_connector_mv",
-					IndustrialWires.MODID + ":blocks/ic2_relay_gold"));
-
-			WireApi.registerConnectorForRender("ic2_conn_hv", new ResourceLocation("immersiveengineering:block/connector/connector_hv.obj"),
-					ImmutableMap.of("#immersiveengineering:blocks/connector_connector_hv",
-					IndustrialWires.MODID + ":blocks/ic2_conn_hv"));
-			WireApi.registerConnectorForRender("ic2_relay_hv", new ResourceLocation("immersiveengineering:block/connector/relay_hv.obj"), null);
-
-			WireApi.registerConnectorForRender("ic2_conn_glass", new ResourceLocation("immersiveengineering:block/connector/connector_hv.obj"),
-					ImmutableMap.of("#immersiveengineering:blocks/connector_connector_hv",
-					IndustrialWires.MODID + ":blocks/ic2_conn_glass"));
-			WireApi.registerConnectorForRender("ic2_relay_glass", new ResourceLocation("immersiveengineering:block/connector/relay_hv.obj"),
-					ImmutableMap.of("#immersiveengineering:blocks/connector_relay_hv",
-					IndustrialWires.MODID + ":blocks/ic2_relay_glass"));
-		}
-		WireApi.registerConnectorForRender("rs_panel_conn", new ResourceLocation("industrialwires:block/rs_panel_conn.obj"), null);
-
-		WireApi.registerConnectorForRender("empty", new ResourceLocation("builtin/generated"), null);
-
 		OBJLoader.INSTANCE.addDomain(IndustrialWires.MODID);
 		ModelLoaderRegistry.registerLoader(new PanelModelLoader());
 		ModelLoaderRegistry.registerLoader(new MBIOModelLoader());

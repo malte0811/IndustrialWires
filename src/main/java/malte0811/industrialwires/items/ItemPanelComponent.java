@@ -58,7 +58,7 @@ public class ItemPanelComponent extends Item implements INetGUIItem {
 	public static final String NAME = "panel_component";
 
 	public ItemPanelComponent() {
-		setUnlocalizedName(IndustrialWires.MODID + "."+NAME);
+		setTranslationKey(IndustrialWires.MODID + "." + NAME);
 		setHasSubtypes(true);
 		this.setCreativeTab(IndustrialWires.creativeTab);
 		setMaxStackSize(64);
@@ -85,10 +85,11 @@ public class ItemPanelComponent extends Item implements INetGUIItem {
 		return ClientProxy.itemFont;//TODO non-core-IE solution?
 	}
 
+
 	@Nonnull
 	@Override
-	public String getUnlocalizedName(ItemStack stack) {
-		return this.getUnlocalizedName() + "." + types[stack.getMetadata()];
+	public String getTranslationKey(ItemStack stack) {
+		return this.getTranslationKey() + "." + types[stack.getMetadata()];
 	}
 
 	@Override

@@ -143,9 +143,10 @@ public class BlockJacobsLadder extends BlockIWBase implements IMetaEnum, IPlacem
 		return new ItemStack(this, 1, getMetaFromState(state));
 	}
 
+
 	@Override
-	public void onEntityCollidedWithBlock(World worldIn, BlockPos pos, IBlockState state, Entity entityIn) {
-		super.onEntityCollidedWithBlock(worldIn, pos, state, entityIn);
+	public void onEntityCollision(World worldIn, BlockPos pos, IBlockState state, Entity entityIn) {
+		super.onEntityCollision(worldIn, pos, state, entityIn);
 		TileEntity te = worldIn.getTileEntity(pos);
 		if (te instanceof TileEntityJacobsLadder) {
 			((TileEntityJacobsLadder) te).onEntityTouch(entityIn);

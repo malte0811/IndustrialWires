@@ -42,7 +42,7 @@ public class ItemKey extends Item implements INetGUIItem {
 	public static final String ITEM_NAME = "key";
 
 	public ItemKey() {
-		setUnlocalizedName(IndustrialWires.MODID + "."+ITEM_NAME);
+		setTranslationKey(IndustrialWires.MODID + "." + ITEM_NAME);
 		setHasSubtypes(true);
 		this.setCreativeTab(IndustrialWires.creativeTab);
 		setMaxStackSize(64);
@@ -83,7 +83,7 @@ public class ItemKey extends Item implements INetGUIItem {
 
 	@Nonnull
 	@Override
-	public String getUnlocalizedName(ItemStack stack) {
+	public String getTranslationKey(ItemStack stack) {
 		return "item."+IndustrialWires.MODID+".key."+types[stack.getMetadata()];
 	}
 

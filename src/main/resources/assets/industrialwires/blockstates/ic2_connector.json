@@ -3,7 +3,6 @@
 	"defaults": {
 		"transform": "forge:default-block",
 		"textures": {
-			
 		},
 		"custom": {
 			"flip-v": true
@@ -17,13 +16,95 @@
 					"#immersiveengineering:blocks/connector_connector_lv": "industrialwires:blocks/ic2_conn_tin"
 				},
 				"transform": {
-					"scale": [ 0.5, 0.5, 0.5 ],
-					"firstperson_righthand": { "translation": [ 0, 0.25, 0.125 ]},
-					"firstperson_lefthand": { "translation": [ 0, 0.25, 0.125 ]},
-					"thirdperson_righthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
-					"thirdperson_lefthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
-					"fixed": {"scale": [ 2,2,2 ], "translation": [ 0, 0, 0 ], "rotation": [{ "y": -90 }]},
-					"gui": { "translation": [ 0, 0.125, 0 ], "rotation": [{ "x": 30 },{ "y": 135 },{ "z": 0 }], "scale": [ 1.5, 1.5, 1.5 ] }
+					"scale": [
+						0.5,
+						0.5,
+						0.5
+					],
+					"firstperson_righthand": {
+						"translation": [
+							0,
+							0.25,
+							0.125
+						]
+					},
+					"firstperson_lefthand": {
+						"translation": [
+							0,
+							0.25,
+							0.125
+						]
+					},
+					"thirdperson_righthand": {
+						"translation": [
+							-0.0625,
+							0.125,
+							0.1875
+						],
+						"rotation": [
+							{
+								"x": 70
+							},
+							{
+								"y": 70
+							}
+						]
+					},
+					"thirdperson_lefthand": {
+						"translation": [
+							-0.0625,
+							0.125,
+							0.1875
+						],
+						"rotation": [
+							{
+								"x": 70
+							},
+							{
+								"y": 70
+							}
+						]
+					},
+					"fixed": {
+						"scale": [
+							2,
+							2,
+							2
+						],
+						"translation": [
+							0,
+							0,
+							0
+						],
+						"rotation": [
+							{
+								"y": -90
+							}
+						]
+					},
+					"gui": {
+						"translation": [
+							0,
+							0.125,
+							0
+						],
+						"rotation": [
+							{
+								"x": 30
+							},
+							{
+								"y": 135
+							},
+							{
+								"z": 0
+							}
+						],
+						"scale": [
+							1.5,
+							1.5,
+							1.5
+						]
+					}
 				}
 			}
 		],
@@ -34,13 +115,95 @@
 					"#immersiveengineering:blocks/connector_connector_lv": "industrialwires:blocks/ic2_relay_tin"
 				},
 				"transform": {
-					"scale": [ 0.5, 0.5, 0.5 ],
-					"firstperson_righthand": { "translation": [ 0, 0.25, 0.125 ]},
-					"firstperson_lefthand": { "translation": [ 0, 0.25, 0.125 ]},
-					"thirdperson_righthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
-					"thirdperson_lefthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
-					"fixed": {"scale": [ 2,2,2 ], "translation": [ 0, 0, 0 ], "rotation": [{ "y": -90 }]},
-					"gui": { "translation": [ 0, 0.125, 0 ], "rotation": [{ "x": 30 },{ "y": 135 },{ "z": 0 }], "scale": [ 1.5, 1.5, 1.5 ] }
+					"scale": [
+						0.5,
+						0.5,
+						0.5
+					],
+					"firstperson_righthand": {
+						"translation": [
+							0,
+							0.25,
+							0.125
+						]
+					},
+					"firstperson_lefthand": {
+						"translation": [
+							0,
+							0.25,
+							0.125
+						]
+					},
+					"thirdperson_righthand": {
+						"translation": [
+							-0.0625,
+							0.125,
+							0.1875
+						],
+						"rotation": [
+							{
+								"x": 70
+							},
+							{
+								"y": 70
+							}
+						]
+					},
+					"thirdperson_lefthand": {
+						"translation": [
+							-0.0625,
+							0.125,
+							0.1875
+						],
+						"rotation": [
+							{
+								"x": 70
+							},
+							{
+								"y": 70
+							}
+						]
+					},
+					"fixed": {
+						"scale": [
+							2,
+							2,
+							2
+						],
+						"translation": [
+							0,
+							0,
+							0
+						],
+						"rotation": [
+							{
+								"y": -90
+							}
+						]
+					},
+					"gui": {
+						"translation": [
+							0,
+							0.125,
+							0
+						],
+						"rotation": [
+							{
+								"x": 30
+							},
+							{
+								"y": 135
+							},
+							{
+								"z": 0
+							}
+						],
+						"scale": [
+							1.5,
+							1.5,
+							1.5
+						]
+					}
 				}
 			}
 		],
@@ -51,13 +214,95 @@
 					"#immersiveengineering:blocks/connector_connector_lv": "industrialwires:blocks/ic2_conn_copper"
 				},
 				"transform": {
-					"scale": [ 0.5, 0.5, 0.5 ],
-					"firstperson_righthand": { "translation": [ 0, 0.25, 0.125 ]},
-					"firstperson_lefthand": { "translation": [ 0, 0.25, 0.125 ]},
-					"thirdperson_righthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
-					"thirdperson_lefthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
-					"fixed": {"scale": [ 2,2,2 ], "translation": [ 0, 0, 0 ], "rotation": [{ "y": -90 }]},
-					"gui": { "translation": [ 0, 0.125, 0 ], "rotation": [{ "x": 30 },{ "y": 135 },{ "z": 0 }], "scale": [ 1.5, 1.5, 1.5 ] }
+					"scale": [
+						0.5,
+						0.5,
+						0.5
+					],
+					"firstperson_righthand": {
+						"translation": [
+							0,
+							0.25,
+							0.125
+						]
+					},
+					"firstperson_lefthand": {
+						"translation": [
+							0,
+							0.25,
+							0.125
+						]
+					},
+					"thirdperson_righthand": {
+						"translation": [
+							-0.0625,
+							0.125,
+							0.1875
+						],
+						"rotation": [
+							{
+								"x": 70
+							},
+							{
+								"y": 70
+							}
+						]
+					},
+					"thirdperson_lefthand": {
+						"translation": [
+							-0.0625,
+							0.125,
+							0.1875
+						],
+						"rotation": [
+							{
+								"x": 70
+							},
+							{
+								"y": 70
+							}
+						]
+					},
+					"fixed": {
+						"scale": [
+							2,
+							2,
+							2
+						],
+						"translation": [
+							0,
+							0,
+							0
+						],
+						"rotation": [
+							{
+								"y": -90
+							}
+						]
+					},
+					"gui": {
+						"translation": [
+							0,
+							0.125,
+							0
+						],
+						"rotation": [
+							{
+								"x": 30
+							},
+							{
+								"y": 135
+							},
+							{
+								"z": 0
+							}
+						],
+						"scale": [
+							1.5,
+							1.5,
+							1.5
+						]
+					}
 				}
 			}
 		],
@@ -68,13 +313,95 @@
 					"#immersiveengineering:blocks/connector_connector_lv": "industrialwires:blocks/ic2_relay_copper"
 				},
 				"transform": {
-					"scale": [ 0.5, 0.5, 0.5 ],
-					"firstperson_righthand": { "translation": [ 0, 0.25, 0.125 ]},
-					"firstperson_lefthand": { "translation": [ 0, 0.25, 0.125 ]},
-					"thirdperson_righthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
-					"thirdperson_lefthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
-					"fixed": {"scale": [ 2,2,2 ], "translation": [ 0, 0, 0 ], "rotation": [{ "y": -90 }]},
-					"gui": { "translation": [ 0, 0.125, 0 ], "rotation": [{ "x": 30 },{ "y": 135 },{ "z": 0 }], "scale": [ 1.5, 1.5, 1.5 ] }
+					"scale": [
+						0.5,
+						0.5,
+						0.5
+					],
+					"firstperson_righthand": {
+						"translation": [
+							0,
+							0.25,
+							0.125
+						]
+					},
+					"firstperson_lefthand": {
+						"translation": [
+							0,
+							0.25,
+							0.125
+						]
+					},
+					"thirdperson_righthand": {
+						"translation": [
+							-0.0625,
+							0.125,
+							0.1875
+						],
+						"rotation": [
+							{
+								"x": 70
+							},
+							{
+								"y": 70
+							}
+						]
+					},
+					"thirdperson_lefthand": {
+						"translation": [
+							-0.0625,
+							0.125,
+							0.1875
+						],
+						"rotation": [
+							{
+								"x": 70
+							},
+							{
+								"y": 70
+							}
+						]
+					},
+					"fixed": {
+						"scale": [
+							2,
+							2,
+							2
+						],
+						"translation": [
+							0,
+							0,
+							0
+						],
+						"rotation": [
+							{
+								"y": -90
+							}
+						]
+					},
+					"gui": {
+						"translation": [
+							0,
+							0.125,
+							0
+						],
+						"rotation": [
+							{
+								"x": 30
+							},
+							{
+								"y": 135
+							},
+							{
+								"z": 0
+							}
+						],
+						"scale": [
+							1.5,
+							1.5,
+							1.5
+						]
+					}
 				}
 			}
 		],
@@ -85,13 +412,95 @@
 					"#immersiveengineering:blocks/connector_connector_mv": "industrialwires:blocks/ic2_conn_gold"
 				},
 				"transform": {
-					"scale": [ 0.5, 0.5, 0.5 ],
-					"firstperson_righthand": { "translation": [ 0, 0.25, 0.125 ]},
-					"firstperson_lefthand": { "translation": [ 0, 0.25, 0.125 ]},
-					"thirdperson_righthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
-					"thirdperson_lefthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
-					"fixed": {"scale": [ 2,2,2 ], "translation": [ 0, 0, 0 ], "rotation": [{ "y": -90 }]},
-					"gui": { "translation": [ 0, 0.125, 0 ], "rotation": [{ "x": 30 },{ "y": 135 },{ "z": 0 }], "scale": [ 1.5, 1.5, 1.5 ] }
+					"scale": [
+						0.5,
+						0.5,
+						0.5
+					],
+					"firstperson_righthand": {
+						"translation": [
+							0,
+							0.25,
+							0.125
+						]
+					},
+					"firstperson_lefthand": {
+						"translation": [
+							0,
+							0.25,
+							0.125
+						]
+					},
+					"thirdperson_righthand": {
+						"translation": [
+							-0.0625,
+							0.125,
+							0.1875
+						],
+						"rotation": [
+							{
+								"x": 70
+							},
+							{
+								"y": 70
+							}
+						]
+					},
+					"thirdperson_lefthand": {
+						"translation": [
+							-0.0625,
+							0.125,
+							0.1875
+						],
+						"rotation": [
+							{
+								"x": 70
+							},
+							{
+								"y": 70
+							}
+						]
+					},
+					"fixed": {
+						"scale": [
+							2,
+							2,
+							2
+						],
+						"translation": [
+							0,
+							0,
+							0
+						],
+						"rotation": [
+							{
+								"y": -90
+							}
+						]
+					},
+					"gui": {
+						"translation": [
+							0,
+							0.125,
+							0
+						],
+						"rotation": [
+							{
+								"x": 30
+							},
+							{
+								"y": 135
+							},
+							{
+								"z": 0
+							}
+						],
+						"scale": [
+							1.5,
+							1.5,
+							1.5
+						]
+					}
 				}
 			}
 		],
@@ -102,13 +511,95 @@
 					"#immersiveengineering:blocks/connector_connector_mv": "industrialwires:blocks/ic2_relay_gold"
 				},
 				"transform": {
-					"scale": [ 0.5, 0.5, 0.5 ],
-					"firstperson_righthand": { "translation": [ 0, 0.25, 0.125 ]},
-					"firstperson_lefthand": { "translation": [ 0, 0.25, 0.125 ]},
-					"thirdperson_righthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
-					"thirdperson_lefthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
-					"fixed": {"scale": [ 2,2,2 ], "translation": [ 0, 0, 0 ], "rotation": [{ "y": -90 }]},
-					"gui": { "translation": [ 0, 0.125, 0 ], "rotation": [{ "x": 30 },{ "y": 135 },{ "z": 0 }], "scale": [ 1.5, 1.5, 1.5 ] }
+					"scale": [
+						0.5,
+						0.5,
+						0.5
+					],
+					"firstperson_righthand": {
+						"translation": [
+							0,
+							0.25,
+							0.125
+						]
+					},
+					"firstperson_lefthand": {
+						"translation": [
+							0,
+							0.25,
+							0.125
+						]
+					},
+					"thirdperson_righthand": {
+						"translation": [
+							-0.0625,
+							0.125,
+							0.1875
+						],
+						"rotation": [
+							{
+								"x": 70
+							},
+							{
+								"y": 70
+							}
+						]
+					},
+					"thirdperson_lefthand": {
+						"translation": [
+							-0.0625,
+							0.125,
+							0.1875
+						],
+						"rotation": [
+							{
+								"x": 70
+							},
+							{
+								"y": 70
+							}
+						]
+					},
+					"fixed": {
+						"scale": [
+							2,
+							2,
+							2
+						],
+						"translation": [
+							0,
+							0,
+							0
+						],
+						"rotation": [
+							{
+								"y": -90
+							}
+						]
+					},
+					"gui": {
+						"translation": [
+							0,
+							0.125,
+							0
+						],
+						"rotation": [
+							{
+								"x": 30
+							},
+							{
+								"y": 135
+							},
+							{
+								"z": 0
+							}
+						],
+						"scale": [
+							1.5,
+							1.5,
+							1.5
+						]
+					}
 				}
 			}
 		],
@@ -119,13 +610,95 @@
 					"#immersiveengineering:blocks/connector_connector_hv": "industrialwires:blocks/ic2_conn_hv"
 				},
 				"transform": {
-					"scale": [ 0.5, 0.5, 0.5 ],
-					"firstperson_righthand": { "translation": [ 0, 0.25, 0.125 ]},
-					"firstperson_lefthand": { "translation": [ 0, 0.25, 0.125 ]},
-					"thirdperson_righthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
-					"thirdperson_lefthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
-					"fixed": {"scale": [ 2,2,2 ], "translation": [ 0, 0, 0 ], "rotation": [{ "y": -90 }]},
-					"gui": { "translation": [ 0, 0.125, 0 ], "rotation": [{ "x": 30 },{ "y": 135 },{ "z": 0 }], "scale": [ 1.5, 1.5, 1.5 ] }
+					"scale": [
+						0.5,
+						0.5,
+						0.5
+					],
+					"firstperson_righthand": {
+						"translation": [
+							0,
+							0.25,
+							0.125
+						]
+					},
+					"firstperson_lefthand": {
+						"translation": [
+							0,
+							0.25,
+							0.125
+						]
+					},
+					"thirdperson_righthand": {
+						"translation": [
+							-0.0625,
+							0.125,
+							0.1875
+						],
+						"rotation": [
+							{
+								"x": 70
+							},
+							{
+								"y": 70
+							}
+						]
+					},
+					"thirdperson_lefthand": {
+						"translation": [
+							-0.0625,
+							0.125,
+							0.1875
+						],
+						"rotation": [
+							{
+								"x": 70
+							},
+							{
+								"y": 70
+							}
+						]
+					},
+					"fixed": {
+						"scale": [
+							2,
+							2,
+							2
+						],
+						"translation": [
+							0,
+							0,
+							0
+						],
+						"rotation": [
+							{
+								"y": -90
+							}
+						]
+					},
+					"gui": {
+						"translation": [
+							0,
+							0.125,
+							0
+						],
+						"rotation": [
+							{
+								"x": 30
+							},
+							{
+								"y": 135
+							},
+							{
+								"z": 0
+							}
+						],
+						"scale": [
+							1.5,
+							1.5,
+							1.5
+						]
+					}
 				}
 			}
 		],
@@ -133,13 +706,95 @@
 			{
 				"model": "immersiveengineering:connector/relay_hv.obj",
 				"transform": {
-					"scale": [ 0.5, 0.5, 0.5 ],
-					"firstperson_righthand": { "translation": [ 0, 0.25, 0.125 ]},
-					"firstperson_lefthand": { "translation": [ 0, 0.25, 0.125 ]},
-					"thirdperson_righthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
-					"thirdperson_lefthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
-					"fixed": {"scale": [ 2,2,2 ], "translation": [ 0, 0, 0 ], "rotation": [{ "y": -90 }]},
-					"gui": { "translation": [ 0, 0.125, 0 ], "rotation": [{ "x": 30 },{ "y": 135 },{ "z": 0 }], "scale": [ 1.5, 1.5, 1.5 ] }
+					"scale": [
+						0.5,
+						0.5,
+						0.5
+					],
+					"firstperson_righthand": {
+						"translation": [
+							0,
+							0.25,
+							0.125
+						]
+					},
+					"firstperson_lefthand": {
+						"translation": [
+							0,
+							0.25,
+							0.125
+						]
+					},
+					"thirdperson_righthand": {
+						"translation": [
+							-0.0625,
+							0.125,
+							0.1875
+						],
+						"rotation": [
+							{
+								"x": 70
+							},
+							{
+								"y": 70
+							}
+						]
+					},
+					"thirdperson_lefthand": {
+						"translation": [
+							-0.0625,
+							0.125,
+							0.1875
+						],
+						"rotation": [
+							{
+								"x": 70
+							},
+							{
+								"y": 70
+							}
+						]
+					},
+					"fixed": {
+						"scale": [
+							2,
+							2,
+							2
+						],
+						"translation": [
+							0,
+							0,
+							0
+						],
+						"rotation": [
+							{
+								"y": -90
+							}
+						]
+					},
+					"gui": {
+						"translation": [
+							0,
+							0.125,
+							0
+						],
+						"rotation": [
+							{
+								"x": 30
+							},
+							{
+								"y": 135
+							},
+							{
+								"z": 0
+							}
+						],
+						"scale": [
+							1.5,
+							1.5,
+							1.5
+						]
+					}
 				}
 			}
 		],
@@ -150,13 +805,95 @@
 					"#immersiveengineering:blocks/connector_connector_hv": "industrialwires:blocks/ic2_conn_glass"
 				},
 				"transform": {
-					"scale": [ 0.5, 0.5, 0.5 ],
-					"firstperson_righthand": { "translation": [ 0, 0.25, 0.125 ]},
-					"firstperson_lefthand": { "translation": [ 0, 0.25, 0.125 ]},
-					"thirdperson_righthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
-					"thirdperson_lefthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
-					"fixed": {"scale": [ 2,2,2 ], "translation": [ 0, 0, 0 ], "rotation": [{ "y": -90 }]},
-					"gui": { "translation": [ 0, 0.125, 0 ], "rotation": [{ "x": 30 },{ "y": 135 },{ "z": 0 }], "scale": [ 1.5, 1.5, 1.5 ] }
+					"scale": [
+						0.5,
+						0.5,
+						0.5
+					],
+					"firstperson_righthand": {
+						"translation": [
+							0,
+							0.25,
+							0.125
+						]
+					},
+					"firstperson_lefthand": {
+						"translation": [
+							0,
+							0.25,
+							0.125
+						]
+					},
+					"thirdperson_righthand": {
+						"translation": [
+							-0.0625,
+							0.125,
+							0.1875
+						],
+						"rotation": [
+							{
+								"x": 70
+							},
+							{
+								"y": 70
+							}
+						]
+					},
+					"thirdperson_lefthand": {
+						"translation": [
+							-0.0625,
+							0.125,
+							0.1875
+						],
+						"rotation": [
+							{
+								"x": 70
+							},
+							{
+								"y": 70
+							}
+						]
+					},
+					"fixed": {
+						"scale": [
+							2,
+							2,
+							2
+						],
+						"translation": [
+							0,
+							0,
+							0
+						],
+						"rotation": [
+							{
+								"y": -90
+							}
+						]
+					},
+					"gui": {
+						"translation": [
+							0,
+							0.125,
+							0
+						],
+						"rotation": [
+							{
+								"x": 30
+							},
+							{
+								"y": 135
+							},
+							{
+								"z": 0
+							}
+						],
+						"scale": [
+							1.5,
+							1.5,
+							1.5
+						]
+					}
 				}
 			}
 		],
@@ -167,51 +904,219 @@
 					"#immersiveengineering:blocks/connector_relay_hv": "industrialwires:blocks/ic2_relay_glass"
 				},
 				"transform": {
-					"scale": [ 0.5, 0.5, 0.5 ],
-					"firstperson_righthand": { "translation": [ 0, 0.25, 0.125 ]},
-					"firstperson_lefthand": { "translation": [ 0, 0.25, 0.125 ]},
-					"thirdperson_righthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
-					"thirdperson_lefthand": { "translation": [ -0.0625, 0.125, 0.1875 ], "rotation": [{ "x": 70 }, { "y": 70 }]},
-					"fixed": {"scale": [ 2,2,2 ], "translation": [ 0, 0, 0 ], "rotation": [{ "y": -90 }]},
-					"gui": { "translation": [ 0, 0.125, 0 ], "rotation": [{ "x": 30 },{ "y": 135 },{ "z": 0 }], "scale": [ 1.5, 1.5, 1.5 ] }
+					"scale": [
+						0.5,
+						0.5,
+						0.5
+					],
+					"firstperson_righthand": {
+						"translation": [
+							0,
+							0.25,
+							0.125
+						]
+					},
+					"firstperson_lefthand": {
+						"translation": [
+							0,
+							0.25,
+							0.125
+						]
+					},
+					"thirdperson_righthand": {
+						"translation": [
+							-0.0625,
+							0.125,
+							0.1875
+						],
+						"rotation": [
+							{
+								"x": 70
+							},
+							{
+								"y": 70
+							}
+						]
+					},
+					"thirdperson_lefthand": {
+						"translation": [
+							-0.0625,
+							0.125,
+							0.1875
+						],
+						"rotation": [
+							{
+								"x": 70
+							},
+							{
+								"y": 70
+							}
+						]
+					},
+					"fixed": {
+						"scale": [
+							2,
+							2,
+							2
+						],
+						"translation": [
+							0,
+							0,
+							0
+						],
+						"rotation": [
+							{
+								"y": -90
+							}
+						]
+					},
+					"gui": {
+						"translation": [
+							0,
+							0.125,
+							0
+						],
+						"rotation": [
+							{
+								"x": 30
+							},
+							{
+								"y": 135
+							},
+							{
+								"z": 0
+							}
+						],
+						"scale": [
+							1.5,
+							1.5,
+							1.5
+						]
+					}
 				}
 			}
 		],
 		"type": {
 			"tin_conn": {
-				"model": "immersiveengineering:smartmodel/conn_ic2_conn_tin"
+				"model": "immersiveengineering:smartmodel/connector",
+				"custom": {
+					"base": "immersiveengineering:block/connector/connector_lv.obj",
+					"layers": [
+						"SOLID"
+					]
+				},
+				"textures": {
+					"#immersiveengineering:blocks/connector_connector_lv": "industrialwires:blocks/ic2_conn_tin"
+				}
 			},
 			"tin_relay": {
-				"model": "immersiveengineering:smartmodel/conn_ic2_relay_tin"
+				"model": "immersiveengineering:smartmodel/connector",
+				"custom": {
+					"base": "immersiveengineering:block/connector/connector_lv.obj",
+					"layers": [
+						"SOLID"
+					]
+				},
+				"textures": {
+					"#immersiveengineering:blocks/connector_connector_lv": "industrialwires:blocks/ic2_relay_tin"
+				}
 			},
 			"copper_conn": {
-				"model": "immersiveengineering:smartmodel/conn_ic2_conn_copper"
+				"model": "immersiveengineering:smartmodel/connector",
+				"custom": {
+					"base": "immersiveengineering:block/connector/connector_lv.obj",
+					"layers": [
+						"SOLID"
+					]
+				},
+				"textures": {
+					"#immersiveengineering:blocks/connector_connector_lv": "industrialwires:blocks/ic2_conn_copper"
+				}
 			},
 			"copper_relay": {
-				"model": "immersiveengineering:smartmodel/conn_ic2_relay_copper"
+				"model": "immersiveengineering:smartmodel/connector",
+				"custom": {
+					"base": "immersiveengineering:block/connector/connector_lv.obj",
+					"layers": [
+						"SOLID"
+					]
+				},
+				"textures": {
+					"#immersiveengineering:blocks/connector_connector_lv": "industrialwires:blocks/ic2_relay_copper"
+				}
 			},
 			"gold_conn": {
-				"model": "immersiveengineering:smartmodel/conn_ic2_conn_gold"
+				"model": "immersiveengineering:smartmodel/connector",
+				"custom": {
+					"base": "immersiveengineering:block/connector/connector_mv.obj",
+					"layers": [
+						"SOLID"
+					]
+				},
+				"textures": {
+					"#immersiveengineering:blocks/connector_connector_mv": "industrialwires:blocks/ic2_conn_gold"
+				}
 			},
 			"gold_relay": {
-				"model": "immersiveengineering:smartmodel/conn_ic2_relay_gold"
+				"model": "immersiveengineering:smartmodel/connector",
+				"custom": {
+					"base": "immersiveengineering:block/connector/connector_mv.obj",
+					"layers": [
+						"SOLID"
+					]
+				},
+				"textures": {
+					"#immersiveengineering:blocks/connector_connector_mv": "industrialwires:blocks/ic2_relay_gold"
+				}
 			},
 			"hv_conn": {
-				"model": "immersiveengineering:smartmodel/conn_ic2_conn_hv"
+				"model": "immersiveengineering:smartmodel/connector",
+				"custom": {
+					"base": "immersiveengineering:block/connector/connector_hv.obj",
+					"layers": [
+						"SOLID"
+					]
+				},
+				"textures": {
+					"#immersiveengineering:blocks/connector_connector_hv": "industrialwires:blocks/ic2_conn_hv"
+				}
 			},
 			"hv_relay": {
-				"model": "immersiveengineering:smartmodel/conn_ic2_relay_hv"
+				"model": "immersiveengineering:smartmodel/connector",
+				"custom": {
+					"base": "immersiveengineering:block/connector/relay_hv.obj",
+					"layers": [
+						"TRANSLUCENT"
+					]
+				}
 			},
 			"glass_conn": {
-				"model": "immersiveengineering:smartmodel/conn_ic2_conn_glass"
+				"model": "immersiveengineering:smartmodel/connector",
+				"custom": {
+					"base": "immersiveengineering:block/connector/connector_hv.obj",
+					"layers": [
+						"SOLID"
+					]
+				},
+				"textures": {
+					"#immersiveengineering:blocks/connector_connector_hv": "industrialwires:blocks/ic2_conn_glass"
+				}
 			},
 			"glass_relay": {
-				"model": "immersiveengineering:smartmodel/conn_ic2_relay_glass"
+				"model": "immersiveengineering:smartmodel/connector",
+				"custom": {
+					"base": "immersiveengineering:block/connector/relay_hv.obj",
+					"layers": [
+						"TRANSLUCENT"
+					]
+				},
+				"textures": {
+					"#immersiveengineering:blocks/connector_relay_hv": "industrialwires:blocks/ic2_relay_glass"
+				}
 			}
 		},
 		"facing": {
 			"down": {
-				
 			},
 			"up": {
 				"transform": {

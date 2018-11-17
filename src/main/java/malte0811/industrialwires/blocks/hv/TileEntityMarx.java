@@ -714,16 +714,16 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 					.radius(5);
 			List<Light> toAdd = new ArrayList<>(te.stageCount*2-3);
 			if (te.dischargeData!=null&&te.dischargeData.energy>0) {
-				toAdd.add(builder.pos(origin.addVector(0, 0, 0)).build());
-				toAdd.add(builder.pos(origin.addVector(0, te.stageCount/2, 0)).build());
-				toAdd.add(builder.pos(origin.addVector(0, te.stageCount-2, 0)).build());
+				toAdd.add(builder.pos(origin.add(0, 0, 0)).build());
+				toAdd.add(builder.pos(origin.add(0, te.stageCount / 2, 0)).build());
+				toAdd.add(builder.pos(origin.add(0, te.stageCount - 2, 0)).build());
 			}
 			origin = new Vec3d(offset(te.pos, te.facing, te.mirrored, 1, 0, 0))
-					.addVector(0, .75, 0)
+					.add(0, .75, 0)
 					.add(new Vec3d(te.facing.getDirectionVec()).scale(.25));
 			builder.radius(.5F);
 			for (int i = 0;i<te.stageCount-1;i+=te.stageCount/5) {
-				toAdd.add(builder.pos(origin.addVector(0, i, 0)).build());
+				toAdd.add(builder.pos(origin.add(0, i, 0)).build());
 			}
 			event.getLightList().addAll(toAdd);
 		}
@@ -768,12 +768,12 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 			Vec3d diff = vertices[max].subtract(vertices[min]);
 			Vec3d v0 = diff.crossProduct(side);
 			transform.setIdentity();
-			double diffLength = diff.lengthVector();
+			double diffLength = diff.length();
 			double noise = Math.sqrt(diffLength)*rand.nextDouble()*1/(1+Math.abs(stageCount/2.0-toGenerate))*.75;
 			if ((max-min)%2==1) {
 				noise *= (toGenerate-min)/(double)(max-min);
 			}
-			v0 = v0.scale((float) (noise/v0.lengthVector()));
+			v0 = v0.scale((float) (noise / v0.length()));
 			diff = diff.scale(1/diffLength);
 			transform.rotate(Math.PI*2*rand.nextDouble(), diff.x, diff.y, diff.z);
 			Vec3d center = vertices[max].add(vertices[min]).scale(.5);

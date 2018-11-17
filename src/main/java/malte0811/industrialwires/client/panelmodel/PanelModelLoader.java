@@ -47,13 +47,13 @@ public class PanelModelLoader implements ICustomModelLoader {
 
 	@Override
 	public boolean accepts(@Nonnull ResourceLocation modelLocation) {
-		return modelLocation.getResourcePath().contains(RESOURCE_BASE + RESOURCE_LOCATION);
+		return modelLocation.getPath().contains(RESOURCE_BASE + RESOURCE_LOCATION);
 	}
 
 	@Nonnull
 	@Override
 	public IModel loadModel(@Nonnull ResourceLocation modelLocation) throws IOException {
-		String resourcePath = modelLocation.getResourcePath();
+		String resourcePath = modelLocation.getPath();
 		int pos = resourcePath.indexOf(RESOURCE_LOCATION);
 		if (pos >= 0) {
 			return new PanelModelBase();

@@ -37,7 +37,7 @@ public class IWPotions {
 			setIconIndex(0, 0);
 			this.setRegistryName(new ResourceLocation(IndustrialWires.MODID, "tinnitus"));
 			ForgeRegistries.POTIONS.register(this);
-			this.setPotionName("potion."+ IndustrialWires.MODID+"." + getRegistryName().getResourcePath());
+			this.setPotionName("potion." + IndustrialWires.MODID + "." + getRegistryName().getPath());
 		}
 
 		@Override

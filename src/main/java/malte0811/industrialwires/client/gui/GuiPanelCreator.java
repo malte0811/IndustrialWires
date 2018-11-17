@@ -309,7 +309,7 @@ public class GuiPanelCreator extends GuiContainer {
 			nbt.setInteger("type", MessageType.DISASSEMBLE.ordinal());
 			break;
 		}
-		if (!nbt.hasNoTags()) {
+		if (!nbt.isEmpty()) {
 			IndustrialWires.packetHandler.sendToServer(new MessageGUIInteract(container.tile, nbt));
 		}
 	}

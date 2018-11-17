@@ -309,9 +309,9 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 		EnumFacing side = facing.getOpposite();
 		double conRadius = con.cableType.getRenderDiameter() / 2;
 		double length = relay?relayOffset:connOffset;
-		return new Vec3d(.5 + ( length - conRadius) * side.getFrontOffsetX(),
-				.5 + (length - conRadius) * side.getFrontOffsetY(),
-				.5 + (length - conRadius) * side.getFrontOffsetZ());
+		return new Vec3d(.5 + (length - conRadius) * side.getXOffset(),
+				.5 + (length - conRadius) * side.getYOffset(),
+				.5 + (length - conRadius) * side.getZOffset());
 	}
 
 	@Override
@@ -427,7 +427,7 @@ public class TileEntityIC2ConnectorTin extends TileEntityImmersiveConnectable im
 	@Override
 	public void readCustomNBT(@Nonnull NBTTagCompound nbt, boolean descPacket) {
 		super.readCustomNBT(nbt, descPacket);
-		facing = EnumFacing.getFront(nbt.getInteger("facing"));
+		facing = EnumFacing.byIndex(nbt.getInteger("facing"));
 		relay = nbt.getBoolean("relay");
 		int version = nbt.getInteger("version");
 		bufferToNet = nbt.getDouble("inBuffer");

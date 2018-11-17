@@ -146,7 +146,7 @@ public class TileEntityRSPanelIE extends TileEntityRSPanel//TODO what parts of T
 	public Vec3d getConnectionOffset(ImmersiveNetHandler.Connection connection) {
 		EnumFacing side = facing.getOpposite();
 		double conRadius = connection.cableType.getRenderDiameter() / 2;
-		return new Vec3d(.5 - conRadius * side.getFrontOffsetX(), .5 - conRadius * side.getFrontOffsetY(), .5 - conRadius * side.getFrontOffsetZ());
+		return new Vec3d(.5 - conRadius * side.getXOffset(), .5 - conRadius * side.getYOffset(), .5 - conRadius * side.getZOffset());
 	}
 
 	@Override

@@ -50,8 +50,8 @@ public class MBIOModelLoader implements ICustomModelLoader {
 	}
 	@Override
 	public boolean accepts(@Nonnull ResourceLocation modelLocation) {
-		return IndustrialWires.MODID.equals(modelLocation.getResourceDomain())
-				&& "models/block/mbio".equals(modelLocation.getResourcePath());
+		return IndustrialWires.MODID.equals(modelLocation.getNamespace())
+				&& "models/block/mbio".equals(modelLocation.getPath());
 	}
 
 	@Nonnull

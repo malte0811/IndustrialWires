@@ -53,7 +53,13 @@
     },
     "type": {
       "rs_wire": {
-        "model": "immersiveengineering:smartmodel/conn_rs_panel_conn"
+        "model": "immersiveengineering:smartmodel/connector",
+        "custom": {
+          "base": "industrialwires:block/rs_panel_conn.obj",
+          "layers": [
+            "SOLID"
+          ]
+        }
       },
       "top": {
         "model": "industrialwires:smartmodel/panel"

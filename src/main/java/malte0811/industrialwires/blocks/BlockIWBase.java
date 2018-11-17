@@ -55,7 +55,7 @@ public abstract class BlockIWBase extends Block {
 		super(mat);
 		setHardness(3.0F);
 		setResistance(15.0F);
-		setUnlocalizedName(IndustrialWires.MODID + "." + name);
+		setTranslationKey(IndustrialWires.MODID + "." + name);
 		setRegistryName(IndustrialWires.MODID, name);
 		setCreativeTab(IndustrialWires.creativeTab);
 		IndustrialWires.blocks.add(this);

@@ -39,8 +39,8 @@ public class EntityBrokenPart extends Entity {
 	public static final DataSerializer<ResourceLocation> RES_LOC_SERIALIZER = new DataSerializer<ResourceLocation>() {
 		@Override
 		public void write(@Nonnull PacketBuffer buf, @Nonnull ResourceLocation value) {
-			buf.writeString(value.getResourceDomain());
-			buf.writeString(value.getResourcePath());
+			buf.writeString(value.getNamespace());
+			buf.writeString(value.getPath());
 		}
 
 		@Nonnull
@@ -59,7 +59,7 @@ public class EntityBrokenPart extends Entity {
 		@Nonnull
 		@Override
 		public ResourceLocation copyValue(@Nonnull ResourceLocation value) {
-			return new ResourceLocation(value.getResourceDomain(), value.getResourcePath());
+			return new ResourceLocation(value.getNamespace(), value.getPath());
 		}
 	};
 	public static DataParameter<ResourceLocation> MARKER_TEXTURE;

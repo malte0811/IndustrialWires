@@ -88,14 +88,14 @@ public final class MiscUtils {
 		if (mirror) {
 			right *= -1;
 		}
-		return offset(offset(p, f, forward), f.rotateY(), right).addVector(0, up, 0);
+		return offset(offset(p, f, forward), f.rotateY(), right).add(0, up, 0);
 	}
 
 	public static Vec3d offset(Vec3d in, EnumFacing f, double amount) {
 		if (amount==0) {
 			return in;
 		}
-		return in.addVector(f.getFrontOffsetX()*amount, f.getFrontOffsetY()*amount, f.getFrontOffsetZ()*amount);
+		return in.add(f.getXOffset() * amount, f.getYOffset() * amount, f.getZOffset() * amount);
 	}
 
 	/**

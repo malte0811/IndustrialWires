@@ -88,7 +88,7 @@ public class LocalSidedWorld {
 
 	public Vec3d getRealPos(Vec3d relative) {
 		return MiscUtils.offset(new Vec3d(origin.getX()+.5, origin.getY()+.5, origin.getZ()+.5), facing, mirror,
-				relative.addVector(.5, .5, .5));
+				relative.add(.5, .5, .5));
 	}
 
 	public Vec3d getRealDirection(Vec3d dir) {
@@ -100,14 +100,14 @@ public class LocalSidedWorld {
 			return f;
 		}
 		//+6 because getHorizontal uses abs(input%3). No idea why.
-		return EnumFacing.getHorizontal(f.getHorizontalIndex()-facing.getHorizontalIndex()+6);
+		return EnumFacing.byHorizontalIndex(f.getHorizontalIndex() - facing.getHorizontalIndex() + 6);
 	}
 
 	public EnumFacing transformedToReal(@Nullable EnumFacing f) {
 		if (f==null||f.getAxis()== EnumFacing.Axis.Y) {
 			return f;
 		}
-		return EnumFacing.getHorizontal(f.getHorizontalIndex()+facing.getHorizontalIndex()+2);
+		return EnumFacing.byHorizontalIndex(f.getHorizontalIndex() + facing.getHorizontalIndex() + 2);
 	}
 
 	//Getters+Setters

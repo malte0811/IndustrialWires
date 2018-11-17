@@ -48,7 +48,7 @@ public class TileEntityComponentPanel extends TileEntityPanel {
 	}
 
 	public void updateRSInput() {
-		int value = world.isBlockIndirectlyGettingPowered(pos);
+		int value = world.getRedstonePowerFromNeighbors(pos);
 		if (value == 0) {
 			for (EnumFacing f : EnumFacing.HORIZONTALS) {
 				IBlockState state = world.getBlockState(pos.offset(f));

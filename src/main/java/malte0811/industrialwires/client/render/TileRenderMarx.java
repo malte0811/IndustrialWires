@@ -52,14 +52,14 @@ public class TileRenderMarx extends TileEntitySpecialRenderer<TileEntityMarx> {
 			//draw firing spark gaps
 			Vec3i facing = te.facing.getDirectionVec();
 			Vec3d offset = new Vec3d(MiscUtils.offset(BlockPos.ORIGIN, te.facing, te.mirrored, 1, 1, 0));
-			offset = offset.addVector(-.5*oneSgn(offset.x), 0, -.5*oneSgn(offset.z));
+			offset = offset.add(-.5 * oneSgn(offset.x), 0, -.5 * oneSgn(offset.z));
 			final float pos = .3125F;
 			Vec3d gapDir = new Vec3d(facing.getZ()*(te.mirrored?-1:1), 1, facing.getX()*(te.mirrored?1:-1));
 			Vec3d up = new Vec3d(gapDir.x, -1, gapDir.z);
 			Vec3d bottomGap = new Vec3d(offset.x+facing.getX()*pos+.5, offset.y+.75, offset.z+facing.getZ() * pos+.5);
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(x + bottomGap.x, y + bottomGap.y, z + bottomGap.z);
-			bottomGap = bottomGap.addVector(te.getPos().getX(), te.getPos().getY(), te.getPos().getZ());
+			bottomGap = bottomGap.add(te.getPos().getX(), te.getPos().getY(), te.getPos().getZ());
 			for (int i = 0; i < te.getStageCount() - 1; i++) {
 				renderGap(i, facing, vb, tes, player, gapDir, up, bottomGap, te.mirrored);
 			}
@@ -85,7 +85,7 @@ public class TileRenderMarx extends TileEntitySpecialRenderer<TileEntityMarx> {
 		player = player.subtract(bottomGap.x, bottomGap.y+i, bottomGap.z);
 		double t = player.dotProduct(gapDir)/2;
 		Vec3d lineToPlayer = gapDir.scale(t).subtract(player);
-		double angleRad = Math.acos(up.dotProduct(lineToPlayer)/(up.lengthVector()*lineToPlayer.lengthVector()));
+		double angleRad = Math.acos(up.dotProduct(lineToPlayer) / (up.length() * lineToPlayer.length()));
 		angleRad *= Math.signum(lineToPlayer.dotProduct(new Vec3d(facing)));
 		float angle = (float) (Math.toDegrees(angleRad));
 		if (facing.getZ()<0) {
