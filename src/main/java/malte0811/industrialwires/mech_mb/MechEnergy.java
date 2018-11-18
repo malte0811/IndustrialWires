@@ -94,14 +94,14 @@ public final class MechEnergy {
 	}
 
 	public float getPitch() {
-		return (float) Math.min(.3*Math.sqrt(getSpeedForSound()), 2);
+		return (float) Math.min(.3 * Math.sqrt(getSpeedForSound()), 1.25);
 	}
 
 	private float getTotalVolume() {
 		if (invalid)
 			return 0;
 		float ret = (float) (weight / 20e3 * Math.tanh(getSpeedForSound()/30));
-		ret = Math.min(ret, 1.5F);
+		ret = Math.min(ret, 1F);
 		return ret;
 	}
 
