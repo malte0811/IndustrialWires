@@ -81,7 +81,7 @@ package malte0811.industrialwires;
  import static malte0811.industrialwires.mech_mb.MechMBPart.EXAMPLE_MECHMB_LOC;
  import static malte0811.industrialwires.wires.MixedWireType.*;
 
-@Mod(modid = IndustrialWires.MODID, version = IndustrialWires.VERSION, dependencies = "required-after:immersiveengineering@[0.12-77,);after:ic2;required-after:forge@[14.23.3.2694,)",
+ @Mod(modid = IndustrialWires.MODID, version = IndustrialWires.VERSION, dependencies = "required-after:immersiveengineering@[0.12-86,);after:ic2;required-after:forge@[14.23.3.2694,)",
 		certificateFingerprint = "7e11c175d1e24007afec7498a1616bef0000027d",
 		updateJSON = "https://raw.githubusercontent.com/malte0811/IndustrialWires/MC1.12/changelog.json")
 @Mod.EventBusSubscriber

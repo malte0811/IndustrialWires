@@ -1,5 +1,10 @@
 ###Minecraft 1.12.2
 
+####Version 1.7-32
+ - Fixed connectors not rendering properly without IC2
+ - Fixed parts of the mechanical multiblocks not rendering when Optifine is installed
+ - Changed some values for the mechanical multiblock sound
+
 ####Version 1.7-31
  - Fixed accidental conversion from FE to EU
  - Fixed connectors not blowing up as intended
