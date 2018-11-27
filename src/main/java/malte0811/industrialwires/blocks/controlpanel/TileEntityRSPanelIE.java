@@ -116,9 +116,7 @@ public class TileEntityRSPanelIE extends TileEntityRSPanel//TODO what parts of T
 	@Override
 	public void connectCable(WireType wireType, TargetingInfo targetingInfo, IImmersiveConnectable other) {
 		hasConn = true;
-		if (other instanceof IRedstoneConnector && ((IRedstoneConnector) other).getNetwork() != wireNetwork) {
-			wireNetwork.mergeNetwork(((IRedstoneConnector) other).getNetwork());
-		}
+		RedstoneWireNetwork.updateConnectors(pos, world, wireNetwork);
 	}
 
 	@Override
@@ -128,7 +126,7 @@ public class TileEntityRSPanelIE extends TileEntityRSPanel//TODO what parts of T
 
 	@Override
 	public boolean allowEnergyToPass(ImmersiveNetHandler.Connection connection) {
-		return false;
+		return true;
 	}
 
 	@Override

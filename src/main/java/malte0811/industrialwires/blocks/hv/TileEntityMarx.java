@@ -72,7 +72,6 @@ import java.util.*;
 
 import static blusunrize.immersiveengineering.api.energy.wires.WireType.REDSTONE_CATEGORY;
 import static malte0811.industrialwires.blocks.hv.TileEntityMarx.FiringState.FIRE;
-import static malte0811.industrialwires.util.MiscUtils.getOffset;
 import static malte0811.industrialwires.util.MiscUtils.offset;
 import static malte0811.industrialwires.util.NBTKeys.*;
 import static malte0811.industrialwires.wires.MixedWireType.IC2_HV_CAT;
@@ -285,11 +284,11 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 
 	private void handleOreProcessing(double energyStored) {
 		BlockPos bottom = getBottomElectrode();
-		Set<BlockPos> toBreak = new HashSet<>(stageCount-2);
+		List<BlockPos> toBreak = new ArrayList<>(stageCount - 2);
 		int ores = 0;
 		for (int i = 1;i<stageCount-1;i++) {
 			BlockPos blockHere = bottom.up(i);
-			if (!world.isAirBlock(blockHere) && canBreak(blockHere)) {
+			if (!world.isAirBlock(blockHere)) {
 				toBreak.add(blockHere);
 				ores++;
 			}
@@ -328,7 +327,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		double tinnitusDistSqu = Math.sqrt(energyStored)/50;
 		Vec3d v0 = getMiddle();
 		AxisAlignedBB aabb = new AxisAlignedBB(v0.x, v0.y, v0.z, v0.x, v0.y, v0.z);
-		aabb = aabb.grow(0, stageCount/2-1,0);
+		aabb = aabb.grow(0, stageCount / 2. - 1, 0);
 		aabb = aabb.grow(tinnitusDistSqu);
 		List<Entity> fools = world.getEntitiesWithinAABB(Entity.class, aabb);
 		damageDistSqu *= damageDistSqu;
@@ -368,16 +367,6 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 				}
 			}
 		}
-	}
-
-	//checks whether the given pos can't be broken because it is part of the generator
-	private boolean canBreak(BlockPos pos) {
-		BlockPos dischargePos = offset(this.pos, facing, mirrored, 1, 3, 0);
-		Vec3i offset = getOffset(dischargePos, facing, mirrored, pos);
-		if (offset.getZ()<1||offset.getZ()>=stageCount-1) {
-			return false;
-		}
-		return Math.abs(offset.getX())>Math.abs(offset.getY());
 	}
 
 	private int getRSSignalFromVoltage(double voltage) {
@@ -566,6 +555,8 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	@Override
 	public void connectCable(WireType cableType, TargetingInfo target, IImmersiveConnectable other) {
 		hasConnection = true;
+		if (WireType.REDSTONE_CATEGORY.equals(cableType.getCategory()))
+			RedstoneWireNetwork.updateConnectors(pos, world, getNetwork());
 	}
 
 	@Override
@@ -575,7 +566,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 
 	@Override
 	public boolean allowEnergyToPass(ImmersiveNetHandler.Connection con) {
-		return false;
+		return true;
 	}
 
 	@Override
