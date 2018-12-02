@@ -1,5 +1,10 @@
 ###Minecraft 1.12.2
 
+####Version 1.7-33
+ - Fixed the Marx generator not processing ores
+ - Fixed control panels and the Marx generator not working when connected directly
+ - Added Russian translation (thanks @StolenSoda)
+
 ####Version 1.7-32
  - Fixed connectors not rendering properly without IC2
  - Fixed parts of the mechanical multiblocks not rendering when Optifine is installed
