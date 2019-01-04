@@ -38,7 +38,7 @@ import javax.annotation.Nullable;
 
 import static blusunrize.immersiveengineering.api.energy.wires.WireType.REDSTONE_CATEGORY;
 
-public class TileEntityRSPanelIE extends TileEntityRSPanel//TODO what parts of TEIIC do I need?
+public class TileEntityRSPanelIE extends TileEntityRSPanel
 		implements IRedstoneConnector, IEBlockInterfaces.IDirectionalTile, IBlockBoundsIW {
 	private EnumFacing facing = EnumFacing.NORTH;
 	@Nonnull
@@ -66,6 +66,11 @@ public class TileEntityRSPanelIE extends TileEntityRSPanel//TODO what parts of T
 	}
 
 	@Override
+	protected void updateInput() {
+		updateInput(wireNetwork.channelValues);
+	}
+
+	@Override
 	public void setNetwork(@Nonnull RedstoneWireNetwork net) {
 		wireNetwork = net;
 	}
@@ -78,7 +83,7 @@ public class TileEntityRSPanelIE extends TileEntityRSPanel//TODO what parts of T
 
 	@Override
 	public void onChange() {
-		inputUpdate(wireNetwork.channelValues);
+		onInputChanged(wireNetwork.channelValues);
 	}
 
 	@Override

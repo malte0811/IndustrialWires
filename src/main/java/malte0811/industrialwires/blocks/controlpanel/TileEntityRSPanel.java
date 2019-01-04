@@ -71,8 +71,8 @@ public abstract class TileEntityRSPanel extends TileEntityGeneralCP implements I
 	protected void markRSDirty() {
 		dirty = true;
 	}
-	
-	protected void inputUpdate(byte[] newIn) {
+
+	protected void onInputChanged(byte[] newIn) {
 		if (!Arrays.equals(currInput, newIn)) {
 			ControlPanelNetwork.RSChannelState[] newStates = new ControlPanelNetwork.RSChannelState[16];
 			for (byte i = 0; i < 16; i++) {
@@ -90,7 +90,7 @@ public abstract class TileEntityRSPanel extends TileEntityGeneralCP implements I
 	@Override
 	public void setNetworkAndInit(ControlPanelNetwork newNet) {
 		super.setNetworkAndInit(newNet);
-		inputUpdate(currInput);
+		onInputChanged(currInput);
 		Consumer<ControlPanelNetwork.RSChannelState> listener = state -> {
 			if (out[state.getColor()] != state.getStrength()) {
 				out[state.getColor()] = state.getStrength();
@@ -118,4 +118,15 @@ public abstract class TileEntityRSPanel extends TileEntityGeneralCP implements I
 
 
 	protected abstract void updateOutput();
+
+	protected abstract void updateInput();
+
+	@Override
+	public void onLoad() {
+		super.onLoad();
+		if (!world.isRemote) {
+			updateInput();
+			updateOutput();
+		}
+	}
 }

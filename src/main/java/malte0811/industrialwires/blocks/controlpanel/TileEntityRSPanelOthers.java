@@ -44,19 +44,20 @@ public class TileEntityRSPanelOthers extends TileEntityRSPanel implements IBundl
 		return ret;
 	}
 
+	@Override
 	public void updateInput() {
 		byte[] data = new byte[16];
 		for (EnumFacing f:EnumFacing.VALUES) {
 			byte[] tmp = Compat.getBundledRS.run(world, pos, f);
 			if (tmp!=null) {
-				for (int i = 0;i<16;i++) {
+				for (int i = 0; i<16; i++) {
 					if (tmp[i]>data[i]) {
 						data[i] = tmp[i];
 					}
 				}
 			}
 		}
-		inputUpdate(data);
+		onInputChanged(data);
 	}
 
 	@Override

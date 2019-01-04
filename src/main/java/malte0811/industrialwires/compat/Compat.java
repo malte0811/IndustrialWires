@@ -191,7 +191,7 @@ public class Compat {
 				byte[] prIn = ProjectRedAPI.transmissionAPI.getBundledInput(w, p, f);
 				if (prIn!=null) {
 					for (int i = 0; i < 16; i++) {
-						oldIn[i] = (byte)((prIn[i]&255)/17);
+						oldIn[i] = (byte) Math.ceil((prIn[i] & 255) / 17.0);
 					}
 				}
 				return oldIn;
