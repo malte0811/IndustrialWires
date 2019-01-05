@@ -41,8 +41,13 @@ public abstract class TileEntityRSPanel extends TileEntityGeneralCP implements I
 	}
 
 	private void updateChannelsArray() {
-		for (byte i = 0;i<16;i++) {
-			channels[i] = new ControlPanelNetwork.RSChannel(controller, i);
+		byte[] oldIn = currInput;
+		if (world == null || !world.isRemote) {
+			panelNetwork.removeIOFor(this);
+			for (byte i = 0; i < 16; i++) {
+				channels[i] = new ControlPanelNetwork.RSChannel(controller, i);
+			}
+			setNetworkAndInit(panelNetwork);
 		}
 	}
 
@@ -58,12 +63,14 @@ public abstract class TileEntityRSPanel extends TileEntityGeneralCP implements I
 	@Override
 	public void writeNBT(NBTTagCompound nbt, boolean updatePacket) {
 		nbt.setByteArray("out", this.out);
+		nbt.setByteArray("in", this.currInput);
 		nbt.setInteger("rsId", controller);
 	}
 
 	@Override
 	public void readNBT(NBTTagCompound nbt, boolean updatePacket) {
 		out = nbt.getByteArray("out");
+		currInput = nbt.getByteArray("in");
 		controller = nbt.getInteger("rsId");
 		updateChannelsArray();
 	}
@@ -90,7 +97,6 @@ public abstract class TileEntityRSPanel extends TileEntityGeneralCP implements I
 	@Override
 	public void setNetworkAndInit(ControlPanelNetwork newNet) {
 		super.setNetworkAndInit(newNet);
-		onInputChanged(currInput);
 		Consumer<ControlPanelNetwork.RSChannelState> listener = state -> {
 			if (out[state.getColor()] != state.getStrength()) {
 				out[state.getColor()] = state.getStrength();
@@ -98,6 +104,9 @@ public abstract class TileEntityRSPanel extends TileEntityGeneralCP implements I
 			}
 		};
 		panelNetwork.addListener(this, listener, channels);
+		byte[] oldIn = currInput;
+		currInput = new byte[16];
+		onInputChanged(oldIn);
 	}
 
 	@Override
@@ -109,6 +118,7 @@ public abstract class TileEntityRSPanel extends TileEntityGeneralCP implements I
 			setNetworkAndInit(panelNetwork);
 			IBlockState state = world.getBlockState(pos);
 			world.notifyBlockUpdate(pos, state, state, 3);
+			updateChannelsArray();
 		}
 	}
 

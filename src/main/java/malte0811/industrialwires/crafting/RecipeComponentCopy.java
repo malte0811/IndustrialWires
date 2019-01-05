@@ -16,9 +16,11 @@ package malte0811.industrialwires.crafting;
 
 import blusunrize.immersiveengineering.api.ApiUtils;
 import malte0811.industrialwires.IndustrialWires;
+import malte0811.industrialwires.blocks.controlpanel.BlockTypes_Panel;
 import malte0811.industrialwires.controlpanel.PanelComponent;
 import malte0811.industrialwires.items.ItemPanelComponent;
 import net.minecraft.inventory.InventoryCrafting;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.NonNullList;
@@ -35,21 +37,27 @@ public class RecipeComponentCopy extends IForgeRegistryEntry.Impl<IRecipe> imple
 		boolean found = false;
 		int foundX = -1;
 		int foundY = -1;
+		boolean foundPanel = false;
 		for (int x = 0; x < inv.getWidth(); x++) {
 			for (int y = 0; y < inv.getHeight(); y++) {
 				ItemStack here = inv.getStackInRowAndColumn(x, y);
 				PanelComponent pc1 = ItemPanelComponent.componentFromStack(here);
-				if (pc1!=null) {
+				if (pc1 != null || isUnfinishedPanel(here)) {
 					if (x==foundX&&y==foundY) {
 						continue;
 					}
 					if (found) {
 						return false;
 					}
+					foundPanel = pc1 == null;
 					if (y+1<inv.getHeight()) {
 						ItemStack below = inv.getStackInRowAndColumn(x, y + 1);
 						PanelComponent pc2 = ItemPanelComponent.componentFromStack(below);
-						if (pc2 == null || pc2.getClass() != pc1.getClass()) {
+						if (foundPanel) {
+							if (!isUnfinishedPanel(below)) {
+								return false;
+							}
+						} else if (pc2 == null || pc2.getClass() != pc1.getClass()) {
 							return false;
 						}
 						found = true;
@@ -97,12 +105,18 @@ public class RecipeComponentCopy extends IForgeRegistryEntry.Impl<IRecipe> imple
 		for (int x = 0; x < inv.getWidth(); x++) {
 			for (int y = 0; y < inv.getHeight() - 1; y++) {
 				ItemStack here = inv.getStackInRowAndColumn(x, y);
-				if (!here.isEmpty() && here.getItem() == IndustrialWires.panelComponent) {
+				if (here.getItem() == IndustrialWires.panelComponent
+						|| isUnfinishedPanel(here)) {
 					return new int[]{x, y};
 				}
 			}
 		}
 		return null;
+	}
+
+	private boolean isUnfinishedPanel(ItemStack stack) {
+		return stack.getItem() == Item.getItemFromBlock(IndustrialWires.panel)
+				&& stack.getMetadata() == BlockTypes_Panel.UNFINISHED.ordinal();
 	}
 
 

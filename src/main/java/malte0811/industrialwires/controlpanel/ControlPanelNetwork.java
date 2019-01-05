@@ -19,6 +19,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import malte0811.industrialwires.blocks.controlpanel.TileEntityGeneralCP;
 import malte0811.industrialwires.util.MiscUtils;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagInt;
@@ -336,6 +337,11 @@ public class ControlPanelNetwork {
 			return result;
 		}
 
+		@Override
+		public String toString() {
+			return "Channel " + EnumDyeColor.byMetadata(color).getName() + " on controller ID " + controller;
+		}
+
 		public boolean isValid() {
 			return controller>=0 && color >= 0;
 		}
@@ -398,7 +404,11 @@ public class ControlPanelNetwork {
 			int result = channel.hashCode();
 			result = 31 * result + strength;
 			return result;
+		}
 
+		@Override
+		public String toString() {
+			return channel + ": " + strength;
 		}
 	}
 }
