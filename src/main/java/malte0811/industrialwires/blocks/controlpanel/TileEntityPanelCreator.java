@@ -115,7 +115,12 @@ public class TileEntityPanelCreator extends TileEntityIWBase implements INetGUI,
 					}
 				}
 				if (valid) {
-					NBTTagCompound panelNBT = new NBTTagCompound();
+					NBTTagCompound panelNBT;
+					if (inv.hasTagCompound()) {
+						panelNBT = inv.getTagCompound().copy();
+					} else {
+						panelNBT = new NBTTagCompound();
+					}
 					writeToItemNBT(panelNBT, true);
 					ItemStack panel = new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.TOP.ordinal());
 					panel.setTagCompound(panelNBT);

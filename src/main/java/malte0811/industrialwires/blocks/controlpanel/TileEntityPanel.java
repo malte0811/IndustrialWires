@@ -34,11 +34,11 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.common.util.Constants;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -140,8 +140,8 @@ public class TileEntityPanel extends TileEntityGeneralCP implements IDirectional
 				}
 			}
 			components.setHeight(nbt.getFloat("height"));
-			if (nbt.hasKey("texture")) {
-				components.setTexture(new ResourceLocation(nbt.getString("texture")));
+			if (nbt.hasKey("texture", Constants.NBT.TAG_COMPOUND)) {
+				components.setTextureSource(new ItemStack(nbt.getCompoundTag("texture")));
 			}
 			components.setAngle(nbt.getFloat("angle"));
 		}
@@ -158,7 +158,7 @@ public class TileEntityPanel extends TileEntityGeneralCP implements IDirectional
 		nbt.setTag("components", comps);
 		nbt.setFloat("height", components.getHeight());
 		nbt.setFloat("angle", components.getAngle());
-		nbt.setString("texture", components.getTexture().toString());
+		nbt.setTag("texture", components.getTextureSource().serializeNBT());
 	}
 
 	@Nonnull

@@ -37,7 +37,7 @@ public class RecipeComponentCopy extends IForgeRegistryEntry.Impl<IRecipe> imple
 		boolean found = false;
 		int foundX = -1;
 		int foundY = -1;
-		boolean foundPanel = false;
+		boolean foundPanel;
 		for (int x = 0; x < inv.getWidth(); x++) {
 			for (int y = 0; y < inv.getHeight(); y++) {
 				ItemStack here = inv.getStackInRowAndColumn(x, y);

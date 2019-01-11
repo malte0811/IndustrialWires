@@ -31,6 +31,7 @@ public class Recipes {
 		registry.register(new RecipeKeyRing(true).setRegistryName(MODID, "add_key_ring"));
 		registry.register(new RecipeKeyRing(false).setRegistryName(MODID, "remove_key_ring"));
 		registry.register(new RecipeKeyLock().setRegistryName(MODID, "key_lock"));
+		registry.register(new RecipePanelTexture().setRegistryName(MODID, "panel_texture"));
 		registry.register(new RecipeComponentCopy().setRegistryName(MODID, "component_copy"));
 		AssemblerHandler.registerRecipeAdapter(RecipeCoilLength.class, new Recipes.AllRecipeAdapter<>());
 		AssemblerHandler.registerRecipeAdapter(RecipeComponentCopy.class, new Recipes.AllRecipeAdapter<>());
@@ -55,7 +56,7 @@ public class Recipes {
 					ret.add(new AssemblerHandler.RecipeQuery(in.get(i), 1));
 				}
 			}
-			return ret.toArray(new AssemblerHandler.RecipeQuery[ret.size()]);
+			return ret.toArray(new AssemblerHandler.RecipeQuery[0]);
 		}
 
 		@Override

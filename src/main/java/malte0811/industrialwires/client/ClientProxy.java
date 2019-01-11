@@ -59,6 +59,8 @@ import net.minecraft.client.audio.MovingSound;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -455,6 +457,28 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public boolean isSingleplayer() {
 		return Minecraft.getMinecraft().isSingleplayer();
+	}
+
+	@Override
+	public boolean isValidTextureSource(ItemStack stack) {
+		if (!super.isValidTextureSource(stack)) {
+			return false;
+		}
+		IBakedModel texModel = Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(stack,
+				null, null);
+		TextureAtlasSprite sprite = texModel.getParticleTexture();
+		if (sprite.hasAnimationMetadata()) {
+			return false;
+		}
+		int[][] data = sprite.getFrameTextureData(0);
+		for (int x = 0; x < data.length; x++) {
+			for (int y = 0; y < data[x].length; y++) {
+				if ((data[x][y] >>> 24) != 255) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	@Override

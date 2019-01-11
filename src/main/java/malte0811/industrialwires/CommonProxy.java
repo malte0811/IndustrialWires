@@ -26,6 +26,7 @@ import malte0811.industrialwires.containers.ContainerRenameKey;
 import malte0811.industrialwires.mech_mb.MechEnergy;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumHand;
@@ -89,5 +90,9 @@ public class CommonProxy implements IGuiHandler {
 
 	public boolean isSingleplayer() {
 		return false;
+	}
+
+	public boolean isValidTextureSource(ItemStack stack) {
+		return stack.getItem() instanceof ItemBlock;
 	}
 }

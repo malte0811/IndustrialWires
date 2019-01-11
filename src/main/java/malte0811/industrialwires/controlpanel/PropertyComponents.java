@@ -17,11 +17,13 @@ package malte0811.industrialwires.controlpanel;
 
 import blusunrize.immersiveengineering.common.util.chickenbones.Matrix4;
 import malte0811.industrialwires.IndustrialWires;
+import malte0811.industrialwires.blocks.controlpanel.BlockTypes_Panel;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -64,7 +66,7 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 		private Matrix4 topTransform;
 		private Matrix4 topTransformInverse;
 		private Matrix4 baseTransform;
-		private ResourceLocation texture = new ResourceLocation(IndustrialWires.MODID, "blocks/control_panel");
+		private ItemStack textureSource = new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.DUMMY.ordinal());
 
 
 		public PanelRenderProperties() {
@@ -177,7 +179,7 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 			ret.facing = facing;
 			ret.top = top;
 			ret.angle = angle;
-			ret.texture = texture;
+			ret.textureSource = textureSource;
 			return ret;
 		}
 
@@ -202,12 +204,13 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 			}
 		}
 
-		public void setTexture(ResourceLocation texture) {
-			this.texture = texture;
+		public void setTextureSource(ItemStack textureSource) {
+			if (textureSource.getItem() instanceof ItemBlock)
+				this.textureSource = textureSource;
 		}
 
-		public ResourceLocation getTexture() {
-			return texture;
+		public ItemStack getTextureSource() {
+			return textureSource;
 		}
 
 		public float getHeight() {
@@ -255,7 +258,7 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 			if (Float.compare(that.angle, angle) != 0) return false;
 			if (facing != that.facing) return false;
 			if (top != that.top) return false;
-			return texture.equals(that.texture);
+			return ItemStack.areItemStacksEqual(textureSource, that.textureSource);
 		}
 
 		@Override
@@ -265,7 +268,6 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 			result = 31 * result + (height != +0.0f ? Float.floatToIntBits(height) : 0);
 			result = 31 * result + top.hashCode();
 			result = 31 * result + (angle != +0.0f ? Float.floatToIntBits(angle) : 0);
-			result = 31 * result + texture.hashCode();
 			return result;
 		}
 	}

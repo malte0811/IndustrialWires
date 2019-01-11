@@ -24,6 +24,7 @@ import malte0811.industrialwires.client.RawQuad;
 import malte0811.industrialwires.controlpanel.PropertyComponents.PanelRenderProperties;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.VertexFormat;
@@ -62,11 +63,17 @@ public final class PanelUtils {
 
 	@SideOnly(Side.CLIENT)
 	public static List<BakedQuad> generateQuads(PanelRenderProperties components) {
-		TextureMap texMap = Minecraft.getMinecraft().getTextureMapBlocks();
 		if (PANEL_TEXTURE == null) {
+			TextureMap texMap = Minecraft.getMinecraft().getTextureMapBlocks();
 			PANEL_TEXTURE = texMap.getAtlasSprite(IndustrialWires.MODID + ":blocks/control_panel");
 		}
-		final TextureAtlasSprite mainTex = texMap.getAtlasSprite(components.getTexture().toString());
+		ItemStack source = components.getTextureSource();
+		IBakedModel texModel = null;
+		if (IndustrialWires.proxy.isValidTextureSource(source)) {
+			texModel = Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(source,
+					null, null);
+		}
+		final TextureAtlasSprite mainTex = texModel != null ? texModel.getParticleTexture() : PANEL_TEXTURE;
 		List<BakedQuad> ret = new ArrayList<>();
 		Matrix4 m4 = components.getPanelTopTransform();
 		Matrix4 m4RotOnly = m4.copy();
