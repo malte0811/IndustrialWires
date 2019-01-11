@@ -41,7 +41,6 @@ public abstract class TileEntityRSPanel extends TileEntityGeneralCP implements I
 	}
 
 	private void updateChannelsArray() {
-		byte[] oldIn = currInput;
 		if (world == null || !world.isRemote) {
 			panelNetwork.removeIOFor(this);
 			for (byte i = 0; i < 16; i++) {
@@ -69,8 +68,12 @@ public abstract class TileEntityRSPanel extends TileEntityGeneralCP implements I
 
 	@Override
 	public void readNBT(NBTTagCompound nbt, boolean updatePacket) {
-		out = nbt.getByteArray("out");
-		currInput = nbt.getByteArray("in");
+		if (nbt.hasKey("out") && nbt.getByteArray("out").length == 16) {
+			out = nbt.getByteArray("out");
+		}
+		if (nbt.hasKey("in") && nbt.getByteArray("in").length == 16) {
+			currInput = nbt.getByteArray("in");
+		}
 		controller = nbt.getInteger("rsId");
 		updateChannelsArray();
 	}

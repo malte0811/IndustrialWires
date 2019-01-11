@@ -34,6 +34,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -139,6 +140,9 @@ public class TileEntityPanel extends TileEntityGeneralCP implements IDirectional
 				}
 			}
 			components.setHeight(nbt.getFloat("height"));
+			if (nbt.hasKey("texture")) {
+				components.setTexture(new ResourceLocation(nbt.getString("texture")));
+			}
 			components.setAngle(nbt.getFloat("angle"));
 		}
 		defAABB = null;
@@ -154,6 +158,7 @@ public class TileEntityPanel extends TileEntityGeneralCP implements IDirectional
 		nbt.setTag("components", comps);
 		nbt.setFloat("height", components.getHeight());
 		nbt.setFloat("angle", components.getAngle());
+		nbt.setString("texture", components.getTexture().toString());
 	}
 
 	@Nonnull

@@ -25,6 +25,7 @@ import malte0811.industrialwires.controlpanel.PropertyComponents.PanelRenderProp
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.EnumDyeColor;
@@ -61,9 +62,11 @@ public final class PanelUtils {
 
 	@SideOnly(Side.CLIENT)
 	public static List<BakedQuad> generateQuads(PanelRenderProperties components) {
+		TextureMap texMap = Minecraft.getMinecraft().getTextureMapBlocks();
 		if (PANEL_TEXTURE == null) {
-			PANEL_TEXTURE = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(IndustrialWires.MODID + ":blocks/control_panel");
+			PANEL_TEXTURE = texMap.getAtlasSprite(IndustrialWires.MODID + ":blocks/control_panel");
 		}
+		final TextureAtlasSprite mainTex = texMap.getAtlasSprite(components.getTexture().toString());
 		List<BakedQuad> ret = new ArrayList<>();
 		Matrix4 m4 = components.getPanelTopTransform();
 		Matrix4 m4RotOnly = m4.copy();
@@ -105,33 +108,33 @@ public final class PanelUtils {
 		//TOP
 		rawOut.add(new RawQuad(new Vector3f(xMin, height0, zMin), new Vector3f(xMin, height1, zMax),
 				new Vector3f(xMax, height1, zMax), new Vector3f(xMax, height0, zMin),
-				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, new float[]{0, 0, uMaxX, uMaxZ}, -1));
+				EnumFacing.UP, mainTex, WHITE, null, new float[]{0, 0, uMaxX, uMaxZ}, -1));
 		//BOTTOM
 		rawOut.add(new RawQuad(new Vector3f(xMin, 0, zMin), new Vector3f(xMax, 0, zMin),
 				new Vector3f(xMax, 0, zMax), new Vector3f(xMin, 0, zMax),
-				EnumFacing.DOWN, PANEL_TEXTURE, WHITE, null, UV_FULL, -1));
+				EnumFacing.DOWN, mainTex, WHITE, null, UV_FULL, -1));
 		//LEFT
 		rawOut.add(new RawQuad(new Vector3f(xMin, 0, zMin), new Vector3f(xMin, 0, zMax),
 				new Vector3f(xMin, height1, zMax), new Vector3f(xMin, height0, zMin),
-				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, new float[][]{
+				EnumFacing.UP, mainTex, WHITE, null, new float[][]{
 				{0, 0}, {0, uMaxZ},
 				{vMax1, uMaxZ}, {vMax0, 0}
 		}, -1));
 		//RIGHT
 		rawOut.add(new RawQuad(new Vector3f(xMax, 0, zMin), new Vector3f(xMax, height0, zMin),
 				new Vector3f(xMax, height1, zMax), new Vector3f(xMax, 0, zMax),
-				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, new float[][]{
+				EnumFacing.UP, mainTex, WHITE, null, new float[][]{
 				{0, 0}, {vMax0, 0},
 				{vMax1, uMaxZ}, {0, uMaxZ}
 		}, -1));
 		//BACK
 		rawOut.add(new RawQuad(new Vector3f(xMax, 0, zMin), new Vector3f(xMin, 0, zMin),
 				new Vector3f(xMin, height0, zMin), new Vector3f(xMax, height0, zMin),
-				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, new float[]{0, 0, vMax0, uMaxX}, -1));
+				EnumFacing.UP, mainTex, WHITE, null, new float[]{0, 0, vMax0, uMaxX}, -1));
 		//FRONT
 		rawOut.add(new RawQuad(new Vector3f(xMin, 0, zMax), new Vector3f(xMax, 0, zMax),
 				new Vector3f(xMax, height1, zMax), new Vector3f(xMin, height1, zMax),
-				EnumFacing.UP, PANEL_TEXTURE, WHITE, null, new float[]{0, 0, vMax1, uMaxX}, -1));
+				EnumFacing.UP, mainTex, WHITE, null, new float[]{0, 0, vMax1, uMaxX}, -1));
 		for (RawQuad bq : rawOut) {
 			ret.add(ClientUtilsIW.bakeQuad(bq, baseTrans, baseNorm));
 		}
