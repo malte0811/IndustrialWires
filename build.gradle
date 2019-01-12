@@ -93,8 +93,8 @@ dependencies {
     //runtime "codechicken:ChickenASM:1.12-1.0.2.7"
     //runtime "mrtjpcore:MrTJPCore-1.12.2:2.1.3.35:universal"
     //Tech Reborn
-    compileOnly "TechReborn:TechReborn-1.12:2.6.+:dev"
-    compileOnly "RebornCore:RebornCore-1.12:3.2.+:dev"
+    compileOnly "TechReborn:TechReborn-1.12:2.6.9.7:universal"
+    compileOnly "RebornCore:RebornCore-1.12:3.2.+:universal"
     //Others
     compileOnly 'com.elytradev:mirage:2.0.1-SNAPSHOT'
     compileOnly "mezz.jei:jei_1.12:4.+"

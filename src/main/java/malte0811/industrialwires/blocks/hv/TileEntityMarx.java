@@ -23,6 +23,7 @@ import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler;
 import blusunrize.immersiveengineering.api.energy.wires.WireType;
 import blusunrize.immersiveengineering.api.energy.wires.redstone.IRedstoneConnector;
 import blusunrize.immersiveengineering.api.energy.wires.redstone.RedstoneWireNetwork;
+import blusunrize.immersiveengineering.common.IESaveData;
 import blusunrize.immersiveengineering.common.blocks.BlockTypes_MetalsIE;
 import blusunrize.immersiveengineering.common.blocks.metal.*;
 import blusunrize.immersiveengineering.common.util.Utils;
@@ -159,8 +160,6 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		return getPos().subtract(offset).offset(facing.getOpposite(), 3);
 	}
 
-
-	@SuppressWarnings("unchecked")
 	@Override
 	public IBlockState getOriginalBlock() {
 		int forward = getForward();
@@ -188,6 +187,53 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		} else {
 			return IEObjects.blockConnectors.getDefaultState().withProperty(IEObjects.blockConnectors.property, BlockTypes_Connector.CONNECTOR_HV)
 					.withProperty(IEProperties.FACING_ALL, facing);
+		}
+	}
+
+	@Override
+	public void disassemble() {
+		boolean active = formed && !world.isRemote;
+		IndustrialWires.logger.info("Calling disassemble for {}, active {}", pos, active);
+		super.disassemble();
+		if (active) {
+			final int forward = -1;
+			BlockPos master = pos.subtract(offset);
+			ItemStack coil = new ItemStack(IEObjects.itemWireCoil, 1, 2);
+			WireType type = WireType.STEEL;
+			TargetingInfo dummy = new TargetingInfo(EnumFacing.DOWN, 0, 0, 0);
+			for (int up = 0; up < stageCount - 1; ++up) {
+				for (int right = 0; right < 2; ++right) {
+					BlockPos lowerPos = offset(master, facing, mirrored, right, forward, up);
+					BlockPos upperPos = lowerPos.up();
+					IndustrialWires.logger.info("Lower: {}, upper: {}, master: {}", lowerPos, upperPos, master);
+					TileEntity lowerTE = world.getTileEntity(lowerPos);
+					if (!(lowerTE instanceof IImmersiveConnectable)) {
+						world.spawnEntity(new EntityItem(world, lowerPos.getX() + .5, lowerPos.getY() + .5,
+								lowerPos.getZ() + .5, coil));
+						continue;
+					}
+					TileEntity upperTE = world.getTileEntity(upperPos);
+					if (!(upperTE instanceof IImmersiveConnectable)) {
+						world.spawnEntity(new EntityItem(world, lowerPos.getX() + .5, lowerPos.getY() + .5,
+								lowerPos.getZ() + .5, coil));
+						continue;
+					}
+					IImmersiveConnectable lowerIIC = (IImmersiveConnectable) lowerTE;
+					IImmersiveConnectable upperIIC = (IImmersiveConnectable) upperTE;
+					ImmersiveNetHandler.Connection conn = ImmersiveNetHandler.INSTANCE.addAndGetConnection(world,
+							lowerPos, upperPos, 1, type);
+					lowerIIC.connectCable(type, dummy, upperIIC);
+					upperIIC.connectCable(type, dummy, lowerIIC);
+					ImmersiveNetHandler.INSTANCE.addBlockData(world, conn);
+					IESaveData.setDirty(world.provider.getDimension());
+					lowerTE.markDirty();
+					IBlockState state = world.getBlockState(lowerPos);
+					world.notifyBlockUpdate(lowerPos, state, state, 3);
+					upperTE.markDirty();
+					state = world.getBlockState(upperPos);
+					world.notifyBlockUpdate(upperPos, state, state, 3);
+				}
+			}
 		}
 	}
 
@@ -540,8 +586,9 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 		return pos;
 	}
 
+
 	@Override
-	public boolean canConnectCable(WireType cableType, TargetingInfo target) {
+	public boolean canConnectCable(WireType cableType, TargetingInfo target, Vec3i offset) {
 		if (hasConnection) {
 			return false;
 		}
@@ -585,7 +632,7 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	}
 
 	@Override
-	public Vec3d getRaytraceOffset(IImmersiveConnectable link) {
+	public Vec3d getConnectionOffset(ImmersiveNetHandler.Connection con) {
 		Matrix4 transf = getBaseTransform();
 		if (getRight()==0) {
 			return transf.apply(new Vec3d(.5, .5, 7/16D));
@@ -595,23 +642,18 @@ public class TileEntityMarx extends TileEntityIWMultiblock implements ITickable,
 	}
 
 	@Override
-	public Vec3d getConnectionOffset(ImmersiveNetHandler.Connection con) {
-		return getRaytraceOffset(null);
-	}
-
-
-	@Override
 	public void validate()
 	{
 		super.validate();
-		ImmersiveNetHandler.INSTANCE.resetCachedIndirectConnections();
+		if (!world.isRemote)
+			ApiUtils.addFutureServerTask(world, () -> ImmersiveNetHandler.INSTANCE.onTEValidated(this));
 	}
 
 	@Override
 	public void invalidate()
 	{
 		super.invalidate();
-		if (world.isRemote)
+		if (world.isRemote && !IndustrialWires.proxy.isSingleplayer())
 			ImmersiveNetHandler.INSTANCE.clearConnectionsOriginatingFrom(pos, world);
 	}
 

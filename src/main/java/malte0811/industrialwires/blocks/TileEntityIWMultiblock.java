@@ -78,6 +78,7 @@ public abstract class TileEntityIWMultiblock extends TileEntityIWBase implements
 		T master = master(here);
 		return master!=null?master:def;
 	}
+
 	public void disassemble() {
 		if (formed && !world.isRemote) {
 			BlockPos startPos = getOrigin();
