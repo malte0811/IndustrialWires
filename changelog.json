@@ -5,8 +5,8 @@
         "1.10.2-recommended": "1.4-18",
         "1.11.2-latest": "1.5-19",
         "1.11.2-recommended": "1.5-19",
-        "1.12.2-latest": "1.7-33",
-        "1.12.2-recommended": "1.7-33"
+      "1.12.2-latest": "1.7-34",
+      "1.12.2-recommended": "1.7-34"
     },
     "1.10.2": {
         "1.1-3": " - fixed incompatibility with IE build 48\n   - reduced the amount of calls to core IE classes to make such incompatibilities less likely\n - fixed localization of the creative tab",
@@ -43,6 +43,7 @@
         "1.7-30": " - Fixed crashes when IC2 isn't installed\n - Fixed connectors allowing too much power output\n - Added a config option for some of the wires' properties\n - Updated chinese translation (thanks @DepletedPrism)",
         "1.7-31": " - Fixed accidental conversion from FE to EU\n - Fixed connectors not blowing up as intended\n ",
         "1.7-32": " - Fixed connectors not rendering properly without IC2\n - Fixed parts of the mechanical multiblocks not rendering when Optifine is installed\n - Changed some values for the mechanical multiblock sound",
-        "1.7-33": " - Fixed the Marx generator not processing ores\n - Fixed control panels and the Marx generator not working when connected directly\n - Added Russian translation (thanks @StolenSoda)"
+      "1.7-33": " - Fixed the Marx generator not processing ores\n - Fixed control panels and the Marx generator not working when connected directly\n - Added Russian translation (thanks @StolenSoda)",
+      "1.7-34": " - Control panels can use the texture of any block now\n - Added a recipe to copy the settings of an unfinished control panel\n - The Marx generator now returns the wires used in its construction when disassembled\n - Fixed the RS controller for non-IE wires not keeping its IO state on world reload\n - Fixed control panels not working correctly with multiple controllers"
     }
 }

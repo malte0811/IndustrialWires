@@ -1,5 +1,12 @@
 ###Minecraft 1.12.2
 
+####Version 1.7-34
+ - Control panels can use the texture of any block now
+ - Added a recipe to copy the settings of an unfinished control panel
+ - The Marx generator now returns the wires used in its construction when disassembled
+ - Fixed the RS controller for non-IE wires not keeping its IO state on world reload
+ - Fixed control panels not working correctly with multiple controllers
+
 ####Version 1.7-33
  - Fixed the Marx generator not processing ores
  - Fixed control panels and the Marx generator not working when connected directly

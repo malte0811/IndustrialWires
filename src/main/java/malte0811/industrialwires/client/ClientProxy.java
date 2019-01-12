@@ -42,6 +42,7 @@ import malte0811.industrialwires.client.manual.TextSplitter;
 import malte0811.industrialwires.client.multiblock_io_model.MBIOModelLoader;
 import malte0811.industrialwires.client.panelmodel.PanelModelLoader;
 import malte0811.industrialwires.client.render.*;
+import malte0811.industrialwires.compat.Compat;
 import malte0811.industrialwires.controlpanel.PanelComponent;
 import malte0811.industrialwires.crafting.IC2TRHelper;
 import malte0811.industrialwires.entities.EntityBrokenPart;
@@ -190,22 +191,24 @@ public class ClientProxy extends CommonProxy {
 				new ManualPages.Text(m, "industrialwires.jacobs1"));
 
 
+		String text = I18n.format("ie.manual.entry.industrialwires.intro");
+		splitter = new TextSplitter(m);
+		splitter.addSpecialPage(0, 0, 9, s -> new ManualPages.Crafting(m, s,
+				new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.DUMMY.ordinal())));
+		splitter.addSpecialPage(1, 0, 9, s -> new ManualPages.Crafting(m, s,
+				new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.UNFINISHED.ordinal())));
+		splitter.split(text);
 		m.addEntry("industrialwires.intro", "control_panels",
-				new ManualPages.Text(m, "industrialwires.intro0"),
-				new ManualPages.Text(m, "industrialwires.intro1"),
-				new ManualPages.Crafting(m, "industrialwires.intro2", new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.DUMMY.ordinal())),
-				new ManualPages.Text(m, "industrialwires.intro3"),
-				new ManualPages.Crafting(m, "industrialwires.intro4", new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.UNFINISHED.ordinal())),
-				new ManualPages.Text(m, "industrialwires.intro5")
+				splitter.toManualEntry().toArray(new IManualPage[0])
 		);
 		m.addEntry("industrialwires.panel_creator", "control_panels",
 				new ManualPages.Crafting(m, "industrialwires.panel_creator0", new ItemStack(IndustrialWires.panel, 1, BlockTypes_Panel.CREATOR.ordinal())),
 				new ManualPages.Text(m, "industrialwires.panel_creator1"),
 				new ManualPages.Text(m, "industrialwires.panel_creator2")
 		);
-		String text = I18n.format("ie.manual.entry.industrialwires.redstone");
+		text = I18n.format("ie.manual.entry.industrialwires.redstone");
 		splitter = new TextSplitter(m);
-		splitter.addSpecialPage(-1, 0, 10, s -> new ManualPages.CraftingMulti(m, s,
+		splitter.addSpecialPage(-1, 0, Compat.enableOtherRS ? 9 : 12, s -> new ManualPages.CraftingMulti(m, s,
 				new ResourceLocation(IndustrialWires.MODID, "control_panel_rs_other"),
 				new ResourceLocation(IndustrialWires.MODID, "control_panel_rs_wire")));
 		splitter.split(text);
