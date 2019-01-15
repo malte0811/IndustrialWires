@@ -34,7 +34,7 @@ import javax.annotation.Nonnull;
 public class RecipePanelTexture extends IForgeRegistryEntry.Impl<IRecipe> implements IRecipe {
 	@Override
 	public boolean matches(@Nonnull InventoryCrafting inv, @Nonnull World worldIn) {
-		boolean foundTexture = false;
+		int texX = -1, texY = -1;
 		boolean foundPanel = false;
 		for (int x = 0; x < inv.getWidth(); x++) {
 			for (int y = 0; y < inv.getHeight(); y++) {
@@ -44,18 +44,23 @@ public class RecipePanelTexture extends IForgeRegistryEntry.Impl<IRecipe> implem
 						return false;
 					}
 					foundPanel = true;
-				} else if (IndustrialWires.proxy.isValidTextureSource(here)) {
-					if (foundTexture || (here.getItem() == Item.getItemFromBlock(IndustrialWires.panel)
-							&& here.getMetadata() != BlockTypes_Panel.DUMMY.ordinal())) {
+				} else if (!here.isEmpty()) {
+					if (texX == -1) {
+						texX = x;
+						texY = y;
+					} else {
 						return false;
 					}
-					foundTexture = true;
-				} else if (!here.isEmpty()) {
-					return false;
 				}
 			}
 		}
-		return foundPanel && foundTexture;
+		if (!foundPanel || texX == -1) {
+			return false;
+		}
+		ItemStack texSource = inv.getStackInRowAndColumn(texX, texY);
+		return IndustrialWires.proxy.isValidTextureSource(texSource) &&
+				(texSource.getItem() != Item.getItemFromBlock(IndustrialWires.panel)
+						|| texSource.getMetadata() == BlockTypes_Panel.DUMMY.ordinal());
 	}
 
 	private boolean isUnfinishedPanel(ItemStack stack) {

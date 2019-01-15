@@ -470,7 +470,8 @@ public class ClientProxy extends CommonProxy {
 		IBakedModel texModel = Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(stack,
 				null, null);
 		TextureAtlasSprite sprite = texModel.getParticleTexture();
-		if (sprite.hasAnimationMetadata()) {
+		//noinspection ConstantConditions
+		if (sprite == null || sprite.hasAnimationMetadata()) {
 			return false;
 		}
 		int[][] data = sprite.getFrameTextureData(0);
