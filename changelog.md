@@ -1,5 +1,8 @@
 ###Minecraft 1.12.2
 
+####Version 1.7-35
+ - Fixed a crash when placing certain items in the crafting grid
+
 ####Version 1.7-34
  - Control panels can use the texture of any block now
  - Added a recipe to copy the settings of an unfinished control panel
