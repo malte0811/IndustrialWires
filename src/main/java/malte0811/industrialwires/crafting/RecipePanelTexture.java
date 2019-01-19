@@ -85,7 +85,7 @@ public class RecipePanelTexture extends IForgeRegistryEntry.Impl<IRecipe> implem
 		}
 		assert texture != null && panel != null;
 		NBTTagCompound texAsNBT = texture.serializeNBT();
-		ItemStack ret = panel.copy();
+		ItemStack ret = ApiUtils.copyStackWithAmount(panel, 1);
 		if (ret.getTagCompound() == null) {
 			ItemNBTHelper.setFloat(ret, NBTKeys.ANGLE, 0);
 			ItemNBTHelper.setFloat(ret, NBTKeys.HEIGHT, .5F);
