@@ -66,6 +66,7 @@ public abstract class PanelComponent implements IOwner {
 		baseCreaters.put("lock", Lock::new);
 		baseCreaters.put("panel_meter", PanelMeter::new);
 		baseCreaters.put(SevenSegDisplay.NAME, SevenSegDisplay::new);
+		baseCreaters.put("rgb_led", RGBIndicator::new);
 		//Check that all components implement equals+hashCode if in a dev env
 		boolean isDevEnv = "NBTTagCompound".equals(NBTTagCompound.class.getSimpleName());
 		if (isDevEnv) {

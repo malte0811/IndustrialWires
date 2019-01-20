@@ -193,13 +193,13 @@ public class Variac extends PanelComponent implements IConfigurableComponent {
 		int bottom = (int) Math.floor(gui.getY0() + (aabb.maxZ - offset) * gui.panelSize);
 
 		GlStateManager.pushMatrix();
-		GlStateManager.translate((left + right) / 2, (top + bottom) / 2, 0);
+		GlStateManager.translate((left + right) / 2F, (top + bottom) / 2F, 0);
 		GlStateManager.rotate(360 / 17F, 0, 0, 1);
-		GlStateManager.translate(-(left + right) / 2, -(top + bottom) / 2, 0);
+		GlStateManager.translate(-(left + right) / 2F, -(top + bottom) / 2F, 0);
 		Gui.drawRect(left, top, right, bottom, 0xff333333);
-		GlStateManager.translate((left + right) / 2, (top + bottom) / 2, 0);
+		GlStateManager.translate((left + right) / 2F, (top + bottom) / 2F, 0);
 		GlStateManager.rotate(45, 0, 0, 1);
-		GlStateManager.translate(-(left + right) / 2, -(top + bottom) / 2, 0);
+		GlStateManager.translate(-(left + right) / 2F, -(top + bottom) / 2F, 0);
 		Gui.drawRect(left, top, right, bottom, 0xff333333);
 		GlStateManager.popMatrix();
 	}

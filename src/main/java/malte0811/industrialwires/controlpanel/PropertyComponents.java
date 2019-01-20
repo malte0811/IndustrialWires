@@ -179,6 +179,7 @@ public class PropertyComponents implements IUnlistedProperty<PropertyComponents.
 			ret.facing = facing;
 			ret.top = top;
 			ret.angle = angle;
+			ret.height = height;
 			ret.textureSource = textureSource;
 			return ret;
 		}
