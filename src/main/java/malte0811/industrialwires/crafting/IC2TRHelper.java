@@ -21,11 +21,15 @@ import malte0811.industrialwires.IndustrialWires;
 import malte0811.industrialwires.compat.Compat;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
+import net.minecraftforge.common.crafting.CompoundIngredient;
+import net.minecraftforge.common.crafting.IngredientNBT;
 import net.minecraftforge.oredict.OreIngredient;
 import techreborn.api.TechRebornAPI;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class IC2TRHelper {
 	public static Ingredient getStack(String type, String variant) {
@@ -34,55 +38,57 @@ public final class IC2TRHelper {
 				return new OreIngredient("itemRubber");
 			}
 		}
-		Set<ItemStack> stacks = new HashSet<>(Compat.getIC2Item.apply(type, variant));
-		if (IndustrialWires.hasTechReborn) {
-			switch (type) {
-				case "cable":
-					stacks.add(getTRCable(variant));
-					break;
-				case "crafting":
-					switch (variant) {
-						case "alloy":
+		Collection<Ingredient> ingreds;
+		{
+			Set<ItemStack> stacks = new HashSet<>(Compat.getIC2Item.apply(type, variant));
+			if (IndustrialWires.hasTechReborn) {
+				switch (type) {
+					case "cable":
+						stacks.add(getTRCable(variant));
+						break;
+					case "crafting":
+						if ("alloy".equals(variant)) {
 							stacks.add(TechRebornAPI.subItemRetriever.getPlateByName("advanced_alloy"));
-							break;
-					}
-					break;
-				case "te":
-					if (variant.equals("mv_transformer")) {
-						stacks.add(new ItemStack(TechRebornAPI.getBlock("MV_TRANSFORMER")));
-					}
+						}
+						break;
+					case "te":
+						if (variant.equals("mv_transformer")) {
+							stacks.add(new ItemStack(TechRebornAPI.getBlock("MV_TRANSFORMER")));
+						}
+				}
 			}
+			stacks.removeIf(ItemStack::isEmpty);
+			ingreds = stacks.stream().map(MyNBTIngredient::new).collect(Collectors.toList());
 		}
-		stacks.removeIf(ItemStack::isEmpty);
-		if (stacks.isEmpty()) {
+		if (ingreds.isEmpty()) {
 			switch (type) {
 				case "cable":
 					return getIECable(variant.substring("type:".length(), variant.indexOf(',')));
 				case "crafting":
 					switch (variant) {
 						case "coil":
-							stacks.add(new ItemStack(IEObjects.blockMetalDecoration0));
+							ingreds.add(new MyIngredient(new ItemStack(IEObjects.blockMetalDecoration0)));
 							break;
 						case "alloy":
 							return new OreIngredient("plateConstantan");
 						case "electric_motor":
-							stacks.add(new ItemStack(IEObjects.itemMaterial, 1, 27));
+							ingreds.add(new MyIngredient(new ItemStack(IEObjects.itemMaterial, 1, 27)));
 							break;
 						case "rubber":
-							stacks.add(new ItemStack(IEObjects.itemMaterial, 1, 13));
+							ingreds.add(new MyIngredient(new ItemStack(IEObjects.itemMaterial, 1, 13)));
 							break;
 					}
 					break;
 				case "te":
 					if (variant.equals("mv_transformer")) {
-						stacks.add(new ItemStack(IEObjects.blockConnectors, 1, 7));
+						ingreds.add(new MyIngredient(new ItemStack(IEObjects.blockConnectors, 1, 7)));
 					}
 			}
 		}
-		if (stacks.size()==0) {
+		if (ingreds.size() == 0) {
 			IndustrialWires.logger.info("No ingredient found for "+type+", "+variant);
 		}
-		return Ingredient.fromStacks(stacks.toArray(new ItemStack[0]));
+		return new MyCompoundIngredient(ingreds);
 	}
 
 	public static ItemStack getTRCable(String variant) {
@@ -126,5 +132,23 @@ public final class IC2TRHelper {
 		}
 		type = Character.toUpperCase(type.charAt(0))+type.substring(1);
 		return new OreIngredient("wire"+type);
+	}
+
+	private static class MyNBTIngredient extends IngredientNBT {
+		public MyNBTIngredient(ItemStack stack) {
+			super(stack);
+		}
+	}
+
+	private static class MyCompoundIngredient extends CompoundIngredient {
+		public MyCompoundIngredient(Collection<Ingredient> children) {
+			super(children);
+		}
+	}
+
+	private static class MyIngredient extends Ingredient {
+		public MyIngredient(ItemStack stack) {
+			super(stack);
+		}
 	}
 }
