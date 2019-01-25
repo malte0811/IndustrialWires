@@ -19,6 +19,7 @@ import malte0811.industrialwires.IndustrialWires;
 import malte0811.industrialwires.client.RawQuad;
 import malte0811.industrialwires.client.gui.GuiPanelCreator;
 import malte0811.industrialwires.controlpanel.ControlPanelNetwork.RSChannel;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
@@ -177,7 +178,24 @@ public class RGBIndicator extends PanelComponent implements IConfigurableCompone
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void renderInGUI(GuiPanelCreator gui) {
-		renderInGUIDefault(gui, 0xffffff);
+		AxisAlignedBB aabb = getBlockRelativeAABB();
+		int left = (int) (gui.getX0() + aabb.minX * gui.panelSize);
+		int top = (int) (gui.getY0() + aabb.minZ * gui.panelSize);
+		int right = (int) (gui.getX0() + aabb.maxX * gui.panelSize);
+		int bottom = (int) (gui.getY0() + aabb.maxZ * gui.panelSize);
+		int width = right - left;
+		int height = bottom - top;
+		for (int colorId = 0; colorId < 3; ++colorId) {
+			int color = (0xff << (colorId * 8)) | 0xff000000;
+			for (int row = 0; row < 3; ++row) {
+				int col = (row * (row + 1) + colorId) % 3;
+				Gui.drawRect(Math.round(left + width * col / 3.0F),
+						Math.round(top + height * row / 3.0F),
+						Math.round(left + width * (col + 1) / 3.0F),
+						Math.round(top + height * (row + 1) / 3.0F),
+						color);
+			}
+		}
 	}
 
 	@Override
@@ -210,14 +228,25 @@ public class RGBIndicator extends PanelComponent implements IConfigurableCompone
 	@Override
 	@SideOnly(Side.CLIENT)
 	public String fomatConfigDescription(ConfigType type, int id) {
-		//TODO
+		String color = null;
+		switch (id) {
+			case 0:
+				color = "red";
+				break;
+			case 1:
+				color = "green";
+				break;
+			case 2:
+				color = "blue";
+				break;
+		}
 		switch (type) {
 			case FLOAT:
 				return null;
 			case RS_CHANNEL:
-				return I18n.format(IndustrialWires.MODID + ".desc.rschannel_info");
+				return I18n.format(IndustrialWires.MODID + ".desc.rschannel_" + color);
 			case INT:
-				return I18n.format(IndustrialWires.MODID + ".desc.rsid_info");
+				return I18n.format(IndustrialWires.MODID + ".desc.rsid_" + color);
 			default:
 				return null;
 		}
