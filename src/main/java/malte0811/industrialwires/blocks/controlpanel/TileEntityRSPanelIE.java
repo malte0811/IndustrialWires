@@ -22,19 +22,25 @@ import blusunrize.immersiveengineering.api.energy.wires.WireType;
 import blusunrize.immersiveengineering.api.energy.wires.redstone.IRedstoneConnector;
 import blusunrize.immersiveengineering.api.energy.wires.redstone.RedstoneWireNetwork;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
+import blusunrize.immersiveengineering.common.util.Utils;
+import malte0811.industrialwires.IndustrialWires;
 import malte0811.industrialwires.blocks.IBlockBoundsIW;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Set;
 
 import static blusunrize.immersiveengineering.api.energy.wires.WireType.REDSTONE_CATEGORY;
 
@@ -50,14 +56,47 @@ public class TileEntityRSPanelIE extends TileEntityRSPanel
 		super.writeNBT(nbt, updatePacket);
 		nbt.setBoolean("hasConn", hasConn);
 		nbt.setInteger("facing", facing.getIndex());
+		if (updatePacket) {
+			writeConnsToNBT(nbt);
+		}
 	}
 
 	@Override
 	public void readNBT(NBTTagCompound nbt, boolean updatePacket) {
 		super.readNBT(nbt, updatePacket);
+		if (nbt.hasKey("connectionList", Constants.NBT.TAG_LIST)) {
+			loadConnsFromNBT(nbt);
+		}
 		hasConn = nbt.getBoolean("hasConn");
 		facing = EnumFacing.VALUES[nbt.getInteger("facing")];
 		aabb = null;
+	}
+
+	//Copied from IE (TileEntityImmersiveConnectable)
+	private void loadConnsFromNBT(NBTTagCompound nbt) {
+		if (world != null && world.isRemote && !Minecraft.getMinecraft().isSingleplayer() && nbt != null) {
+			NBTTagList connectionList = nbt.getTagList("connectionList", Constants.NBT.TAG_COMPOUND);
+			ImmersiveNetHandler.INSTANCE.clearConnectionsOriginatingFrom(Utils.toCC(this), world);
+			for (int i = 0; i < connectionList.tagCount(); i++) {
+				NBTTagCompound conTag = connectionList.getCompoundTagAt(i);
+				ImmersiveNetHandler.Connection con = ImmersiveNetHandler.Connection.readFromNBT(conTag);
+				if (con != null) {
+					ImmersiveNetHandler.INSTANCE.addConnection(world, Utils.toCC(this), con);
+				} else
+					IndustrialWires.logger.error("CLIENT read connection as null from {}", nbt);
+			}
+		}
+	}
+
+	private void writeConnsToNBT(NBTTagCompound nbt) {
+		if (world != null && !world.isRemote && nbt != null) {
+			NBTTagList connectionList = new NBTTagList();
+			Set<ImmersiveNetHandler.Connection> conL = ImmersiveNetHandler.INSTANCE.getConnections(world, Utils.toCC(this));
+			if (conL != null)
+				for (ImmersiveNetHandler.Connection con : conL)
+					connectionList.appendTag(con.writeToNBT());
+			nbt.setTag("connectionList", connectionList);
+		}
 	}
 
 	@Override
@@ -216,5 +255,13 @@ public class TileEntityRSPanelIE extends TileEntityRSPanel
 			}
 		}
 		return aabb;
+	}
+
+	@Override
+	public void invalidate() {
+		super.invalidate();
+		if (world.isRemote && !Minecraft.getMinecraft().isSingleplayer()) {
+			ImmersiveNetHandler.INSTANCE.clearAllConnectionsFor(pos, world, this, false);
+		}
 	}
 }
