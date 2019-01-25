@@ -1,5 +1,11 @@
 ###Minecraft 1.12.2
 
+####Version 1.7-36
+ - Added an RGB indicator light, controlled by 3 (independent) RS signals
+ - Fixed a bug allowing for unfinished control panels to be duplicated
+ - Fixed insulated and uninsulated wire producing the same wire coils
+ - Fixed some issues (including a crash) with the IE RS controller on dedicated servers
+
 ####Version 1.7-35
  - Fixed a crash when placing certain items in the crafting grid
 
