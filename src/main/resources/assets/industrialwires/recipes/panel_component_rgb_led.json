@@ -1,0 +1,25 @@
+{
+  "result": {
+    "item": "industrialwires:panel_component",
+    "data": 10
+  },
+  "ingredients": [
+    {
+      "type": "forge:ore_dict",
+      "ore": "dustRedstone"
+    },
+    {
+      "item": "industrialwires:panel_component",
+      "data": 2
+    },
+    {
+      "item": "industrialwires:panel_component",
+      "data": 2
+    },
+    {
+      "item": "industrialwires:panel_component",
+      "data": 2
+    }
+  ],
+  "type": "forge:ore_shapeless"
+}

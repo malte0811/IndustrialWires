@@ -227,7 +227,8 @@ public class ClientProxy extends CommonProxy {
 				new ManualPages.CraftingMulti(m, "industrialwires.lock", new ItemStack(IndustrialWires.panelComponent, 1, 7), new ItemStack(IndustrialWires.key)),
 				new ManualPages.Crafting(m, "industrialwires.lock1", new ItemStack(IndustrialWires.key, 1, 2)),
 				new ManualPages.Crafting(m, "industrialwires.panel_meter", new ItemStack(IndustrialWires.panelComponent, 1, 8)),
-				new ManualPages.Crafting(m, "industrialwires.7seg", new ItemStack(IndustrialWires.panelComponent, 1, 9))
+				new ManualPages.Crafting(m, "industrialwires.7seg", new ItemStack(IndustrialWires.panelComponent, 1, 9)),
+				new ManualPages.Crafting(m, "industrialwires.rgb_led", new ItemStack(IndustrialWires.panelComponent, 1, 10))
 		);
 		List<MarxOreHandler.OreInfo> ores = MarxOreHandler.getRecipes();
 		text = I18n.format("ie.manual.entry.industrialwires.marx");

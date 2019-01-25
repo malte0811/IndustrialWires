@@ -53,7 +53,7 @@ import static malte0811.industrialwires.util.NBTKeys.*;
 public class ItemPanelComponent extends Item implements INetGUIItem {
 	public static final String[] types = {
 			"lighted_button", "label", "indicator_light", "slider", "variac", "toggle_switch", "toggle_switch_covered",
-			"lock", "panel_meter", SevenSegDisplay.NAME
+			"lock", "panel_meter", SevenSegDisplay.NAME, "rgb_led"
 	};
 	public static final String NAME = "panel_component";
 
